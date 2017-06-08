@@ -1,4 +1,8 @@
-var { window, Position, workspace } = require('vscode');
+var {
+    window,
+    Position,
+    workspace
+} = require('vscode');
 var launch = require('child_process').execFile;
 const spawn = require('child_process').spawn;
 var path = require('path');
@@ -11,11 +15,12 @@ const tidyPath = configuration.tidyPath;
 const checkPath = configuration.checkPath;
 const helpPath = configuration.helpPath;
 const infoPath = configuration.infoPath;
+const kodaPath = configuration.kodaPath;
 
 var aiOut = window.createOutputChannel('AutoIt');
 
 module.exports = {
-    
+
     runScript: () => {
         var thisDoc = window.activeTextEditor.document; // Get the object of the text editor
         var thisFile = thisDoc.fileName; // Get the current file name
@@ -25,8 +30,9 @@ module.exports = {
 
         window.setStatusBarMessage("Running the script...", 1500);
 
-        procRunner(aiPath,[wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', 
-            thisFile, '/UserParams', '$(1)', '$(2)', '$(3)', '$(4)']);
+        procRunner(aiPath, [wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in',
+            thisFile, '/UserParams', '$(1)', '$(2)', '$(3)', '$(4)'
+        ]);
     },
 
     launchHelp: () => {
@@ -42,7 +48,7 @@ module.exports = {
     },
 
     launchInfo: () => {
-        launch(infoPath);   
+        launch(infoPath);
     },
 
     debugMsgBox: () => {
@@ -50,9 +56,9 @@ module.exports = {
         var indent;
 
         var debugText = getDebugText();
-       
+
         indent = getIndent()
-        
+
         if (debugText) {
             var debugCode = `${indent};### Debug MSGBOX ↓↓↓\n${indent}MsgBox(262144, 'Debug line ~' & @ScriptLineNumber, 'Selection:' & @CRLF & '${debugText.text}' & @CRLF & @CRLF & 'Return:' & @CRLF & ${debugText.text})\n`;
 
@@ -71,9 +77,9 @@ module.exports = {
 
         window.setStatusBarMessage('Compiling script...', 1500);
 
-              
+
         // Launch the AutoIt Wrapper executable with the script's path
-        procRunner(aiPath,[wrapperPath, '/ShowGui', '/prod', '/in', thisFile]);
+        procRunner(aiPath, [wrapperPath, '/ShowGui', '/prod', '/in', thisFile]);
     },
 
 
@@ -84,9 +90,9 @@ module.exports = {
         var thisFile = window.activeTextEditor.document.fileName;
 
         window.setStatusBarMessage('Tidying script...' + thisFile, 1500);
-              
+
         // Launch the AutoIt Wrapper executable with the script's path
-        procRunner(tidyPath,[thisFile ]);
+        procRunner(tidyPath, [thisFile]);
     },
 
     checkScript: () => {
@@ -96,9 +102,9 @@ module.exports = {
         var thisFile = window.activeTextEditor.document.fileName;
 
         window.setStatusBarMessage('Checking script...' + thisFile, 1500);
-              
+
         // Launch the AutoIt Wrapper executable with the script's path
-        procRunner(checkPath,[thisFile ]);
+        procRunner(checkPath, [thisFile]);
     },
 
     buildScript: () => {
@@ -108,9 +114,9 @@ module.exports = {
         var thisFile = window.activeTextEditor.document.fileName;
 
         window.setStatusBarMessage('Building script...', 1500);
-        
+
         // Launch the AutoIt Wrapper executable with the script's path
-        procRunner(aiPath,[wrapperPath, '/NoStatus', '/prod', '/in', thisFile]);   
+        procRunner(aiPath, [wrapperPath, '/NoStatus', '/prod', '/in', thisFile]);
     },
 
     debugConsole: () => {
@@ -129,33 +135,40 @@ module.exports = {
                 edit.insert(debugText.position, debugCode);
             });
         }
+    },
+
+    launchKoda: () => {
+        //Launch Koda Form Designer(FD.exe)
+        procRunner(kodaPath);
     }
 };
 
-function procRunner(cmdPath,args) {
+function procRunner(cmdPath, args) {
     aiOut.show(true);
-    
+
     // Set working directory to AutoIt script dir so that compile and build
     // commands work right
     var workDir = path.dirname(window.activeTextEditor.document.fileName);
-    
-    var runner = spawn(cmdPath, args, { cwd: workDir });
+
+    var runner = spawn(cmdPath, args, {
+        cwd: workDir
+    });
 
     runner.stdout.on('data', (data) => {
-            var output = data.toString();
-            console.log(output);
-            aiOut.append(output);
-        });
+        var output = data.toString();
+        console.log(output);
+        aiOut.append(output);
+    });
 
-        runner.stderr.on('data', (data) => {
-            var output = data.toString();
-            console.log(output);
-            aiOut.append(output);
-        });
+    runner.stderr.on('data', (data) => {
+        var output = data.toString();
+        console.log(output);
+        aiOut.append(output);
+    });
 
-        runner.on('exit', (code) => {
-            console.log(`Process exited with code ${code}`);
-            aiOut.appendLine(`Process exited with code ${code}`);
+    runner.on('exit', (code) => {
+        console.log(`Process exited with code ${code}`);
+        aiOut.appendLine(`Process exited with code ${code}`);
     });
 }
 
@@ -170,7 +183,10 @@ function getDebugText() {
         var nextLine = editor.selection.active.line + 1;
         var newPosition = new Position(nextLine, 0);
 
-        return {text: varToDebug, position: newPosition};
+        return {
+            text: varToDebug,
+            position: newPosition
+        };
     } else {
         window.showErrorMessage("Select variable or macro to generate a debug line");
         return {};

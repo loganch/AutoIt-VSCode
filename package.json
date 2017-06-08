@@ -76,6 +76,10 @@
                 {
                     "command": "extension.debugConsole",
                     "when": "editorLangId == autoit"
+                },
+                {
+                    "command": "extension.launchKoda",
+                    "when": "editorLangId == autoit"
                 }
             ]
         },
@@ -114,6 +118,10 @@
             {
                 "command": "extension.debugConsole",
                 "title": "AutoIt: Debug to Console"
+            },
+            {
+                "command": "extension.launchKoda",
+                "title": "AutoIt: Koda Form Designer"
             }
         ],
         "grammars": [{
@@ -164,6 +172,11 @@
                 "command": "extension.debugConsole",
                 "key": "alt+d",
                 "when": "editorTextFocus && editorLangId == autoit"
+            },
+            {
+                "command": "extension.launchKoda",
+                "key": "ctrl+k",
+                "when": "editorTextFocus && editorLangId == autoit"
             }
         ],
         "configuration": {
@@ -199,6 +212,11 @@
                     "type": "string",
                     "default": "C:\\Program Files (x86)\\AutoIt3\\Au3Info.exe",
                     "description": "Path Au3Info.exe"
+                },
+                "autoit.kodaPath": {
+                    "type": "string",
+                    "default": "C:\\Program Files (x86)\\AutoIt3\\SciTE\\Koda\\FD.exe",
+                    "description": "Path FD.exe"
                 }
             }
         }
