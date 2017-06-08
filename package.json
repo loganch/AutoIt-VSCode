@@ -3,7 +3,7 @@
     "displayName": "AutoIt",
     "description": "AutoIt language extension for Visual Studio Code",
     "icon": "img/ai_icon.png",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "publisher": "Damien",
     "galleryBanner": {
         "color": "#254768",

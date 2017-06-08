@@ -1,5 +1,9 @@
 # AutoIt-VSCode Changelog
 
+## 0.1.6
+* Fixed the intellisense of parameters in the scope of the function.
+* Added configuration for path to Koda and shortcut for launching Koda "Ctrl+K"
+
 ## 0.1.5
 More IntelliSense!
 * Added in function signature helpers (parameter info)

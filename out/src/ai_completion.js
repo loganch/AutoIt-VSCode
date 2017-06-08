@@ -1,6 +1,6 @@
 'use strict'
 
-var { languages, Completion, CompletionList, CompletionItemKind, editor, document } = require('vscode')
+var { languages, Completion, CompletionItem, CompletionItemKind, editor, document } = require('vscode')
 var fs = require('fs')
 var completions = []
 var newComp
@@ -11,57 +11,53 @@ for (var i in files) {
     completions = completions.concat(newComp)
 }
 
-const _funcPattern = /Func\s(.+)\(/
-const _varPattern = /(\$\w+)/
-
-
-// var macros = require('./completions/macros')
-// var mainFunctions = require('./completions/mainFunctions')
+const _funcPattern = /Func\s+(\w*)\s*\(/g;
+const _varPattern = /\$(\w*)/g;
 
 module.exports = languages.registerCompletionItemProvider({ language: 'autoit', scheme: 'file' }, {
     provideCompletionItems(document, position, token) {
         // Gather the functions created by the user
-        var userFunctions = []
-        var docVariables = []
-        var funcName = ''
-        var varName = ''
-        var existingComps = []
-        const lineCount = Math.min(document.lineCount, 10000)
-        for (let line = 0; line < lineCount; line++) {
-            const { text } = document.lineAt(line)
+        var added = {};
+        var result = [];
+        var text = document.getText();
+        var range = document.getWordRangeAtPosition(position);
+        var prefix = range ? document.getText(range) : '';
 
-            funcName = _funcPattern.exec(text)
-            varName = _varPattern.exec(text)
-            if (funcName) {
-                userFunctions.push({
-                    label: funcName[1],
-                    kind: CompletionItemKind.Function,
-                    detail: 'Document Function'
-                })
-            } else if (varName) {
-                newComp = {
-                    label: varName[1],
-                    kind: CompletionItemKind.Variable,
-                    detail: 'Variable'
-                }
-                if (existingComps.indexOf(varName[1]) === -1) {
-                    docVariables.push(newComp)
-                    existingComps.push(varName[1])
+        if (!range) {
+            range = new Range(position, position);
+        }
+
+        var createNewCompletionItem = function (kind, name) {
+            var compItem = new CompletionItem(name, kind);
+            var strDetail = 'Document Function';
+            if (kind == CompletionItemKind.Variable) {
+                strDetail = 'Variable';
+            }
+            compItem.detail = strDetail;
+
+            return compItem;
+        };
+
+        if (prefix[0] === '$') {
+            var pattern = null;
+            while (pattern = _varPattern.exec(text)) {
+                var varName = pattern[0];
+                if (!added[varName]) {
+                    added[varName] = true;
+                    result.push(createNewCompletionItem(CompletionItemKind.Variable, varName));
                 }
             }
         }
 
-        // Get the current word to not look for completions 
-        // when the current word starts with a '$', since
-        // that blocks Intellisense for variables
-        // var wordRange = document.getWordRangeAtPosition(position)
-        // var word = wordRange ? document.getText(wordRange) : ''
+        var pattern = null;
+        while (pattern = _funcPattern.exec(text)) {
+            var funcName = pattern[1];
+            if (!added[funcName]) {
+                added[funcName] = true;
+                result.push(createNewCompletionItem(CompletionItemKind.Function, funcName));
+            }
+        }
 
-        // if (word.charAt(0) === '$') {
-        //     return []
-        // }
-
-        return completions.concat(userFunctions, docVariables)
-
+        return completions.concat(result);
     }
-})
+}, '.', '$')

@@ -7,7 +7,9 @@ and developed from Damien122's release.
 
 * AutoIt Syntax highlighting
 * IntelliSense (code hints and completion)
-![Intellisense](img/docs/signaturehelp.gif)
+
+  ![Intellisense](img/docs/signaturehelp.gif)
+  
 * Launch, compile and build scripts from VSCode
 * Launch AutoIt Help for highlighted text 
 
@@ -15,11 +17,11 @@ and developed from Damien122's release.
 
 * Access the command palette (Ctrl + Shift + P), type Preferences: Open User Settings or Preferences: Open Workspace Settings.
 
-![CtrlShiftP](img/docs/CtrlShiftP.png)
+  ![CtrlShiftP](img/docs/CtrlShiftP.png)
 
 * Configure the paths according to your AutoIt installation.
 
-![AutoItConfiguration](img/docs/AutoItConfiguration.png)
+  ![AutoItConfiguration](img/docs/AutoItConfiguration.png)
 
 ### Note
 Advanced functions on the full install of [SciTE4AutoIt3](https://www.autoitscript.com/site/autoit-script-editor/downloads/) alongside AutoIt.
