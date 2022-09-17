@@ -28,7 +28,7 @@ function procRunner(cmdPath, args) {
   runner = spawn(cmdPath, args, {
     cwd: workDir,
   });
-
+//	document.save() is async, it should wait for it to finish before proceeding.
   runner.stdout.on('data', data => {
     const output = data.toString();
     aiOut.append(output);
@@ -50,32 +50,32 @@ const runScript = () => {
 
   // Save the file
   thisDoc.save().then(() =>	{
-		const params = workspace.getConfiguration('autoit').get('consoleParams');
+    const params = workspace.getConfiguration('autoit').get('consoleParams');
 
-		window.setStatusBarMessage('Running the script...', 1500);
+    window.setStatusBarMessage('Running the script...', 1500);
 
-		if (params) {
-			const quoteSplit = /[\w-/]+|"[^"]+"/g;
-			const paramArray = params.match(quoteSplit); // split the string by space or quotes
+    if (params) {
+      const quoteSplit = /[\w-/]+|"[^"]+"/g;
+      const paramArray = params.match(quoteSplit); // split the string by space or quotes
 
-			const cleanParams = paramArray.map(value => {
-				return value.replace(/"/g, '');
-			});
+      const cleanParams = paramArray.map(value => {
+        return value.replace(/"/g, '');
+      });
 
-			procRunner(aiPath, [
-				wrapperPath,
-				'/run',
-				'/prod',
-				'/ErrorStdOut',
-				'/in',
-				thisFile,
-				'/UserParams',
-				...cleanParams,
-			]);
-		} else {
-			procRunner(aiPath, [wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', thisFile]);
-		}
-	});
+      procRunner(aiPath, [
+        wrapperPath,
+        '/run',
+        '/prod',
+        '/ErrorStdOut',
+        '/in',
+        thisFile,
+        '/UserParams',
+        ...cleanParams,
+      ]);
+    } else {
+      procRunner(aiPath, [wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', thisFile]);
+    }
+  });
 };
 
 const launchHelp = () => {
@@ -186,53 +186,53 @@ const debugMsgBox = () => {
 const compileScript = () => {
   // Save the file
   window.activeTextEditor.document.save().then(() => {
-		// Get the current file name
-		const thisFile = window.activeTextEditor.document.fileName;
+    // Get the current file name
+    const thisFile = window.activeTextEditor.document.fileName;
 
-		window.setStatusBarMessage('Compiling script...', 1500);
+    window.setStatusBarMessage('Compiling script...', 1500);
 
-		// Launch the AutoIt Wrapper executable with the script's path
-		procRunner(aiPath, [wrapperPath, '/ShowGui', '/prod', '/in', thisFile]);
-	});
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(aiPath, [wrapperPath, '/ShowGui', '/prod', '/in', thisFile]);
+  });
 };
 
 const tidyScript = () => {
   // Save the file
   window.activeTextEditor.document.save().then(() => {
-		// Get the current file name
-		const thisFile = window.activeTextEditor.document.fileName;
+    // Get the current file name
+    const thisFile = window.activeTextEditor.document.fileName;
 
-		window.setStatusBarMessage(`Tidying script...${thisFile}`, 1500);
+    window.setStatusBarMessage(`Tidying script...${thisFile}`, 1500);
 
-		// Launch the AutoIt Wrapper executable with the script's path
-		procRunner(tidyPath, [thisFile]);
-	});
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(tidyPath, [thisFile]);
+  });
 };
 
 const checkScript = () => {
   // Save the file
   window.activeTextEditor.document.save().then(() => {
-		// Get the current file name
-		const thisFile = window.activeTextEditor.document.fileName;
+    // Get the current file name
+    const thisFile = window.activeTextEditor.document.fileName;
 
-		window.setStatusBarMessage(`Checking script...${thisFile}`, 1500);
+    window.setStatusBarMessage(`Checking script...${thisFile}`, 1500);
 
-		// Launch the AutoIt Wrapper executable with the script's path
-		procRunner(aiPath, [wrapperPath, '/AU3check', '/prod', '/in', thisFile]);
-	});
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(aiPath, [wrapperPath, '/AU3check', '/prod', '/in', thisFile]);
+  });
 };
 
 const buildScript = () => {
   // Save the file
   window.activeTextEditor.document.save().then(() => {
-		// Get the current file name
-		const thisFile = window.activeTextEditor.document.fileName;
+    // Get the current file name
+    const thisFile = window.activeTextEditor.document.fileName;
 
-		window.setStatusBarMessage('Building script...', 1500);
+    window.setStatusBarMessage('Building script...', 1500);
 
-		// Launch the AutoIt Wrapper executable with the script's path
-		procRunner(aiPath, [wrapperPath, '/NoStatus', '/prod', '/in', thisFile]);
-	});
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(aiPath, [wrapperPath, '/NoStatus', '/prod', '/in', thisFile]);
+  });
 };
 
 const debugConsole = () => {
