@@ -384,34 +384,33 @@ const runScript = () => {
   // Save the file
   thisDoc.save().then(() => {
 
+    const params = config.consoleParams;
 
-  const params = config.consoleParams;
+      window.setStatusBarMessage('Running the script...', 1500);
 
-    window.setStatusBarMessage('Running the script...', 1500);
+      if (params) {
+        const quoteSplit = /[\w-/]+|"[^"]+"/g;
+        const paramArray = params.match(quoteSplit); // split the string by space or quotes
 
-    if (params) {
-      const quoteSplit = /[\w-/]+|"[^"]+"/g;
-      const paramArray = params.match(quoteSplit); // split the string by space or quotes
-
-      const cleanParams = paramArray.map(value => {
-        return value.replace(/"/g, '');
-      });
+        const cleanParams = paramArray.map(value => {
+          return value.replace(/"/g, '');
+        });
 
 
-    procRunner(config.aiPath, [
-      config.wrapperPath,
-      '/run',
-      '/prod',
-      '/ErrorStdOut',
-      '/in',
-      thisFile,
-      '/UserParams',
-      ...cleanParams,
-    ], config.multiOutput && config.multiOutputReuseOutput);
-  } else {
-    procRunner(config.aiPath, [config.wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', thisFile], config.multiOutput && config.multiOutputReuseOutput);
-  }
-
+      procRunner(config.aiPath, [
+        config.wrapperPath,
+        '/run',
+        '/prod',
+        '/ErrorStdOut',
+        '/in',
+        thisFile,
+        '/UserParams',
+        ...cleanParams,
+      ], config.multiOutput && config.multiOutputReuseOutput);
+    } else {
+      procRunner(config.aiPath, [config.wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', thisFile], config.multiOutput && config.multiOutputReuseOutput);
+    }
+  });
 };
 
 const launchHelp = () => {
@@ -541,15 +540,14 @@ const compileScript = () => {
   // Save the file
   window.activeTextEditor.document.save().then(() => {
     
-  // Get the current file name
-  const thisFile = getActiveDocumentFile();
-
+    // Get the current file name
+    const thisFile = getActiveDocumentFile();
 
     window.setStatusBarMessage('Compiling script...', 1500);
 
-  // Launch the AutoIt Wrapper executable with the script's path
-  procRunner(config.aiPath, [config.wrapperPath, '/ShowGui', '/prod', '/in', thisFile]);
-}
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(config.aiPath, [config.wrapperPath, '/ShowGui', '/prod', '/in', thisFile]);
+  });
 };
 
 const tidyScript = () => {
@@ -557,50 +555,42 @@ const tidyScript = () => {
 
   window.activeTextEditor.document.save().then(() => {
     
-  // Get the current file name
-  const thisFile = getActiveDocumentFile();
-
+    // Get the current file name
+    const thisFile = getActiveDocumentFile();
 
     window.setStatusBarMessage(`Tidying script...${thisFile}`, 1500);
 
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(config.aiPath, [ config.wrapperPath, '/Tidy', '/in', thisFile]);
 
-  // Launch the AutoIt Wrapper executable with the script's path
-  procRunner(config.aiPath, [ config.wrapperPath, '/Tidy', '/in', thisFile]);
-
-  }
+  });
 };
 
 const checkScript = () => {
   // Save the file
-
   window.activeTextEditor.document.save().then(() => {
     
-  // Get the current file name
-  const thisFile = getActiveDocumentFile();
-
+    // Get the current file name
+    const thisFile = getActiveDocumentFile();
 
     window.setStatusBarMessage(`Checking script...${thisFile}`, 1500);
-
     
-  // Launch the AutoIt Wrapper executable with the script's path
-  procRunner(config.aiPath, [config.wrapperPath, '/AU3check', '/prod', '/in', thisFile]);
-  }
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(config.aiPath, [config.wrapperPath, '/AU3check', '/prod', '/in', thisFile]);
+  });
 };
 
 const buildScript = () => {
   // Save the file
-
   window.activeTextEditor.document.save().then(() => {
     // Get the current file name
-  const thisFile = getActiveDocumentFile();
-
+    const thisFile = getActiveDocumentFile();
 
     window.setStatusBarMessage('Building script...', 1500);
 
-
-  // Launch the AutoIt Wrapper executable with the script's path
-  procRunner(config.aiPath, [config.wrapperPath, '/NoStatus', '/prod', '/in', thisFile]);
-  }
+    // Launch the AutoIt Wrapper executable with the script's path
+    procRunner(config.aiPath, [config.wrapperPath, '/NoStatus', '/prod', '/in', thisFile]);
+  });
 };
 
 const debugConsole = () => {
