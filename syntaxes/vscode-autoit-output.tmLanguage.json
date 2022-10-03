@@ -3,141 +3,154 @@
   "name": "vscode-autoit-output",
   "scopeName": "source.vscode_autoit_output",
   "patterns": [
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?((?:---|\\+\\+\\+).*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-date"},
-        "3": {"name": "vscode-autoit-output-brown"}
-      }
+    {"include": "#header"}
+  ],
+  "repository": {
+    "header": {
+      "patterns": [
+        {
+          "begin": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3})?( ?#\\d+:| {3,})? )?",
+          "end": "$",
+          "beginCaptures":{
+            "1": {"name": "vscode-autoit-output-date"},
+            "2": {"name": "vscode-autoit-output-process-id"}
+          },
+          "patterns":[
+            {"include": "#general"}
+          ]
+        }
+      ]
     },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?((?:---|\\+\\+\\+).*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-brown"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?((?:Warning|Error).*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-chocolate"}
-      }
-    },
-    {
-      "begin": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(Starting process (#\\d+))",
-      "end": "((.+) \\[PID ([0-9]+|n\/a)\\])",
-      "beginCaptures": {
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-process"},
-        "4": {"name": "vscode-autoit-output-process-id"}
-      },
-      "endCaptures": {
-        "1": {"name": "vscode-autoit-output-process"},
-        "2": {"name": "vscode-autoit-output-process-file"},
-        "3": {"name": "vscode-autoit-output-process-pid"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?([>].*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-blue"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?([+].*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-green"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?([-<].*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-orange"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?([!].*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-bold-red"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(.*:([0-9]+):)?",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-purple"},
-        "4": {"name": "vscode-autoit-output-purple"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(.*\\son line\\s([0-9]*).*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-red"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(@@ Debug\\(\\d+\\) :)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-debug"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(.*\\(\\d+\\).*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-olive"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(In file included from\\s.*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-purple"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(line(?:\\s|.)*\\scolumn(?:\\s|.)*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-red"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,} )?(#\\d+: | {4,})?)?(.*\\t([0-9]+)\\s.*)",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"},
-        "3": {"name": "vscode-autoit-output-pink"}
-      }
-    },
-    {
-      "match": "^(?:(\\d{2}:\\d{2}:\\d{2}\\.\\d{3,})|(#\\d+: | {4,}))",
-      "captures":{
-        "1": {"name": "vscode-autoit-output-date"},
-        "2": {"name": "vscode-autoit-output-process-id"}
-      }
-    }
+    "general": {
+      "patterns": [
+        {
+          "begin": "(Starting process (#\\d+))",
+          "end": "((.+) \\[PID ([0-9]+|n\/a)\\])",
+          "beginCaptures": {
+            "1": {"name": "vscode-autoit-output-process"},
+            "2": {"name": "vscode-autoit-output-process-id"}
+          },
+          "endCaptures": {
+            "1": {"name": "vscode-autoit-output-process"},
+            "2": {"name": "vscode-autoit-output-process-file"},
+            "3": {"name": "vscode-autoit-output-process-pid"}
+          }
+        },
+        {
+          "match": ">Exit code (?:0|-1) .*",
+          "name": "vscode-autoit-output-EXIT"
+        },
+        {
+          "match": ">Exit code 1 .*",
+          "name": "vscode-autoit-output-EXIT_WARNING"
+        },
+        {
+          "match": ">Exit code \\-?\\d+.*",
+          "name": "vscode-autoit-output-EXIT_ERROR"
+        },
+        {
+          "match": ">.*",
+          "name": "vscode-autoit-output-SCE_ERR_CMD"
+        },
+        {
+          "match": "(?:---|[+]{3}).*",
+          "name": "vscode-autoit-output-SCE_ERR_DIFF_MESSAGE"
+        },
+        {
+          "match": "[-<].*",
+          "name": "vscode-autoit-output-SCE_ERR_DIFF_DELETION"
+        },
+        {
+          "match": "[!].*",
+          "name": "vscode-autoit-output-SCE_ERR_DIFF_CHANGED"
+        },
+        {
+          "match": "[+].*",
+          "name": "vscode-autoit-output-SCE_ERR_DIFF_ADDITION"
+        },
+        {
+          "match": "cf90-.*",
+          "name": "vscode-autoit-output-SCE_ERR_ABSF"
+        },
+        {
+          "match": "fortcom:.*",
+          "name": "vscode-autoit-output-SCE_ERR_IFORT"
+        },
+        {
+          "match": ".*(?:File \".*, line|, line.*File).*",
+          "name": "vscode-autoit-output-SCE_ERR_PYTHON"
+        },
+        {
+          "match": ".* (?:in .* on line|on line .* in) .*",
+          "name": "vscode-autoit-output-SCE_ERR_PHP"
+        },
+        {
+          "match": "(?:Warning|Error) at \\(.*\\) : .*",
+          "name": "vscode-autoit-output-SCE_ERR_IFC"
+        },
+        {
+          "match": "(?:Warning|Error) .*",
+          "name": "vscode-autoit-output-SCE_ERR_BORLAND"
+        },
+        {
+          "match": "(?:.*at line .*file |.*file .*at line ).*",
+          "name": "vscode-autoit-output-SCE_ERR_LUA"
+        },
+        {
+          "match": ".* at .* line .*",
+          "name": "vscode-autoit-output-SCE_ERR_PERL"
+        },
+        {
+          "match": ".*   at .*:line.*",
+          "name": "vscode-autoit-output-SCE_ERR_NET"
+        },
+        {
+          "match": "Line .*, file .*",
+          "name": "vscode-autoit-output-SCE_ERR_ELF"
+        },
+        {
+          "match": "line .* column .*",
+          "name": "vscode-autoit-output-SCE_ERR_TIDY"
+        },
+        {
+          "match": "\tat .*\\(.*\\.java.*",
+          "name": "vscode-autoit-output-SCE_ERR_JAVA_STACK"
+        },
+        {
+          "match": "(?:                 from |In file included from ).*",
+          "name": "vscode-autoit-output-SCE_ERR_GCC_INCLUDED_FROM"
+        },
+        {
+          "match": "NMAKE : fatal error.*",
+          "name": "vscode-autoit-output-SCE_ERR_MS"
+        },
+        {
+          "match": ".*warning LNK.*",
+          "name": "vscode-autoit-output-SCE_ERR_MS"
+        },
+        {
+          "match": " [|][ +].*",
+          "name": "vscode-autoit-output-SCE_ERR_GCC_EXCERPT"
+        },
+        {
+          "match": "\\S+\\t.*\\t\\d+.*",
+          "name": "vscode-autoit-output-SCE_ERR_CTAG"
+        },
+        {
+          "match": ".*:\\d+:",
+          "name": "vscode-autoit-output-SCE_ERR_GCC"
+        },
+        {
+          "match": ".*\\(\\d+\\).*",
+          "name": "vscode-autoit-output-olive"
+        },
+        {
+          "match": "@@ Debug\\(\\d+\\) :",
+          "name": "vscode-autoit-output-debug"
+        }
 
-  ]
+      ]
+    }
+  }
+
 }

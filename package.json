@@ -457,40 +457,46 @@
       "editor.tokenColorCustomizations": {
         "textMateRules": [
           {
-            "scope": "vscode-autoit-output-blue",
+            "scope": "vscode-autoit-output-olive",
+            "settings": {
+              "foreground": "#808000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_CMD",
             "settings": {
               "foreground": "#3d85c6"
             }
           },
           {
-            "scope": "vscode-autoit-output-red",
+            "scope": "vscode-autoit-output-SCE_ERR_DIFF_CHANGED",
             "settings": {
-              "foreground": "#f44336"
-            }
-          },
-          {
-            "scope": "vscode-autoit-output-bold-red",
-            "settings": {
-              "foreground": "#f44336",
+              "foreground": "#f70000",
               "fontStyle": "bold"
             }
           },
           {
-            "scope": "vscode-autoit-output-green",
+            "scope": "vscode-autoit-output-SCE_ERR_DIFF_ADDITION",
             "settings": {
               "foreground": "#6aa84f"
             }
           },
           {
-            "scope": "vscode-autoit-output-orange",
+            "scope": "vscode-autoit-output-SCE_ERR_DIFF_DELETION",
             "settings": {
               "foreground": "#ff8800"
             }
           },
           {
-            "scope": "vscode-autoit-output-pink",
+            "scope": "vscode-autoit-output-SCE_ERR_DIFF_MESSAGE",
             "settings": {
-              "foreground": "#f4cccc"
+              "foreground": "#7F0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-date",
+            "settings": {
+              "foreground": "#83817a"
             }
           },
           {
@@ -526,39 +532,147 @@
             }
           },
           {
-            "scope": "vscode-autoit-output-brown",
-            "settings": {
-              "foreground": "#7F0000"
-            }
-          },
-          {
-            "scope": "vscode-autoit-output-chocolate",
+            "scope": "vscode-autoit-output-SCE_ERR_BORLAND",
             "settings": {
               "foreground": "#B06000"
             }
           },
           {
-            "scope": "vscode-autoit-output-purple",
+            "scope": "vscode-autoit-output-SCE_ERR_IFC",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_GCC_INCLUDED_FROM",
             "settings": {
               "foreground": "#800080"
             }
           },
           {
-            "scope": "vscode-autoit-output-pink",
+            "scope": "vscode-autoit-output-SCE_ERR_GCC_INCLUDED_FROM",
             "settings": {
-              "foreground": "#FF00FF"
+              "foreground": "#800080"
             }
           },
           {
-            "scope": "vscode-autoit-output-olive",
+            "scope": "vscode-autoit-output-SCE_ERR_IFORT",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_PYTHON",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_PERL",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_NET",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_LUA",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_ELF",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_TIDY",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_JAVA_STACK",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_PHP",
+            "settings": {
+              "foreground": "#FF0000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_MS",
             "settings": {
               "foreground": "#808000"
             }
           },
           {
-            "scope": "vscode-autoit-output-date",
+            "scope": "vscode-autoit-output-SCE_ERR_GCC",
             "settings": {
-              "foreground": "#83817a"
+              "foreground": "#800080"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_GCC_EXCERPT",
+            "settings": {
+              "foreground": "#B06000"
+            }
+          },
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_CTAG",
+            "settings": {
+              "foreground": "#FF00FF"
+            }
+          },
+
+          {
+            "scope": "vscode-autoit-output-EXIT",
+            "settings": {
+              "foreground": "#3d85c6"
+            }
+          },
+
+          {
+            "scope": "vscode-autoit-output-EXIT_ERROR",
+            "settings": {
+              "foreground": "#f70000",
+              "fontStyle": "bold"
+            }
+          },
+
+          {
+            "scope": "vscode-autoit-output-EXIT_WARNING",
+            "settings": {
+              "foreground": "#ff8800"
+            }
+          },
+
+
+
+          {
+            "scope": "vscode-autoit-output-test",
+            "settings": {
+              "fontStyle": "bold",
+              "foreground": "#0004ff"
+            }
+          },
+
+
+
+
+          {
+            "scope": "vscode-autoit-output-SCE_ERR_ABSF",
+            "settings": {
+              "foreground": "#FF0000"
             }
           }
         ]
