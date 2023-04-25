@@ -176,76 +176,80 @@ window.onDidChangeVisibleTextEditors(trimOutputLines);
 const aWrapperHotkey = (() => {
   const regex = /(SciTE_(STOPEXECUTE|RESTART)\s*=).*/gi;
   const { env } = process;
-  let dataOrig;
-  let data;
-  let ini;
+  /**
+  * keep track of running scripts to avoid accidentally replacing AutoIt3Wrapper.ini
+  * before each script finished initializing
+  */
+  const count = new Map();
+  let iniDataOrig = null;
+  let iniPath;
   let timer;
-  let disabled = false;
 
   /**
    * Reads the AutoIt3Wrapper.ini file and returns its data as an object.
-   * @returns {object} An object with two properties: `ini` (the path to the
-   * AutoIt3Wrapper.ini file) and `data` (the contents of the file).
+   * @returns {object} An object with two properties: `iniPath` (the path to the
+   * AutoIt3Wrapper.ini file) and `iniData` (the contents of the file).
    */
   const fileData = () => {
-    ini = null;
-    data = '';
+    let iniData = '';
 
     // We should not cache this
     if (env.SCITE_USERHOME && fs.existsSync(`${env.SCITE_USERHOME}\\AutoIt3Wrapper`))
-      ini = `${env.SCITE_USERHOME}\\AutoIt3Wrapper\\AutoIt3Wrapper.ini`;
+      iniPath = `${env.SCITE_USERHOME}\\AutoIt3Wrapper\\AutoIt3Wrapper.ini`;
     else if (env.SCITE_HOME && fs.existsSync(`${env.SCITE_HOME}/AutoIt3Wrapper`))
-      ini = `${env.SCITE_HOME}\\AutoIt3Wrapper\\AutoIt3Wrapper.ini`;
+      iniPath = `${env.SCITE_HOME}\\AutoIt3Wrapper\\AutoIt3Wrapper.ini`;
     else if (fs.existsSync(`${path.dirname(config.wrapperPath)}\\AutoIt3Wrapper.ini`))
-      ini = `${path.dirname(config.wrapperPath)}\\AutoIt3Wrapper.ini`;
-    else ini = `${path.dirname(config.wrapperPath)}\\AutoIt3Wrapper.ini`;
+      iniPath = `${path.dirname(config.wrapperPath)}\\AutoIt3Wrapper.ini`;
+    else iniPath = `${path.dirname(config.wrapperPath)}\\AutoIt3Wrapper.ini`;
 
     try {
-      dataOrig = fs.readFileSync(ini, 'utf-8');
-      data = dataOrig.replace(regex, (match, hotkeySetting, hotKeyName) => {
-        if (hotKeyName.toUpperCase() === 'STOPEXECUTE') {
-          disabled = true;
-          return 'SciTE_STOPEXECUTE=';
-        }
-        if (hotKeyName.toUpperCase() === 'RESTART') {
-          disabled = true;
-          return 'SciTE_RESTART=';
-        }
-        return match;
-      });
-
-      if (!disabled) {
-        data += '\r\n[Other]\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=';
+      iniDataOrig = fs.readFileSync(iniPath, 'utf-8');
+      iniData = iniDataOrig.replace(regex, "");
+      let otherIndex = iniData.search(/\[Other\]/i);
+      if (otherIndex == -1)
+      {
+        iniData += "\r\n[Other]";
+        otherIndex = iniData.length;
       }
+
+      iniData = iniData.substring(0, otherIndex + 7) + "\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n" + iniData.substring(otherIndex + 7);
     } catch (error) {
+      iniDataOrig = null;
       // eslint-disable-next-line no-console
       console.error(`Error reading AutoIt3Wrapper.ini: ${error.message}`);
     }
 
-    return { ini, data };
+    return { iniPath, iniData };
   };
 
   return {
-    disable: () => {
-      disabled = true;
+    disable(id) { //can't use arrow function because we need access "this.reset"
       clearTimeout(timer);
-      const { iniPath, iniData } = fileData();
-      try {
-        fs.writeFileSync(iniPath, iniData, 'utf-8');
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(`Error writing AutoIt3Wrapper.ini: ${error.message}`);
+      count.set(id, id);
+      if (count.size == 1) {
+        const { iniPath, iniData } = fileData();
+        try {
+          fs.writeFileSync(iniPath, iniData, 'utf-8');
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Error writing AutoIt3Wrapper.ini: ${error.message}`);
+        }
       }
-      timer = setTimeout(() => this.reset(), 5000);
+      //timer should never be fired unless something went wrong
+      timer = setTimeout(() => this.reset(), 10000);
+      return id;
     },
 
-    reset: () => {
+    reset: (id) => {
       clearTimeout(timer);
-      disabled = false;
-      if (!ini) return;
+      count.delete(id);
+      if (!iniPath || (id && count.size)) return;
 
       try {
-        fs.writeFileSync(ini, dataOrig, 'utf-8');
+        if (iniDataOrig === null)
+          fs.rmSync(iniPath);
+        else
+          fs.writeFileSync(iniPath, iniDataOrig, 'utf-8');
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Error restoring AutoIt3Wrapper.ini: ${error.message}`);
