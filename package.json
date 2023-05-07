@@ -487,13 +487,7 @@
         }
       }
     },
-    "configurationDefaults": {
-      "[autoit]": {
-        "editor.detectIndentation": false,
-        "editor.tabSize": 4,
-        "editor.insertSpaces": false
-		},
-      "editor.tokenColorCustomizations": {
+    "editor.tokenColorCustomizations": {
         "textMateRules": [
           {
             "scope": "vscode-autoit-output-olive",
