@@ -1,7 +1,7 @@
 import { workspace, Uri, FileType } from 'vscode';
-import { showErrorMessage } from './ai_showMessage';
 import fs from 'fs';
 import path from 'path';
+import { showErrorMessage } from './ai_showMessage';
 
 const conf = {
   data: workspace.getConfiguration('autoit'),
@@ -20,193 +20,42 @@ const conf = {
 const listeners = new Map();
 let listenerId = 0;
 let aiPath = '';
-let _noEvents;
+let bNoEvents;
 const isWinOS = process.platform === 'win32';
 let showErrors = false;
-workspace.onDidChangeConfiguration(({ affectsConfiguration }) => {
-  if (_noEvents || !affectsConfiguration('autoit')) return;
 
-  conf.data = workspace.getConfiguration('autoit');
-  listeners.forEach(listener => {
-    try {
-      listener();
-    } catch (er) {
-      console.error(er);
-    }
-  });
-  showErrors = isWinOS;
-  getPaths();
-});
-
-getPaths();
-
-function addListener(listener) {
-  listeners.set(++listenerId, listener);
-  return listenerId;
-}
-
-function removeListener(id) {
-  listeners.remove(id);
-}
-
-function splitPath(path) {
-  path = path.trim().match(/^(.*[\\/])?([^\\/]+)?$/).map(a => a || "");
+function splitPath(_path) {
+  _path = _path
+    .trim()
+    .match(/^(.*[\\/])?([^\\/]+)?$/)
+    .map(a => a || '');
 
   return {
-    path: path[0],
-    dir: path[1] + (path[1] === "" ? "" : "\\"),
-    file: path[2],
-    isRelative: !!(path[1] && !path[1].match(/^[a-zA-Z]:[\\/]/))
+    path: _path[0],
+    dir: _path[1] + (_path[1] === '' ? '' : '\\'),
+    file: _path[2],
+    isRelative: !!(_path[1] && !_path[1].match(/^[a-zA-Z]:[\\/]/)),
   };
 }
 
-function fixPath(value, data) {
-  const path = splitPath(value || "");
-  const file = data.file;
-  const dir = data.dir;
-  if (path.file === "")
-    path.file = file || "";
-
-  if (path.dir === "" || path.isRelative)
-    path.dir = aiPath.dir + path.dir + (!path.isRelative ? (dir || "") : "");
-
-  if (file === undefined)
-    path.file += "/";
-
-  return (path.dir + "/" + path.file).replace(/[\\/]+/g, "\\");
-}
-
-function verifyPath(path, data, msgSuffix) {
-
-  return workspace.fs.stat(Uri.file(data.fullPath)).then(stats => {
-    const type = (data.file !== undefined ? FileType.File : FileType.Directory) | FileType.SymbolicLink;
-    if (!(stats.type & type))
-    {
-      if (showErrors)
-        showError(path, data, msgSuffix);
-
-      return;
-    }
-
-    if (data.message) {
-      data.message.hide();
-      delete data.message;
-    }
-    data.prevCheck = path;
-    return path;
-
-  }).catch(() => {
-    if (showErrors)
-      showError(path, data, msgSuffix);
-
-  });
-}
-
-function showError(path, data, msgSuffix) {
-  if (!msgSuffix)
-    return;
-
-  const timeout = data.message && !data.message.isHidden ? 1000 : 0;
-  if (timeout) {
-    data.message.hide();
-    delete data.message;
-  }
-  if (data.prevCheck !== path) {
-    const type = data.file !== undefined ? "File" : "Directory";
-    setTimeout(() => data.message = showErrorMessage(`${type} "${path}" not found (autoit.${msgSuffix})`), timeout);
-  }
-
-  data.prevCheck = path;
-}
-
-function updateFullPath(path, data, msgSuffix) {
-  if (path !== "")
-    data.fullPath = fixPath(path, data);
-
-  if (data.fullPath === undefined)
-    data.fullPath = "";
-
-  return verifyPath(path, data, msgSuffix);
-}
-
-function getPaths() {
-  aiPath = splitPath(conf.data.aiPath || "");
-
-  for (let i in conf.defaultPaths) {
-    const defaultPath = conf.defaultPaths[i],
-      confValue = conf.data[i];
-
-    if (i == "smartHelp") {
-      if (Array.isArray(confValue))//convert array-based old config into new object-based
-        return upgradeSmartHelpConfig();
-
-      defaultPath.fullPath = {};
-      for (let prefix in confValue) {
-
-        const val = confValue[prefix];
-        if (prefix == "_yourUdfFuncPrefix_" || typeof val.chmPath !== "string" || (typeof val.udfPath !== "string" && !Array.isArray(val.udfPath)))
-          continue;
-
-        const chmPath = val.chmPath.trim(),
-          data = Object.assign({ fullPath: "" }, defaultPath.check),
-          udfPath = Array.isArray(val.udfPath) ? [...val.udfPath] : val.udfPath.split("|"),
-          msgSuffix = `${i}.${prefix}`;
-
-        updateFullPath(chmPath, data, `${msgSuffix}.chmPath`);
-
-        for (let k = 0; k < udfPath.length; k++) {
-          const data = Object.assign({ fullPath: "" }, defaultPath.check);
-          updateFullPath(udfPath[k], data).then(filePath => {
-            if (!filePath && !(filePath = findFilepath(udfPath[k], true))) {
-              if (showErrors)
-                showError(udfPath[k], data, `${msgSuffix}.udfPath[${k}]`);
-            }
-            else
-              udfPath[k] = filePath;
-          });
-        }
-        defaultPath.fullPath[prefix] = {
-          chmPath: data.fullPath,
-          udfPath: udfPath
-        };
-      }
-    }
-    else if (Array.isArray(confValue)) {
-      for (let j = 0; j < confValue.length; j++) {
-        let path = (typeof confValue[j] == 'string' ? confValue[j] : '').trim();
-
-        if (path === "" && i == "includePaths")
-          path = "Include";
-
-        if (defaultPath[j] === undefined)
-          defaultPath[j] = Object.assign({ fullPath: "" }, defaultPath[0].check);
-
-        updateFullPath(path, defaultPath[j], `${i}[${j}]`);
-      }
-    }
-    else {
-      defaultPath.fullPath = fixPath(confValue, defaultPath);
-      verifyPath(confValue, defaultPath, i);
-    }
-  }
-}
-
 function upgradeSmartHelpConfig() {
-  const data = conf.data.smartHelp,
-    inspect = conf.data.inspect("smartHelp"),
-    props = {
-      workspaceFolderLanguageValue: [null, true],
-      workspaceLanguageValue: [false, true],
-      globalLanguageValue: [true, true],
-      defaultLanguageValue: [null, true],
-      workspaceFolderValue: [],
-      workspaceValue: [false],
-      globalValue: [true],
-      defaultValue: []
-    };
+  const data = conf.data.smartHelp;
+  const inspect = conf.data.inspect('smartHelp');
+  const props = {
+    workspaceFolderLanguageValue: [null, true],
+    workspaceLanguageValue: [false, true],
+    globalLanguageValue: [true, true],
+    defaultLanguageValue: [null, true],
+    workspaceFolderValue: [],
+    workspaceValue: [false],
+    globalValue: [true],
+    defaultValue: [],
+  };
 
-  let ret = {}, ConfigurationTarget, overrideInLanguage;
-  for (let i in props) {
+  let ret = {};
+  let ConfigurationTarget;
+  let overrideInLanguage;
+  for (const i in props) {
     if (inspect[i] !== undefined) {
       [ConfigurationTarget, overrideInLanguage] = props[i];
       break;
@@ -216,7 +65,7 @@ function upgradeSmartHelpConfig() {
     for (let i = 0; i < data.length; i++) {
       ret[data[i][0]] = {
         chmPath: data[i][1],
-        udfPath: data[i][2].split("|")
+        udfPath: data[i][2].split('|'),
       };
     }
   }
@@ -225,8 +74,69 @@ function upgradeSmartHelpConfig() {
   conf.data.update('smartHelp', ret, ConfigurationTarget, overrideInLanguage);
 }
 
-function noEvents(value) {
-  _noEvents = value;
+function fixPath(value, data) {
+  const sPath = splitPath(value || '');
+  const { file } = data;
+  const { dir } = data;
+  if (sPath.file === '') sPath.file = file || '';
+
+  if (sPath.dir === '' || sPath.isRelative)
+    sPath.dir = aiPath.dir + sPath.dir + (!sPath.isRelative ? dir || '' : '');
+
+  if (file === undefined) sPath.file += '/';
+
+  return (sPath.dir + '/' + sPath.file).replace(/[\\/]+/g, '\\');
+}
+
+function showError(sPath, data, msgSuffix) {
+  if (!msgSuffix) return;
+
+  const timeout = data.message && !data.message.isHidden ? 1000 : 0;
+  if (timeout) {
+    data.message.hide();
+    delete data.message;
+  }
+  if (data.prevCheck !== sPath) {
+    const type = data.file !== undefined ? 'File' : 'Directory';
+    setTimeout(() => {
+      data.message = showErrorMessage(`${type} "${sPath}" not found (autoit.${msgSuffix})`);
+      return data.message;
+    }, timeout);
+  }
+
+  data.prevCheck = sPath;
+}
+
+function verifyPath(sPath, data, msgSuffix) {
+  return workspace.fs
+    .stat(Uri.file(data.fullPath))
+    .then(stats => {
+      const type =
+        (data.file !== undefined ? FileType.File : FileType.Directory) | FileType.SymbolicLink;
+      if (!(stats.type & type)) {
+        if (showErrors) showError(sPath, data, msgSuffix);
+
+        return undefined;
+      }
+
+      if (data.message) {
+        data.message.hide();
+        delete data.message;
+      }
+      data.prevCheck = sPath;
+      return sPath;
+    })
+    .catch(() => {
+      if (showErrors) showError(sPath, data, msgSuffix);
+    });
+}
+
+function updateFullPath(_path, data, msgSuffix) {
+  if (_path !== '') data.fullPath = fixPath(_path, data);
+
+  if (data.fullPath === undefined) data.fullPath = '';
+
+  return verifyPath(_path, data, msgSuffix);
 }
 
 const config = new Proxy(conf, {
@@ -274,6 +184,109 @@ const findFilepath = (file, library = true) => {
   }
   return false;
 };
+
+function getPaths() {
+  aiPath = splitPath(conf.data.aiPath || '');
+
+  for (const i in conf.defaultPaths) {
+    if (Object.hasOwn(conf.defaultPaths, i)) {
+      const defaultPath = conf.defaultPaths[i];
+      const confValue = conf.data[i];
+
+      if (i === 'smartHelp') {
+        if (Array.isArray(confValue))
+          // convert array-based old config into new object-based
+          return upgradeSmartHelpConfig();
+
+        defaultPath.fullPath = {};
+        for (const prefix in confValue) {
+          if (Object.hasOwn(defaultPath, prefix)) {
+            const val = confValue[prefix];
+            if (
+              prefix === '_yourUdfFuncPrefix_' ||
+              typeof val.chmPath !== 'string' ||
+              (typeof val.udfPath !== 'string' && !Array.isArray(val.udfPath))
+            )
+              continue;
+
+            const chmPath = val.chmPath.trim();
+            const data = Object.assign({ fullPath: '' }, defaultPath.check);
+            const udfPath = Array.isArray(val.udfPath) ? [...val.udfPath] : val.udfPath.split('|');
+            const msgSuffix = `${i}.${prefix}`;
+
+            updateFullPath(chmPath, data, `${msgSuffix}.chmPath`);
+
+            for (let k = 0; k < udfPath.length; k++) {
+              const oData = Object.assign({ fullPath: '' }, defaultPath.check);
+              const bShowErrors = showErrors;
+              const sMsgSuffix = msgSuffix;
+              const aUdfPath = udfPath;
+              updateFullPath(udfPath[k], oData).then(filePath => {
+                if (!filePath) {
+                  filePath = findFilepath(aUdfPath[k], true);
+                }
+                if (filePath) {
+                  aUdfPath[k] = filePath;
+                } else if (bShowErrors) {
+                  showError(aUdfPath[k], oData, `${sMsgSuffix}.udfPath[${k}]`);
+                }
+              });
+            }
+            defaultPath.fullPath[prefix] = {
+              chmPath: data.fullPath,
+              udfPath,
+            };
+          }
+        }
+      } else if (Array.isArray(confValue)) {
+        for (let j = 0; j < confValue.length; j++) {
+          let sPath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
+
+          if (sPath === '' && i === 'includePaths') sPath = 'Include';
+
+          if (defaultPath[j] === undefined)
+            defaultPath[j] = Object.assign({ fullPath: '' }, defaultPath[0].check);
+
+          updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
+        }
+      } else {
+        defaultPath.fullPath = fixPath(confValue, defaultPath);
+        verifyPath(confValue, defaultPath, i);
+      }
+    }
+  }
+  return undefined;
+}
+
+workspace.onDidChangeConfiguration(({ affectsConfiguration }) => {
+  if (bNoEvents || !affectsConfiguration('autoit')) return;
+
+  conf.data = workspace.getConfiguration('autoit');
+  listeners.forEach(listener => {
+    try {
+      listener();
+    } catch (er) {
+      console.error(er);
+    }
+  });
+  showErrors = isWinOS;
+  getPaths();
+});
+
+getPaths();
+
+function addListener(listener) {
+  listeners.set(++listenerId, listener);
+  return listenerId;
+}
+
+function removeListener(id) {
+  listeners.remove(id);
+}
+
+function noEvents(value) {
+  bNoEvents = Boolean(value);
+}
 
 export default {
   config,

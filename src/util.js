@@ -10,7 +10,8 @@ const trueFalseHeader = `\n|&nbsp;|&nbsp;&nbsp;&nbsp;|&nbsp;
 const opt = '**[optional]**';
 const br = '\u0020\u0020';
 const defaultZero = `${br + br}\`Default = 0\``;
-RegExp.prototype.setFlags = function(flags) {
+// eslint-disable-next-line no-extend-native
+RegExp.prototype.setFlags = function setFlags(flags) {
   return RegExp(this.source, flags);
 };
 
@@ -97,7 +98,6 @@ workspace.onDidChangeConfiguration(event => {
  * @returns Returns an array of Completion objects
  */
 const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
-
   const filledCompletion = entries.map(entry => {
     const newDoc = new MarkdownString(entry.documentation);
     if (requiredScript) newDoc.appendCodeblock(`#include <${requiredScript}>`, 'autoit');

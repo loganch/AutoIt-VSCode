@@ -3,5 +3,13 @@
   "settings": {
     "import/core-modules": ["vscode"]
   },
-  "rules": { "prettier/prettier": ["error", { "endOfLine": "auto" }] }
+  "rules": { "prettier/prettier": ["error", { "endOfLine": "auto" }],
+    "prefer-template": "off", // allow "string" + "string"
+    "no-plusplus": "off",
+    "no-continue": "off",
+    "no-param-reassign": "off",
+    "no-restricted-syntax": "off",
+    "no-bitwise": "off"
+  }
+
 }

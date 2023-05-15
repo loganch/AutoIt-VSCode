@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import { decode } from 'iconv-lite';
 import { parse } from 'jsonc-parser';
+import { performance } from 'perf_hooks';
 import { findFilepath, getIncludeText, functionDefinitionRegex } from './util';
 import conf from './ai_config';
 import { commandsList as _commandsList, commandsPrefix } from './commandsList';
@@ -11,6 +12,7 @@ import { showInformationMessage, showErrorMessage, messages } from './ai_showMes
 
 const { config } = conf;
 const aiOutCommon = window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output');
+const keybindingsDefaultRaw = require('../package.json').contributes.keybindings;
 
 /**
  * Get the file name of the active document in the editor.
@@ -121,7 +123,6 @@ const runners = {
    */
   cleanupFinishedRunner(info, runner) {
     const localAiOutCommon = aiOutCommon;
-    // eslint-disable-next-line no-param-reassign
     info.callback = () => {
       // eslint-disable-next-line no-underscore-dangle
       info._aiOut.flush();
@@ -177,9 +178,9 @@ const aWrapperHotkey = (() => {
   const regex = /(SciTE_(STOPEXECUTE|RESTART)\s*=).*/gi;
   const { env } = process;
   /**
-  * keep track of running scripts to avoid accidentally replacing AutoIt3Wrapper.ini
-  * before each script finished initializing
-  */
+   * keep track of running scripts to avoid accidentally replacing AutoIt3Wrapper.ini
+   * before each script finished initializing
+   */
   const count = new Map();
   let iniDataOrig = null;
   let iniPath;
@@ -204,15 +205,17 @@ const aWrapperHotkey = (() => {
 
     try {
       iniDataOrig = fs.readFileSync(iniPath, 'utf-8');
-      iniData = iniDataOrig.replace(regex, "");
+      iniData = iniDataOrig.replace(regex, '');
       let otherIndex = iniData.search(/\[Other\]/i);
-      if (otherIndex == -1)
-      {
-        iniData += "\r\n[Other]";
+      if (otherIndex === -1) {
+        iniData += '\r\n[Other]';
         otherIndex = iniData.length;
       }
 
-      iniData = iniData.substring(0, otherIndex + 7) + "\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n" + iniData.substring(otherIndex + 7);
+      iniData =
+        iniData.substring(0, otherIndex + 7) +
+        '\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n' +
+        iniData.substring(otherIndex + 7);
     } catch (error) {
       iniDataOrig = null;
       // eslint-disable-next-line no-console
@@ -223,33 +226,32 @@ const aWrapperHotkey = (() => {
   };
 
   return {
-    disable(id) { //can't use arrow function because we need access "this.reset"
+    disable(id) {
+      // can't use arrow function because we need access "this.reset"
       clearTimeout(timer);
       count.set(id, id);
-      if (count.size == 1) {
-        const { iniPath, iniData } = fileData();
+      if (count.size === 1) {
+        const { iniPath: _iniPath, iniData: _iniData } = fileData();
         try {
-          fs.writeFileSync(iniPath, iniData, 'utf-8');
+          fs.writeFileSync(_iniPath, _iniData, 'utf-8');
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error(`Error writing AutoIt3Wrapper.ini: ${error.message}`);
         }
       }
-      //timer should never be fired unless something went wrong
+      // timer should never be fired unless something went wrong
       timer = setTimeout(() => this.reset(), 10000);
       return id;
     },
 
-    reset: (id) => {
+    reset: id => {
       clearTimeout(timer);
       count.delete(id);
       if (!iniPath || (id && count.size)) return;
 
       try {
-        if (iniDataOrig === null)
-          fs.rmSync(iniPath);
-        else
-          fs.writeFileSync(iniPath, iniDataOrig, 'utf-8');
+        if (iniDataOrig === null) fs.rmSync(iniPath);
+        else fs.writeFileSync(iniPath, iniDataOrig, 'utf-8');
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(`Error restoring AutoIt3Wrapper.ini: ${error.message}`);
@@ -275,86 +277,56 @@ function getTime() {
     .replace(',', '.');
 }
 
-//get keybindings
-let keybindings; //note, we are defining this variable without value!
-{//anonymous scope
+// get keybindings
+let keybindings; // note, we are defining this variable without value!
+{
+  // anonymous scope
   conf.noEvents(true);
   let profileDir;
-  const prefs = workspace.getConfiguration('autoit'),
-    prefName = "consoleParams",
-    pref = prefs.inspect(prefName),
-    prefValue = pref.globalValue !== undefined ? pref.globalValue.replace(/ ?-profileDirID[\d.]+$/, "") : pref.globalValue,
-    //generate ID, in some rare circumstances previous ID could still be present, try remove it
-    id = (prefValue ? prefValue + " " : "") + "-profileDirID." + new Date().getTime() + performance.now(),
-    dir = (process.env.VSCODE_PORTABLE ? process.env.VSCODE_PORTABLE + "/user-data" : process.env.APPDATA + "/Code") + "/User/",
-    settingsJsonWatcher = workspace.createFileSystemWatcher(new RelativePattern(dir, "**/settings.json")),
-    settingsJsonWatcherEventHandler = uri => {
-      if (profileDir)
-        return;
+  const prefs = workspace.getConfiguration('autoit');
+  const prefName = 'consoleParams';
+  const pref = prefs.inspect(prefName);
+  const prefValue =
+    pref.globalValue !== undefined
+      ? pref.globalValue.replace(/ ?-profileDirID[\d.]+$/, '')
+      : pref.globalValue;
+  // generate ID, in some rare circumstances previous ID could still be present, try remove it
+  const id =
+    (prefValue ? prefValue + ' ' : '') +
+    '-profileDirID.' +
+    new Date().getTime() +
+    performance.now();
+  const dir =
+    (process.env.VSCODE_PORTABLE
+      ? process.env.VSCODE_PORTABLE + '/user-data'
+      : process.env.APPDATA + '/Code') + '/User/';
+  const settingsJsonWatcher = workspace.createFileSystemWatcher(
+    new RelativePattern(dir, '**/settings.json'),
+  );
 
-      fs.readFile(uri.fsPath, (err, data) => {
-        if (profileDir)
-          return;
-
-        const json = parse(data.toString());
-        if (json[pref.key] !== id)
-          return;
-
-        profileDir = uri.fsPath.replace(/[^\\/]+$/, "");
-        settingsJsonWatcher.dispose();
-        reset();
-      });
-    },
-    reset = () => {
-      clearTimeout(settingsTimer);
-      prefs.update(prefName, prefValue, true).then(() => conf.noEvents(false));
-      initKeybindings(profileDir || dir);
-    };
-
-  settingsJsonWatcher.onDidChange(settingsJsonWatcherEventHandler);
-  settingsJsonWatcher.onDidCreate(settingsJsonWatcherEventHandler);
-  prefs.update(prefName, id, true);
-  const settingsTimer = setTimeout(reset, 2000);
-  const initKeybindings = dir => {
-    let readFileLast = 0; //prevent multiple calls
+  let settingsTimer;
+  const initKeybindings = _dir => {
+    let readFileLast = 0; // prevent multiple calls
     const commandsList = {};
     for (let i = 0; i < _commandsList.length; i++)
-      commandsList[commandsPrefix + _commandsList[i]] = "";
+      commandsList[commandsPrefix + _commandsList[i]] = '';
 
-    const keybindingsDefaultRaw = require("../package.json").contributes.keybindings;
-    const keybindingsDefault = keybindingsDefaultRaw.reduce((a, b) => (a[b.command] = b.key, a), {});
-    const fs = require("fs");
-    const promise = { resolve: () => { }, isResolved: false };
-
-    const readFile = uri => {
-
-      const now = performance.now();
-      if (uri && (uri.scheme != "file" || uri.fsPath != file || !promise.isResolved || readFileLast + 200 > now))
-        return;
-
-      keybindings = new Promise(resolve => (promise.resolve = resolve, promise.isResolved = false));
-      Object.assign(keybindings, Object.assign({}, keybindingsDefault));
-      readFileLast = now;
-      //read file
-      fs.readFile(file, (err, data) => {
-        //we can't use JSON.parse() because file may contain comments
-        keybindingsUpdate(err ? keybindingsDefaultRaw : parse(data.toString()) || keybindingsDefaultRaw);
-      });
-    };
-    const fileName = "keybindings.json";
-    const file = Uri.file(dir + fileName).fsPath;
-    const watcher = workspace.createFileSystemWatcher(new RelativePattern(dir, "*.json"));
-    watcher.onDidChange(readFile);
-    watcher.onDidCreate(readFile);
-    watcher.onDidDelete(readFile);
-
+    const keybindingsDefault = keybindingsDefaultRaw.reduce((a, b) => {
+      a[b.command] = b.key;
+      return a;
+    }, {});
+    const promise = { resolve: () => {}, isResolved: false };
+    const fileName = 'keybindings.json';
+    const file = Uri.file(_dir + fileName).fsPath;
     const keybindingsUpdate = list => {
-      const keybindingsNew = {},
-        keybindingsFallback = Object.assign({}, keybindingsDefault);
+      const keybindingsNew = {};
+      const keybindingsFallback = Object.assign({}, keybindingsDefault);
 
       for (let i = 0; i < list.length; i++) {
-        const isRemove = list[i].command.substring(0, 1) == "-";
-        const command = isRemove ? list[i].command.substring(1, list[i].command.length) : list[i].command;
+        const isRemove = list[i].command.substring(0, 1) === '-';
+        const command = isRemove
+          ? list[i].command.substring(1, list[i].command.length)
+          : list[i].command;
         if (command in commandsList) {
           if (isRemove) {
             delete keybindings[command];
@@ -364,26 +336,89 @@ let keybindings; //note, we are defining this variable without value!
           keybindingsNew[command] = list[i].key;
         }
       }
-      for (let command in commandsList) {
-        const key = keybindingsNew[command] || keybindingsFallback[command];
-        if (!key)
-          continue;
-        //capitalize first letter
-        keybindingsFallback[command] = key.replace(/\w+/g, w => (w.substring(0, 1).toUpperCase()) + w.substring(1));
-        //add spaces around "+"
-        // keybindingsFallback[i] = keybindingsFallback[i].replace(/\+/g, " $& ");
-        keybindings[command] = keybindingsFallback[command];
+      for (const command in commandsList) {
+        if (Object.hasOwn(commandsList, command)) {
+          const key = keybindingsNew[command] || keybindingsFallback[command];
+          if (!key) continue;
+          // capitalize first letter
+          keybindingsFallback[command] = key.replace(
+            /\w+/g,
+            w => w.substring(0, 1).toUpperCase() + w.substring(1),
+          );
+          // add spaces around "+"
+          // keybindingsFallback[i] = keybindingsFallback[i].replace(/\+/g, " $& ");
+          keybindings[command] = keybindingsFallback[command];
+        }
       }
 
-      if (messages.error.killScript && (keybindings[commandsPrefix + "killScript"] || keybindings[commandsPrefix + "killScriptOpened"])) {
+      if (
+        messages.error.killScript &&
+        (keybindings[commandsPrefix + 'killScript'] ||
+          keybindings[commandsPrefix + 'killScriptOpened'])
+      ) {
         messages.error.killScript.hide();
         delete messages.error.killScript;
       }
       promise.resolve(keybindingsFallback);
       promise.isResolved = true;
     };
+    const readFile = uri => {
+      const now = performance.now();
+      if (
+        uri &&
+        (uri.scheme !== 'file' ||
+          uri.fsPath !== file ||
+          !promise.isResolved ||
+          readFileLast + 200 > now)
+      )
+        return;
+
+      keybindings = new Promise(resolve => {
+        promise.resolve = resolve;
+        promise.isResolved = false;
+      });
+      Object.assign(keybindings, Object.assign({}, keybindingsDefault));
+      readFileLast = now;
+      // read file
+      fs.readFile(file, (err, data) => {
+        // we can't use JSON.parse() because file may contain comments
+        keybindingsUpdate(
+          err ? keybindingsDefaultRaw : parse(data.toString()) || keybindingsDefaultRaw,
+        );
+      });
+    };
+    const watcher = workspace.createFileSystemWatcher(new RelativePattern(_dir, '*.json'));
+    watcher.onDidChange(readFile);
+    watcher.onDidCreate(readFile);
+    watcher.onDidDelete(readFile);
+
     readFile();
   };
+  const reset = () => {
+    clearTimeout(settingsTimer);
+    prefs.update(prefName, prefValue, true).then(() => conf.noEvents(false));
+    initKeybindings(profileDir || dir);
+  };
+  settingsTimer = setTimeout(reset, 2000);
+
+  const settingsJsonWatcherEventHandler = uri => {
+    if (profileDir) return;
+
+    fs.readFile(uri.fsPath, (err, data) => {
+      if (profileDir) return;
+
+      const json = parse(data.toString());
+      if (json[pref.key] !== id) return;
+
+      profileDir = uri.fsPath.replace(/[^\\/]+$/, '');
+      settingsJsonWatcher.dispose();
+      reset();
+    });
+  };
+
+  settingsJsonWatcher.onDidChange(settingsJsonWatcherEventHandler);
+  settingsJsonWatcher.onDidCreate(settingsJsonWatcherEventHandler);
+  prefs.update(prefName, id, true);
 }
 
 const AiOut = ({ id, aiOutProcess }) => {
@@ -432,7 +467,7 @@ const AiOut = ({ id, aiOutProcess }) => {
     if (textProcess) {
       aiOutProcess[prop](textProcess); // process output
       isNewLineProcess =
-        prop === 'appendLine' || textProcess.substring(textProcess.length - 2) == '\r\n';
+        prop === 'appendLine' || textProcess.substring(textProcess.length - 2) === '\r\n';
     }
 
     if (runners.lastId !== id && !runners.isNewLine) {
@@ -545,50 +580,63 @@ const AiOut = ({ id, aiOutProcess }) => {
 let hhproc;
 
 function procRunner(cmdPath, args = [], bAiOutReuse = true) {
-  const thisFile = getActiveDocumentFileName(),
-    processCommand = cmdPath + " " + args,
-    runnerPrev = bAiOutReuse && runners.findRunner({ status: false, thisFile, processCommand }),
-    id = runnerPrev ? runnerPrev.info.id : ++runners.id,
-    aiOutProcess = config.multiOutput
-      ? runnerPrev && !runnerPrev.info.aiOut.void && runnerPrev.info.aiOut || window.createOutputChannel(`AutoIt #${id} (${thisFile})`, 'vscode-autoit-output')
-      : new Proxy({}, { get() { return () => { }; } }),
-    aiOut = new AiOut({ id, aiOutProcess }),
-    info = runnerPrev && runnerPrev.info || {
-      id,
-      startTime: new Date().getTime(),
-      endTime: 0,
-      aiOut: aiOutProcess,
-      thisFile,
-      processCommand,
-      status: true
-    },
-    exit = (code, text) => {
-      aWrapperHotkey.reset(id);
-      code = ~~code; //convert possible null into 0
-      info.endTime = new Date().getTime();
-      info.status = false;
-      aiOut.flush();
-      aiOut.appendLine((code > 1 || code < -1 ? "!" : code < 1 ? ">" : "-") + `>Exit code ${code}${text ? " (" + text + ")" : ""} Time: ${(info.endTime - info.startTime) / 1000}`);
-      runners.cleanup();
-      //      runners.lastId = null;
-    };
-  if (!info._aiOut)
-    info._aiOut = aiOut;
+  const thisFile = getActiveDocumentFileName();
+  const processCommand = cmdPath + ' ' + args;
+  const runnerPrev = bAiOutReuse && runners.findRunner({ status: false, thisFile, processCommand });
+  const id = runnerPrev ? runnerPrev.info.id : ++runners.id;
+  const aiOutProcess = config.multiOutput
+    ? (runnerPrev && !runnerPrev.info.aiOut.void && runnerPrev.info.aiOut) ||
+      window.createOutputChannel(`AutoIt #${id} (${thisFile})`, 'vscode-autoit-output')
+    : new Proxy(
+        {},
+        {
+          get() {
+            return () => {};
+          },
+        },
+      );
+  const aiOut = new AiOut({ id, aiOutProcess });
+  const info = (runnerPrev && runnerPrev.info) || {
+    id,
+    startTime: new Date().getTime(),
+    endTime: 0,
+    aiOut: aiOutProcess,
+    thisFile,
+    processCommand,
+    status: true,
+  };
+  const exit = (code, text) => {
+    aWrapperHotkey.reset(id);
+    code = Number(code); // convert possible null into 0
+    info.endTime = new Date().getTime();
+    info.status = false;
+    aiOut.flush();
+    aiOut.appendLine(
+      // eslint-disable-next-line no-nested-ternary
+      (code > 1 || code < -1 ? '!' : code < 1 ? '>' : '-') +
+        `>Exit code ${code}${text ? ' (' + text + ')' : ''} Time: ${(info.endTime -
+          info.startTime) /
+          1000}`,
+    );
+    runners.cleanup();
+    //      runners.lastId = null;
+  };
+  // eslint-disable-next-line no-underscore-dangle
+  if (!info._aiOut) info._aiOut = aiOut;
 
   if (runnerPrev) {
-    if (runnerPrev.info.aiOut.void) //void won't be undefined when used proxy object
+    if (runnerPrev.info.aiOut.void)
+      // void won't be undefined when used proxy object
       runnerPrev.info.aiOut = aiOutProcess;
 
     clearTimeout(runnerPrev.info.timer);
     runnerPrev.info.startTime = new Date().getTime();
     info.status = true;
-    if (config.clearOutput)
-      aiOutProcess.clear(); //clear process output
+    if (config.clearOutput) aiOutProcess.clear(); // clear process output
 
-    runners.lastId = 0; //force displaying ID
+    runners.lastId = 0; // force displaying ID
   }
-  if (!config.multiOutput && config.clearOutput)
-    aiOutCommon.clear();
+  if (!config.multiOutput && config.clearOutput) aiOutCommon.clear();
 
   //  if (id == 1 || runners.isAiOutVisible()) //only switch output channel if autoit channel is opened now
   (config.multiOutput ? aiOutProcess : aiOutCommon).show(true);
@@ -600,22 +648,25 @@ function procRunner(cmdPath, args = [], bAiOutReuse = true) {
   const runner = spawn(cmdPath, args, {
     cwd: workDir,
   });
-  //display process command line, adding quotes to file paths as it does in SciTE
-  aiOut.appendLine(`Starting process #${id}\r\n"${cmdPath}" ${args.map((a, i, ar) => !i || ar[i - 1] == "/in" ? '"' + a + '"' : a).join(" ")} [PID ${runner.pid || "n/a"}]`);
+  // display process command line, adding quotes to file paths as it does in SciTE
+  aiOut.appendLine(
+    `Starting process #${id}\r\n"${cmdPath}" ${args
+      .map((a, i, ar) => (!i || ar[i - 1] === '/in' ? '"' + a + '"' : a))
+      .join(' ')} [PID ${runner.pid || 'n/a'}]`,
+  );
 
   if (runnerPrev) {
-    //since we are reusing output panel
-    //we need update our list
-    //Map() doesn't allow update/replace keys, we'll have to add new one and delete old.
+    // since we are reusing output panel
+    // we need update our list
+    // Map() doesn't allow update/replace keys, we'll have to add new one and delete old.
     runners.list.set(runner, runnerPrev.info);
     runners.list.delete(runnerPrev.runner);
-  }
-  else {
+  } else {
     runners.list.set(runner, info);
   }
   // process failed to start
   if (!runner.pid) {
-    exit(-2, "wrong path?");
+    exit(-2, 'wrong path?');
     return runner;
   }
 
@@ -623,8 +674,7 @@ function procRunner(cmdPath, args = [], bAiOutReuse = true) {
     try {
       const output = (config.isCodePage ? decode(data, config.outputCodePage) : data).toString();
       aiOut.append(output);
-    }
-    catch (er) {
+    } catch (er) {
       console.error(er);
     }
   });
@@ -633,8 +683,7 @@ function procRunner(cmdPath, args = [], bAiOutReuse = true) {
     try {
       const output = (config.isCodePage ? decode(data, config.outputCodePage) : data).toString();
       aiOut.append(output);
-    }
-    catch (er) {
+    } catch (er) {
       console.error(er);
     }
   });
@@ -642,28 +691,52 @@ function procRunner(cmdPath, args = [], bAiOutReuse = true) {
   runner.on('exit', exit);
   return runner;
 }
-workspace.onDidCloseTextDocument(doc => {
-  if (!config.terminateRunningOnClose)
+const killScript = (thisFile = null) => {
+  const data = runners.findRunner({ status: true, thisFile });
+  if (!data) {
+    const file = thisFile
+      ? ` (${thisFile
+          .split('\\')
+          .splice(-2, 2)
+          .join('\\')}) `
+      : ' ';
+    showInformationMessage(`No script${file}currently is running.`, { timeout: 10000 });
     return;
+  }
 
-  if (runners.findRunner({ status: true, thisFile: doc.fileName }))
-    killScript(doc.fileName);
+  window.setStatusBarMessage('Stopping the script...', 1500);
+  data.runner.stdin.pause();
+  data.runner.kill();
+};
+
+workspace.onDidCloseTextDocument(doc => {
+  if (!config.terminateRunningOnClose) return;
+
+  if (runners.findRunner({ status: true, thisFile: doc.fileName })) killScript(doc.fileName);
 });
 
 const runScript = () => {
   const thisDoc = window.activeTextEditor.document; // Get the object of the text editor
   const thisFile = getActiveDocumentFileName();
-  if (!keybindings[commandsPrefix + "killScript"] && !keybindings[commandsPrefix + "killScriptOpened"]) {
-    messages.error.killScript = showErrorMessage(`Please set "AutoIt: Kill Running Script" keyboard shortcut.`, { timeout: 30000 });
+  if (
+    !keybindings[commandsPrefix + 'killScript'] &&
+    !keybindings[commandsPrefix + 'killScriptOpened']
+  ) {
+    messages.error.killScript = showErrorMessage(
+      `Please set "AutoIt: Kill Running Script" keyboard shortcut.`,
+      { timeout: 30000 },
+    );
     return messages.error.killScript;
   }
   // Save the file
-  thisDoc.save().then(isSaved => {
+  thisDoc.save().then(() => {
     if (thisDoc.isUntitled)
       return window.showErrorMessage(`"${thisFile}" file must be saved first!`);
 
     if (thisDoc.isDirty)
-      showInformationMessage(`File failed to save, running saved file instead ("${thisFile}")`, { timeout: 30000 });
+      showInformationMessage(`File failed to save, running saved file instead ("${thisFile}")`, {
+        timeout: 30000,
+      });
 
     const params = config.consoleParams;
 
@@ -677,21 +750,30 @@ const runScript = () => {
         return value.replace(/"/g, '');
       });
 
-
-      procRunner(config.aiPath, [
-        config.wrapperPath,
-        '/run',
-        '/prod',
-        '/ErrorStdOut',
-        '/in',
-        thisFile,
-        '/UserParams',
-        ...cleanParams,
-      ], config.multiOutput && config.multiOutputReuseOutput);
+      procRunner(
+        config.aiPath,
+        [
+          config.wrapperPath,
+          '/run',
+          '/prod',
+          '/ErrorStdOut',
+          '/in',
+          thisFile,
+          '/UserParams',
+          ...cleanParams,
+        ],
+        config.multiOutput && config.multiOutputReuseOutput,
+      );
     } else {
-      procRunner(config.aiPath, [config.wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', thisFile], config.multiOutput && config.multiOutputReuseOutput);
+      procRunner(
+        config.aiPath,
+        [config.wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', thisFile],
+        config.multiOutput && config.multiOutputReuseOutput,
+      );
     }
+    return undefined;
   });
+  return undefined;
 };
 
 const launchHelp = () => {
@@ -710,29 +792,35 @@ const launchHelp = () => {
     window.setStatusBarMessage(`Searching documentation for ${query}`, 1500);
 
     let paths;
-    if (prefix && (paths = config.smartHelp[prefix])) {
+    if (prefix) {
+      paths = config.smartHelp[prefix];
+    }
+    if (prefix && paths) {
       // Make sure help file exists
       if (!fs.existsSync(paths.chmPath)) {
         window.showErrorMessage(`Unable to locate ${paths.chmPath}`);
         return;
       }
 
-      const regex = new RegExp(`\\bFunc\\s+${query}\\s*\\(`, "g");
+      const regex = new RegExp(`\\bFunc\\s+${query}\\s*\\(`, 'g');
       const udfPaths = paths.udfPath;
 
       for (let j = 0; j < udfPaths.length; j += 1) {
-
         let filePath = udfPaths[j];
         if (!fs.existsSync(filePath)) {
           filePath = findFilepath(filePath, true);
-          if (!filePath) { continue; }
+          if (!filePath) {
+            continue;
+          }
         }
-        let text = getIncludeText(filePath);
-        let found = text.match(regex);
+        const text = getIncludeText(filePath);
+        const found = text.match(regex);
 
         if (found) {
-          if (hhproc) { hhproc.kill(); }
-          hhproc = spawn("hh", [`mk:@MSITStore:${paths.chmPath}::/funcs/${query}.htm`]);
+          if (hhproc) {
+            hhproc.kill();
+          }
+          hhproc = spawn('hh', [`mk:@MSITStore:${paths.chmPath}::/funcs/${query}.htm`]);
           return;
         }
       }
@@ -752,24 +840,29 @@ function getDebugText() {
   let lineNbr = editor.selection.active.line;
   let currentLine = thisDoc.lineAt(lineNbr);
   const wordRange = editor.document.getWordRangeAtPosition(editor.selection.start);
-  const varToDebug = (!wordRange) ? '' : thisDoc.getText(thisDoc.getWordRangeAtPosition(editor.selection.active));
+  const varToDebug = !wordRange
+    ? ''
+    : thisDoc.getText(thisDoc.getWordRangeAtPosition(editor.selection.active));
 
   // Make sure that a variable or macro is selected
   if (varToDebug.charAt(0) === '$' || varToDebug.charAt(0) === '@') {
     const lineCount = thisDoc.lineCount - 2;
     const isContinue = /\s_\b\s*(;.*)?\s*/;
 
+    // eslint-disable-next-line no-underscore-dangle
     if (!currentLine._isLastLine) {
       // Find first line without continuation character
       while (lineNbr <= lineCount) {
-        let noContinue = (isContinue.exec(currentLine.text) === null);
-        if (noContinue) { break; }
+        const noContinue = isContinue.exec(currentLine.text) === null;
+        if (noContinue) {
+          break;
+        }
 
         lineNbr += 1;
         currentLine = thisDoc.lineAt(lineNbr);
       }
     }
-    let endPos = currentLine.range.end.character;
+    const endPos = currentLine.range.end.character;
     const newPosition = new Position(lineNbr, endPos);
 
     return {
@@ -778,7 +871,7 @@ function getDebugText() {
     };
   }
   window.showErrorMessage(
-    `"${varToDebug}" is not a variable or macro, debug line can't be generated`
+    `"${varToDebug}" is not a variable or macro, debug line can't be generated`,
   );
   return {};
 }
@@ -946,24 +1039,6 @@ const changeConsoleParams = () => {
     });
 };
 
-const killScript = (thisFile = null) => {
-  const data = runners.findRunner({ status: true, thisFile });
-  if (!data) {
-    const file = thisFile
-      ? ` (${thisFile
-          .split('\\')
-          .splice(-2, 2)
-          .join('\\')}) `
-      : ' ';
-    showInformationMessage(`No script${file}currently is running.`, { timeout: 10000 });
-    return;
-  }
-
-  window.setStatusBarMessage('Stopping the script...', 1500);
-  data.runner.stdin.pause();
-  data.runner.kill();
-};
-
 const killScriptOpened = () => {
   killScript(getActiveDocumentFileName());
 };
@@ -1013,7 +1088,7 @@ const insertHeader = () => {
   const lineText = doc.lineAt(currentLine).text;
   const { UDFCreator } = config;
 
-  const findFunc = functionDefinitionRegex.setFlags("i");
+  const findFunc = functionDefinitionRegex.setFlags('i');
   const found = findFunc.exec(lineText);
 
   if (found === null) {
@@ -1029,15 +1104,15 @@ const insertHeader = () => {
     const params = found[3].split(',').map((parameter, index) => {
       parameter = parameter.trim();
       let tag = '- ';
-      let paramIndex = parameter.search('=');
+      const paramIndex = parameter.search('=');
       if (paramIndex !== -1) {
-        tag += '[optional] Default is ' + parameter.substring(paramIndex+1).trim() + ".";
+        tag += '[optional] Default is ' + parameter.substring(paramIndex + 1).trim() + '.';
         syntaxBegin += '[';
         syntaxEnd = `]${syntaxEnd}`;
       }
-      let byref = "";
+      let byref = '';
       if (parameter.substring(0, 5).toLowerCase() === 'byref') {
-        byref = "ByRef ";
+        byref = 'ByRef ';
         parameter = parameter.substring(6).trim(); // strip off byref keyword
         tag += '[in/out] ';
       }
