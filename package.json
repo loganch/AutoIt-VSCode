@@ -24,21 +24,21 @@
   ],
   "dependencies": {
     "iconv-lite": "^0.6.3",
-    "jsonc-parser": "^3.2.0"
+    "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.10",
-    "@babel/preset-env": "^7.12.11",
-    "@types/vscode": "^1.52.0",
-    "babel-loader": "^8.2.2",
+    "@babel/core": "^7.26.7",
+    "@babel/preset-env": "^7.26.7",
+    "@types/vscode": "^1.96.0",
+    "babel-loader": "^9.2.1",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.2.0",
     "eslint-config-prettier": "^6.15.0",
-    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^3.3.1",
-    "prettier": "^1.19.1",
+    "prettier": "^3.4.2",
     "typescript": "^3.5.3",
-    "webpack": "^5.12.2",
+    "webpack": "^5.97.1",
     "webpack-cli": "^4.3.1"
   },
   "license": "MIT",

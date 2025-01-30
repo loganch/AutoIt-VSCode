@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Node package update.
+
+### Fixed
+
+- Usage of wrong Au3Check encoding for the file path string.
+
 ## [1.0.13] - 2025-01-28
 
 ### Added
@@ -331,6 +341,7 @@ The IntelliSense release!
 - Added the ability to generate a debug MsgBox for a highlighted variable or macro with Ctrl+Shift+D.
 - Added icon, banner color and description for marketplace.
 
+[Unreleased]: https://github.com/loganch/AutoIt-VSCode/compare/v1.0.13...HEAD
 [1.0.13]: https://github.com/loganch/AutoIt-VSCode/compare/v1.0.12...v1.0.13
 [1.0.12]: https://github.com/loganch/AutoIt-VSCode/compare/v1.0.11...v1.0.12
 [1.0.11]: https://github.com/loganch/AutoIt-VSCode/compare/v1.0.10...v1.0.11
