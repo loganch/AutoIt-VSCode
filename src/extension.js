@@ -19,32 +19,32 @@ const { config } = conf;
 
 /**
  * Runs the check process for the given document and returns the console output.
- * @param {TextDocument} document - The document to run the AU3Check process on.
+ * @param {import('vscode').TextDocument} document - The document to run the AU3Check process on.
  * @returns {Promise<string>} A promise that resolves with the console output of the check process.
  */
-const runCheckProcess = (document) => {
+const runCheckProcess = document => {
   return new Promise((resolve, reject) => {
     let consoleOutput = '';
     const params = [
       /* https://www.autoitscript.com/autoit3/docs/intro/au3check.htm */
       '-w',
-      1, // already included file (on)
+      '1', // already included file (on)
       '-w',
-      2, // missing #comments-end (on)
+      '2', // missing #comments-end (on)
       '-w',
-      3, // already declared var (off)
+      '3', // already declared var (off)
       '-w',
-      4, // local var used in global scope (off)
+      '4', // local var used in global scope (off)
       '-w',
-      5, // local var declared but not used (off)
+      '5', // local var declared but not used (off)
       '-w',
-      6, // warn when using Dim (off)
+      '6', // warn when using Dim (off)
       '-w',
-      7, // warn when passing Const or expression on ByRef param(s) (on)
+      '7', // warn when passing Const or expression on ByRef param(s) (on)
     ];
 
     // Add -I for each include path
-    config.includePaths.forEach((path) => {
+    config.includePaths.forEach(path => {
       params.push('-I', path);
     });
 
@@ -56,24 +56,25 @@ const runCheckProcess = (document) => {
     while (match) {
       const [, param, value] = regexp.exec(match[0]) || [];
       if (!param) break;
-      const i = (value - 1) * 2;
+      const numValue = Number(value);
+      const i = (numValue - 1) * 2;
       // only update existing params
       if (params[i] === undefined) continue;
       params[i] = param;
-      params[i + 1] = ~~value;
+      params[i + 1] = String(numValue);
     }
     const checkProcess = execFile(config.checkPath, [...params, document.fileName], {
       cwd: dirname(document.fileName),
     });
 
-    checkProcess.stdout.on('data', (data) => {
+    checkProcess.stdout.on('data', data => {
       if (data.length === 0) {
         return;
       }
       consoleOutput += data.toString();
     });
 
-    checkProcess.stderr.on('error', (error) => {
+    checkProcess.stderr.on('error', error => {
       reject(error);
     });
 
@@ -83,11 +84,11 @@ const runCheckProcess = (document) => {
   });
 };
 
-const handleCheckProcessError = (error) => {
+const handleCheckProcessError = error => {
   window.showErrorMessage(`${config.checkPath} ${error}`);
 };
 
-const validateCheckPath = (checkPath) => {
+const validateCheckPath = checkPath => {
   if (!existsSync(checkPath)) {
     window.showErrorMessage(
       'Invalid Check Path! Please review AutoIt settings (Check Path in UI, autoit.checkPath in JSON)',
@@ -122,8 +123,8 @@ const validateFormatterPaths = () => {
 
 /**
  * Checks the AutoIt code in the given document and updates the diagnostic collection.
- * @param {TextDocument} document - The document to check.
- * @param {DiagnosticCollection} diagnosticCollection - The diagnostic collection to update.
+ * @param {import('vscode').TextDocument} document - The document to check.
+ * @param {import('vscode').DiagnosticCollection} diagnosticCollection - The diagnostic collection to update.
  */
 const checkAutoItCode = async (document, diagnosticCollection) => {
   if (!config.enableDiagnostics) {
@@ -144,7 +145,7 @@ const checkAutoItCode = async (document, diagnosticCollection) => {
   }
 };
 
-export const activate = (ctx) => {
+export const activate = ctx => {
   const features = [
     hoverFeature,
     completionFeature,
@@ -170,11 +171,13 @@ export const activate = (ctx) => {
     const diagnosticCollection = languages.createDiagnosticCollection('autoit');
     ctx.subscriptions.push(diagnosticCollection);
 
-    workspace.onDidSaveTextDocument((document) => checkAutoItCode(document, diagnosticCollection));
-    workspace.onDidOpenTextDocument((document) => checkAutoItCode(document, diagnosticCollection));
-    workspace.onDidCloseTextDocument((document) => {
+    workspace.onDidSaveTextDocument(document => checkAutoItCode(document, diagnosticCollection));
+    workspace.onDidOpenTextDocument(document => checkAutoItCode(document, diagnosticCollection));
+    workspace.onDidCloseTextDocument(document => {
       // First remove all diagnostics owned by the closing document (including in included files)
-      try { clearDiagnosticsOwnedBy(diagnosticCollection, document.uri); } catch (err) {
+      try {
+        clearDiagnosticsOwnedBy(diagnosticCollection, document.uri);
+      } catch (err) {
         // Optional debug logging to help diagnose cleanup failures without breaking the extension
         try {
           const cfg = workspace.getConfiguration('autoit');
@@ -206,7 +209,7 @@ export const activate = (ctx) => {
         }
       }
     });
-    window.onDidChangeActiveTextEditor((editor) => {
+    window.onDidChangeActiveTextEditor(editor => {
       if (editor) {
         checkAutoItCode(editor.document, diagnosticCollection);
       }
