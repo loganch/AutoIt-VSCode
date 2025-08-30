@@ -11,52 +11,59 @@ const meta = require('../package.json');
  * #209
  * @link https://github.com/microsoft/vscode/issues/201603
  */
-{
+try {
   const cConfig = workspace.getConfiguration('editor');
   const dataNew = {};
   let save = false;
 
-  // convert default rules into an object with the scope as key
-  const defaultRules = meta.contributes.configurationDefaults[
-    'editor.tokenColorCustomizations'
-  ].textMateRules.reduce((obj, item) => {
-    obj[item.scope] = item;
-    return obj;
-  }, {});
+  // Safely read token color defaults from package.json (guard for packaging changes)
+  const cfgDefaults = meta?.contributes?.configurationDefaults?.['editor.tokenColorCustomizations'];
 
-  let value = cConfig.get('tokenColorCustomizations');
-  if (typeof value !== 'object' || value === null) value = {};
+  if (!cfgDefaults?.textMateRules?.length) {
+    // nothing to add, skip
+  } else {
+    // convert default rules into an object with the scope as key
+    const defaultRules = cfgDefaults.textMateRules.reduce((obj, item) => {
+      obj[item.scope] = item;
+      return obj;
+    }, {});
 
-  const keys = Object.keys(value);
-  if (!Array.isArray(value.textMateRules)) keys.push('textMateRules');
+    let value = cConfig.get('tokenColorCustomizations');
+    if (typeof value !== 'object' || value === null) value = {};
 
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    // we are only interested in settings that have textMateRules
-    if (key !== 'textMateRules' && !value[key].textMateRules) continue;
+    const keys = Object.keys(value);
+    if (!Array.isArray(value.textMateRules)) keys.push('textMateRules');
 
-    const list = (value[key] && value[key].textMateRules) || value[key] || [];
-    const rules = Object.assign({}, defaultRules);
-    for (let j = 0; j < list.length; j++) {
-      // remove all existing rules, we don't want to replace user-changed rules
-      if (rules[list[j].scope]) delete rules[list[j].scope];
-    }
-    // add all remaining rules
-    for (const scope in rules) {
-      if (Object.prototype.hasOwnProperty.call(rules, scope)) {
-        list.push(rules[scope]);
-        save = true;
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      // we are only interested in settings that have textMateRules
+      if (key !== 'textMateRules' && !value[key].textMateRules) continue;
+
+      const list = (value[key] && value[key].textMateRules) || value[key] || [];
+      const rules = Object.assign({}, defaultRules);
+      for (let j = 0; j < list.length; j++) {
+        // remove all existing rules, we don't want to replace user-changed rules
+        if (rules[list[j].scope]) delete rules[list[j].scope];
       }
-    }
+      // add all remaining rules
+      for (const scope in rules) {
+        if (Object.prototype.hasOwnProperty.call(rules, scope)) {
+          list.push(rules[scope]);
+          save = true;
+        }
+      }
 
-    // store data in a new object, because original might be a Proxy
-    if (value[key] && value[key].textMateRules) dataNew[key] = { textMateRules: list };
-    else dataNew[key] = list;
+      // store data in a new object, because original might be a Proxy
+      if (value[key] && value[key].textMateRules) dataNew[key] = { textMateRules: list };
+      else dataNew[key] = list;
+    }
+    if (save) {
+      // save global settings
+      cConfig.update('tokenColorCustomizations', dataNew, true);
+    }
   }
-  if (save) {
-    // save global settings
-    cConfig.update('tokenColorCustomizations', dataNew, true);
-  }
+} catch {
+  /* swallow to avoid impacting activation */
 }
 
 const conf = {
@@ -81,7 +88,9 @@ const isWinOS = process.platform === 'win32';
 let showErrors = false;
 
 /**
- * Attempts to auto-detect AutoIt installation paths on Windows
+ * Attempts to auto-detect AutoIt installation paths on Windows.
+ * Returns an array of candidate install directories that contain AutoIt3.exe.
+ * Non-Windows platforms receive an empty array.
  * @returns {string[]} Array of potential AutoIt installation paths
  */
 function detectAutoItPaths() {
@@ -137,17 +146,22 @@ function detectAutoItPaths() {
   });
 }
 
+/**
+ * Split a filesystem path into components.
+ * Returns an object with raw path, directory (always trailing backslash unless empty),
+ * filename, and whether the directory is relative.
+ * @param {string} _path - input path string
+ * @returns {{path:string,dir:string,file:string,isRelative:boolean}}
+ */
 function splitPath(_path) {
-  _path = _path
-    .trim()
-    .match(/^(.*[\\/])?([^\\/]+)?$/)
-    .map(a => a || '');
+  const m = (_path || '').trim().match(/^(.*[\\/])?([^\\/]+)?$/) || [];
+  const parts = m.map(a => a || '');
 
   return {
-    path: _path[0],
-    dir: _path[1] + (_path[1] === '' ? '' : '\\'),
-    file: _path[2],
-    isRelative: !!(_path[1] && !_path[1].match(/^[a-zA-Z]:[\\/]/)),
+    path: parts[0] || '',
+    dir: (parts[1] || '') + ((parts[1] || '') === '' ? '' : '\\'),
+    file: parts[2] || '',
+    isRelative: !!(parts[1] && !parts[1].match(/^[a-zA-Z]:[\\/]/)),
   };
 }
 
@@ -187,6 +201,13 @@ function upgradeSmartHelpConfig() {
   conf.data.update('smartHelp', ret, ConfigurationTarget, overrideInLanguage);
 }
 
+/**
+ * Normalize and resolve a configured value against the detected aiPath and defaults.
+ * Returns a filesystem path using backslashes.
+ * @param {string} value - configured path value (may be file or dir)
+ * @param {object} data - default path metadata (may include file, dir)
+ * @returns {string} normalized path
+ */
 function fixPath(value, data) {
   const sPath = splitPath(value || '');
   const { file } = data;
@@ -220,6 +241,14 @@ function showError(sPath, data, msgSuffix) {
   data.prevCheck = sPath;
 }
 
+/**
+ * Verify that a previously-resolved fullPath exists and matches expected type.
+ * Uses workspace.fs.stat for editor-friendly checks.
+ * @param {string} sPath - original (user) path string used for messages
+ * @param {object} data - metadata holding fullPath and file indicator
+ * @param {string} msgSuffix - configuration key suffix for error messages
+ * @returns {Promise<string|undefined>} resolves to sPath on success, undefined on failure
+ */
 function verifyPath(sPath, data, msgSuffix) {
   return Promise.resolve(workspace.fs.stat(Uri.file(data.fullPath)))
     .then(stats => {
@@ -244,6 +273,13 @@ function verifyPath(sPath, data, msgSuffix) {
     });
 }
 
+/**
+ * Compute and set data.fullPath for a configured value, then verify it.
+ * @param {string} _path - configured path/value
+ * @param {object} data - metadata object to update with fullPath
+ * @param {string} [msgSuffix] - configuration key suffix for error messages (optional)
+ * @returns {Promise<string|undefined>} resolves to sPath on success, undefined on failure
+ */
 function updateFullPath(_path, data, msgSuffix) {
   if (_path !== '') data.fullPath = fixPath(_path, data);
 
@@ -273,10 +309,11 @@ const config = new Proxy(conf, {
 });
 
 /**
- * Checks a filename with the include paths for a valid path
- * @param {string} file - the filename to append to the paths
- * @param {boolean} library - Search Autoit library first?
- * @returns {(string|boolean)} Full path if found to exist or false
+ * Find a file by checking configured includePaths and (optionally) auto-detected AutoIt Include folders.
+ * Returns the first matching full path or false if not found.
+ * @param {string} file - filename to search for
+ * @param {boolean} library - whether to prefer library entries (true) or search them last (false)
+ * @returns {(string|boolean)} Full path if found, or false
  */
 const findFilepath = (file, library = true) => {
   // work with copy to avoid changing main config
@@ -286,29 +323,22 @@ const findFilepath = (file, library = true) => {
     includePaths.push(includePaths.shift());
   }
 
-  let newPath;
-  const pathFound = includePaths.some(iPath => {
-    newPath = path.normalize(`${iPath}\\`) + file;
-    if (fs.existsSync(newPath)) {
-      return true;
+  // Search configured include paths (skip falsy entries)
+  for (const iPath of includePaths.filter(Boolean)) {
+    const candidate = path.join(iPath, file);
+    if (fs.existsSync(candidate)) {
+      return candidate;
     }
-    return false;
-  });
-
-  if (pathFound && newPath) {
-    return newPath;
   }
 
   // If not found, always try auto-detection as fallback
-  if (!pathFound) {
-    const detectedPaths = detectAutoItPaths();
-    for (const autoItPath of detectedPaths) {
-      const includePath = path.join(autoItPath, 'Include');
-      if (fs.existsSync(includePath)) {
-        newPath = path.join(includePath, file);
-        if (fs.existsSync(newPath)) {
-          return newPath;
-        }
+  const detectedPaths = detectAutoItPaths();
+  for (const autoItPath of detectedPaths) {
+    const includePath = path.join(autoItPath, 'Include');
+    if (fs.existsSync(includePath)) {
+      const candidate = path.join(includePath, file);
+      if (fs.existsSync(candidate)) {
+        return candidate;
       }
     }
   }
@@ -341,11 +371,14 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
       const sMsgSuffix = msgSuffix;
       const aUdfPath = udfPath;
       updateFullPath(udfPath[k], oData).then(filePath => {
-        if (!filePath) {
-          filePath = findFilepath(aUdfPath[k], true);
+        // prefer the resolved path from updateFullPath, otherwise try configured include paths
+        let resolved = filePath;
+        if (!resolved) {
+          const found = findFilepath(aUdfPath[k], true);
+          if (typeof found === 'string') resolved = found;
         }
-        if (filePath) {
-          aUdfPath[k] = filePath;
+        if (resolved) {
+          aUdfPath[k] = resolved;
         } else if (bShowErrors) {
           showError(aUdfPath[k], oData, `${sMsgSuffix}.udfPath[${k}]`);
         }
@@ -363,9 +396,10 @@ function getPaths() {
 
   // Auto-detect AutoIt installation if no aiPath is configured
   if (!aiPath.dir || aiPath.dir === '' || aiPath.dir === '\\') {
-    const detectedPaths = detectAutoItPaths();
-    if (detectedPaths.length > 0) {
-      aiPath = splitPath(detectedPaths[0]);
+    const detected = detectAutoItPaths();
+    if (detected.length > 0) {
+      const detectedDir = detected[0].replace(/[\\/]+$/, '');
+      aiPath = { path: detectedDir, dir: detectedDir + '\\', file: '', isRelative: false };
     }
   }
 
@@ -383,7 +417,10 @@ function getPaths() {
           if (sPath === '') sPath = 'Include';
 
           if (defaultPath[j] === undefined)
-            defaultPath[j] = Object.assign({ fullPath: '' }, defaultPath[0].check);
+            defaultPath[j] = Object.assign(
+              { fullPath: '' },
+              defaultPath[0].check || { dir: '', file: undefined },
+            );
 
           updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
         }
@@ -415,7 +452,10 @@ function getPaths() {
         if (sPath === '' && i === 'includePaths') sPath = 'Include';
 
         if (defaultPath[j] === undefined)
-          defaultPath[j] = Object.assign({ fullPath: '' }, defaultPath[0].check);
+          defaultPath[j] = Object.assign(
+            { fullPath: '' },
+            defaultPath[0].check || { dir: '', file: undefined },
+          );
 
         updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
       }
@@ -428,6 +468,9 @@ function getPaths() {
 }
 
 function updateIncludePaths() {
+  // Only operate on Windows
+  if (!isWinOS) return;
+
   const { includePaths } = conf.data;
   if (Array.isArray(includePaths)) {
     for (let j = 0; j < includePaths.length; j++) {
@@ -436,15 +479,15 @@ function updateIncludePaths() {
       if (conf.defaultPaths.includePaths[j] === undefined)
         conf.defaultPaths.includePaths[j] = Object.assign(
           { fullPath: '' },
-          conf.defaultPaths.includePaths[0].check,
+          conf.defaultPaths.includePaths[0].check || { dir: '', file: undefined },
         );
       updateFullPath(sPath, conf.defaultPaths.includePaths[j], `includePaths[${j}]`);
     }
 
-    // Update the registry key
+    // Update the registry key (silent on success, only surface errors)
     const includePathsString = includePaths.join(';');
     exec(
-      `reg add "HKCU\\Software\\AutoIt v3\\Autoit" /v Include /t REG_SZ /d "${includePathsString}" /f`,
+      `reg add "HKCU\\Software\\AutoIt v3\\AutoIt" /v Include /t REG_SZ /d "${includePathsString}" /f`,
       (error, stdout, stderr) => {
         if (error) {
           window.showErrorMessage(`Error updating registry: ${error.message}`);
@@ -454,7 +497,7 @@ function updateIncludePaths() {
           window.showErrorMessage(`Registry stderr: ${stderr}`);
           return;
         }
-        window.showInformationMessage(`Registry updated: ${stdout}`);
+        // Success: do not notify to reduce noise
       },
     );
   }
