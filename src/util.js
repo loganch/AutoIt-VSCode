@@ -1,8 +1,9 @@
 /// <reference types="vscode" />
-const fs = require('fs');
-const path = require('path');
-const { CompletionItemKind, MarkdownString, workspace, window } = require('vscode');
-const { findFilepath } = require('./ai_config').default;
+import fs from 'fs';
+import path from 'path';
+import { CompletionItemKind, MarkdownString, workspace, window } from 'vscode';
+import aiConfig from './ai_config';
+const { findFilepath } = aiConfig;
 
 const descriptionHeader = '|Description |Value |\n|:---|:---:|\n';
 const valueFirstHeader = '\n|&nbsp;|&nbsp;&nbsp;&nbsp; |&nbsp;\n|---:|:---:|:---|';
@@ -527,33 +528,30 @@ const getIncludeData = (fileName, doc) => {
   return functions;
 };
 
-module.exports = {
-  descriptionHeader,
-  valueFirstHeader,
-  setDetail: setDetailAndDocumentation,
-  opt,
-  trueFalseHeader,
-  br,
-  AI_CONSTANTS,
-  defaultZero,
-  AUTOIT_MODE,
-  isSkippableLine,
-  getIncludeText,
-  getIncludePath,
-  fillCompletions,
-  signatureToHover,
-  includePattern,
-  functionPattern,
-  variablePattern,
-  regionPattern,
-  libraryIncludePattern,
-  completionToHover,
-  signatureToCompletion,
-  findFilepath,
-  getIncludeData,
-  getParams,
-  getIncludeScripts,
-  buildFunctionSignature,
-  functionDefinitionRegex,
-  setRegExpFlags,
-};
+export { descriptionHeader };
+export { valueFirstHeader };
+export { setDetailAndDocumentation as setDetail };
+export { opt };
+export { trueFalseHeader };
+export { br };
+export { AI_CONSTANTS };
+export { defaultZero };
+export { AUTOIT_MODE };
+export { isSkippableLine };
+export { getIncludeText };
+export { getIncludePath };
+export { fillCompletions };
+export { signatureToHover };
+export { includePattern };
+export { functionPattern };
+export { variablePattern };
+export { regionPattern };
+export { libraryIncludePattern };
+export { completionToHover };
+export { signatureToCompletion };
+export { getIncludeData };
+export { getParams };
+export { getIncludeScripts };
+export { buildFunctionSignature };
+export { functionDefinitionRegex };
+export { setRegExpFlags };
