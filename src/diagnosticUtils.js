@@ -16,12 +16,36 @@ export const getDiagnosticSeverity = severityString => {
 
 /**
  * Returns a diagnostic range for a given line and position.
- * @param {number} line - The line number.
- * @param {number} position - The position number.
+ * @param {string|number} line - The line number (string or number).
+ * @param {string|number} position - The position number (string or number).
  * @returns {Range} - The diagnostic range.
  */
 export const createDiagnosticRange = (line, position) => {
-  const diagnosticPosition = new Position(parseInt(line, 10) - 1, parseInt(position, 10) - 1);
+  // Coerce inputs to integers in a robust, predictable way.
+  const parsedLine =
+    typeof line === 'string'
+      ? parseInt(line, 10)
+      : typeof line === 'number'
+        ? Math.floor(Number(line))
+        : NaN;
+
+  const parsedPosition =
+    typeof position === 'string'
+      ? parseInt(position, 10)
+      : typeof position === 'number'
+        ? Math.floor(Number(position))
+        : NaN;
+
+  // Convert to zero-based numbers and fall back to 0 for invalid values.
+  const lineNum =
+    Number.isFinite(parsedLine) && !Number.isNaN(parsedLine) ? Math.max(0, parsedLine - 1) : 0;
+
+  const charNum =
+    Number.isFinite(parsedPosition) && !Number.isNaN(parsedPosition)
+      ? Math.max(0, parsedPosition - 1)
+      : 0;
+
+  const diagnosticPosition = new Position(lineNum, charNum);
 
   return new Range(diagnosticPosition, diagnosticPosition);
 };
@@ -43,7 +67,8 @@ export const updateDiagnostics = (diagnostics, scriptPath, diagnosticToAdd) => {
   diagnostics.set(scriptPath, diagnosticArray);
 };
 
-const OUTPUT_REGEXP = /"(?<scriptPath>.+)"\((?<line>\d{1,4}),(?<position>\d{1,4})\)\s:\s(?<severity>warning|error):\s(?<description>.+)\r/gm;
+const OUTPUT_REGEXP =
+  /"(?<scriptPath>.+)"\((?<line>\d{1,4}),(?<position>\d{1,4})\)\s:\s(?<severity>warning|error):\s(?<description>.+)\r/gm;
 
 /**
  * Normalize Windows-like paths to a comparable form:
@@ -51,7 +76,7 @@ const OUTPUT_REGEXP = /"(?<scriptPath>.+)"\((?<line>\d{1,4}),(?<position>\d{1,4}
  * - Convert forward slashes to backslashes.
  * - Trim whitespace.
  */
-const normalizeWindowsPath = (p) => {
+const normalizeWindowsPath = p => {
   if (!p || typeof p !== 'string') return '';
   let n = p.trim();
   if (n.startsWith('/')) {
@@ -79,18 +104,18 @@ const pathsReferToSameFile = (a, b) => {
  * Detect presence of non-ASCII characters that may trigger AU3Check encoding issues.
  * Returns true if any character is outside the 0x20-0x7E printable ASCII range.
  */
-const hasSpecialCharacters = (p) => {
+const hasSpecialCharacters = p => {
   if (!p) return false;
   return Array.from(p).some(char => {
     const code = char.charCodeAt(0);
-    return code < 0x20 || code > 0x7E;
+    return code < 0x20 || code > 0x7e;
   });
 };
 
 /**
  * Processes the results of AU3Check, identifies warnings and errors.
  * @param {string} output Text returned from AU3Check.
- * @param {DiagnosticCollection} collection - The diagnostic collection to update.
+ * @param {import('vscode').DiagnosticCollection} collection - The diagnostic collection to update.
  * @param {Uri} documentURI - The URI of the document that was checked
  */
 export const parseAu3CheckOutput = (output, collection, documentURI) => {
@@ -115,7 +140,12 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
     // Store ownership information using a custom property for cleanup purposes
     // This allows clearDiagnosticsOwnedBy to identify diagnostics that belong to a specific owner
     try {
-      diagnosticToAdd._ownerUri = documentURI.toString();
+      Object.defineProperty(diagnosticToAdd, '_ownerUri', {
+        value: documentURI.toString(),
+        enumerable: false,
+        writable: true,
+        configurable: true,
+      });
     } catch {
       // no-op if assignment fails for any reason
     }
@@ -124,7 +154,9 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
     // Fall back to documentURI only when AU3Check's path encoding likely corrupts the path:
     // specifically, when both paths refer to the same file AND either contains special characters.
     const normalizedScriptPath = normalizeWindowsPath(scriptPath);
-    const normalizedDocumentPath = normalizeWindowsPath(documentURI.fsPath ?? documentURI.path ?? String(documentURI));
+    const normalizedDocumentPath = normalizeWindowsPath(
+      documentURI.fsPath ?? documentURI.path ?? String(documentURI),
+    );
 
     let chosenPath = normalizedScriptPath;
 
@@ -133,8 +165,10 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
 
     // Fallback condition: same file and special chars present -> prefer documentURI (stable encoding).
     if (
-      (!normalizedScriptPath || normalizedScriptPath.length === 0) ||
-      (pathsReferToSameFile(normalizedScriptPath, normalizedDocumentPath) && (scriptHasSpecial || docHasSpecial))
+      !normalizedScriptPath ||
+      normalizedScriptPath.length === 0 ||
+      (pathsReferToSameFile(normalizedScriptPath, normalizedDocumentPath) &&
+        (scriptHasSpecial || docHasSpecial))
     ) {
       chosenPath = normalizedDocumentPath;
     }
@@ -144,7 +178,11 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
 
   diagnostics.forEach((diagnosticArray, file) => {
     // Track the file URI we set diagnostics for, to enable safe future cleanup.
-    try { trackDiagnosticFile(file); } catch {}
+    try {
+      trackDiagnosticFile(file);
+    } catch {
+      /* empty */
+    }
     collection.set(Uri.file(file), diagnosticArray);
   });
 };
@@ -165,13 +203,13 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
  */
 
 /** @type {Set<string>} */
-let trackedDiagnosticFileUris = new Set();
+const trackedDiagnosticFileUris = new Set();
 
 /**
  * Register a file path (as string) whose diagnostics we set, so later cleanup can find it safely via public APIs.
  * @param {string} filePath
  */
-const trackDiagnosticFile = (filePath) => {
+const trackDiagnosticFile = filePath => {
   if (!filePath) return;
   try {
     const uri = Uri.file(filePath).toString();
@@ -191,7 +229,11 @@ const filterDiagnosticsOnUriByOwner = (collection, uri, owner) => {
   try {
     const current = collection.get(uri);
     if (!current || current.length === 0) return;
-    const filtered = current.filter(d => d && d._ownerUri !== owner);
+    const filtered = current.filter(d => {
+      if (!d) return false;
+      const ownerProp = /** @type {any} */ (d)['_ownerUri'];
+      return ownerProp !== owner;
+    });
     if (filtered.length === 0) {
       collection.delete(uri);
     } else if (filtered.length !== current.length) {
@@ -224,7 +266,8 @@ const filterDiagnosticsOnUriByOwner = (collection, uri, owner) => {
  * @param {string|Uri} ownerUri
  */
 export const clearDiagnosticsOwnedBy = (collection, ownerUri) => {
-  const owner = typeof ownerUri === 'string' ? ownerUri : ownerUri?.toString?.() ?? String(ownerUri);
+  const owner =
+    typeof ownerUri === 'string' ? ownerUri : (ownerUri?.toString?.() ?? String(ownerUri));
 
   // 1) Filter diagnostics for all currently open text documents (public API).
   try {
