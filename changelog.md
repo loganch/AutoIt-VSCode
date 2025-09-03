@@ -16,10 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Refactored monolithic command code
 - Upgraded build toolchain
+- Diagnostic system overhaul with encoding handling and problem script source tracking
 
 ### Fixed
 
-- Diagnostic system overhaul with proper encoding handling for Au3Check
 - Restored Go to Definition functionality for symbols declared outside of current script
 - Restored Open Include file (Alt+i) functionality
 - Path handling improvements
