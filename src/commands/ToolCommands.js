@@ -44,6 +44,7 @@ const processRunner = new ProcessRunner(
   outputChannelManager,
   hotkeyManager,
   getActiveDocumentFileName,
+  window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output'),
 );
 
 /**

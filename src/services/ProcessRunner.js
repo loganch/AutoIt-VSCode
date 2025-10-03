@@ -30,6 +30,7 @@ class ProcessRunner {
    * @param {OutputChannelManager} outputChannelManager - OutputChannelManager for creating output channels
    * @param {HotkeyManager} hotkeyManager - HotkeyManager for managing AutoIt3Wrapper hotkeys
    * @param {Function} getActiveDocumentFileName - Function to get the active document filename
+   * @param {Object} globalOutputChannel - Global output channel singleton
    */
   constructor(
     config,
@@ -37,12 +38,14 @@ class ProcessRunner {
     outputChannelManager,
     hotkeyManager,
     getActiveDocumentFileName,
+    globalOutputChannel,
   ) {
     this.config = config;
     this.processManager = processManager;
     this.outputChannelManager = outputChannelManager;
     this.hotkeyManager = hotkeyManager;
     this.getActiveDocumentFileName = getActiveDocumentFileName;
+    this.globalOutputChannel = globalOutputChannel;
   }
 
   /**
@@ -159,7 +162,10 @@ class ProcessRunner {
     return new Proxy(
       {},
       {
-        get() {
+        get(target, prop) {
+          if (prop === 'void') {
+            return true;
+          }
           return () => {};
         },
       },
@@ -247,9 +253,7 @@ class ProcessRunner {
    */
   _clearOutputIfNeeded(_aiOutProcess) {
     if (!this.config.multiOutput && this.config.clearOutput) {
-      this.outputChannelManager.constructor
-        .createGlobalOutputChannel('AutoIt (global)', 'vscode-autoit-output')
-        .clear();
+      this.globalOutputChannel.clear();
     }
   }
 
@@ -259,12 +263,7 @@ class ProcessRunner {
    * @param {Object} aiOutProcess - Process output channel
    */
   _showOutputChannel(aiOutProcess) {
-    const channelToShow = this.config.multiOutput
-      ? aiOutProcess
-      : this.outputChannelManager.constructor.createGlobalOutputChannel(
-          'AutoIt (global)',
-          'vscode-autoit-output',
-        );
+    const channelToShow = this.config.multiOutput ? aiOutProcess : this.globalOutputChannel;
     channelToShow.show(true);
   }
 

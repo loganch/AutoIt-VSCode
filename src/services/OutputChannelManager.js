@@ -2,6 +2,16 @@ const { window } = require('vscode');
 const { HOTKEY_LINE_DELAY_MS, NO_BREAK_SPACE } = require('../command_constants');
 
 /**
+ * Module-level cache for output channels keyed by channel name.
+ * This cache ensures singleton behavior for global channels (such as
+ * 'AutoIt (global)') so multiple callers receive the same OutputChannel
+ * instance. A simple module-level object is sufficient for typical VS Code
+ * extension activation flows and is safe for the single-threaded Node.js
+ * runtime used by extensions.
+ */
+const _cachedOutputChannels = {};
+
+/**
  * @typedef {Object} OutputOptions
  * @property {number} id - Process ID
  * @property {Object} aiOutProcess - Process output channel
@@ -105,12 +115,14 @@ class MultiFormattingStrategy extends OutputFormattingStrategy {
 class OutputChannelManager {
   /**
    * Creates an instance of OutputChannelManager.
+   * @param {Object} globalOutputChannel - Global output channel singleton
    * @param {Object} config - Configuration object from ai_config
    * @param {Object} keybindings - Keybindings object for hotkey replacement
    * @param {Object} aWrapperHotkey - AutoIt3Wrapper hotkey manager
    * @param {Object} runners - Runners object for managing output state
    */
-  constructor(config, keybindings, aWrapperHotkey, runners) {
+  constructor(globalOutputChannel, config, keybindings, aWrapperHotkey, runners) {
+    this.globalOutputChannel = globalOutputChannel;
     this.config = config;
     this.keybindings = keybindings;
     this.aWrapperHotkey = aWrapperHotkey;
@@ -133,13 +145,32 @@ class OutputChannelManager {
 
   /**
    * Factory method to create a global output channel.
+   * Uses a module-level cache to ensure channels with the same name are
+   * created only once and the same OutputChannel instance is returned
+   * on subsequent requests. This prevents duplicate "AutoIt (global)"
+   * channels when multiple modules call createOutputChannel.
+   *
    * @static
    * @param {string} name - Name for the output channel
    * @param {string} languageId - Language ID for syntax highlighting
    * @returns {Object} VS Code output channel
    */
   static createGlobalOutputChannel(name, languageId) {
-    return window.createOutputChannel(name, languageId);
+    // Return cached channel if present
+    if (_cachedOutputChannels[name]) {
+      return _cachedOutputChannels[name];
+    }
+
+    // Create and cache the channel
+    const channel = window.createOutputChannel(name, languageId);
+
+    // Debug log only when the canonical global channel is created to help runtime verification
+    if (name === 'AutoIt (global)') {
+      console.debug('[AutoIt][OutputChannelManager] created global channel:', name);
+    }
+
+    _cachedOutputChannels[name] = channel;
+    return channel;
   }
 
   /**
@@ -172,7 +203,7 @@ class OutputChannelManager {
     const prefixId = `#${id}:${spacer}`;
     const prefixEmpty = ''.padStart(prefixId.length, spacer);
 
-    const aiOutCommon = window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output');
+    const aiOutCommon = this.globalOutputChannel;
 
     const outputText = (aiOut, prop, lines) => {
       const time = this.getTime();
@@ -333,9 +364,10 @@ class OutputChannelManager {
    * Trims the output text in the visible AutoIt output to the max number of lines
    * set in the configuration.
    * @param {Object} runners - Runners object containing output state
+   * @param {Object} globalOutputChannel - Global output channel singleton
    * @returns {void}
    */
-  static trimOutputLines(runners) {
+  static trimOutputLines(runners, globalOutputChannel) {
     const out = runners.isAiOutVisible();
     if (!out || !runners.config.outputMaxHistoryLines) return;
 
@@ -343,8 +375,7 @@ class OutputChannelManager {
       const text = out.output.document.getText();
       const lines = text.split(/\r?\n/);
       const outputText = lines.slice(-runners.config.outputMaxHistoryLines).join('\r\n');
-      const aiOutCommon = window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output');
-      aiOutCommon.replace(outputText);
+      globalOutputChannel.replace(outputText);
     }
   }
 

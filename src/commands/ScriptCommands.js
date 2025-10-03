@@ -28,21 +28,28 @@ function getActiveDocumentFileName() {
 }
 
 // Instantiate services
+// Create singleton global channel using cached factory method
+const globalOutputChannel = OutputChannelManager.createGlobalOutputChannel(
+  'AutoIt (global)',
+  'vscode-autoit-output',
+);
+
 const processManager = new ProcessManager(
   config,
-  window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output'),
+  globalOutputChannel, // Use the singleton instead of creating a new one
   getActiveDocumentFileName,
   `extension-output-${require('../../package.json').publisher}.${require('../../package.json').name}-#`,
 );
 
-const outputChannelManager = new OutputChannelManager(
-  config,
-  {}, // keybindings - will be handled separately if needed
-  null, // aWrapperHotkey - will be handled by HotkeyManager
-  processManager,
-);
-
 const hotkeyManager = new HotkeyManager(config);
+
+const outputChannelManager = new OutputChannelManager(
+  globalOutputChannel, // 1st param: globalOutputChannel (was incorrectly config)
+  config, // 2nd param: config (was incorrectly {})
+  {}, // 3rd param: keybindings
+  hotkeyManager, // 4th param: aWrapperHotkey
+  processManager, // 5th param: runners (was missing)
+);
 
 const processRunner = new ProcessRunner(
   config,
@@ -50,6 +57,7 @@ const processRunner = new ProcessRunner(
   outputChannelManager,
   hotkeyManager,
   getActiveDocumentFileName,
+  globalOutputChannel, // Use the singleton instead of creating a new one
 );
 
 /**

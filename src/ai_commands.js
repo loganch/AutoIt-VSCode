@@ -75,6 +75,9 @@ class CommandsFacade {
         'vscode-autoit-output',
       );
 
+      // Store global output channel as singleton
+      this.services.globalOutputChannel = outputChannel;
+
       // Initialize process manager
       this.services.processManager = new ProcessManager(
         this.config,
@@ -88,6 +91,7 @@ class CommandsFacade {
 
       // Initialize output channel manager
       this.services.outputChannelManager = new OutputChannelManager(
+        this.services.globalOutputChannel,
         this.config,
         this.keybindings,
         this.services.hotkeyManager,
@@ -101,6 +105,7 @@ class CommandsFacade {
         this.services.outputChannelManager,
         this.services.hotkeyManager,
         UtilityCommands.getActiveDocumentFileName,
+        this.services.globalOutputChannel,
       );
 
       // Set up event listeners
@@ -131,7 +136,10 @@ class CommandsFacade {
 
       // Listen for visible text editor changes to trim output
       window.onDidChangeVisibleTextEditors(() => {
-        OutputChannelManager.trimOutputLines(this.services.processManager);
+        OutputChannelManager.trimOutputLines(
+          this.services.processManager,
+          this.services.globalOutputChannel,
+        );
       });
     } catch (error) {
       console.error('Error setting up event listeners:', error);
