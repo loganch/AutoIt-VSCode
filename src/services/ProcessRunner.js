@@ -1,6 +1,10 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const { decode } = require('iconv-lite');
+const { validateFilePath, validateExecutablePath } = require('../utils/pathValidation');
+
+const MILLISECONDS_TO_SECONDS = 1000;
+const EXIT_CODE_SPAWN_FAILURE = -2;
 
 /**
  * Service class for spawning and managing AutoIt processes with comprehensive functionality
@@ -58,6 +62,21 @@ class ProcessRunner {
   async run(cmdPath, args = [], bAiOutReuse = true) {
     try {
       const thisFile = this.getActiveDocumentFileName();
+
+      // Validate the script file path to prevent path traversal
+      if (thisFile) {
+        const fileValidation = validateFilePath(thisFile);
+        if (!fileValidation.valid) {
+          throw new Error(`Security: ${fileValidation.error}`);
+        }
+      }
+
+      // Validate the executable path to prevent executing arbitrary executables
+      const execValidation = validateExecutablePath(cmdPath);
+      if (!execValidation.valid) {
+        throw new Error(`Security: ${execValidation.error}`);
+      }
+
       const processCommand = cmdPath + ' ' + args.join(' ');
 
       // Find existing runner for reuse if enabled
@@ -142,7 +161,7 @@ class ProcessRunner {
 
       // Handle spawn errors
       if (!runner.pid) {
-        exit(-2, 'wrong path?');
+        exit(EXIT_CODE_SPAWN_FAILURE, 'wrong path?');
         return runner;
       }
 
@@ -216,8 +235,21 @@ class ProcessRunner {
    * @returns {string} Formatted exit message
    */
   _formatExitMessage(code, text, info) {
-    const time = (info.endTime - info.startTime) / 1000;
-    const codeSymbol = code > 1 || code < -1 ? '!' : code < 1 ? '>' : '-';
+    const time = (info.endTime - info.startTime) / MILLISECONDS_TO_SECONDS;
+
+    // Determine exit code symbol based on code value:
+    // '!' = abnormal exit (code outside -1 to 1 range)
+    // '>' = warning/info exit (code is 0 or -1)
+    // '-' = normal exit (code is 1)
+    let codeSymbol;
+    if (code > 1 || code < -1) {
+      codeSymbol = '!';
+    } else if (code < 1) {
+      codeSymbol = '>';
+    } else {
+      codeSymbol = '-';
+    }
+
     const textPart = text ? ` (${text})` : '';
     return `${codeSymbol}>Exit code ${code}${textPart} Time: ${time}`;
   }

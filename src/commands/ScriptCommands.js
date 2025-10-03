@@ -5,8 +5,16 @@ import OutputChannelManager from '../services/OutputChannelManager';
 import HotkeyManager from '../services/HotkeyManager';
 import conf from '../ai_config';
 import { showErrorMessage, showInformationMessage } from '../ai_showMessage';
+import { validateFilePath } from '../utils/pathValidation.js';
+
+const packageJson = require('../../package.json');
 
 const { config } = conf;
+
+// Constants
+const STATUS_BAR_MESSAGE_TIMEOUT = 1500; // milliseconds
+const SCRIPT_STOP_INFO_TIMEOUT = 10000; // milliseconds
+const PATH_PARTS_TO_SHOW = 2; // number of path parts to show in error messages
 
 /**
  * Get the file name of the active document in the editor.
@@ -40,7 +48,7 @@ const processManager = new ProcessManager(
   config,
   globalOutputChannel, // Use the singleton instead of creating a new one
   getActiveDocumentFileName,
-  `extension-output-${require('../../package.json').publisher}.${require('../../package.json').name}-#`,
+  `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
 );
 
 const hotkeyManager = new HotkeyManager(config);
@@ -67,18 +75,32 @@ const processRunner = new ProcessRunner(
  * @returns {Promise<void>|undefined} Promise if async operation, undefined otherwise
  */
 async function runScript() {
+  if (!window.activeTextEditor) {
+    showErrorMessage('No active editor found');
+    return;
+  }
+
   const thisDoc = window.activeTextEditor.document;
   const thisFile = getActiveDocumentFileName();
+
+  // Check if file is untitled before attempting to save
+  if (thisDoc.isUntitled) {
+    showErrorMessage(`"${thisFile}" file must be saved first!`);
+    return;
+  }
+
+  // Validate file path to prevent path traversal attacks
+  const fileValidation = validateFilePath(thisFile);
+  if (!fileValidation.valid) {
+    showErrorMessage(`Security error: ${fileValidation.error}`);
+    return;
+  }
 
   // Simplified check - assume keybindings are set if not explicitly handled
   // In a real implementation, you might want to pass keybindings as a parameter or import them
 
   // Save the file
   const saveResult = await thisDoc.save();
-  if (thisDoc.isUntitled) {
-    window.showErrorMessage(`"${thisFile}" file must be saved first!`);
-    return;
-  }
 
   if (!saveResult) {
     showInformationMessage(`File failed to save, running saved file instead ("${thisFile}")`, {
@@ -87,7 +109,7 @@ async function runScript() {
   }
 
   const params = config.consoleParams;
-  window.setStatusBarMessage('Running the script...', 1500);
+  window.setStatusBarMessage('Running the script...', STATUS_BAR_MESSAGE_TIMEOUT);
 
   let args;
   if (params) {
@@ -132,12 +154,18 @@ async function runScript() {
 function killScript(thisFile = null) {
   const data = processManager.findRunner({ status: true, thisFile });
   if (!data) {
-    const file = thisFile ? ` (${thisFile.split('\\').splice(-2, 2).join('\\')}) ` : ' ';
-    showInformationMessage(`No script${file}currently is running.`, { timeout: 10000 });
+    let file = ' ';
+    if (thisFile) {
+      const parts = thisFile.split('\\');
+      file = ` (${parts.slice(-PATH_PARTS_TO_SHOW).join('\\')}) `;
+    }
+    showInformationMessage(`No script${file}currently is running.`, {
+      timeout: SCRIPT_STOP_INFO_TIMEOUT,
+    });
     return;
   }
 
-  window.setStatusBarMessage('Stopping the script...', 1500);
+  window.setStatusBarMessage('Stopping the script...', STATUS_BAR_MESSAGE_TIMEOUT);
   data.runner.stdin.pause();
   data.runner.kill();
 }
@@ -146,21 +174,26 @@ function killScript(thisFile = null) {
  * Restarts the running AutoIt script
  * @returns {Promise<void>|undefined} Promise if async operation, undefined otherwise
  */
-async function restartScript() {
+function restartScript() {
   const { runner, info } = processManager.lastRunningOpened || {};
-  if (runner) {
+
+  // If there's a currently running script, kill it and restart when it exits
+  if (runner && info?.status) {
     runner.on('exit', () => {
       if (info.callback) {
         clearTimeout(info.timer);
         info.callback();
       }
-      runScript();
+      // Fire and forget - errors will be handled by runScript internally
+      runScript().catch(error => {
+        console.error('Error restarting script after exit:', error);
+      });
     });
-    if (info.status) {
-      killScript(info.thisFile);
-      return;
-    }
+    killScript(info.thisFile);
+    return;
   }
+
+  // No running script, just start one
   return runScript();
 }
 
