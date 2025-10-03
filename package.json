@@ -36,6 +36,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^16.4.0",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
     "prettier": "^3.4.2",
@@ -208,7 +209,8 @@
       {
         "command": "extension.restartScript",
         "title": "AutoIt: Restart script"
-      }, {
+      },
+      {
         "command": "extension.debugRemove",
         "title": "AutoIt: Debug Remove lines"
       },
@@ -521,7 +523,9 @@
       }
     },
     "configurationDefaults": {
-      "[autoit]": { "editor.minimap.showRegionSectionHeaders": false },
+      "[autoit]": {
+        "editor.minimap.showRegionSectionHeaders": false
+      },
       "editor.tokenColorCustomizations": {
         "textMateRules": [
           {
@@ -752,7 +756,9 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testMatch": ["<rootDir>/test/**/*.test.js"],
+    "testMatch": [
+      "<rootDir>/test/**/*.test.js"
+    ],
     "moduleNameMapper": {
       "^vscode$": "<rootDir>/test/__mocks__/vscode.js"
     },
