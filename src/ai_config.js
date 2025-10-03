@@ -1,7 +1,7 @@
 import { FileType, Uri, window, workspace } from 'vscode';
 import fs from 'fs';
 import path from 'path';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { showErrorMessage } from './ai_showMessage';
 
 const meta = require('../package.json');
@@ -486,8 +486,19 @@ function updateIncludePaths() {
 
     // Update the registry key (silent on success, only surface errors)
     const includePathsString = includePaths.join(';');
-    exec(
-      `reg add "HKCU\\Software\\AutoIt v3\\AutoIt" /v Include /t REG_SZ /d "${includePathsString}" /f`,
+    execFile(
+      'reg',
+      [
+        'add',
+        'HKCU\\Software\\AutoIt v3\\AutoIt',
+        '/v',
+        'Include',
+        '/t',
+        'REG_SZ',
+        '/d',
+        includePathsString,
+        '/f',
+      ],
       (error, stdout, stderr) => {
         if (error) {
           window.showErrorMessage(`Error updating registry: ${error.message}`);
