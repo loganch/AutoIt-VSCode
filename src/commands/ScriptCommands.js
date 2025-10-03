@@ -34,6 +34,8 @@ const globalOutputChannel = OutputChannelManager.createGlobalOutputChannel(
   'vscode-autoit-output',
 );
 
+export { globalOutputChannel };
+
 const processManager = new ProcessManager(
   config,
   globalOutputChannel, // Use the singleton instead of creating a new one

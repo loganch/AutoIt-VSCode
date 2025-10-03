@@ -1,3 +1,4 @@
+import { globalOutputChannel } from './ScriptCommands.js';
 const { window } = require('vscode');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -32,7 +33,7 @@ function getActiveDocumentFileName() {
 // Instantiate services
 const processManager = new ProcessManager(
   config,
-  window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output'),
+  globalOutputChannel,
   getActiveDocumentFileName,
   'extension-output-${require("../../package.json").publisher}.${require("../../package.json").name}-#',
 );
@@ -44,7 +45,7 @@ const processRunner = new ProcessRunner(
   outputChannelManager,
   hotkeyManager,
   getActiveDocumentFileName,
-  window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output'),
+  globalOutputChannel,
 );
 
 /**

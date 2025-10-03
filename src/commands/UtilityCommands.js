@@ -1,3 +1,4 @@
+import { globalOutputChannel } from './ScriptCommands.js';
 const { window, Position, Uri } = require('vscode');
 const path = require('path');
 const fs = require('fs');
@@ -6,7 +7,7 @@ const { findFilepath, functionDefinitionRegex, setRegExpFlags } = require('../ut
 
 import aiConfig from '../ai_config';
 const { config } = aiConfig;
-const aiOutCommon = window.createOutputChannel('AutoIt (global)', 'vscode-autoit-output');
+const aiOutCommon = globalOutputChannel;
 
 const runners = {
   isAiOutVisible() {
