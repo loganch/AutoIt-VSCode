@@ -50,7 +50,7 @@ export default [
       'no-restricted-syntax': 'off',
       'no-bitwise': 'off',
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-console': 'warn',
+      'no-console': 'off',
       'prefer-const': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',
