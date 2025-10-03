@@ -50,6 +50,8 @@ By default, this extension is set up for the default installation of AutoIt and 
 | `autoit.outputShowTime`             | Show time when each output line was received                                                                                                                                                            | "None"                                          |
 | `autoit.outputMaxHistoryLines`      | Number of output lines to keep                                                                                                                                                                          | 5000                                            |
 | `autoit.enableParenTriggerForFunctions` | Adds the ability to use `(` to select a function completion suggestion, which will add the function with open and closed parens, place the cursor between them and trigger signature help. Requires window reload to take full effect. | `true` |
+| `autoit.workspaceSymbolMaxFiles`    | Maximum number of AutoIt files to process for workspace symbol search. Lower values improve performance on large projects.                                                                               | 500                                             |
+| `autoit.workspaceSymbolBatchSize`   | Number of files to process in each batch when building workspace symbol index. Lower values reduce UI freezing but take longer to complete.                                                              | 10                                              |
 
 <!-- * Access the command palette `Ctrl+Shift+P`, type Preferences: Open User Settings or Preferences: Open Workspace Settings. -->
 

@@ -519,6 +519,20 @@
           "type": "boolean",
           "default": true,
           "description": "Adds the ability to use '(' to select a function completion suggestion, which will add the function with open and closed parens, place the cursor between them and trigger signature help. Requires window reload to take full effect."
+        },
+        "autoit.workspaceSymbolMaxFiles": {
+          "type": "number",
+          "default": 500,
+          "minimum": 10,
+          "maximum": 5000,
+          "description": "Maximum number of AutoIt files to process for workspace symbol search. Lower values improve performance on large projects."
+        },
+        "autoit.workspaceSymbolBatchSize": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Number of files to process in each batch when building workspace symbol index. Lower values reduce UI freezing but take longer to complete."
         }
       }
     },

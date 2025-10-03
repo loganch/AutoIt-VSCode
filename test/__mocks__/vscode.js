@@ -18,6 +18,24 @@ module.exports = {
     }
   },
   Uri: {
-    file: p => ({ fsPath: p }),
+    file: p => ({ fsPath: p, toString: () => p }),
+  },
+  workspace: {
+    getConfiguration: jest.fn(),
+    findFiles: jest.fn(),
+    openTextDocument: jest.fn(),
+    createFileSystemWatcher: jest.fn(() => ({
+      onDidChange: jest.fn(),
+      onDidCreate: jest.fn(),
+      onDidDelete: jest.fn(),
+    })),
+    onDidChangeConfiguration: jest.fn(),
+  },
+  languages: {
+    registerWorkspaceSymbolProvider: jest.fn(),
+  },
+  window: {
+    showWarningMessage: jest.fn(),
+    showErrorMessage: jest.fn(),
   },
 };
