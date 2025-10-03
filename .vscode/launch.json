@@ -6,7 +6,7 @@
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "execPath",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "args": ["--profile-temp", "--extensionDevelopmentPath=${workspaceFolder}"],
       "preLaunchTask": "npm: webpack",
       "smartStep": true,
       "sourceMaps": true,
