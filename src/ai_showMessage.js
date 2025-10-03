@@ -54,4 +54,5 @@ const initMessage = type => {
 };
 export const showInformationMessage = initMessage('showInformationMessage');
 export const showErrorMessage = initMessage('showErrorMessage');
+export const showWarningMessage = initMessage('showWarningMessage');
 export const messages = { error: {}, info: {} };

@@ -430,7 +430,7 @@
         "autoit.consoleParams": {
           "type": "string",
           "default": "",
-          "description": "Sets the parameters that get passed when scripts are run"
+          "description": "Sets the parameters that get passed when scripts are run. Supports all flags and characters for testing. The extension will warn if parameters contain potentially dangerous shell metacharacters, but allows you to proceed."
         },
         "autoit.enableDiagnostics": {
           "type": "boolean",

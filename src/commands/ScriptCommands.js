@@ -4,8 +4,9 @@ import ProcessManager from '../services/ProcessManager';
 import OutputChannelManager from '../services/OutputChannelManager';
 import HotkeyManager from '../services/HotkeyManager';
 import conf from '../ai_config';
-import { showErrorMessage, showInformationMessage } from '../ai_showMessage';
+import { showErrorMessage, showInformationMessage, showWarningMessage } from '../ai_showMessage';
 import { validateFilePath } from '../utils/pathValidation.js';
+import { validateParameterString } from '../utils/parameterValidation.js';
 
 const packageJson = require('../../package.json');
 
@@ -113,12 +114,16 @@ async function runScript() {
 
   let args;
   if (params) {
-    const quoteSplit = /[\w-/]+|"[^"]+"/g;
-    const paramArray = params.match(quoteSplit); // split the string by space or quotes
+    // Check parameters for potentially dangerous patterns and warn
+    const paramValidation = validateParameterString(params);
 
-    const cleanParams = paramArray.map(value => {
-      return value.replace(/"/g, '');
-    });
+    if (paramValidation.hasWarnings) {
+      const warningMessages = paramValidation.warnings.join('\n');
+      showWarningMessage(
+        `Warning: Console parameters contain potentially dangerous characters:\n${warningMessages}\n\nParameters are passed safely via spawn(), but this may indicate unintended input.`,
+        { timeout: 15000 },
+      );
+    }
 
     args = [
       config.wrapperPath,
@@ -128,7 +133,7 @@ async function runScript() {
       '/in',
       thisFile,
       '/UserParams',
-      ...cleanParams,
+      ...paramValidation.sanitized,
     ];
   } else {
     args = [config.wrapperPath, '/run', '/prod', '/ErrorStdOut', '/in', thisFile];
