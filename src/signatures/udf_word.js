@@ -1,11 +1,11 @@
 import { CompletionItemKind } from 'vscode';
 import {
   br,
-  opt,
-  signatureToHover,
-  signatureToCompletion,
-  trueFalseHader as tfHeader,
   valueFirstHeader as header,
+  opt,
+  signatureToCompletion,
+  signatureToHover,
+  trueFalseHader as tfHeader,
 } from '../util';
 
 const include = '(Requires: `#include <Word.au3>`)';

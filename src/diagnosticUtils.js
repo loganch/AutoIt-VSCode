@@ -1,4 +1,4 @@
-import { Diagnostic, DiagnosticSeverity, Range, Position, Uri, workspace, window } from 'vscode';
+import { Diagnostic, DiagnosticSeverity, Position, Range, Uri, window, workspace } from 'vscode';
 
 /**
  * Returns the diagnostic severity based on the severity string.

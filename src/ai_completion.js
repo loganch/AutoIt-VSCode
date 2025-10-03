@@ -1,14 +1,14 @@
-import { languages, CompletionItem, CompletionItemKind, Range, workspace } from 'vscode';
+import { CompletionItem, CompletionItemKind, Range, languages, workspace } from 'vscode';
 import completions from './completions';
 import {
-  includePattern,
-  variablePattern,
-  libraryIncludePattern,
-  findFilepath,
-  getIncludeData,
   AUTOIT_MODE,
   functionPattern as _functionPattern,
+  findFilepath,
+  getIncludeData,
+  includePattern,
+  libraryIncludePattern,
   setRegExpFlags,
+  variablePattern,
 } from './util';
 import DEFAULT_UDFS from './constants';
 
@@ -60,8 +60,8 @@ const getLibraryFunctions = (libraryIncludes, doc) => {
       const fullPath = findFilepath(file);
       return fullPath
         ? Object.keys(getIncludeData(fullPath, doc)).map(newFunc => {
-            return { file, newFunc };
-          })
+          return { file, newFunc };
+        })
         : [];
     })
     .map(({ file, newFunc }) => {

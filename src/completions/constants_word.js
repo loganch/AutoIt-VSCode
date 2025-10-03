@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { descriptionHeader, setDetail, fillCompletions } from '../util';
+import { descriptionHeader, fillCompletions, setDetail } from '../util';
 
 let items = [];
 

@@ -1,4 +1,4 @@
-import { languages, Hover } from 'vscode';
+import { Hover, languages } from 'vscode';
 import hovers from './hovers';
 import { AUTOIT_MODE } from './util';
 

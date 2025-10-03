@@ -1,4 +1,3 @@
-/* eslint-disable no-template-curly-in-string */
 import { CompletionItemKind, SnippetString } from 'vscode';
 import { fillCompletions } from '../util';
 

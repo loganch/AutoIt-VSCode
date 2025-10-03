@@ -1,4 +1,4 @@
-import { window, languages, workspace } from 'vscode';
+import { languages, window, workspace } from 'vscode';
 import { dirname } from 'path';
 import { existsSync } from 'fs';
 import { execFile } from 'child_process';
@@ -12,7 +12,7 @@ import goToDefinitionFeature from './ai_definition';
 
 import { registerCommands } from './registerCommands';
 import { formatterProvider } from './ai_formatter';
-import { parseAu3CheckOutput, clearDiagnosticsOwnedBy } from './diagnosticUtils';
+import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
 import conf from './ai_config';
 
 const { config } = conf;

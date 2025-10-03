@@ -1,4 +1,4 @@
-import { languages, workspace, window } from 'vscode';
+import { languages, window, workspace } from 'vscode';
 import { provideDocumentSymbols } from './ai_symbols';
 
 let symbolsCache = [];

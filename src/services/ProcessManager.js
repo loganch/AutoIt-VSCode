@@ -145,7 +145,6 @@ class ProcessManager extends EventEmitter {
       const localAiOutCommon = this.outputChannel;
       info.callback = () => {
         try {
-          // eslint-disable-next-line no-underscore-dangle
           info._aiOut.flush();
           if (!info.aiOut.void && info.aiOut !== localAiOutCommon) {
             info.aiOut.dispose();

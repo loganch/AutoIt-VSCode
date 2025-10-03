@@ -1,7 +1,7 @@
 /// <reference types="vscode" />
 import fs from 'fs';
 import path from 'path';
-import { CompletionItemKind, MarkdownString, workspace, window } from 'vscode';
+import { CompletionItemKind, MarkdownString, window, workspace } from 'vscode';
 import aiConfig from './ai_config';
 
 // ============================================================================
@@ -807,9 +807,9 @@ export { getIncludeData };
 export { REGEX_PATTERNS as patterns };
 
 // Individual pattern exports for backward compatibility
-export const includePattern = REGEX_PATTERNS.includePattern;
-export const functionPattern = REGEX_PATTERNS.functionPattern;
-export const functionDefinitionRegex = REGEX_PATTERNS.functionDefinitionRegex;
-export const variablePattern = REGEX_PATTERNS.variablePattern;
-export const regionPattern = REGEX_PATTERNS.regionPattern;
-export const libraryIncludePattern = REGEX_PATTERNS.libraryIncludePattern;
+export const { includePattern } = REGEX_PATTERNS;
+export const { functionPattern } = REGEX_PATTERNS;
+export const { functionDefinitionRegex } = REGEX_PATTERNS;
+export const { variablePattern } = REGEX_PATTERNS;
+export const { regionPattern } = REGEX_PATTERNS;
+export const { libraryIncludePattern } = REGEX_PATTERNS;

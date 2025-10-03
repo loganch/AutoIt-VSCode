@@ -79,8 +79,8 @@ import { completions as WinNet } from '../signatures/udf_winnet';
 import { completions as Word } from '../signatures/udf_word';
 import InetConstants from './constantsInet';
 import wrapperDirectivesCompletionItems, {
-  au3StripperDirectivesCompletionItems,
   au3CheckDirectivesCompletionItems,
+  au3StripperDirectivesCompletionItems,
   versioningDirectivesCompletionItems,
 } from './directives';
 

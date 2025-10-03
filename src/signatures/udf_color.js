@@ -1,105 +1,107 @@
 import { CompletionItemKind } from 'vscode';
 import {
   br,
-  opt,
-  signatureToHover,
   valueFirstHeader as header,
+  opt,
   signatureToCompletion,
+  signatureToHover,
 } from '../util';
 
 const include = '(Requires: `#include <Color.au3>`)';
 
 const signatures = {
-  "_ColorConvertHSLtoRGB": {
-    "documentation": "Converts HSL to RGB",
-    "label": "_ColorConvertHSLtoRGB ( $aArray )",
-    "params": [
+  _ColorConvertHSLtoRGB: {
+    documentation: 'Converts HSL to RGB',
+    label: '_ColorConvertHSLtoRGB ( $aArray )',
+    params: [
       {
-        "label": "$aArray",
-        "documentation": "An array containing HSL values in their respective positions"
-      }
-    ]
+        label: '$aArray',
+        documentation: 'An array containing HSL values in their respective positions',
+      },
+    ],
   },
-  "_ColorConvertRGBtoHSL": {
-    "documentation": "Converts RGB to HSL",
-    "label": "_ColorConvertRGBtoHSL ( $aArray )",
-    "params": [
+  _ColorConvertRGBtoHSL: {
+    documentation: 'Converts RGB to HSL',
+    label: '_ColorConvertRGBtoHSL ( $aArray )',
+    params: [
       {
-        "label": "$aArray",
-        "documentation": "An array containing RGB values in their respective positions"
-      }
-    ]
+        label: '$aArray',
+        documentation: 'An array containing RGB values in their respective positions',
+      },
+    ],
   },
-  "_ColorGetBlue": {
-    "documentation": "Returns the blue component of a given color",
-    "label": "_ColorGetBlue ( $iColor )",
-    "params": [
+  _ColorGetBlue: {
+    documentation: 'Returns the blue component of a given color',
+    label: '_ColorGetBlue ( $iColor )',
+    params: [
       {
-        "label": "$iColor",
-        "documentation": "The RGB color to work with (0x00RRGGBB)."
-      }
-    ]
+        label: '$iColor',
+        documentation: 'The RGB color to work with (0x00RRGGBB).',
+      },
+    ],
   },
-  "_ColorGetCOLORREF": {
-    "documentation": "Returns the COLORREF color",
-    "label": "_ColorGetCOLORREF ( $iColor )",
-    "params": [
+  _ColorGetCOLORREF: {
+    documentation: 'Returns the COLORREF color',
+    label: '_ColorGetCOLORREF ( $iColor )',
+    params: [
       {
-        "label": "$iColor",
-        "documentation": "the COLORREF color to work with (0x00BBGGRR)"
-      }
-    ]
+        label: '$iColor',
+        documentation: 'the COLORREF color to work with (0x00BBGGRR)',
+      },
+    ],
   },
-  "_ColorGetGreen": {
-    "documentation": "Returns the green component of a given color",
-    "label": "_ColorGetGreen ( $iColor )",
-    "params": [
+  _ColorGetGreen: {
+    documentation: 'Returns the green component of a given color',
+    label: '_ColorGetGreen ( $iColor )',
+    params: [
       {
-        "label": "$iColor",
-        "documentation": "The RGB color to work with (0x00RRGGBB)."
-      }
-    ]
+        label: '$iColor',
+        documentation: 'The RGB color to work with (0x00RRGGBB).',
+      },
+    ],
   },
-  "_ColorGetRed": {
-    "documentation": "Returns the red component of a given color",
-    "label": "_ColorGetRed ( $iColor )",
-    "params": [
+  _ColorGetRed: {
+    documentation: 'Returns the red component of a given color',
+    label: '_ColorGetRed ( $iColor )',
+    params: [
       {
-        "label": "$iColor",
-        "documentation": "The RGB color to work with (0x00RRGGBB)."
-      }
-    ]
+        label: '$iColor',
+        documentation: 'The RGB color to work with (0x00RRGGBB).',
+      },
+    ],
   },
-  "_ColorGetRGB": {
-    "documentation": "Returns an array containing RGB values in their respective positions",
-    "label": "_ColorGetRGB ( $iColor )",
-    "params": [
+  _ColorGetRGB: {
+    documentation: 'Returns an array containing RGB values in their respective positions',
+    label: '_ColorGetRGB ( $iColor )',
+    params: [
       {
-        "label": "$iColor",
-        "documentation": "The RGB color to work with (0x00RRGGBB)."
-      }
-    ]
+        label: '$iColor',
+        documentation: 'The RGB color to work with (0x00RRGGBB).',
+      },
+    ],
   },
-  "_ColorSetCOLORREF": {
-    "documentation": "Returns the COLORREF color",
-    "label": "_ColorSetCOLORREF ( $aColor )",
-    "params": [
+  _ColorSetCOLORREF: {
+    documentation: 'Returns the COLORREF color',
+    label: '_ColorSetCOLORREF ( $aColor )',
+    params: [
       {
-        "label": "$aColor",
-        "documentation": "an array of values in the range 0-255:  \n[0] Red component color  \n[1] Green component color  \n[2] Blue component color"
-      }
-    ]
+        label: '$aColor',
+        documentation:
+          'an array of values in the range 0-255:  \n[0] Red component color  \n[1] Green component color  \n[2] Blue component color',
+      },
+    ],
   },
-  "_ColorSetRGB": {
-    "documentation": "Returns the RGB color",
-    "label": "_ColorSetRGB ( $aColor )",
-    "params": [
+  _ColorSetRGB: {
+    documentation: 'Returns the RGB color',
+    label: '_ColorSetRGB ( $aColor )',
+    params: [
       {
-        "label": "$aColor",
-        "documentation": "an array of values in the range 0-255:  \n[0] Red component color  \n[1] Green component color  \n[2] Blue component color"
-      }
-    ]
-  }
+        label: '$aColor',
+        documentation:
+          'an array of values in the range 0-255:  \n[0] Red component color  \n[1] Green component color  \n[2] Blue component color',
+      },
+    ],
+  },
 };
 
 const hovers = signatureToHover(signatures);

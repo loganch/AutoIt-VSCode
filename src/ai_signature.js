@@ -1,19 +1,19 @@
 import {
-  languages,
+  Hover,
+  MarkdownString,
+  ParameterInformation,
   SignatureHelp,
   SignatureInformation,
-  ParameterInformation,
-  MarkdownString,
-  Hover,
+  languages,
 } from 'vscode';
 import {
-  includePattern,
-  findFilepath,
-  libraryIncludePattern,
-  getIncludeData,
   AUTOIT_MODE,
   buildFunctionSignature,
+  findFilepath,
   functionDefinitionRegex,
+  getIncludeData,
+  includePattern,
+  libraryIncludePattern,
 } from './util';
 import defaultSigs from './signatures';
 import DEFAULT_UDFS from './constants';

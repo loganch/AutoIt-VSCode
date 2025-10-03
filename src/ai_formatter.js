@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { languages, TextEdit, Range, Position, window, workspace, Uri } from 'vscode';
+import { Position, Range, TextEdit, Uri, languages, window, workspace } from 'vscode';
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import fsSync from 'fs';

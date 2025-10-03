@@ -1,10 +1,10 @@
 import { CompletionItemKind } from 'vscode';
 import {
   br,
-  opt,
-  signatureToHover,
   valueFirstHeader as header,
+  opt,
   signatureToCompletion,
+  signatureToHover,
 } from '../util';
 
 const include = '(Requires: `#include <WinNet.au3>`)';

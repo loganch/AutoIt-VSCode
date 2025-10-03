@@ -201,7 +201,7 @@ class KeybindingService {
 
       const updateKeybindings = list => {
         const keybindingsNew = {};
-        const keybindingsFallback = Object.assign({}, keybindingsDefault);
+        const keybindingsFallback = { ...keybindingsDefault };
 
         for (let i = 0; i < list.length; i++) {
           const isRemove = list[i].command.substring(0, 1) === '-';

@@ -69,10 +69,10 @@ import { hovers as udfWord } from '../signatures/udf_word';
 import { hovers as udfDebug } from '../signatures/udf_debug';
 import { hovers as InetConstants } from '../completions/constantsInet';
 import {
-  wrapperDirectivesHovers,
-  au3StripperDirectivesHovers,
   au3CheckDirectivesHovers,
+  au3StripperDirectivesHovers,
   versioningDirectivesHovers,
+  wrapperDirectivesHovers,
 } from '../completions/directives';
 
 const hoverImports = {

@@ -5,7 +5,8 @@ const include = '`#include <Debug.au3>`';
 const signatures = {
   _Assert: {
     documentation: `Display a message if assertion fails ${include}`,
-    label: `_Assert ( $sCondition, [$bExit] = True, [$iCode] = 0x7FFFFFFF, [$sLine] = @ScriptLineNumber )`,
+    label:
+      '_Assert ( $sCondition, [$bExit] = True, [$iCode] = 0x7FFFFFFF, [$sLine] = @ScriptLineNumber )',
     params: [
       {
         label: '$sCondition',
@@ -33,7 +34,7 @@ const signatures = {
       [$sArrayRange] = "", [$iFlags] = 0, [$vUser_Separator] = Default,
       [$sHeader] = Default, [$iMax_ColWidth] = Default, [$hUser_Function] = "" )`,
     params: [
-      { label: '$aArray', documentation: `Array to display` },
+      { label: '$aArray', documentation: 'Array to display' },
       { label: '$sTitle', documentation: `${opt} Title for dialog. \`Default = "DebugArray"\`.` },
       {
         label: '$sArrayRange',
@@ -69,7 +70,7 @@ const signatures = {
   },
   _DebugBugReportEnv: {
     documentation: `Outputs a string containing information for Bug report submission ${include}`,
-    label: `_DebugBugReportEnv ( )`,
+    label: '_DebugBugReportEnv ( )',
     params: [],
   },
   _DebugCOMError: {
@@ -103,7 +104,7 @@ const signatures = {
   },
   _DebugReport: {
     documentation: `Writes to a debugging session ${include}`,
-    label: `_DebugReport ( $sData, [$bLastError] = False, [$bExit] = False )`,
+    label: '_DebugReport ( $sData, [$bLastError] = False, [$bExit] = False )',
     params: [
       {
         label: '$sData',

@@ -1,4 +1,4 @@
-import { workspace, Uri, FileType, window } from 'vscode';
+import { FileType, Uri, window, workspace } from 'vscode';
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
@@ -40,7 +40,7 @@ try {
       if (key !== 'textMateRules' && !value[key].textMateRules) continue;
 
       const list = (value[key] && value[key].textMateRules) || value[key] || [];
-      const rules = Object.assign({}, defaultRules);
+      const rules = { ...defaultRules };
       for (let j = 0; j < list.length; j++) {
         // remove all existing rules, we don't want to replace user-changed rules
         if (rules[list[j].scope]) delete rules[list[j].scope];
@@ -359,14 +359,14 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
       continue;
 
     const chmPath = val.chmPath.trim();
-    const data = Object.assign({ fullPath: '' }, defaultPath.check);
+    const data = { fullPath: '', ...defaultPath.check };
     const udfPath = Array.isArray(val.udfPath) ? [...val.udfPath] : val.udfPath.split('|');
     const msgSuffix = `${i}.${prefix}`;
 
     updateFullPath(chmPath, data, `${msgSuffix}.chmPath`);
 
     for (let k = 0; k < udfPath.length; k++) {
-      const oData = Object.assign({ fullPath: '' }, defaultPath.check);
+      const oData = { fullPath: '', ...defaultPath.check };
       const bShowErrors = showErrors;
       const sMsgSuffix = msgSuffix;
       const aUdfPath = udfPath;
@@ -417,10 +417,10 @@ function getPaths() {
           if (sPath === '') sPath = 'Include';
 
           if (defaultPath[j] === undefined)
-            defaultPath[j] = Object.assign(
-              { fullPath: '' },
-              defaultPath[0].check || { dir: '', file: undefined },
-            );
+            defaultPath[j] = {
+              fullPath: '',
+              ...(defaultPath[0].check || { dir: '', file: undefined }),
+            };
 
           updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
         }
@@ -434,7 +434,7 @@ function getPaths() {
           // Add to the end so user configured paths take precedence
           const nextIndex = confValue && confValue.length > 0 ? confValue.length + idx : idx;
           if (defaultPath[nextIndex] === undefined) {
-            defaultPath[nextIndex] = Object.assign({ fullPath: '' }, { dir: '', file: undefined });
+            defaultPath[nextIndex] = { fullPath: '', dir: '', file: undefined };
           }
           defaultPath[nextIndex].fullPath = includePath;
         }
@@ -452,10 +452,10 @@ function getPaths() {
         if (sPath === '' && i === 'includePaths') sPath = 'Include';
 
         if (defaultPath[j] === undefined)
-          defaultPath[j] = Object.assign(
-            { fullPath: '' },
-            defaultPath[0].check || { dir: '', file: undefined },
-          );
+          defaultPath[j] = {
+            fullPath: '',
+            ...(defaultPath[0].check || { dir: '', file: undefined }),
+          };
 
         updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
       }
@@ -477,10 +477,10 @@ function updateIncludePaths() {
       let sPath = (typeof includePaths[j] === 'string' ? includePaths[j] : '').trim();
       if (sPath === '') sPath = 'Include';
       if (conf.defaultPaths.includePaths[j] === undefined)
-        conf.defaultPaths.includePaths[j] = Object.assign(
-          { fullPath: '' },
-          conf.defaultPaths.includePaths[0].check || { dir: '', file: undefined },
-        );
+        conf.defaultPaths.includePaths[j] = {
+          fullPath: '',
+          ...(conf.defaultPaths.includePaths[0].check || { dir: '', file: undefined }),
+        };
       updateFullPath(sPath, conf.defaultPaths.includePaths[j], `includePaths[${j}]`);
     }
 
@@ -495,7 +495,6 @@ function updateIncludePaths() {
         }
         if (stderr) {
           window.showErrorMessage(`Registry stderr: ${stderr}`);
-          return;
         }
         // Success: do not notify to reduce noise
       },

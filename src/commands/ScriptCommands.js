@@ -4,7 +4,7 @@ import ProcessManager from '../services/ProcessManager';
 import OutputChannelManager from '../services/OutputChannelManager';
 import HotkeyManager from '../services/HotkeyManager';
 import conf from '../ai_config';
-import { showInformationMessage, showErrorMessage } from '../ai_showMessage';
+import { showErrorMessage, showInformationMessage } from '../ai_showMessage';
 
 const { config } = conf;
 

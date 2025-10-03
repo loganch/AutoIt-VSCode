@@ -194,24 +194,24 @@ class CommandsFacade {
 const commandsFacade = new CommandsFacade();
 
 // Export command functions with facade integration
-export const runScript = ScriptCommands.runScript;
-export const killScript = ScriptCommands.killScript;
-export const restartScript = ScriptCommands.restartScript;
+export const { runScript } = ScriptCommands;
+export const { killScript } = ScriptCommands;
+export const { restartScript } = ScriptCommands;
 
-export const compile = ToolCommands.compile;
-export const tidy = ToolCommands.tidy;
-export const check = ToolCommands.check;
-export const build = ToolCommands.build;
-export const launchHelp = ToolCommands.launchHelp;
-export const launchInfo = ToolCommands.launchInfo;
-export const launchKoda = ToolCommands.launchKoda;
+export const { compile } = ToolCommands;
+export const { tidy } = ToolCommands;
+export const { check } = ToolCommands;
+export const { build } = ToolCommands;
+export const { launchHelp } = ToolCommands;
+export const { launchInfo } = ToolCommands;
+export const { launchKoda } = ToolCommands;
 
-export const debugMsgBox = DebugCommands.debugMsgBox;
-export const debugConsole = DebugCommands.debugConsole;
+export const { debugMsgBox } = DebugCommands;
+export const { debugConsole } = DebugCommands;
 
-export const changeParams = UtilityCommands.changeParams;
-export const openInclude = UtilityCommands.openInclude;
-export const insertHeader = UtilityCommands.insertHeader;
+export const { changeParams } = UtilityCommands;
+export const { openInclude } = UtilityCommands;
+export const { insertHeader } = UtilityCommands;
 
 // Re-export debug functions
 export { debugRemove, functionTraceAdd, traceRemove };

@@ -1,5 +1,5 @@
-import { languages, Location, Position, Range, Uri, window } from 'vscode';
-import { AUTOIT_MODE, getIncludePath, getIncludeText, getIncludeScripts } from './util';
+import { Location, Position, Range, Uri, languages, window } from 'vscode';
+import { AUTOIT_MODE, getIncludePath, getIncludeScripts, getIncludeText } from './util';
 
 // Constants for better maintainability
 const REGEX_FLAGS = 'mi';

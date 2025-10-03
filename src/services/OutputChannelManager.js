@@ -27,7 +27,7 @@ class OutputFormattingStrategy {
    * @param {Object} _context - Formatting context
    * @returns {string[]} Formatted lines
    */
-  // eslint-disable-next-line no-unused-vars
+
   format(_lines, _context) {
     throw new Error('Strategy must implement format method');
   }

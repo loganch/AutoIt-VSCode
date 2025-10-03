@@ -1,11 +1,11 @@
-import { languages, Location, SymbolInformation, SymbolKind, workspace, Range } from 'vscode';
+import { Location, Range, SymbolInformation, SymbolKind, languages, workspace } from 'vscode';
 import {
   AI_CONSTANTS,
   AUTOIT_MODE,
-  isSkippableLine,
   functionPattern,
-  variablePattern,
+  isSkippableLine,
   regionPattern,
+  variablePattern,
 } from './util';
 
 const config = workspace.getConfiguration('autoit');

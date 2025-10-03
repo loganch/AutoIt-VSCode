@@ -9,7 +9,7 @@ const ProcessManager = require('../services/ProcessManager');
 const OutputChannelManager = require('../services/OutputChannelManager');
 const HotkeyManager = require('../services/HotkeyManager');
 
-const config = conf.config;
+const { config } = conf;
 
 /**
  * Get the file name of the active document in the editor.
