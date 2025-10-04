@@ -12,14 +12,24 @@ import {
 } from './util';
 import DEFAULT_UDFS from './constants';
 
-let currentIncludeFiles = [];
-let includes = [];
+// Per-document cache for include completions
+const includeCache = new Map(); // Map<documentUri, { files: string[], completions: CompletionItem[] }>
+const MAX_CACHE_SIZE = 50; // LRU cache limit
+
 const functionPattern = setRegExpFlags(_functionPattern, 'gim');
 let parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
 
 workspace.onDidChangeConfiguration(event => {
   if (event.affectsConfiguration('autoit.enableParenTriggerForFunctions'))
     parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
+});
+
+// Clean up cache when documents are closed
+workspace.onDidCloseTextDocument(document => {
+  if (document.languageId === 'autoit') {
+    const docUri = document.uri.toString();
+    includeCache.delete(docUri);
+  }
 });
 
 /**
@@ -42,26 +52,75 @@ const createNewCompletionItem = (kind, name, itemDetail = 'Document Function') =
 };
 
 const arraysMatch = (arr1, arr2) => {
-  if (arr1.length === arr2.length && arr1.some(v => arr2.indexOf(v) <= 0)) {
-    return true;
+  if (arr1.length !== arr2.length) {
+    return false;
   }
-  return false;
+  return arr1.every(v => arr2.indexOf(v) >= 0);
+};
+
+/**
+ * Implements LRU eviction when cache exceeds MAX_CACHE_SIZE
+ * @param {Map} cache The cache map to manage
+ */
+const enforceCacheLimit = cache => {
+  if (cache.size > MAX_CACHE_SIZE) {
+    const firstKey = cache.keys().next().value;
+    cache.delete(firstKey);
+  }
+};
+
+/**
+ * Retrieves include completions for a document, using cache when possible
+ * @param {import('vscode').TextDocument} document The document to get include completions for
+ * @param {Array<string>} includesCheck Array of include file names
+ * @returns {CompletionItem[]} Array of completion items from includes
+ */
+const getIncludeCompletions = (document, includesCheck) => {
+  const docUri = document.uri.toString();
+  const cached = includeCache.get(docUri);
+
+  // Return cached completions if includes haven't changed
+  if (cached && arraysMatch(includesCheck, cached.files)) {
+    // Move to end for LRU (refresh access time)
+    includeCache.delete(docUri);
+    includeCache.set(docUri, cached);
+    return cached.completions;
+  }
+
+  // Build new completions
+  const includeCompletionItems = [];
+  includesCheck.forEach(include => {
+    const includeFunctions = getIncludeData(include, document);
+    if (includeFunctions) {
+      Object.keys(includeFunctions).forEach(newFunc => {
+        includeCompletionItems.push(
+          createNewCompletionItem(CompletionItemKind.Function, newFunc, `Function from ${include}`),
+        );
+      });
+    }
+  });
+
+  // Update cache with new completions
+  includeCache.set(docUri, { files: includesCheck, completions: includeCompletionItems });
+  enforceCacheLimit(includeCache);
+
+  return includeCompletionItems;
 };
 
 /**
  * Generates function completions from files included through library paths
  * @param {Array<String>} libraryIncludes Array containing filenames of library includes
- * @param {Object<TextDocument>} doc Originating text document
+ * @param {import('vscode').TextDocument} doc Originating text document
  * @returns {CompletionItem[]} Array of completionItem objects
  */
 const getLibraryFunctions = (libraryIncludes, doc) => {
   return libraryIncludes
     .flatMap(file => {
       const fullPath = findFilepath(file);
-      return fullPath
+      return fullPath && typeof fullPath === 'string'
         ? Object.keys(getIncludeData(fullPath, doc)).map(newFunc => {
-          return { file, newFunc };
-        })
+            return { file, newFunc };
+          })
         : [];
     })
     .map(({ file, newFunc }) => {
@@ -160,39 +219,20 @@ const provideCompletionItems = (document, position) => {
 
   const localCompletions = [...variableCompletions, ...functionCompletions];
 
-  // collect the includes of the document
+  // Collect the includes of the document
   let pattern = includePattern.exec(text);
   while (pattern) {
     includesCheck.push(pattern[1]);
     pattern = includePattern.exec(text);
   }
 
-  // Redo the include collecting if the includes are different
-  if (!arraysMatch(includesCheck, currentIncludeFiles)) {
-    includes = [];
-    let includeFunctions = [];
-    includesCheck.forEach(include => {
-      includeFunctions = getIncludeData(include, document);
-      if (includeFunctions) {
-        Object.keys(includeFunctions).forEach(newFunc => {
-          includes.push(
-            createNewCompletionItem(
-              CompletionItemKind.Function,
-              newFunc,
-              `Function from ${include}`,
-            ),
-          );
-        });
-      }
-    });
-
-    currentIncludeFiles = includesCheck;
-  }
+  // Get cached or build new include completions
+  const includeCompletions = getIncludeCompletions(document, includesCheck);
 
   const libraryIncludes = getLibraryIncludes(text);
   const libraryCompletions = getLibraryFunctions(libraryIncludes, document);
 
-  return [...completions, ...localCompletions, ...includes, ...libraryCompletions];
+  return [...completions, ...localCompletions, ...includeCompletions, ...libraryCompletions];
 };
 
 const completionFeature = languages.registerCompletionItemProvider(
