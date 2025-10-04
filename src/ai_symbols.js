@@ -1,4 +1,12 @@
-import { Location, Range, SymbolInformation, SymbolKind, languages, workspace } from 'vscode';
+import {
+  Location,
+  Range,
+  SymbolInformation,
+  SymbolKind,
+  languages,
+  window,
+  workspace,
+} from 'vscode';
 import {
   AI_CONSTANTS,
   AUTOIT_MODE,
@@ -7,11 +15,16 @@ import {
   regionPattern,
   variablePattern,
 } from './util';
-
 const config = workspace.getConfiguration('autoit');
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;
 const commentStartRegex = /^\s*#(?:cs|comments-start)/;
 const continuationRegex = /\s_\b\s*(;.*)?\s*/;
+
+// Default maximum number of lines to process for symbol indexing (performance limit)
+const DEFAULT_SYMBOL_MAX_LINES = 50000;
+
+// Track which files have been warned about to avoid repeated warnings
+const warnedFiles = new Set();
 
 /**
  * Creates a symbol information object for a variable.
@@ -19,8 +32,8 @@ const continuationRegex = /\s_\b\s*(;.*)?\s*/;
  * @param {Object} params - The input parameters.
  * @param {string} params.variable - The name of the variable.
  * @param {SymbolKind} params.variableKind - The kind of the variable symbol.
- * @param {TextDocument} params.doc - The document where the variable is defined.
- * @param {Range} params.line - The range of the line where the variable is defined.
+ * @param {import("vscode").TextDocument} params.doc - The document where the variable is defined.
+ * @param {import("vscode").TextLine} params.line - The line where the variable is defined.
  * @param {string} [params.container=null] - The name of the container where the variable is defined.
  * @returns {SymbolInformation} The symbol information object for the variable.
  */
@@ -37,7 +50,7 @@ const createVariableSymbol = ({ variable, variableKind, doc, line, container = n
  * Generates a SymbolInformation object for a function from a given TextDocument
  * that includes the full range of the function's body
  * @param {String} functionName The name of the function from the AutoIt script
- * @param {TextDocument} document The current document to search
+ * @param {import("vscode").TextDocument} document The current document to search
  * @param {Number} startingLineNumber The function's starting line number within the document
  * @returns {SymbolInformation} The generated SymbolInformation object
  */
@@ -105,7 +118,7 @@ const findRegionEndIndex = (documentText, startIndex) => {
  * Generates a SymbolInformation object for a Region from a given TextDocument
  * that includes the full range of the region's body
  * @param {String} regionName The name of the region from the AutoIt script
- * @param {TextDocument} document The current document to search
+ * @param {import("vscode").TextDocument} document The current document to search
  * @param {String} documentText The text from the document (usually generated through `TextDocument.getText()`)
  * @returns SymbolInformation
  */
@@ -137,9 +150,10 @@ const createRegionSymbol = (regionName, document, documentText) => {
  * @param {Object} params - An object containing the following properties:
  *   @param {string} params.text - The text to search for function symbols.
  *   @param {Set} params.processedSymbols - A set of already processed function symbols.
- *   @param {vscode.TextDocument} params.doc - The document object representing the text.
+ *   @param {import("vscode").TextDocument} params.doc - The document object representing the text.
  *   @param {number} params.lineNum - The line number where the function symbol is located.
  *   @param {Array} params.result - An array to store the extracted function symbols.
+ *   @param {string} params.scriptText - The full text of the script.
  * @returns {void} None. The extracted function symbols are added to the `result` array provided in the `params` object.
  */
 const parseFunctionFromText = params => {
@@ -262,16 +276,12 @@ function addVariableToResults(result, variable, variableKind, doc, line, contain
  * @param {object} params - An object containing the following properties:
  *   @param {string} params.text - The text to parse for variables.
  *   @param {array} params.result - An array to store the extracted variables.
- *   @param {number} params.line - The line number of the text.
+ *   @param {import("vscode").TextLine} params.line - The line object from the document.
  *   @param {Set} params.found - A set to keep track of already found variables.
- *   @param {string} params.doc - The documentation for the variables.
+ *   @param {import("vscode").TextDocument} params.doc - The document object.
  *   @param {boolean} params.inContinuation - Indicates if the text is a continuation of a previous line.
- *   @param {string} params.variableKind - The kind of variable (e.g., local, global).
- * @returns {object} An object containing the following properties:
- *   @returns {boolean} inContinuation - Indicates if the text is a continuation of a previous line.
- *   @returns {string} variableKind - The kind of variable (e.g., local, global).
- *   @returns {array} params.result - The updated array of extracted variables.
- *   @returns {Set} params.found - The set of found variables.
+ *   @param {SymbolKind} params.variableKind - The kind of variable (e.g., local, global).
+ * @returns {{inContinuation: boolean, variableKind: SymbolKind}} An object containing inContinuation (indicates if the text is a continuation) and variableKind (the kind of variable).
  */
 function parseVariablesFromText(params) {
   const { text, result, line, found, doc } = params;
@@ -311,7 +321,7 @@ function parseVariablesFromText(params) {
  * It parses the text of the document line by line and extracts information about functions, variables, and regions.
  * Returns an array of symbol information objects.
  *
- * @param {Document} doc - The document for which to provide symbols.
+ * @param {import("vscode").TextDocument} doc - The document for which to provide symbols.
  * @returns {Array} An array of symbol information objects, each containing the name, kind, and range of a symbol in the document.
  */
 function provideDocumentSymbols(doc) {
@@ -322,7 +332,19 @@ function provideDocumentSymbols(doc) {
   let variableKind;
   const scriptText = doc.getText();
 
-  const lineCount = Math.min(doc.lineCount, 10000);
+  // Get fresh config for the maxLines setting (other settings use module-level config)
+  const currentConfig = workspace.getConfiguration('autoit');
+  const maxLines = currentConfig.get('symbolMaxLines', DEFAULT_SYMBOL_MAX_LINES);
+  const lineCount = Math.min(doc.lineCount, maxLines);
+
+  // Warn user once per file if document exceeds the symbol processing limit
+  if (doc.lineCount > maxLines && !warnedFiles.has(doc.uri.toString())) {
+    warnedFiles.add(doc.uri.toString());
+    window.showWarningMessage(
+      `AutoIt: File has ${doc.lineCount} lines but only processing first ${maxLines} for symbols. Increase 'autoit.symbolMaxLines' to index more lines.`,
+    );
+  }
+
   for (let lineNum = 0; lineNum < lineCount; lineNum += 1) {
     const line = doc.lineAt(lineNum);
     const lineText = line.text;
