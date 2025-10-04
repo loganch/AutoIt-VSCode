@@ -184,7 +184,6 @@ export const activate = ctx => {
           const dbg = cfg?.get?.('debugLogging') === true;
           const msg = `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
           if (dbg) {
-            // eslint-disable-next-line no-console
             console.debug(msg);
           }
         } catch {
@@ -201,7 +200,6 @@ export const activate = ctx => {
           const dbg = cfg?.get?.('debugLogging') === true;
           const msg = `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
           if (dbg) {
-            // eslint-disable-next-line no-console
             console.debug(msg);
           }
         } catch {
@@ -221,7 +219,6 @@ export const activate = ctx => {
     }
   }
 
-  // eslint-disable-next-line no-console
   console.log('AutoIt is now active!');
 };
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
  * ai_definition.test.js
  * End-to-end function-level tests for src/ai_definition.js using Jest with mocked VS Code API and util/fs.

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
  * Test Debugging Utilities for ai_definition.test.js
  * Provides individual test isolation and debugging capabilities
