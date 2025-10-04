@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { Position, Range, TextEdit, Uri, languages, window, workspace } from 'vscode';
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
