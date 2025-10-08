@@ -52,6 +52,7 @@ By default, this extension is set up for the default installation of AutoIt and 
 | `autoit.enableParenTriggerForFunctions` | Adds the ability to use `(` to select a function completion suggestion, which will add the function with open and closed parens, place the cursor between them and trigger signature help. Requires window reload to take full effect. | `true` |
 | `autoit.workspaceSymbolMaxFiles`    | Maximum number of AutoIt files to process for workspace symbol search. Lower values improve performance on large projects.                                                                               | 500                                             |
 | `autoit.workspaceSymbolBatchSize`   | Number of files to process in each batch when building workspace symbol index. Lower values reduce UI freezing but take longer to complete.                                                              | 10                                              |
+| `autoit.symbolMaxLines`             | Maximum number of lines to process for symbol information in a single file. Increase for very large files. Higher values may impact performance.                                                         | 50000                                           |
 
 <!-- * Access the command palette `Ctrl+Shift+P`, type Preferences: Open User Settings or Preferences: Open Workspace Settings. -->
 

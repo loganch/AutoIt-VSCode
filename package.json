@@ -427,6 +427,12 @@
           "default": true,
           "description": "Determines whether regions show up when you use Ctrl+Shift+O to find symbols within a script"
         },
+        "autoit.symbolMaxLines": {
+          "type": "number",
+          "default": 50000,
+          "minimum": 1000,
+          "description": "Maximum number of lines to process for symbol information. Increase if you have very large files. Higher values may impact performance."
+        },
         "autoit.consoleParams": {
           "type": "string",
           "default": "",

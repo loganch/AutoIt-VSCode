@@ -7,9 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.2.0 - Unreleased
 
+### Added
+
+- File path validation to prevent path traversal attacks
+- Parameter safety warnings for `autoit.consoleParams` to detect potentially dangerous shell metacharacters
+- Workspace symbol performance optimizations with batch processing to prevent UI freezing on large projects
+- Configuration options `autoit.workspaceSymbolMaxFiles` (default: 500) and `autoit.workspaceSymbolBatchSize` (default: 10)
+- Configuration option `autoit.symbolMaxLines` (default: 50000) to control maximum lines processed for symbol information
+- Warning message when files exceed symbol processing limit with actionable instructions
+- Comprehensive unit tests for completion provider with 8 test cases
+
 ### Fixed
 
+- Command injection risk in registry update functionality by replacing `exec` with `execFile` for safer argument handling
 - Multiple global output panels opening for AutoIt on startup
+- Memory leak in completion provider where include cache grew indefinitely across document switches
+- Incorrect array comparison logic in completion cache invalidation
+- Cross-document contamination of completion items from include files
+
+### Changed
+
+- Simplified ESLint configuration by using globals package and removing redundant rules
+- Workspace symbol cache now uses incremental updates instead of full invalidation on file changes
+- Completion provider now uses per-document Map-based caching with LRU eviction (50 document limit)
+- Include cache automatically cleans up when documents are closed
+- Symbol processing limit increased from hardcoded 10,000 to configurable 50,000 lines by default
 
 ## [1.1.0] - 2025-09-23
 
