@@ -3,6 +3,7 @@
 [![Version](https://img.shields.io/visual-studio-marketplace/v/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
 [![Installs](https://img.shields.io/visual-studio-marketplace/i/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
 [![Rating](https://img.shields.io/visual-studio-marketplace/r/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![GitHub Stars](https://img.shields.io/github/stars/loganch/AutoIt-VSCode?style=social)](https://github.com/loganch/AutoIt-VSCode)
 
 A comprehensive AutoIt language extension for Visual Studio Code, providing syntax highlighting, IntelliSense, diagnostics, and integrated script execution.
 
@@ -60,6 +61,8 @@ Quickly navigate to functions, variables, and regions within your script using `
 ### Diagnostics & Error Checking
 
 Real-time syntax checking and error detection using Au3Check, displayed in the Problems tab.
+
+![Diagnostics](img/docs/diagnostics.gif)
 
 ### Script Execution & Building
 
@@ -123,6 +126,8 @@ This extension works on **Windows, macOS, and Linux**, with the following consid
 ### Essential Settings
 
 Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, then search for "AutoIt":
+
+![AutoIt Settings](img/docs/AutoItConfiguration.png)
 
 | Setting | Description | Default |
 |---------|-------------|---------|

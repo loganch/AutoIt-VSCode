@@ -37,6 +37,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Include cache automatically cleans up when documents are closed
 - Symbol processing limit increased from hardcoded 10,000 to configurable 50,000 lines by default
 
+### Removed
+
+- The unussed `autoit.YAML-tmLanguage` file
+
 ## [1.1.0] - 2025-09-23
 
 ### Added
@@ -378,7 +382,7 @@ The IntelliSense release!
 
 ## 0.0.9
 
-- Running, compiling and building will now require the full install of SciTE4AutoIt3 (found [here](https://www.autoitscript.com/site/autoit-script-editor/downloads/)) in the default install location
+- Running, compiling, and building will now require the full install of SciTE4AutoIt3 (found [here](https://www.autoitscript.com/site/autoit-script-editor/downloads/) - the AutoIt script editor) in the default install location
 - Changed compile command to closer reflect SciTe4AutoIt3 version (Opens GUI)
 - Implemented build command, which works similar to previous compile command
 - Added console output for running, compiling and building scripts
