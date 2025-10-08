@@ -31,6 +31,7 @@
     "@babel/preset-env": "^7.26.7",
     "@types/jest": "^29.5.12",
     "@types/vscode": "^1.102.0",
+    "@vscode/vsce": "^3.2.1",
     "babel-loader": "^9.2.1",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^9.1.0",
@@ -772,7 +773,9 @@
     "precommit": "npm run lint && npm run test:quick-flaky && npm test",
     "webpack": "webpack --mode development",
     "webpack-dev": "webpack --mode development --watch",
-    "vscode:prepublish": "webpack --mode production"
+    "vscode:prepublish": "webpack --mode production",
+    "package:openvsx": "node scripts/package-openvsx.js",
+    "package:all": "node scripts/package-all.js"
   },
   "jest": {
     "testEnvironment": "node",

@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration option `autoit.symbolMaxLines` (default: 50000) to control maximum lines processed for symbol information
 - Warning message when files exceed symbol processing limit with actionable instructions
 - Comprehensive unit tests for completion provider with 8 test cases
+- Comprehensive README documentation improvements with installation guide, quick start section, platform support matrix, troubleshooting guide, and reorganized configuration
+- Distribution scripts for packaging the extension to multiple marketplaces:
+  - `package-all.js` for simultaneous packaging to VS Code Marketplace and OpenVSX
+  - `package-openvsx.js` for OpenVSX-specific packaging with publisher name handling
 
 ### Fixed
 
