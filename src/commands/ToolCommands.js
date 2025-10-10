@@ -42,11 +42,11 @@ const processManager = new ProcessManager(
 );
 const hotkeyManager = new HotkeyManager(config);
 const outputChannelManager = new OutputChannelManager(
-  globalOutputChannel, // 1st param: globalOutputChannel (was incorrectly config)
-  config, // 2nd param: config (was incorrectly {})
-  {}, // 3rd param: keybindings
-  hotkeyManager, // 4th param: aWrapperHotkey
-  processManager, // 5th param: runners (was missing)
+  globalOutputChannel,
+  config,
+  {},
+  hotkeyManager,
+  processManager,
 );
 const processRunner = new ProcessRunner(
   config,
