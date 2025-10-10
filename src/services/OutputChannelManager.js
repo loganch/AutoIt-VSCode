@@ -1,5 +1,8 @@
 const { window } = require('vscode');
 const { HOTKEY_LINE_DELAY_MS, NO_BREAK_SPACE } = require('../command_constants');
+// Constants to avoid magic numbers when checking for CRLF endings
+const CRLF = '\\r\\n';
+const CRLF_LENGTH = CRLF.length;
 
 /**
  * Module-level cache for output channels keyed by channel name.
@@ -122,11 +125,31 @@ class OutputChannelManager {
    * @param {Object} runners - Runners object for managing output state
    */
   constructor(globalOutputChannel, config, keybindings, aWrapperHotkey, runners) {
+    // Validate required parameters
+    if (!globalOutputChannel) {
+      throw new Error(
+        'OutputChannelManager: globalOutputChannel is required and cannot be null/undefined',
+      );
+    }
+
+    // Validate that globalOutputChannel has the expected methods
+    const requiredMethods = ['append', 'appendLine', 'show', 'hide', 'clear', 'dispose'];
+    for (const method of requiredMethods) {
+      if (typeof globalOutputChannel[method] !== 'function') {
+        throw new Error(`OutputChannelManager: globalOutputChannel must have method '${method}'`);
+      }
+    }
+
+    // Validate config parameter
+    if (!config || typeof config !== 'object') {
+      throw new Error('OutputChannelManager: config parameter is required and must be an object');
+    }
+
     this.globalOutputChannel = globalOutputChannel;
     this.config = config;
-    this.keybindings = keybindings;
+    this.keybindings = keybindings || {};
     this.aWrapperHotkey = aWrapperHotkey;
-    this.runners = runners;
+    this.runners = runners || {};
 
     // Strategy pattern implementations
     this.strategies = {
@@ -227,13 +250,13 @@ class OutputChannelManager {
         config: this.config,
       };
       const formattedProcessLines = this.strategies.process.format(linesProcess, processContext);
-      isNewLineProcess = processContext.isNewLineProcess;
+      ({ isNewLineProcess } = processContext);
 
       const textProcess = formattedProcessLines.join('\r\n');
       if (textProcess) {
         aiOutProcess[prop](textProcess);
         isNewLineProcess =
-          prop === 'appendLine' || textProcess.substring(textProcess.length - 2) === '\r\n';
+          prop === 'appendLine' || textProcess.substring(textProcess.length - CRLF_LENGTH) === CRLF;
       }
 
       if (this.runners.lastId !== id && !this.runners.isNewLine) {
@@ -259,57 +282,79 @@ class OutputChannelManager {
       if (textGlobal) {
         aiOut[prop](textGlobal);
         this.runners.isNewLine =
-          prop === 'appendLine' || textGlobal.substring(textGlobal.length - 2) === '\r\n';
+          prop === 'appendLine' || textGlobal.substring(textGlobal.length - CRLF_LENGTH) === CRLF;
       }
     };
 
     const get = (aiOut, prop, proxy) => {
-      const isFlush = prop === 'flush';
-      const isError = prop === 'error';
+      try {
+        const isFlush = prop === 'flush';
+        const isError = prop === 'error';
 
-      if (isFlush) prop = 'append';
-      else if (isError) prop = 'appendLine';
+        if (isFlush) prop = 'append';
+        else if (isError) prop = 'appendLine';
 
-      let ret = aiOut[prop];
-      if (!(ret instanceof Function)) return ret;
+        // Validate that the property exists on the target object
+        if (!(prop in aiOut)) {
+          console.error(
+            `[OutputChannelManager] Method '${prop}' not found on output channel. Available methods:`,
+            Object.getOwnPropertyNames(aiOut).filter(name => typeof aiOut[name] === 'function'),
+          );
+          throw new Error(
+            `OutputChannelManager: Method '${prop}' is not available on the output channel. ` +
+              `This usually indicates incorrect initialization - the first parameter should be an output channel, not a config object.`,
+          );
+        }
 
-      ret = text => {
-        if (text === undefined) return;
+        let ret = aiOut[prop];
+        if (!(ret instanceof Function)) return ret;
 
-        clearTimeout(prevLineTimer);
-        const lines = prop === 'append' ? text.split(/\r?\n/) : [text];
-        lines[0] = prevLine + lines[0];
+        ret = text => {
+          if (text === undefined) return;
 
-        // Filter hotkey failure messages
-        for (let i = 0; i < lines.length; i++) {
-          if (hotkeyFailedMsgFound) continue;
-          for (let r = 0; r < this.hotkeyFailedMsg.length; r++) {
-            const line = lines[i].replace(this.hotkeyFailedMsg[r], '');
-            if (line === lines[i]) continue;
-            if (hotkeyFailedMsgFound) {
-              lines.splice(i, 1);
-            } else {
-              this.aWrapperHotkey.reset(id);
-              lines[i] = this.generateHotkeyReplacementMessage();
-              hotkeyFailedMsgFound = true;
+          clearTimeout(prevLineTimer);
+          const lines = prop === 'append' ? text.split(/\r?\n/) : [text];
+          lines[0] = prevLine + lines[0];
+
+          // Filter hotkey failure messages
+          for (let i = 0; i < lines.length; i++) {
+            if (hotkeyFailedMsgFound) continue;
+            for (let r = 0; r < this.hotkeyFailedMsg.length; r++) {
+              const line = lines[i].replace(this.hotkeyFailedMsg[r], '');
+              if (line === lines[i]) continue;
+              if (hotkeyFailedMsgFound) {
+                lines.splice(i, 1);
+              } else {
+                this.aWrapperHotkey.reset(id);
+                lines[i] = this.generateHotkeyReplacementMessage();
+                hotkeyFailedMsgFound = true;
+              }
+              if (++i >= lines.length) break;
             }
-            if (++i >= lines.length) break;
           }
-        }
 
-        prevLine = !isFlush && prop === 'append' ? lines[lines.length - 1] : '';
-        if (prevLine) {
-          if (lines.length > 1) lines[lines.length - 1] = '';
-          else lines.pop();
+          prevLine = !isFlush && prop === 'append' ? lines[lines.length - 1] : '';
+          if (prevLine) {
+            if (lines.length > 1) lines[lines.length - 1] = '';
+            else lines.pop();
 
-          prevLineTimer = setTimeout(() => proxy.flush(), HOTKEY_LINE_DELAY_MS);
-        }
-        if (lines.length) outputText(aiOut, prop, lines);
-      };
+            prevLineTimer = setTimeout(() => proxy.flush(), HOTKEY_LINE_DELAY_MS);
+          }
+          if (lines.length) outputText(aiOut, prop, lines);
+        };
 
-      if (isFlush) ret('');
+        if (isFlush) ret('');
 
-      return ret;
+        return ret;
+      } catch (error) {
+        console.error('[OutputChannelManager] Proxy handler error:', error);
+        // Provide a fallback function that prevents crashes
+        return () => {
+          console.warn(
+            `[OutputChannelManager] Fallback called for method '${prop}' due to proxy error`,
+          );
+        };
+      }
     };
 
     return new Proxy(aiOutCommon, { get });
