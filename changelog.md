@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Missing AutoIt macros: `@exitMethod`, `@GUI_DropId`, and `@SW_ENABLE` to completions and hovers
+
+### Fixed
+
+- Incorrect documentation for `@GUI_CtrlId` macro (now correctly states "Last click GUI Control identifier" instead of "Drag GUI Control identifier")
+
+### Changed
+
+- Consolidated macro data into single source of truth (`src/completions/macrosData.js`) to eliminate duplication and ensure consistency between completions and hovers
+- Converted `src/hovers/macros.json` to `src/hovers/macros.js` to import from unified macro data source
+
 ## [1.2.0] - 2025-10-08
 
 ### Added
