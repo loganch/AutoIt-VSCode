@@ -1,6 +1,6 @@
-import ai_functions from './ai_functions';
-import keywords from './keywords';
-import macros from './macros';
+import { hovers as ai_functions } from '../signatures/functions';
+import { hovers as keywords } from '../signatures/keywords';
+import { hovers as macros } from '../signatures/macros';
 import { hovers as udf_array } from '../signatures/udf_array';
 import { hovers as udf_clipboard } from '../signatures/udf_clipboard';
 import { hovers as udf_color } from '../signatures/udf_color';
@@ -49,24 +49,25 @@ import { hovers as udf_sqlite } from '../signatures/udf_sqlite';
 import { hovers as udf_string } from '../signatures/udf_string';
 import { hovers as udf_timers } from '../signatures/udf_timers';
 import { hovers as udf_winAPI } from '../signatures/udf_winapi';
-import udf_visa from './udf_visa';
-import udf_winAPIExCOM from './udf_winAPIExCOM';
-import udf_winAPIExDiag from './udf_winAPIExDiag';
-import udf_winAPIExDlg from './udf_winAPIExDlg';
-import udf_winAPIExFiles from './udf_winAPIExFiles';
-import udf_winAPIExGdi from './udf_winAPIExGdi';
-import udf_winAPIExLocale from './udf_winAPIExLocale';
-import udf_winAPIExMisc from './udf_winAPIExMisc';
-import udf_winAPIExProc from './udf_winAPIExProc';
-import udf_winAPIExReg from './udf_winAPIExReg';
-import udf_winAPIExRes from './udf_winAPIExRes';
-import udf_winAPIExShellEx from './udf_winAPIExShellEx';
-import udf_winAPIExShPath from './udf_winAPIExShPath';
-import udf_winAPIExSys from './udf_winAPIExSys';
+import { hovers as udf_visa } from '../signatures/udf_visa';
+import { hovers as udf_winAPIExCOM } from '../signatures/WinAPIEx/WinAPICom';
+import { hovers as udf_winAPIExDiag } from '../signatures/WinAPIEx/WinAPIDiag';
+import { hovers as udf_winAPIExDlg } from '../signatures/WinAPIEx/WinAPIDlg';
+import { hovers as udf_winAPIExFiles } from '../signatures/WinAPIEx/WinAPIFiles';
+import { hovers as udf_winAPIExGdi } from '../signatures/WinAPIEx/WinAPIGdi';
+import { hovers as udf_winAPIExLocale } from '../signatures/WinAPIEx/WinAPILocale';
+import { hovers as udf_winAPIExMisc } from '../signatures/WinAPIEx/WinAPIMisc';
+import { hovers as udf_winAPIExProc } from '../signatures/WinAPIEx/WinAPIProc';
+import { hovers as udf_winAPIExReg } from '../signatures/WinAPIEx/WinAPIReg';
+import { hovers as udf_winAPIExRes } from '../signatures/WinAPIEx/WinAPIRes';
+import { hovers as udf_winAPIExShellEx } from '../signatures/WinAPIEx/WinAPIShellEx';
+import { hovers as udf_winAPIExShPath } from '../signatures/WinAPIEx/WinAPIShPath';
+import { hovers as udf_winAPIExSys } from '../signatures/WinAPIEx/WinAPISys';
 import { hovers as udfWinAPITheme } from '../signatures/WinAPIEx/WinAPITheme';
 import { hovers as udfWinNet } from '../signatures/udf_winnet';
 import { hovers as udfWord } from '../signatures/udf_word';
 import { hovers as udfDebug } from '../signatures/udf_debug';
+import { hovers as AVIConstants } from '../completions/constants_avi';
 import { hovers as InetConstants } from '../completions/constantsInet';
 import {
   au3CheckDirectivesHovers,
@@ -145,6 +146,7 @@ const hoverImports = {
   ...udfWinNet,
   ...udfWord,
   ...udfDebug,
+  ...AVIConstants,
   ...InetConstants,
   ...wrapperDirectivesHovers,
   ...au3StripperDirectivesHovers,

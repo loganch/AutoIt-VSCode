@@ -1,217 +1,219 @@
 import { CompletionItemKind, SnippetString } from 'vscode';
-import { fillCompletions } from '../util';
+import { signatureToCompletion, signatureToHover } from '../util';
 
-const items = [
-  {
-    label: 'And',
+const signatures = {
+  And: {
     documentation:
-      'Logical And operation.\ne.g. If $vVar = 5 And $vVar2 > 6 Then\n(True if $vVar equals 5 and $vVar2 is greater than 6)',
+      'Logical And operation.\ne.g. If $vVar = 5 And $vVar2 > 6 Then\\n(True if $vVar equals 5 and $vVar2 is greater than 6)',
+    label: 'And',
   },
-  {
-    label: 'ByRef',
+  ByRef: {
     documentation: 'Indicates that a parameter should be treated as a reference to the original',
+    label: 'ByRef',
   },
-  {
-    label: 'Case',
+  Case: {
     documentation: '',
+    label: 'Case',
   },
-  {
-    label: 'Const',
+  Const: {
     documentation: 'Declare a constant',
+    label: 'Const',
   },
-  {
-    label: 'ContinueCase',
+  ContinueCase: {
     documentation:
       'Abort the code in the current Case block and continue with the code in the next Case block when in a Select or Switch structure.',
+    label: 'ContinueCase',
   },
-  {
-    label: 'ContinueLoop',
+  ContinueLoop: {
     documentation: 'Continue a While/Do/For loop',
+    label: 'ContinueLoop',
   },
-  {
-    label: 'Default',
+  Default: {
     documentation: 'Keyword value used in function call',
+    label: 'Default',
   },
-  {
+  Dim: {
+    documentation: '',
     label: 'Dim',
-    documentation:
-      "Declare a variable in Local scope if the variable name doesn't already exist globally (in which case it reuses the global variable!)",
   },
-  {
+  Do: {
+    documentation: '',
     label: 'Do',
-    documentation: '',
   },
-  {
+  Else: {
+    documentation: '',
     label: 'Else',
-    documentation: '',
   },
-  {
+  ElseIf: {
+    documentation: '',
     label: 'ElseIf',
-    documentation: '',
   },
-  {
-    label: 'EndFunc',
+  EndFunc: {
     documentation: 'Closes a Function definition',
+    label: 'EndFunc',
   },
-  {
-    label: 'EndIf',
+  EndIf: {
     documentation: 'Closes an If block',
+    label: 'EndIf',
   },
-  {
-    label: 'EndSelect',
+  EndSelect: {
     documentation: 'Closes a Select block',
+    label: 'EndSelect',
   },
-  {
-    label: 'EndSwitch',
+  EndSwitch: {
     documentation: 'Closes a Switch block',
+    label: 'EndSwitch',
   },
-  {
-    label: 'EndWith',
+  EndWith: {
     documentation: 'Closes a With block',
+    label: 'EndWith',
   },
-  {
-    label: 'Enum',
+  Enum: {
     documentation: 'Enumerates constants.',
+    label: 'Enum',
   },
-  {
-    label: 'Exit',
+  Exit: {
     documentation: 'Terminates the script.',
+    label: 'Exit',
   },
-  {
-    label: 'ExitLoop',
+  ExitLoop: {
     documentation: 'Terminate a While/Do/For loop.',
+    label: 'ExitLoop',
   },
-  {
-    label: 'False',
+  False: {
     documentation: 'Boolean value for use in logical expressions.',
+    label: 'False',
   },
-  {
-    label: 'For',
+  For: {
     documentation: '',
+    label: 'For',
   },
-  {
-    label: 'Func',
+  Func: {
     documentation:
       'Defines a user-defined function that takes zero or more arguments and optionally returns a result.',
+    label: 'Func',
   },
-  {
+  Global: {
+    documentation: '',
     label: 'Global',
-    documentation: '',
   },
-  {
-    label: 'If',
+  If: {
     documentation: 'Conditionally run one or more statements.',
+    label: 'If',
   },
-  {
+  In: {
+    documentation: '',
     label: 'In',
-    documentation: '',
   },
-  {
+  Local: {
+    documentation: '',
     label: 'Local',
-    documentation: '',
   },
-  {
+  Next: {
+    documentation: '',
     label: 'Next',
-    documentation: '',
   },
-  {
-    label: 'Not',
+  Not: {
     documentation: 'Logical Not operation',
+    label: 'Not',
   },
-  {
-    label: 'Null',
+  Null: {
     documentation: 'Keyword value to use in function call.',
+    label: 'Null',
   },
-  {
-    label: 'Or',
+  Or: {
     documentation: 'Logical Or operation',
+    label: 'Or',
   },
-  {
-    label: 'Redim',
+  Redim: {
     documentation: 'Resize an existing array.',
+    label: 'Redim',
   },
-  {
-    label: 'Return',
+  Return: {
     documentation: 'Exit a function and provide a value',
+    label: 'Return',
   },
-  {
+  Select: {
+    documentation: 'Conditionally run statements.',
     label: 'Select',
-    documentation: 'Conditionally run statements.',
   },
-  {
-    label: 'Static',
+  Static: {
     documentation: 'Declare a static variable or create a static array.',
+    label: 'Static',
   },
-  {
+  Step: {
+    documentation: '',
     label: 'Step',
-    documentation: '',
   },
-  {
-    label: 'Switch',
+  Switch: {
     documentation: 'Conditionally run statements.',
+    label: 'Switch',
   },
-  {
+  Then: {
+    documentation: '',
     label: 'Then',
-    documentation: '',
   },
-  {
+  To: {
+    documentation: '',
     label: 'To',
-    documentation: '',
   },
-  {
-    label: 'True',
+  True: {
     documentation: 'Boolean value for use in logical expressions.',
+    label: 'True',
   },
-  {
-    label: 'Until',
+  Until: {
     documentation: '',
+    label: 'Until',
   },
-  {
-    label: 'Volatile',
+  Volatile: {
     documentation: 'Function qualifier. (EXPERIMENTAL)',
+    label: 'Volatile',
   },
-  {
-    label: 'WEnd',
+  WEnd: {
     documentation: 'Closes a While Loop',
+    label: 'WEnd',
   },
-  {
-    label: 'While',
+  While: {
     documentation: 'Loop based on an expression.',
+    label: 'While',
   },
-  {
-    label: 'With',
+  With: {
     documentation: 'Used to reduce long references to dot-accessible type of variables.',
+    label: 'With',
   },
-  {
-    label: '#NoTrayIcon',
+  '#NoTrayIcon': {
     documentation: 'Indicates that the AutoIt tray icon will not be shown when the script starts.',
+    label: '#NoTrayIcon',
   },
-  {
-    label: '#RequireAdmin',
+  '#RequireAdmin': {
     documentation: 'Specifies that the current script requires full administrator rights to run.',
+    label: '#RequireAdmin',
   },
-  {
-    label: '#include',
+  '#include': {
     documentation: 'Includes a file in the current script.',
+    label: '#include',
   },
-  {
-    label: '#include-once',
+  '#include-once': {
     documentation: 'Specifies that the current file should only be included once.',
+    label: '#include-once',
   },
-  {
-    label: '#OnAutoItStartRegister',
+  '#OnAutoItStartRegister': {
     documentation: 'Registers a function to be called when AutoIt starts.',
+    label: '#OnAutoItStartRegister',
     insertText: new SnippetString('#OnAutoItStartRegister ').appendPlaceholder('function'),
   },
-  {
-    label: '#pragma',
+  '#pragma': {
     documentation: 'A special directive for controlling aspects of how the script is compiled.',
+    label: '#pragma',
     insertText: new SnippetString('#pragma compile(')
       .appendPlaceholder('pragma-option')
       .appendText(', ')
       .appendPlaceholder('parameter')
       .appendText(')'),
   },
-];
+};
 
-export default fillCompletions(items, CompletionItemKind.Keyword, 'Keyword');
+const hovers = signatureToHover(signatures);
+const completions = signatureToCompletion(signatures, CompletionItemKind.Keyword, 'Keyword');
+
+export { signatures as default, hovers, completions };

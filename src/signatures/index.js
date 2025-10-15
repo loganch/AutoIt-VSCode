@@ -1,9 +1,23 @@
-import mainFunctions from './functions.json';
+import mainFunctions from './functions';
+import keywords from './keywords';
+import macros from './macros';
 import debug from './udf_debug';
 import word from './udf_word';
 import winnet from './udf_winnet';
-import udfArray from './udf_array';
 import WinAPITheme from './WinAPIEx/WinAPITheme';
+import WinAPICom from './WinAPIEx/WinAPICom';
+import WinAPIDiag from './WinAPIEx/WinAPIDiag';
+import WinAPIDlg from './WinAPIEx/WinAPIDlg';
+import WinAPIFiles from './WinAPIEx/WinAPIFiles';
+import WinAPIGdi from './WinAPIEx/WinAPIGdi';
+import WinAPILocale from './WinAPIEx/WinAPILocale';
+import WinAPIMisc from './WinAPIEx/WinAPIMisc';
+import WinAPIProc from './WinAPIEx/WinAPIProc';
+import WinAPIReg from './WinAPIEx/WinAPIReg';
+import WinAPIRes from './WinAPIEx/WinAPIRes';
+import WinAPIShellEx from './WinAPIEx/WinAPIShellEx';
+import WinAPIShPath from './WinAPIEx/WinAPIShPath';
+import WinAPISys from './WinAPIEx/WinAPISys';
 import udf_array from './udf_array';
 import udf_clipboard from './udf_clipboard';
 import udf_color from './udf_color';
@@ -51,15 +65,30 @@ import udf_sound from './udf_sound';
 import udf_sqlite from './udf_sqlite';
 import udf_string from './udf_string';
 import udf_timers from './udf_timers';
+import udf_visa from './udf_visa';
 import udf_winapi from './udf_winapi';
 
 const signatures = {
   ...mainFunctions,
+  ...keywords,
+  ...macros,
   ...debug,
   ...word,
   ...winnet,
-  ...udfArray,
+  ...winnet,
   ...WinAPITheme,
+  ...WinAPIDiag,
+  ...WinAPIDlg,
+  ...WinAPIFiles,
+  ...WinAPIGdi,
+  ...WinAPILocale,
+  ...WinAPIMisc,
+  ...WinAPIProc,
+  ...WinAPIReg,
+  ...WinAPIRes,
+  ...WinAPIShellEx,
+  ...WinAPIShPath,
+  ...WinAPISys,
   ...udf_array,
   ...udf_clipboard,
   ...udf_color,
@@ -107,6 +136,7 @@ const signatures = {
   ...udf_sqlite,
   ...udf_string,
   ...udf_timers,
+  ...udf_visa,
   ...udf_winapi,
 };
 

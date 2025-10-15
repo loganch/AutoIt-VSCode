@@ -215,7 +215,11 @@ const versioningDirectives = [
   },
 ];
 
-const versioningDirectivesCompletionItems = fillCompletions(versioningDirectives);
+const versioningDirectivesCompletionItems = fillCompletions(
+  versioningDirectives,
+  CompletionItemKind.Keyword,
+  'Versioning Directive',
+);
 
 const wrapperDirectivesHovers = completionToHover(wrapperDirectivesCompletionItems);
 const au3StripperDirectivesHovers = completionToHover(au3StripperDirectivesCompletionItems);

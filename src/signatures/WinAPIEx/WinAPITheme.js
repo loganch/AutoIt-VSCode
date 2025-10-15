@@ -1,4 +1,5 @@
-import { br, opt, signatureToHover } from '../../util';
+import { CompletionItemKind } from 'vscode';
+import { br, opt, signatureToHover, signatureToCompletion } from '../../util';
 
 const include = '`#include <WinAPITHeme.au3>`';
 
@@ -944,5 +945,6 @@ const signatures = {
 };
 
 const hovers = signatureToHover(signatures);
+const completions = signatureToCompletion(signatures, CompletionItemKind.Function, include);
 
-export { signatures as default, hovers };
+export { signatures as default, completions, hovers };

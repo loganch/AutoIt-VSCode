@@ -23,12 +23,12 @@ import TreeViewConstants from './constants_treeview';
 import UpDownConstants from './constants_updown';
 import WindowsConstants from './constants_windows';
 import WordConstants from './constants_word';
-import KEYWORDS from './keywords';
-import MACROS from './macros';
-import MAIN_FUNCTIONS from './mainFunctions';
+import { completions as KEYWORDS } from '../signatures/keywords';
+import { completions as MACROS } from '../signatures/macros';
+import { completions as MAIN_FUNCTIONS } from '../signatures/functions';
 import SendKeys from './send_keys';
 import Debug from './udf_debug';
-import Visa from './udf_visa';
+import { completions as Visa } from '../signatures/udf_visa';
 import { completions as ArrayUDF } from '../signatures/udf_array';
 import { completions as Clipboard } from '../signatures/udf_clipboard';
 import { completions as ColorUDF } from '../signatures/udf_color';
@@ -75,6 +75,20 @@ import { completions as SQLite } from '../signatures/udf_sqlite';
 import { completions as StringUDF } from '../signatures/udf_string';
 import { completions as Timers } from '../signatures/udf_timers';
 import { completions as WinAPI } from '../signatures/udf_winapi';
+import { completions as WinAPICom } from '../signatures/WinAPIEx/WinAPICom';
+import { completions as WinAPIDiag } from '../signatures/WinAPIEx/WinAPIDiag';
+import { completions as WinAPIDlg } from '../signatures/WinAPIEx/WinAPIDlg';
+import { completions as WinAPIFiles } from '../signatures/WinAPIEx/WinAPIFiles';
+import { completions as WinAPIGdi } from '../signatures/WinAPIEx/WinAPIGdi';
+import { completions as WinAPILocale } from '../signatures/WinAPIEx/WinAPILocale';
+import { completions as WinAPIMisc } from '../signatures/WinAPIEx/WinAPIMisc';
+import { completions as WinAPIProc } from '../signatures/WinAPIEx/WinAPIProc';
+import { completions as WinAPIReg } from '../signatures/WinAPIEx/WinAPIReg';
+import { completions as WinAPIRes } from '../signatures/WinAPIEx/WinAPIRes';
+import { completions as WinAPIShellEx } from '../signatures/WinAPIEx/WinAPIShellEx';
+import { completions as WinAPIShPath } from '../signatures/WinAPIEx/WinAPIShPath';
+import { completions as WinAPISys } from '../signatures/WinAPIEx/WinAPISys';
+import { completions as WinAPITheme } from '../signatures/WinAPIEx/WinAPITheme';
 import { completions as WinNet } from '../signatures/udf_winnet';
 import { completions as Word } from '../signatures/udf_word';
 import InetConstants from './constantsInet';
@@ -163,6 +177,20 @@ const completions = [
   ...Timers,
   ...Visa,
   ...WinAPI,
+  ...WinAPICom,
+  ...WinAPIDiag,
+  ...WinAPIDlg,
+  ...WinAPIFiles,
+  ...WinAPIGdi,
+  ...WinAPILocale,
+  ...WinAPIMisc,
+  ...WinAPIProc,
+  ...WinAPIReg,
+  ...WinAPIRes,
+  ...WinAPIShellEx,
+  ...WinAPIShPath,
+  ...WinAPISys,
+  ...WinAPITheme,
   ...Word,
   ...InetConstants,
   ...wrapperDirectivesCompletionItems,
