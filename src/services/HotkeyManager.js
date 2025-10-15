@@ -9,6 +9,11 @@ const path = require('path');
  * This class handles the temporary disabling of AutoIt3Wrapper hotkeys during script execution
  * to prevent conflicts with the extension, and ensures proper restoration afterwards.
  */
+// Named constants to avoid magic numbers and make behavior clearer
+const OTHER_SECTION = '[Other]';
+const OTHER_SECTION_LENGTH = OTHER_SECTION.length; // used when inserting placeholders
+const SAFE_TIMER_MS = 10000;
+
 class HotkeyManager {
   /**
    * Creates a new HotkeyManager instance.
@@ -99,14 +104,16 @@ class HotkeyManager {
       iniData = this.iniDataOrig.replace(this.regex, '');
       let otherIndex = iniData.search(/\[Other\]/i);
       if (otherIndex === -1) {
-        iniData += '\r\n[Other]';
-        otherIndex = iniData.length;
+        iniData += `\r\n${OTHER_SECTION}`;
+        otherIndex = iniData.length - OTHER_SECTION_LENGTH; // index where the section starts
       }
 
+      // Insert empty SciTE hotkey placeholders immediately after the [Other] section header
+      const placeholder = '\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n';
       iniData =
-        iniData.substring(0, otherIndex + 7) +
-        '\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n' +
-        iniData.substring(otherIndex + 7);
+        iniData.substring(0, otherIndex + OTHER_SECTION_LENGTH) +
+        placeholder +
+        iniData.substring(otherIndex + OTHER_SECTION_LENGTH);
     } catch (error) {
       this.iniDataOrig = null;
       console.error(`Error reading AutoIt3Wrapper.ini: ${error.message}`);
@@ -147,7 +154,7 @@ class HotkeyManager {
       this.timer = setTimeout(() => {
         console.warn('HotkeyManager: Safety timer triggered - forcing reset');
         this._forceReset();
-      }, 10000);
+      }, SAFE_TIMER_MS);
 
       return id;
     } catch (error) {
