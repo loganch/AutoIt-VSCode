@@ -191,6 +191,7 @@ const completions = [
   ...WinAPIShPath,
   ...WinAPISys,
   ...WinAPITheme,
+  ...WinNet,
   ...Word,
   ...InetConstants,
   ...wrapperDirectivesCompletionItems,
