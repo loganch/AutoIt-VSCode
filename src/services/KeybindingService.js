@@ -16,6 +16,11 @@ const { performance } = require('perf_hooks');
  * and command mapping functionality.
  */
 class KeybindingService {
+  // eslint-disable-next-line no-magic-numbers
+  static PROFILE_DETECTION_TIMEOUT_MS = 2000;
+  // eslint-disable-next-line no-magic-numbers
+  static KEYBINDINGS_DEBOUNCE_MS = 200;
+
   /**
    * Creates a new KeybindingService instance.
    * @param {Object} options - Configuration options
@@ -61,7 +66,7 @@ class KeybindingService {
    * @returns {Promise<string>} Promise that resolves to the profile directory path
    * @private
    */
-  async _detectProfileDirectory() {
+  _detectProfileDirectory() {
     return new Promise((resolve, reject) => {
       const prefs = workspace.getConfiguration('autoit');
       const prefName = 'consoleParams';
@@ -136,11 +141,11 @@ class KeybindingService {
         if (updateResult && typeof updateResult.then === 'function') {
           Promise.resolve(updateResult)
             .then(() => {
-              settingsTimer = setTimeout(onTimeout, 2000);
+              settingsTimer = setTimeout(onTimeout, KeybindingService.PROFILE_DETECTION_TIMEOUT_MS);
             })
             .catch(reject);
         } else {
-          settingsTimer = setTimeout(onTimeout, 2000);
+          settingsTimer = setTimeout(onTimeout, KeybindingService.PROFILE_DETECTION_TIMEOUT_MS);
         }
       } catch (error) {
         reject(error);
@@ -169,7 +174,12 @@ class KeybindingService {
     let readFileLast = 0;
     const readFile = uri => {
       const now = performance.now();
-      if (uri && (uri.scheme !== 'file' || uri.fsPath !== filePath || readFileLast + 200 > now)) {
+      if (
+        uri &&
+        (uri.scheme !== 'file' ||
+          uri.fsPath !== filePath ||
+          readFileLast + KeybindingService.KEYBINDINGS_DEBOUNCE_MS > now)
+      ) {
         return;
       }
       readFileLast = now;
@@ -187,7 +197,7 @@ class KeybindingService {
    * @returns {Promise<KeybindingMap>} Promise that resolves to the parsed keybindings
    * @private
    */
-  async _loadKeybindings(filePath) {
+  _loadKeybindings(filePath) {
     return new Promise(resolve => {
       const commandsList = {};
       for (let i = 0; i < this.commandsList.length; i++) {

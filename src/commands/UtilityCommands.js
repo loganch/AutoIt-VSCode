@@ -9,6 +9,11 @@ import aiConfig from '../ai_config';
 const { config } = aiConfig;
 const aiOutCommon = globalOutputChannel;
 
+const SUBSTRING_DOUBLE_UNDERSCORE_LENGTH = 2;
+const SUBSTRING_BYREF_LENGTH = 5;
+const BYREF_PREFIX_LENGTH = 6;
+const PARAMETER_PAD_LENGTH = 21;
+
 const runners = {
   isAiOutVisible() {
     for (let i = 0; i < window.visibleTextEditors.length; i += 1) {
@@ -203,7 +208,9 @@ const insertHeader = () => {
     }
 
     const hdrType =
-      found[2].substring(0, 2) === '__' ? '#INTERNAL_USE_ONLY# ' : '#FUNCTION# =========';
+      found[2].substring(0, SUBSTRING_DOUBLE_UNDERSCORE_LENGTH) === '__'
+        ? '#INTERNAL_USE_ONLY# '
+        : '#FUNCTION# =========';
     let syntaxBegin = `${found[2]}(`;
     let syntaxEnd = ')';
     let paramsOut = 'None';
@@ -218,13 +225,13 @@ const insertHeader = () => {
           syntaxEnd = `]${syntaxEnd}`;
         }
         let byref = '';
-        if (parameter.substring(0, 5).toLowerCase() === 'byref') {
+        if (parameter.substring(0, SUBSTRING_BYREF_LENGTH).toLowerCase() === 'byref') {
           byref = 'ByRef ';
-          parameter = parameter.substring(6).trim(); // strip off byref keyword
+          parameter = parameter.substring(BYREF_PREFIX_LENGTH).trim(); // strip off byref keyword
           tag += '[in/out] ';
         }
         syntaxBegin += (index ? ', ' : '') + byref + parameter;
-        return parameter.split(' ')[0].padEnd(21).concat(tag);
+        return parameter.split(' ')[0].padEnd(PARAMETER_PAD_LENGTH).concat(tag);
       });
       const paramPrefix = '\n;                  ';
       paramsOut = params.join(paramPrefix);
