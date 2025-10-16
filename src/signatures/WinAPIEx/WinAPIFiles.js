@@ -6,7 +6,8 @@ const include = '(Requires: `#include <WinAPIFiles.au3>`)';
 const signatures = {
   _WinAPI_BackupRead: {
     documentation: 'Backs up a file or directory, including the security information',
-    label: '_WinAPI_BackupRead ( $hFile, $pBuffer, $iLength, ByRef $iBytes, ByRef $pContext [, $bSecurity = False] )',
+    label:
+      '_WinAPI_BackupRead ( $hFile, $pBuffer, $iLength, ByRef $iBytes, ByRef $pContext [, $bSecurity = False] )',
     params: [
       {
         label: '$hFile',
@@ -27,7 +28,7 @@ const signatures = {
       {
         label: 'ByRef $pContext [, $bSecurity',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_BackupReadAbort: {
@@ -37,11 +38,12 @@ const signatures = {
       {
         label: 'ByRef $pContext',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_BackupSeek: {
-    documentation: 'Seeks forward in a data stream initially accessed by using the _WinAPI_BackupRead() or _WinAPI_BackupWrite() function',
+    documentation:
+      'Seeks forward in a data stream initially accessed by using the _WinAPI_BackupRead() or _WinAPI_BackupWrite() function',
     label: '_WinAPI_BackupSeek ( $hFile, $iSeek, ByRef $iBytes, ByRef $pContext )',
     params: [
       {
@@ -59,12 +61,13 @@ const signatures = {
       {
         label: 'ByRef $pContext',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_BackupWrite: {
     documentation: 'Restore a file or directory that was backed up using _WinAPI_BackupRead()',
-    label: '_WinAPI_BackupWrite ( $hFile, $pBuffer, $iLength, ByRef $iBytes, ByRef $pContext [, $bSecurity = False] )',
+    label:
+      '_WinAPI_BackupWrite ( $hFile, $pBuffer, $iLength, ByRef $iBytes, ByRef $pContext [, $bSecurity = False] )',
     params: [
       {
         label: '$hFile',
@@ -85,7 +88,7 @@ const signatures = {
       {
         label: 'ByRef $pContext [, $bSecurity',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_BackupWriteAbort: {
@@ -95,12 +98,12 @@ const signatures = {
       {
         label: 'ByRef $pContext',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DefineDosDevice: {
     documentation: 'Defines, redefines, or deletes MS-DOS device names',
-    label: '_WinAPI_DefineDosDevice ( $sDevice, $iFlags [, $sFilePath = \'\'] )',
+    label: "_WinAPI_DefineDosDevice ( $sDevice, $iFlags [, $sFilePath = ''] )",
     params: [
       {
         label: '$sDevice',
@@ -109,25 +112,24 @@ const signatures = {
       {
         label: '$iFlags [, $sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDriveType: {
-    documentation: 'Determines whether a disk drive is a removable, fixed, CD-ROM, RAM disk, or network drive',
-    label: '_WinAPI_GetDriveType ( [$sDrive = \'\'] )',
+    documentation:
+      'Determines whether a disk drive is a removable, fixed, CD-ROM, RAM disk, or network drive',
+    label: "_WinAPI_GetDriveType ( [$sDrive = ''] )",
     params: [
       {
         label: '$sDrive',
-        documentation: '**[optional]** Default is \'\'.',
-      }
+        documentation: "**[optional]** Default is ''.",
+      },
     ],
   },
   _WinAPI_GetLogicalDrives: {
     documentation: 'Retrieves a bitmask representing the currently available disk drives',
     label: '_WinAPI_GetLogicalDrives ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetPEType: {
     documentation: 'Retrieves a type of the machine for the specified portable executable (PE)',
@@ -136,7 +138,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_QueryDosDevice: {
@@ -146,7 +148,7 @@ const signatures = {
       {
         label: '$sDevice',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_Wow64EnableWow64FsRedirection: {
@@ -156,7 +158,7 @@ const signatures = {
       {
         label: '$bEnable',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateObjectID: {
@@ -166,7 +168,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DeleteObjectID: {
@@ -176,12 +178,13 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DeviceIoControl: {
     documentation: 'Sends a control code directly to a specified device driver',
-    label: '_WinAPI_DeviceIoControl ( $hDevice, $iControlCode [, $pInBuffer = 0 [, $iInBufferSize = 0 [, $pOutBuffer = 0 [, $iOutBufferSize = 0]]]] )',
+    label:
+      '_WinAPI_DeviceIoControl ( $hDevice, $iControlCode [, $pInBuffer = 0 [, $iInBufferSize = 0 [, $pOutBuffer = 0 [, $iOutBufferSize = 0]]]] )',
     params: [
       {
         label: '$hDevice',
@@ -190,7 +193,7 @@ const signatures = {
       {
         label: '$iControlCode [, $pInBuffer',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EjectMedia: {
@@ -200,7 +203,7 @@ const signatures = {
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetCDType: {
@@ -210,7 +213,7 @@ const signatures = {
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDriveBusType: {
@@ -220,27 +223,28 @@ const signatures = {
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDriveGeometryEx: {
-    documentation: 'Retrieves extended information about the disk\'s geometry',
+    documentation: "Retrieves extended information about the disk's geometry",
     label: '_WinAPI_GetDriveGeometryEx ( $iDrive )',
     params: [
       {
         label: '$iDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDriveNumber: {
-    documentation: 'Retrieves a device type, device number, and partition number for the specified drive',
+    documentation:
+      'Retrieves a device type, device number, and partition number for the specified drive',
     label: '_WinAPI_GetDriveNumber ( $sDrive )',
     params: [
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetObjectID: {
@@ -250,7 +254,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IOCTL: {
@@ -272,7 +276,7 @@ const signatures = {
       {
         label: '$iAccess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsDoorOpen: {
@@ -282,7 +286,7 @@ const signatures = {
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsWritable: {
@@ -292,7 +296,7 @@ const signatures = {
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoadMedia: {
@@ -302,12 +306,14 @@ const signatures = {
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CopyFileEx: {
-    documentation: 'Copies an existing file to a new file, notifying the application of its progress through a callback function',
-    label: '_WinAPI_CopyFileEx ( $sExistingFile, $sNewFile [, $iFlags = 0 [, $pProgressProc = 0 [, $pData = 0]]] )',
+    documentation:
+      'Copies an existing file to a new file, notifying the application of its progress through a callback function',
+    label:
+      '_WinAPI_CopyFileEx ( $sExistingFile, $sNewFile [, $iFlags = 0 [, $pProgressProc = 0 [, $pData = 0]]] )',
     params: [
       {
         label: '$sExistingFile',
@@ -316,7 +322,7 @@ const signatures = {
       {
         label: '$sNewFile [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateDirectory: {
@@ -326,7 +332,7 @@ const signatures = {
       {
         label: '$sDir [, $tSecurity',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateDirectoryEx: {
@@ -340,12 +346,13 @@ const signatures = {
       {
         label: '$sTemplateDir [, $tSecurity',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateFileEx: {
     documentation: 'Creates or opens a file or I/O device',
-    label: '_WinAPI_CreateFileEx ( $sFilePath, $iCreation [, $iAccess = 0 [, $iShare = 0 [, $iFlagsAndAttributes = 0 [, $tSecurity = 0 [, $hTemplate = 0]]]]] )',
+    label:
+      '_WinAPI_CreateFileEx ( $sFilePath, $iCreation [, $iAccess = 0 [, $iShare = 0 [, $iFlagsAndAttributes = 0 [, $tSecurity = 0 [, $hTemplate = 0]]]]] )',
     params: [
       {
         label: '$sFilePath',
@@ -354,17 +361,18 @@ const signatures = {
       {
         label: '$iCreation [, $iAccess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateFileMapping: {
     documentation: 'Creates or opens a named or unnamed file mapping object for a specified file',
-    label: '_WinAPI_CreateFileMapping ( $hFile [, $iSize = 0 [, $sName = \'\' [, $iProtect = 0x0004 [, $tSecurity = 0]]]] )',
+    label:
+      "_WinAPI_CreateFileMapping ( $hFile [, $iSize = 0 [, $sName = '' [, $iProtect = 0x0004 [, $tSecurity = 0]]]] )",
     params: [
       {
         label: '$hFile [, $iSize',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateHardLink: {
@@ -378,7 +386,7 @@ const signatures = {
       {
         label: '$sExistingFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateSymbolicLink: {
@@ -392,7 +400,7 @@ const signatures = {
       {
         label: '$sTarget [, $bDirectory',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DecryptFile: {
@@ -402,7 +410,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DeleteFile: {
@@ -412,7 +420,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DeleteVolumeMountPoint: {
@@ -422,12 +430,13 @@ const signatures = {
       {
         label: '$sMountedPath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DuplicateEncryptionInfoFile: {
     documentation: 'Copies the EFS metadata from one file or directory to another',
-    label: '_WinAPI_DuplicateEncryptionInfoFile ( $sSrcFilePath, $sDestFilePath [, $iCreation = 2 [, $iAttributes = 0 [, $tSecurity = 0]]] )',
+    label:
+      '_WinAPI_DuplicateEncryptionInfoFile ( $sSrcFilePath, $sDestFilePath [, $iCreation = 2 [, $iAttributes = 0 [, $tSecurity = 0]]] )',
     params: [
       {
         label: '$sSrcFilePath',
@@ -436,7 +445,7 @@ const signatures = {
       {
         label: '$sDestFilePath [, $iCreation',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EncryptFile: {
@@ -446,7 +455,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EncryptionDisable: {
@@ -460,27 +469,29 @@ const signatures = {
       {
         label: '$bDisable',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumFiles: {
-    documentation: 'Enumerates the files and subdirectories for the specified directory with a name that matches the template',
-    label: '_WinAPI_EnumFiles ( $sDir [, $iFlag = 0 [, $sTemplate = \'\' [, $bExclude = False]]] )',
+    documentation:
+      'Enumerates the files and subdirectories for the specified directory with a name that matches the template',
+    label: "_WinAPI_EnumFiles ( $sDir [, $iFlag = 0 [, $sTemplate = '' [, $bExclude = False]]] )",
     params: [
       {
         label: '$sDir [, $iFlag',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumFileStreams: {
-    documentation: 'Enumerates all streams with a ::$DATA stream type in the specified file or directory',
+    documentation:
+      'Enumerates all streams with a ::$DATA stream type in the specified file or directory',
     label: '_WinAPI_EnumFileStreams ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumHardLinks: {
@@ -490,7 +501,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FileEncryptionStatus: {
@@ -500,7 +511,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FileExists: {
@@ -510,7 +521,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FileInUse: {
@@ -520,7 +531,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindClose: {
@@ -530,7 +541,7 @@ const signatures = {
       {
         label: '$hSearch',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindCloseChangeNotification: {
@@ -540,11 +551,12 @@ const signatures = {
       {
         label: '$hChange',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindFirstChangeNotification: {
-    documentation: 'Creates a change notification handle and sets up initial change notification filter conditions',
+    documentation:
+      'Creates a change notification handle and sets up initial change notification filter conditions',
     label: '_WinAPI_FindFirstChangeNotification ( $sDirectory, $iFlags [, $bSubtree = False] )',
     params: [
       {
@@ -554,11 +566,12 @@ const signatures = {
       {
         label: '$iFlags [, $bSubtree',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindFirstFile: {
-    documentation: 'Searches a directory for a file or subdirectory with a name that matches a specific name',
+    documentation:
+      'Searches a directory for a file or subdirectory with a name that matches a specific name',
     label: '_WinAPI_FindFirstFile ( $sFilePath, $tData )',
     params: [
       {
@@ -568,7 +581,7 @@ const signatures = {
       {
         label: '$tData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindFirstFileName: {
@@ -582,11 +595,12 @@ const signatures = {
       {
         label: 'ByRef $sLink',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindFirstStream: {
-    documentation: 'Enumerates the first stream with a ::$DATA stream type in the specified file or directory',
+    documentation:
+      'Enumerates the first stream with a ::$DATA stream type in the specified file or directory',
     label: '_WinAPI_FindFirstStream ( $sFilePath, $tData )',
     params: [
       {
@@ -596,17 +610,18 @@ const signatures = {
       {
         label: '$tData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindNextChangeNotification: {
-    documentation: 'Requests that the operating system signal a change notification handle the next time it detects an appropriate change',
+    documentation:
+      'Requests that the operating system signal a change notification handle the next time it detects an appropriate change',
     label: '_WinAPI_FindNextChangeNotification ( $hChange )',
     params: [
       {
         label: '$hChange',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindNextFile: {
@@ -620,7 +635,7 @@ const signatures = {
       {
         label: '$tData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindNextFileName: {
@@ -634,7 +649,7 @@ const signatures = {
       {
         label: 'ByRef $sLink',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindNextStream: {
@@ -648,7 +663,7 @@ const signatures = {
       {
         label: '$tData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FlushViewOfFile: {
@@ -658,27 +673,29 @@ const signatures = {
       {
         label: '$pAddress [, $iBytes',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetBinaryType: {
-    documentation: 'Determines whether a file is an executable (.exe) file, and if so, which subsystem runs the executable file',
+    documentation:
+      'Determines whether a file is an executable (.exe) file, and if so, which subsystem runs the executable file',
     label: '_WinAPI_GetBinaryType ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetCompressedFileSize: {
-    documentation: 'Retrieves the actual number of bytes of disk storage used to store a specified file',
+    documentation:
+      'Retrieves the actual number of bytes of disk storage used to store a specified file',
     label: '_WinAPI_GetCompressedFileSize ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetCompression: {
@@ -688,24 +705,23 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetCurrentDirectory: {
     documentation: 'Retrieves the current directory for the current process',
     label: '_WinAPI_GetCurrentDirectory ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetDiskFreeSpaceEx: {
-    documentation: 'Retrieves information about the amount of space that is available on a disk volume',
+    documentation:
+      'Retrieves information about the amount of space that is available on a disk volume',
     label: '_WinAPI_GetDiskFreeSpaceEx ( $sDrive )',
     params: [
       {
         label: '$sDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileAttributes: {
@@ -715,17 +731,17 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileID: {
-    documentation: 'Retrieves the file system\'s 8-byte file reference number for a file',
+    documentation: "Retrieves the file system's 8-byte file reference number for a file",
     label: '_WinAPI_GetFileID ( $hFile )',
     params: [
       {
         label: '$hFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileInformationByHandle: {
@@ -735,7 +751,7 @@ const signatures = {
       {
         label: '$hFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileInformationByHandleEx: {
@@ -745,7 +761,7 @@ const signatures = {
       {
         label: '$hFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFilePointerEx: {
@@ -755,7 +771,7 @@ const signatures = {
       {
         label: '$hFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileSizeOnDisk: {
@@ -765,7 +781,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileTitle: {
@@ -775,7 +791,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileType: {
@@ -785,7 +801,7 @@ const signatures = {
       {
         label: '$hFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFinalPathNameByHandle: {
@@ -795,7 +811,7 @@ const signatures = {
       {
         label: '$hFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFinalPathNameByHandleEx: {
@@ -805,7 +821,7 @@ const signatures = {
       {
         label: '$hFile [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFullPathName: {
@@ -815,54 +831,55 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetProfilesDirectory: {
     documentation: 'Retrieves the path to the root directory where user profiles are stored',
     label: '_WinAPI_GetProfilesDirectory ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetTempFileName: {
     documentation: 'Creates a name for a temporary file',
-    label: '_WinAPI_GetTempFileName ( $sFilePath [, $sPrefix = \'\'] )',
+    label: "_WinAPI_GetTempFileName ( $sFilePath [, $sPrefix = ''] )",
     params: [
       {
         label: '$sFilePath [, $sPrefix',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetVolumeInformation: {
-    documentation: 'Retrieves information about the file system and volume associated with the specified root directory',
-    label: '_WinAPI_GetVolumeInformation ( [$sRoot = \'\'] )',
+    documentation:
+      'Retrieves information about the file system and volume associated with the specified root directory',
+    label: "_WinAPI_GetVolumeInformation ( [$sRoot = ''] )",
     params: [
       {
         label: '$sRoot',
-        documentation: '**[optional]** Default is \'\'.',
-      }
+        documentation: "**[optional]** Default is ''.",
+      },
     ],
   },
   _WinAPI_GetVolumeInformationByHandle: {
-    documentation: 'Retrieves information about the file system and volume associated with the specified file',
+    documentation:
+      'Retrieves information about the file system and volume associated with the specified file',
     label: '_WinAPI_GetVolumeInformationByHandle ( $hFile )',
     params: [
       {
         label: '$hFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetVolumeNameForVolumeMountPoint: {
-    documentation: 'Retrieves a volume GUID path for the volume that is associated with the specified volume mount point',
+    documentation:
+      'Retrieves a volume GUID path for the volume that is associated with the specified volume mount point',
     label: '_WinAPI_GetVolumeNameForVolumeMountPoint ( $sMountedPath )',
     params: [
       {
         label: '$sMountedPath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsPathShared: {
@@ -872,11 +889,12 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LockDevice: {
-    documentation: 'Enables or disables the mechanism that ejects media, for those devices possessing that locking capability',
+    documentation:
+      'Enables or disables the mechanism that ejects media, for those devices possessing that locking capability',
     label: '_WinAPI_LockDevice ( $sDrive, $bLock )',
     params: [
       {
@@ -886,7 +904,7 @@ const signatures = {
       {
         label: '$bLock',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LockFile: {
@@ -904,22 +922,25 @@ const signatures = {
       {
         label: '$iLength',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_MapViewOfFile: {
     documentation: 'Maps a view of a file mapping into the address space of a calling process',
-    label: '_WinAPI_MapViewOfFile ( $hMapping [, $iOffset = 0 [, $iBytes = 0 [, $iAccess = 0x0006]]] )',
+    label:
+      '_WinAPI_MapViewOfFile ( $hMapping [, $iOffset = 0 [, $iBytes = 0 [, $iAccess = 0x0006]]] )',
     params: [
       {
         label: '$hMapping [, $iOffset',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_MoveFileEx: {
-    documentation: 'Moves a file or directory, notifying the application of its progress through a callback function',
-    label: '_WinAPI_MoveFileEx ( $sExistingFile, $sNewFile [, $iFlags = 0 [, $pProgressProc = 0 [, $pData = 0]]] )',
+    documentation:
+      'Moves a file or directory, notifying the application of its progress through a callback function',
+    label:
+      '_WinAPI_MoveFileEx ( $sExistingFile, $sNewFile [, $iFlags = 0 [, $pProgressProc = 0 [, $pData = 0]]] )',
     params: [
       {
         label: '$sExistingFile',
@@ -928,7 +949,7 @@ const signatures = {
       {
         label: '$sNewFile [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OpenFileById: {
@@ -942,7 +963,7 @@ const signatures = {
       {
         label: '$vID [, $iAccess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OpenFileMapping: {
@@ -952,7 +973,7 @@ const signatures = {
       {
         label: '$sName [, $iAccess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsDirectory: {
@@ -962,7 +983,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsDirectoryEmpty: {
@@ -972,12 +993,14 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ReadDirectoryChanges: {
-    documentation: 'Retrieves information that describes the changes within the specified directory',
-    label: '_WinAPI_ReadDirectoryChanges ( $hDirectory, $iFilter, $pBuffer, $iLength [, $bSubtree = 0] )',
+    documentation:
+      'Retrieves information that describes the changes within the specified directory',
+    label:
+      '_WinAPI_ReadDirectoryChanges ( $hDirectory, $iFilter, $pBuffer, $iLength [, $bSubtree = 0] )',
     params: [
       {
         label: '$hDirectory',
@@ -994,7 +1017,7 @@ const signatures = {
       {
         label: '$iLength [, $bSubtree',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RemoveDirectory: {
@@ -1004,11 +1027,12 @@ const signatures = {
       {
         label: '$sDirPath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ReOpenFile: {
-    documentation: 'Reopens the specified file system object with different access rights, sharing mode, and flags',
+    documentation:
+      'Reopens the specified file system object with different access rights, sharing mode, and flags',
     label: '_WinAPI_ReOpenFile ( $hFile, $iAccess, $iShare [, $iFlags = 0] )',
     params: [
       {
@@ -1022,12 +1046,14 @@ const signatures = {
       {
         label: '$iShare [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ReplaceFile: {
-    documentation: 'Replaces one file with another file, and creates a backup copy of the original file',
-    label: '_WinAPI_ReplaceFile ( $sReplacedFile, $sReplacementFile [, $sBackupFile = \'\' [, $iFlags = 0]] )',
+    documentation:
+      'Replaces one file with another file, and creates a backup copy of the original file',
+    label:
+      "_WinAPI_ReplaceFile ( $sReplacedFile, $sReplacementFile [, $sBackupFile = '' [, $iFlags = 0]] )",
     params: [
       {
         label: '$sReplacedFile',
@@ -1036,17 +1062,17 @@ const signatures = {
       {
         label: '$sReplacementFile [, $sBackupFile',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SearchPath: {
     documentation: 'Searches for a specified file in a specified path',
-    label: '_WinAPI_SearchPath ( $sFilePath [, $sSearchPath = \'\'] )',
+    label: "_WinAPI_SearchPath ( $sFilePath [, $sSearchPath = ''] )",
     params: [
       {
         label: '$sFilePath [, $sSearchPath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetCompression: {
@@ -1060,7 +1086,7 @@ const signatures = {
       {
         label: '$iCompression',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetCurrentDirectory: {
@@ -1070,7 +1096,7 @@ const signatures = {
       {
         label: '$sDir',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetFileAttributes: {
@@ -1084,7 +1110,7 @@ const signatures = {
       {
         label: '$iAttributes',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetFileInformationByHandleEx: {
@@ -1098,7 +1124,7 @@ const signatures = {
       {
         label: '$tFILEINFO',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetFilePointerEx: {
@@ -1112,7 +1138,7 @@ const signatures = {
       {
         label: '$iPos [, $iMethod',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetFileShortName: {
@@ -1126,7 +1152,7 @@ const signatures = {
       {
         label: '$sShortName',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetFileValidData: {
@@ -1140,17 +1166,18 @@ const signatures = {
       {
         label: '$iLength',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetSearchPathMode: {
-    documentation: 'Sets the per-process mode that the _WinAPI_SearchPath() function uses when locating files',
+    documentation:
+      'Sets the per-process mode that the _WinAPI_SearchPath() function uses when locating files',
     label: '_WinAPI_SetSearchPathMode ( $iFlags )',
     params: [
       {
         label: '$iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetVolumeMountPoint: {
@@ -1164,7 +1191,7 @@ const signatures = {
       {
         label: '$sGUID',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SfcIsFileProtected: {
@@ -1174,7 +1201,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UnlockFile: {
@@ -1192,19 +1219,19 @@ const signatures = {
       {
         label: '$iLength',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UnmapViewOfFile: {
-    documentation: 'Unmaps a mapped view of a file from the calling process\'s address space',
+    documentation: "Unmaps a mapped view of a file from the calling process's address space",
     label: '_WinAPI_UnmapViewOfFile ( $pAddress )',
     params: [
       {
         label: '$pAddress',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);

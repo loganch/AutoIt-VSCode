@@ -7,9 +7,7 @@ const signatures = {
   _WinAPI_GetExtended: {
     documentation: 'Retrieves the last extended function return value',
     label: '_WinAPI_GetExtended ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_PlaySound: {
     documentation: 'Plays a sound specified by the given file name, resource, or system event',
@@ -18,7 +16,7 @@ const signatures = {
       {
         label: '$sSound [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CharToOem: {
@@ -28,7 +26,7 @@ const signatures = {
       {
         label: '$sStr',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DWordToFloat: {
@@ -38,7 +36,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DWordToInt: {
@@ -48,7 +46,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FloatToDWord: {
@@ -58,7 +56,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetString: {
@@ -68,7 +66,7 @@ const signatures = {
       {
         label: '$pString [, $bUnicode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_HashData: {
@@ -82,7 +80,7 @@ const signatures = {
       {
         label: '$iSize [, $iLength',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_HashString: {
@@ -92,7 +90,7 @@ const signatures = {
       {
         label: '$sString [, $bCaseSensitive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_HiByte: {
@@ -102,7 +100,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_HiDWord: {
@@ -112,7 +110,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IntToDWord: {
@@ -122,7 +120,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoByte: {
@@ -132,7 +130,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoDWord: {
@@ -142,7 +140,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LongMid: {
@@ -160,7 +158,7 @@ const signatures = {
       {
         label: '$iCount',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_MakeWord: {
@@ -174,17 +172,18 @@ const signatures = {
       {
         label: '$iHi',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OemToChar: {
-    documentation: 'Converts a string from the OEM-defined character set into either an ANSI string',
+    documentation:
+      'Converts a string from the OEM-defined character set into either an ANSI string',
     label: '_WinAPI_OemToChar ( $sStr )',
     params: [
       {
         label: '$sStr',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShortToWord: {
@@ -194,37 +193,40 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StrFormatByteSize: {
-    documentation: 'Converts a numeric value into a string that represents the number expressed as a size value in bytes, kilobytes, megabytes, or gigabytes',
+    documentation:
+      'Converts a numeric value into a string that represents the number expressed as a size value in bytes, kilobytes, megabytes, or gigabytes',
     label: '_WinAPI_StrFormatByteSize ( $iSize )',
     params: [
       {
         label: '$iSize',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StrFormatByteSizeEx: {
-    documentation: 'Converts a numeric value into a string that represents the number expressed as separated groups of digits to the left of the decimal',
+    documentation:
+      'Converts a numeric value into a string that represents the number expressed as separated groups of digits to the left of the decimal',
     label: '_WinAPI_StrFormatByteSizeEx ( $iSize )',
     params: [
       {
         label: '$iSize',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StrFormatKBSize: {
-    documentation: 'Converts a numeric value into a string that represents the number expressed as a size value in kilobytes',
+    documentation:
+      'Converts a numeric value into a string that represents the number expressed as a size value in kilobytes',
     label: '_WinAPI_StrFormatKBSize ( $iSize )',
     params: [
       {
         label: '$iSize',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StrFromTimeInterval: {
@@ -234,7 +236,7 @@ const signatures = {
       {
         label: '$iTime [, $iDigits',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StrLen: {
@@ -244,7 +246,7 @@ const signatures = {
       {
         label: '$pString [, $bUnicode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SwapDWord: {
@@ -254,7 +256,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SwapQWord: {
@@ -264,7 +266,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SwapWord: {
@@ -274,7 +276,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_WordToShort: {
@@ -284,7 +286,7 @@ const signatures = {
       {
         label: '$iValue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ArrayToStruct: {
@@ -294,21 +296,22 @@ const signatures = {
       {
         label: 'Const ByRef $aData [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CopyStruct: {
     documentation: 'Creates a duplicate of a specified structure',
-    label: '_WinAPI_CopyStruct ( $tStruct [, $sStruct = \'\'] )',
+    label: "_WinAPI_CopyStruct ( $tStruct [, $sStruct = ''] )",
     params: [
       {
         label: '$tStruct [, $sStruct',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateMargins: {
-    documentation: 'Creates $tagMARGINS structure with specified left, right, top, and bottom retaining borders',
+    documentation:
+      'Creates $tagMARGINS structure with specified left, right, top, and bottom retaining borders',
     label: '_WinAPI_CreateMargins ( $iLeftWidth, $iRightWidth, $iTopHeight, $iBottomHeight )',
     params: [
       {
@@ -326,11 +329,12 @@ const signatures = {
       {
         label: '$iBottomHeight',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreatePoint: {
-    documentation: 'Creates $tagPOINT structure with the x- and y-coordinates of the specified point',
+    documentation:
+      'Creates $tagPOINT structure with the x- and y-coordinates of the specified point',
     label: '_WinAPI_CreatePoint ( $iX, $iY )',
     params: [
       {
@@ -340,7 +344,7 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateRect: {
@@ -362,7 +366,7 @@ const signatures = {
       {
         label: '$iBottom',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateRectEx: {
@@ -384,11 +388,12 @@ const signatures = {
       {
         label: '$iHeight',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateSize: {
-    documentation: 'Creates $tagSIZE structure with the width and height of the specified rectangle',
+    documentation:
+      'Creates $tagSIZE structure with the width and height of the specified rectangle',
     label: '_WinAPI_CreateSize ( $iWidth, $iHeight )',
     params: [
       {
@@ -398,7 +403,7 @@ const signatures = {
       {
         label: '$iHeight',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StructToArray: {
@@ -408,12 +413,12 @@ const signatures = {
       {
         label: '$tStruct [, $iItems',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UnionStruct: {
     documentation: 'Creates the structure of two structures',
-    label: '_WinAPI_UnionStruct ( $tStruct1, $tStruct2 [, $sStruct = \'\'] )',
+    label: "_WinAPI_UnionStruct ( $tStruct1, $tStruct2 [, $sStruct = ''] )",
     params: [
       {
         label: '$tStruct1',
@@ -422,9 +427,9 @@ const signatures = {
       {
         label: '$tStruct2 [, $sStruct',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);

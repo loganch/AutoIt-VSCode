@@ -5,13 +5,14 @@ const include = '(Requires: `#include <WinAPIShPath.au3>`)';
 
 const signatures = {
   _WinAPI_CommandLineToArgv: {
-    documentation: 'Parses a command-line string and returns an array of the command-line arguments',
+    documentation:
+      'Parses a command-line string and returns an array of the command-line arguments',
     label: '_WinAPI_CommandLineToArgv ( $sCmd )',
     params: [
       {
         label: '$sCmd',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsNameInExpression: {
@@ -25,7 +26,7 @@ const signatures = {
       {
         label: '$sPattern [, $bCaseSensitive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ParseURL: {
@@ -35,7 +36,7 @@ const signatures = {
       {
         label: '$sUrl',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ParseUserName: {
@@ -45,27 +46,28 @@ const signatures = {
       {
         label: '$sUser',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathAddBackslash: {
-    documentation: 'Adds a backslash to the end of a string to create the correct syntax for a path',
+    documentation:
+      'Adds a backslash to the end of a string to create the correct syntax for a path',
     label: '_WinAPI_PathAddBackslash ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathAddExtension: {
     documentation: 'Adds a file name extension to a path string',
-    label: '_WinAPI_PathAddExtension ( $sFilePath [, $sExt = \'\'] )',
+    label: "_WinAPI_PathAddExtension ( $sFilePath [, $sExt = ''] )",
     params: [
       {
         label: '$sFilePath [, $sExt',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathAppend: {
@@ -79,7 +81,7 @@ const signatures = {
       {
         label: '$sMore',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathBuildRoot: {
@@ -89,17 +91,18 @@ const signatures = {
       {
         label: '$iDrive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathCanonicalize: {
-    documentation: 'Removes elements of a file path according to special strings inserted into that path',
+    documentation:
+      'Removes elements of a file path according to special strings inserted into that path',
     label: '_WinAPI_PathCanonicalize ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathCommonPrefix: {
@@ -113,11 +116,12 @@ const signatures = {
       {
         label: '$sPath2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathCompactPath: {
-    documentation: 'Truncates a file path to fit within a given pixel width by replacing path components with ellipses',
+    documentation:
+      'Truncates a file path to fit within a given pixel width by replacing path components with ellipses',
     label: '_WinAPI_PathCompactPath ( $hWnd, $sFilePath [, $iWidth = 0] )',
     params: [
       {
@@ -127,11 +131,12 @@ const signatures = {
       {
         label: '$sFilePath [, $iWidth',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathCompactPathEx: {
-    documentation: 'Truncates a path to fit within a certain number of characters by replacing path components with ellipses',
+    documentation:
+      'Truncates a path to fit within a certain number of characters by replacing path components with ellipses',
     label: '_WinAPI_PathCompactPathEx ( $sFilePath, $iMax )',
     params: [
       {
@@ -141,7 +146,7 @@ const signatures = {
       {
         label: '$iMax',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathCreateFromUrl: {
@@ -151,7 +156,7 @@ const signatures = {
       {
         label: '$sUrl',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathFindExtension: {
@@ -161,7 +166,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathFindFileName: {
@@ -171,17 +176,18 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathFindNextComponent: {
-    documentation: 'Parses a path and returns the portion of that path that follows the first backslash',
+    documentation:
+      'Parses a path and returns the portion of that path that follows the first backslash',
     label: '_WinAPI_PathFindNextComponent ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathGetArgs: {
@@ -191,7 +197,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathGetCharType: {
@@ -201,21 +207,23 @@ const signatures = {
       {
         label: '$sChar',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathGetDriveNumber: {
-    documentation: 'Searches a path for a drive letter within the range of \'A\' to \'Z\' and returns the corresponding drive number',
+    documentation:
+      "Searches a path for a drive letter within the range of 'A' to 'Z' and returns the corresponding drive number",
     label: '_WinAPI_PathGetDriveNumber ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsContentType: {
-    documentation: 'Determines if a file\'s registered content type matches the specified content type',
+    documentation:
+      "Determines if a file's registered content type matches the specified content type",
     label: '_WinAPI_PathIsContentType ( $sFilePath, $sType )',
     params: [
       {
@@ -225,7 +233,7 @@ const signatures = {
       {
         label: '$sType',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsExe: {
@@ -235,7 +243,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsFileSpec: {
@@ -245,7 +253,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsLFNFileSpec: {
@@ -255,7 +263,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsRelative: {
@@ -265,7 +273,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsRoot: {
@@ -275,7 +283,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsSameRoot: {
@@ -289,37 +297,40 @@ const signatures = {
       {
         label: '$sPath2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsSystemFolder: {
-    documentation: 'Determines if an existing folder contains the attributes that make it a system folder',
+    documentation:
+      'Determines if an existing folder contains the attributes that make it a system folder',
     label: '_WinAPI_PathIsSystemFolder ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsUNC: {
-    documentation: 'Determines if the string is a valid Universal Naming Convention (UNC) for a server and share path',
+    documentation:
+      'Determines if the string is a valid Universal Naming Convention (UNC) for a server and share path',
     label: '_WinAPI_PathIsUNC ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsUNCServer: {
-    documentation: 'Determines if a string is a valid Universal Naming Convention (UNC) for a server path only',
+    documentation:
+      'Determines if a string is a valid Universal Naming Convention (UNC) for a server path only',
     label: '_WinAPI_PathIsUNCServer ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathIsUNCServerShare: {
@@ -329,7 +340,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathMakeSystemFolder: {
@@ -339,7 +350,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathMatchSpec: {
@@ -353,7 +364,7 @@ const signatures = {
       {
         label: '$sSpec',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathParseIconLocation: {
@@ -363,7 +374,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathRelativePathTo: {
@@ -385,7 +396,7 @@ const signatures = {
       {
         label: '$bDirTo',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathRemoveArgs: {
@@ -395,7 +406,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathRemoveBackslash: {
@@ -405,7 +416,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathRemoveExtension: {
@@ -415,7 +426,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathRemoveFileSpec: {
@@ -425,7 +436,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathRenameExtension: {
@@ -439,7 +450,7 @@ const signatures = {
       {
         label: '$sExt',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathSearchAndQualify: {
@@ -449,17 +460,18 @@ const signatures = {
       {
         label: '$sFilePath [, $bExists',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathSkipRoot: {
-    documentation: 'Parses a path, ignoring the drive letter or Universal Naming Convention (UNC) server/share path elements',
+    documentation:
+      'Parses a path, ignoring the drive letter or Universal Naming Convention (UNC) server/share path elements',
     label: '_WinAPI_PathSkipRoot ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathStripPath: {
@@ -469,7 +481,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathStripToRoot: {
@@ -479,7 +491,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathUndecorate: {
@@ -489,17 +501,18 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathUnExpandEnvStrings: {
-    documentation: 'Replaces folder names in a fully-qualified path with their associated environment string',
+    documentation:
+      'Replaces folder names in a fully-qualified path with their associated environment string',
     label: '_WinAPI_PathUnExpandEnvStrings ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathUnmakeSystemFolder: {
@@ -509,7 +522,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathUnquoteSpaces: {
@@ -519,7 +532,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathYetAnotherMakeUniqueName: {
@@ -529,7 +542,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetImageList: {
@@ -539,17 +552,18 @@ const signatures = {
       {
         label: '$bSmall',
         documentation: '**[optional]** Default is False.',
-      }
+      },
     ],
   },
   _WinAPI_UrlApplyScheme: {
-    documentation: 'Determines a scheme for a specified URL string, and returns a string with an appropriate prefix',
+    documentation:
+      'Determines a scheme for a specified URL string, and returns a string with an appropriate prefix',
     label: '_WinAPI_UrlApplyScheme ( $sUrl [, $iFlags = 1] )',
     params: [
       {
         label: '$sUrl [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlCanonicalize: {
@@ -563,7 +577,7 @@ const signatures = {
       {
         label: '$iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlCombine: {
@@ -577,7 +591,7 @@ const signatures = {
       {
         label: '$sPart [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlCompare: {
@@ -591,7 +605,7 @@ const signatures = {
       {
         label: '$sUrl2 [, $bIgnoreSlash',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlCreateFromPath: {
@@ -601,7 +615,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlFixup: {
@@ -611,7 +625,7 @@ const signatures = {
       {
         label: '$sUrl',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlGetPart: {
@@ -625,7 +639,7 @@ const signatures = {
       {
         label: '$iPart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlHash: {
@@ -635,7 +649,7 @@ const signatures = {
       {
         label: '$sUrl [, $iLength',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UrlIs: {
@@ -645,9 +659,9 @@ const signatures = {
       {
         label: '$sUrl [, $iType',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);

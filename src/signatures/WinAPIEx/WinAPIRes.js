@@ -5,7 +5,8 @@ const include = '(Requires: `#include <WinAPIRes.au3>`)';
 
 const signatures = {
   _WinAPI_CreateCaret: {
-    documentation: 'Creates a new shape for the system caret and assigns ownership of the caret to the specified window',
+    documentation:
+      'Creates a new shape for the system caret and assigns ownership of the caret to the specified window',
     label: '_WinAPI_CreateCaret ( $hWnd, $hBitmap [, $iWidth = 0 [, $iHeight = 0]] )',
     params: [
       {
@@ -15,29 +16,24 @@ const signatures = {
       {
         label: '$hBitmap [, $iWidth',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DestroyCaret: {
-    documentation: 'Destroys the caret\'s current shape, frees the caret from the window, and removes the caret from the screen',
+    documentation:
+      "Destroys the caret's current shape, frees the caret from the window, and removes the caret from the screen",
     label: '_WinAPI_DestroyCaret ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetCaretBlinkTime: {
-    documentation: 'Returns the time required to invert the caret\'s pixels',
+    documentation: "Returns the time required to invert the caret's pixels",
     label: '_WinAPI_GetCaretBlinkTime ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetCaretPos: {
-    documentation: 'Retrieves the caret\'s position',
+    documentation: "Retrieves the caret's position",
     label: '_WinAPI_GetCaretPos ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_HideCaret: {
     documentation: 'Removes the caret from the screen',
@@ -46,7 +42,7 @@ const signatures = {
       {
         label: '$hWnd',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetCaretBlinkTime: {
@@ -56,7 +52,7 @@ const signatures = {
       {
         label: '$iDuration',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetCaretPos: {
@@ -70,17 +66,17 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShowCaret: {
-    documentation: 'Makes the caret visible on the screen at the caret\'s current position',
+    documentation: "Makes the caret visible on the screen at the caret's current position",
     label: '_WinAPI_ShowCaret ( $hWnd )',
     params: [
       {
         label: '$hWnd',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ClipCursor: {
@@ -90,7 +86,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CopyCursor: {
@@ -100,7 +96,7 @@ const signatures = {
       {
         label: '$hCursor',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DestroyCursor: {
@@ -110,22 +106,19 @@ const signatures = {
       {
         label: '$hCursor',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetClipCursor: {
-    documentation: 'Retrieves the screen coordinates of the rectangular area to which the cursor is confined',
+    documentation:
+      'Retrieves the screen coordinates of the rectangular area to which the cursor is confined',
     label: '_WinAPI_GetClipCursor ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetCursor: {
     documentation: 'Retrieves a handle to the current cursor',
     label: '_WinAPI_GetCursor ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_LoadCursor: {
     documentation: 'Loads the specified cursor resource from the executable (.exe) file',
@@ -138,7 +131,7 @@ const signatures = {
       {
         label: '$sName',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoadCursorFromFile: {
@@ -148,7 +141,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetSystemCursor: {
@@ -162,7 +155,7 @@ const signatures = {
       {
         label: '$iID [, $bCopy',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AddIconTransparency: {
@@ -172,12 +165,13 @@ const signatures = {
       {
         label: '$hIcon [, $iPercent',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateIcon: {
     documentation: 'Creates an icon that has the specified size, colors, and bit patterns',
-    label: '_WinAPI_CreateIcon ( $hInstance, $iWidth, $iHeight, $iPlanes, $iBitsPixel, $pANDBits, $pXORBits )',
+    label:
+      '_WinAPI_CreateIcon ( $hInstance, $iWidth, $iHeight, $iPlanes, $iBitsPixel, $pANDBits, $pXORBits )',
     params: [
       {
         label: '$hInstance',
@@ -206,12 +200,13 @@ const signatures = {
       {
         label: '$pXORBits',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateIconFromResourceEx: {
     documentation: 'Creates an icon or cursor from resource bits describing the icon',
-    label: '_WinAPI_CreateIconFromResourceEx ( $pData, $iSize [, $bIcon = True [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
+    label:
+      '_WinAPI_CreateIconFromResourceEx ( $pData, $iSize [, $bIcon = True [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
     params: [
       {
         label: '$pData',
@@ -220,7 +215,7 @@ const signatures = {
       {
         label: '$iSize [, $bIcon',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ExtractIcon: {
@@ -234,7 +229,7 @@ const signatures = {
       {
         label: '$iIndex [, $bSmall',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FileIconInit: {
@@ -244,7 +239,7 @@ const signatures = {
       {
         label: '$bRestore',
         documentation: '**[optional]** Default is True.',
-      }
+      },
     ],
   },
   _WinAPI_GetIconInfoEx: {
@@ -254,11 +249,12 @@ const signatures = {
       {
         label: '$hIcon',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoadIcon: {
-    documentation: 'Loads the specified icon resource from the executable (.exe) file associated with an application instance',
+    documentation:
+      'Loads the specified icon resource from the executable (.exe) file associated with an application instance',
     label: '_WinAPI_LoadIcon ( $hInstance, $sName )',
     params: [
       {
@@ -268,27 +264,30 @@ const signatures = {
       {
         label: '$sName',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LookupIconIdFromDirectoryEx: {
-    documentation: 'Searches through icon or cursor data for the icon or cursor that best fits the current display device',
-    label: '_WinAPI_LookupIconIdFromDirectoryEx ( $pData [, $bIcon = True [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
+    documentation:
+      'Searches through icon or cursor data for the icon or cursor that best fits the current display device',
+    label:
+      '_WinAPI_LookupIconIdFromDirectoryEx ( $pData [, $bIcon = True [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
     params: [
       {
         label: '$pData [, $bIcon',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_BeginUpdateResource: {
-    documentation: 'Retrieves a handle that can be used to add, delete, or replace resources in a binary module',
+    documentation:
+      'Retrieves a handle that can be used to add, delete, or replace resources in a binary module',
     label: '_WinAPI_BeginUpdateResource ( $sFilePath [, $bDelete = False] )',
     params: [
       {
         label: '$sFilePath [, $bDelete',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EndUpdateResource: {
@@ -298,11 +297,12 @@ const signatures = {
       {
         label: '$hUpdate [, $bDiscard',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumResourceLanguages: {
-    documentation: 'Enumerates a language-specific resources, of the specified type and name, associated with a binary module',
+    documentation:
+      'Enumerates a language-specific resources, of the specified type and name, associated with a binary module',
     label: '_WinAPI_EnumResourceLanguages ( $hModule, $sType, $sName )',
     params: [
       {
@@ -316,7 +316,7 @@ const signatures = {
       {
         label: '$sName',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumResourceNames: {
@@ -330,7 +330,7 @@ const signatures = {
       {
         label: '$sType',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumResourceTypes: {
@@ -340,11 +340,12 @@ const signatures = {
       {
         label: '$hModule',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindResource: {
-    documentation: 'Determines the location of a resource with the specified type and name in the specified module',
+    documentation:
+      'Determines the location of a resource with the specified type and name in the specified module',
     label: '_WinAPI_FindResource ( $hInstance, $sType, $sName )',
     params: [
       {
@@ -358,11 +359,12 @@ const signatures = {
       {
         label: '$sName',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FindResourceEx: {
-    documentation: 'Determines the location of the resource with the specified type, name, and language in the specified module',
+    documentation:
+      'Determines the location of the resource with the specified type, name, and language in the specified module',
     label: '_WinAPI_FindResourceEx ( $hInstance, $sType, $sName, $iLanguage )',
     params: [
       {
@@ -380,7 +382,7 @@ const signatures = {
       {
         label: '$iLanguage',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FreeResource: {
@@ -390,7 +392,7 @@ const signatures = {
       {
         label: '$hData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFileVersionInfo: {
@@ -404,7 +406,7 @@ const signatures = {
       {
         label: 'ByRef $pBuffer [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoadIndirectString: {
@@ -414,7 +416,7 @@ const signatures = {
       {
         label: '$sStrIn',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoadResource: {
@@ -428,7 +430,7 @@ const signatures = {
       {
         label: '$hResource',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LoadStringEx: {
@@ -442,7 +444,7 @@ const signatures = {
       {
         label: '$iID [, $iLanguage',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LockResource: {
@@ -452,7 +454,7 @@ const signatures = {
       {
         label: '$hData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SizeOfResource: {
@@ -466,7 +468,7 @@ const signatures = {
       {
         label: '$hResource',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UpdateResource: {
@@ -496,39 +498,42 @@ const signatures = {
       {
         label: '$iSize',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_VerQueryRoot: {
-    documentation: 'Retrieves the fixed version information from the specified version-information resource',
+    documentation:
+      'Retrieves the fixed version information from the specified version-information resource',
     label: '_WinAPI_VerQueryRoot ( $pData )',
     params: [
       {
         label: '$pData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_VerQueryValue: {
-    documentation: 'Retrieves the non-fixed (strings) version information from the specified version-information resource',
-    label: '_WinAPI_VerQueryValue ( $pData [, $sValues = \'\'] )',
+    documentation:
+      'Retrieves the non-fixed (strings) version information from the specified version-information resource',
+    label: "_WinAPI_VerQueryValue ( $pData [, $sValues = ''] )",
     params: [
       {
         label: '$pData [, $sValues',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_VerQueryValueEx: {
-    documentation: 'Retrieves the text information from the version-information resource of the specified binary module',
-    label: '_WinAPI_VerQueryValueEx ( $hModule [, $sValues = \'\' [, $iLanguage = 0x0400]] )',
+    documentation:
+      'Retrieves the text information from the version-information resource of the specified binary module',
+    label: "_WinAPI_VerQueryValueEx ( $hModule [, $sValues = '' [, $iLanguage = 0x0400]] )",
     params: [
       {
         label: '$hModule [, $sValues',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);

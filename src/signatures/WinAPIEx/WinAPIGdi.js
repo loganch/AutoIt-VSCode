@@ -5,8 +5,10 @@ const include = '(Requires: `#include <WinAPIGdi.au3>`)';
 
 const signatures = {
   _WinAPI_CreateDIB: {
-    documentation: 'Creates an uncompressed device-independent bitmap (DIB) with the specified width, height, and color depth',
-    label: '_WinAPI_CreateDIB ( $iWidth, $iHeight [, $iBitsPerPel = 32 [, $tColorTable = 0 [, $iColorCount = 0]]] )',
+    documentation:
+      'Creates an uncompressed device-independent bitmap (DIB) with the specified width, height, and color depth',
+    label:
+      '_WinAPI_CreateDIB ( $iWidth, $iHeight [, $iBitsPerPel = 32 [, $tColorTable = 0 [, $iColorCount = 0]]] )',
     params: [
       {
         label: '$iWidth',
@@ -15,12 +17,14 @@ const signatures = {
       {
         label: '$iHeight [, $iBitsPerPel',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AdjustBitmap: {
-    documentation: 'Creates a new device-depended bitmap (DDB) from the source bitmap with new dimensions and color adjustment',
-    label: '_WinAPI_AdjustBitmap ( $hBitmap, $iWidth, $iHeight [, $iMode = 3 [, $tAdjustment = 0]] )',
+    documentation:
+      'Creates a new device-depended bitmap (DDB) from the source bitmap with new dimensions and color adjustment',
+    label:
+      '_WinAPI_AdjustBitmap ( $hBitmap, $iWidth, $iHeight [, $iMode = 3 [, $tAdjustment = 0]] )',
     params: [
       {
         label: '$hBitmap',
@@ -33,12 +37,13 @@ const signatures = {
       {
         label: '$iHeight [, $iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AlphaBlend: {
     documentation: 'Displays bitmaps that have transparent or semitransparent pixels',
-    label: '_WinAPI_AlphaBlend ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $hSrcDC, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $iAlpha [, $bAlpha = False] )',
+    label:
+      '_WinAPI_AlphaBlend ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $hSrcDC, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $iAlpha [, $bAlpha = False] )',
     params: [
       {
         label: '$hDestDC',
@@ -83,12 +88,13 @@ const signatures = {
       {
         label: '$iAlpha [, $bAlpha',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CompressBitmapBits: {
     documentation: 'Creates a compressed data block from the specified bitmap',
-    label: '_WinAPI_CompressBitmapBits ( $hBitmap, ByRef $pBuffer [, $iCompression = 0 [, $iQuality = 100]] )',
+    label:
+      '_WinAPI_CompressBitmapBits ( $hBitmap, ByRef $pBuffer [, $iCompression = 0 [, $iQuality = 100]] )',
     params: [
       {
         label: '$hBitmap',
@@ -97,27 +103,30 @@ const signatures = {
       {
         label: 'ByRef $pBuffer [, $iCompression',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CopyBitmap: {
-    documentation: 'Creates a duplicate of a specified bitmap with a device-independent bitmap (DIB) section',
+    documentation:
+      'Creates a duplicate of a specified bitmap with a device-independent bitmap (DIB) section',
     label: '_WinAPI_CopyBitmap ( $hBitmap )',
     params: [
       {
         label: '$hBitmap',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CopyImage: {
-    documentation: 'Creates a new image (icon, cursor, or bitmap) and copies the attributes of the specified image to the new one',
-    label: '_WinAPI_CopyImage ( $hImage [, $iType = 0 [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
+    documentation:
+      'Creates a new image (icon, cursor, or bitmap) and copies the attributes of the specified image to the new one',
+    label:
+      '_WinAPI_CopyImage ( $hImage [, $iType = 0 [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
     params: [
       {
         label: '$hImage [, $iType',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_Create32BitHBITMAP: {
@@ -127,7 +136,7 @@ const signatures = {
       {
         label: '$hIcon [, $bDib',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_Create32BitHICON: {
@@ -137,7 +146,7 @@ const signatures = {
       {
         label: '$hIcon [, $bDelete',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateANDBitmap: {
@@ -147,17 +156,18 @@ const signatures = {
       {
         label: '$hBitmap',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateBitmapIndirect: {
-    documentation: 'Creates a bitmap with the specified width, height, and color format (color planes and bits-per-pixel)',
+    documentation:
+      'Creates a bitmap with the specified width, height, and color format (color planes and bits-per-pixel)',
     label: '_WinAPI_CreateBitmapIndirect ( $tBITMAP )',
     params: [
       {
         label: '$tBITMAP',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateCompatibleBitmapEx: {
@@ -179,21 +189,23 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateDIBColorTable: {
     documentation: 'Creates RGB color table from the specified array of colors',
-    label: '_WinAPI_CreateDIBColorTable ( Const ByRef $aColorTable [, $iStart = 0 [, $iEnd = -1]] )',
+    label:
+      '_WinAPI_CreateDIBColorTable ( Const ByRef $aColorTable [, $iStart = 0 [, $iEnd = -1]] )',
     params: [
       {
         label: 'Const ByRef $aColorTable [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateDIBitmap: {
-    documentation: 'Creates a compatible bitmap (DDB) from a DIB and, optionally, sets the bitmap bits',
+    documentation:
+      'Creates a compatible bitmap (DDB) from a DIB and, optionally, sets the bitmap bits',
     label: '_WinAPI_CreateDIBitmap ( $hDC, $tBITMAPINFO, $iUsage [, $pBits = 0] )',
     params: [
       {
@@ -207,12 +219,13 @@ const signatures = {
       {
         label: '$iUsage [, $pBits',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateDIBSection: {
     documentation: 'Creates a DIB that applications can write to directly',
-    label: '_WinAPI_CreateDIBSection ( $hDC, $tBITMAPINFO, $iUsage, ByRef $pBits [, $hSection = 0 [, $iOffset = 0]] )',
+    label:
+      '_WinAPI_CreateDIBSection ( $hDC, $tBITMAPINFO, $iUsage, ByRef $pBits [, $hSection = 0 [, $iOffset = 0]] )',
     params: [
       {
         label: '$hDC',
@@ -229,11 +242,12 @@ const signatures = {
       {
         label: 'ByRef $pBits [, $hSection',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateEmptyIcon: {
-    documentation: 'Creates a fully transparent icon with the specified width, height, and color depth',
+    documentation:
+      'Creates a fully transparent icon with the specified width, height, and color depth',
     label: '_WinAPI_CreateEmptyIcon ( $iWidth, $iHeight [, $iBitsPerPel = 32] )',
     params: [
       {
@@ -243,12 +257,14 @@ const signatures = {
       {
         label: '$iHeight [, $iBitsPerPel',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateIconIndirect: {
-    documentation: 'Creates an icon or cursor that has the specified size, colors, and bit patterns',
-    label: '_WinAPI_CreateIconIndirect ( $hBitmap, $hMask [, $iXHotspot = 0 [, $iYHotspot = 0 [, $bIcon = True]]] )',
+    documentation:
+      'Creates an icon or cursor that has the specified size, colors, and bit patterns',
+    label:
+      '_WinAPI_CreateIconIndirect ( $hBitmap, $hMask [, $iXHotspot = 0 [, $iYHotspot = 0 [, $bIcon = True]]] )',
     params: [
       {
         label: '$hBitmap',
@@ -257,7 +273,7 @@ const signatures = {
       {
         label: '$hMask [, $iXHotspot',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DrawBitmap: {
@@ -279,7 +295,7 @@ const signatures = {
       {
         label: '$hBitmap [, $iRop',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ExtFloodFill: {
@@ -301,7 +317,7 @@ const signatures = {
       {
         label: '$iRGB [, $iType',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetBitmapBits: {
@@ -319,7 +335,7 @@ const signatures = {
       {
         label: '$pBits',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetBitmapDimension: {
@@ -329,7 +345,7 @@ const signatures = {
       {
         label: '$hBitmap',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetBitmapDimensionEx: {
@@ -339,7 +355,7 @@ const signatures = {
       {
         label: '$hBitmap',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDIBColorTable: {
@@ -349,7 +365,7 @@ const signatures = {
       {
         label: '$hBitmap',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetIconDimension: {
@@ -359,7 +375,7 @@ const signatures = {
       {
         label: '$hIcon',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetPixel: {
@@ -377,7 +393,7 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetStretchBltMode: {
@@ -387,12 +403,13 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GradientFill: {
     documentation: 'Fills rectangle or triangle gradient',
-    label: '_WinAPI_GradientFill ( $hDC, Const ByRef $aVertex [, $iStart = 0 [, $iEnd = -1 [, $bRotate = False]]] )',
+    label:
+      '_WinAPI_GradientFill ( $hDC, Const ByRef $aVertex [, $iStart = 0 [, $iEnd = -1 [, $bRotate = False]]] )',
     params: [
       {
         label: '$hDC',
@@ -401,7 +418,7 @@ const signatures = {
       {
         label: 'Const ByRef $aVertex [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_InvertANDBitmap: {
@@ -411,7 +428,7 @@ const signatures = {
       {
         label: '$hBitmap [, $bDelete',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsAlphaBitmap: {
@@ -421,12 +438,14 @@ const signatures = {
       {
         label: '$hBitmap',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_MaskBlt: {
-    documentation: 'Combines the color data for the source and destination bitmaps using the specified mask and raster operation',
-    label: '_WinAPI_MaskBlt ( $hDestDC, $iXDest, $iYDest, $iWidth, $iHeight, $hSrcDC, $iXSrc, $iYSrc, $hMask, $iXMask, $iYMask, $iRop )',
+    documentation:
+      'Combines the color data for the source and destination bitmaps using the specified mask and raster operation',
+    label:
+      '_WinAPI_MaskBlt ( $hDestDC, $iXDest, $iYDest, $iWidth, $iHeight, $hSrcDC, $iXSrc, $iYSrc, $hMask, $iXMask, $iYMask, $iRop )',
     params: [
       {
         label: '$hDestDC',
@@ -475,12 +494,14 @@ const signatures = {
       {
         label: '$iRop',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PlgBlt: {
-    documentation: 'Performs a bit-block transfer of color data from the specified rectangle in the source DC to the specified parallelogram in the DC context',
-    label: '_WinAPI_PlgBlt ( $hDestDC, Const ByRef $aPoint, $hSrcDC, $iXSrc, $iYSrc, $iWidth, $iHeight [, $hMask = 0 [, $iXMask = 0 [, $iYMask = 0]]] )',
+    documentation:
+      'Performs a bit-block transfer of color data from the specified rectangle in the source DC to the specified parallelogram in the DC context',
+    label:
+      '_WinAPI_PlgBlt ( $hDestDC, Const ByRef $aPoint, $hSrcDC, $iXSrc, $iYSrc, $iWidth, $iHeight [, $hMask = 0 [, $iXMask = 0 [, $iYMask = 0]]] )',
     params: [
       {
         label: '$hDestDC',
@@ -509,12 +530,13 @@ const signatures = {
       {
         label: '$iHeight [, $hMask',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RadialGradientFill: {
     documentation: 'Fills radial gradient',
-    label: '_WinAPI_RadialGradientFill ( $hDC, $iX, $iY, $iRadius, $iRGB1, $iRGB2 [, $fAngleStart = 0 [, $fAngleEnd = 360 [, $fStep = 5]]] )',
+    label:
+      '_WinAPI_RadialGradientFill ( $hDC, $iX, $iY, $iRadius, $iRGB1, $iRGB2 [, $fAngleStart = 0 [, $fAngleEnd = 360 [, $fStep = 5]]] )',
     params: [
       {
         label: '$hDC',
@@ -539,12 +561,13 @@ const signatures = {
       {
         label: '$iRGB2 [, $fAngleStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SaveHBITMAPToFile: {
     documentation: 'Saves a specified bitmap to the specified bitmap (.bmp) file',
-    label: '_WinAPI_SaveHBITMAPToFile ( $sFilePath, $hBitmap [, $iXPelsPerMeter = Default [, $iYPelsPerMeter = Default]] )',
+    label:
+      '_WinAPI_SaveHBITMAPToFile ( $sFilePath, $hBitmap [, $iXPelsPerMeter = Default [, $iYPelsPerMeter = Default]] )',
     params: [
       {
         label: '$sFilePath',
@@ -553,12 +576,14 @@ const signatures = {
       {
         label: '$hBitmap [, $iXPelsPerMeter',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SaveHICONToFile: {
-    documentation: 'Saves a specified single or multiple icon (HICON) to the specified icon (.ico) file',
-    label: '_WinAPI_SaveHICONToFile ( $sFilePath, Const ByRef $vIcon [, $bCompress = 0 [, $iStart = 0 [, $iEnd = -1]]] )',
+    documentation:
+      'Saves a specified single or multiple icon (HICON) to the specified icon (.ico) file',
+    label:
+      '_WinAPI_SaveHICONToFile ( $sFilePath, Const ByRef $vIcon [, $bCompress = 0 [, $iStart = 0 [, $iEnd = -1]]] )',
     params: [
       {
         label: '$sFilePath',
@@ -567,7 +592,7 @@ const signatures = {
       {
         label: 'Const ByRef $vIcon [, $bCompress',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetBitmapBits: {
@@ -585,7 +610,7 @@ const signatures = {
       {
         label: '$pBits',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetBitmapDimensionEx: {
@@ -603,7 +628,7 @@ const signatures = {
       {
         label: '$iHeight',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetDIBColorTable: {
@@ -621,12 +646,13 @@ const signatures = {
       {
         label: '$iColorCount',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetDIBitsToDevice: {
     documentation: 'Sets the pixels in the specified rectangle on the device',
-    label: '_WinAPI_SetDIBitsToDevice ( $hDC, $iXDest, $iYDest, $iWidth, $iHeight, $iXSrc, $iYSrc, $iStartScan, $iScanLines, $tBITMAPINFO, $iUsage, $pBits )',
+    label:
+      '_WinAPI_SetDIBitsToDevice ( $hDC, $iXDest, $iYDest, $iWidth, $iHeight, $iXSrc, $iYSrc, $iStartScan, $iScanLines, $tBITMAPINFO, $iUsage, $pBits )',
     params: [
       {
         label: '$hDC',
@@ -675,7 +701,7 @@ const signatures = {
       {
         label: '$pBits',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetPixel: {
@@ -697,7 +723,7 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetStretchBltMode: {
@@ -711,12 +737,14 @@ const signatures = {
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StretchBlt: {
-    documentation: 'Copies a bitmap from a source rectangle into a destination rectangle, stretching or compressing the bitmap to fit the dimensions of the destination rectangle',
-    label: '_WinAPI_StretchBlt ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $hSrcDC, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $iRop )',
+    documentation:
+      'Copies a bitmap from a source rectangle into a destination rectangle, stretching or compressing the bitmap to fit the dimensions of the destination rectangle',
+    label:
+      '_WinAPI_StretchBlt ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $hSrcDC, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $iRop )',
     params: [
       {
         label: '$hDestDC',
@@ -761,12 +789,14 @@ const signatures = {
       {
         label: '$iRop',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StretchDIBits: {
-    documentation: 'Copies the color data for a rectangle of pixels in a DIB, JPEG, or PNG image to the specified destination rectangle, stretching or compressing the rows and columns by using the specified raster operation',
-    label: '_WinAPI_StretchDIBits ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $tBITMAPINFO, $iUsage, $pBits, $iRop )',
+    documentation:
+      'Copies the color data for a rectangle of pixels in a DIB, JPEG, or PNG image to the specified destination rectangle, stretching or compressing the rows and columns by using the specified raster operation',
+    label:
+      '_WinAPI_StretchDIBits ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $tBITMAPINFO, $iUsage, $pBits, $iRop )',
     params: [
       {
         label: '$hDestDC',
@@ -819,12 +849,14 @@ const signatures = {
       {
         label: '$iRop',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_TransparentBlt: {
-    documentation: 'Performs a bit-block transfer of the color data corresponding to a rectangle of pixels',
-    label: '_WinAPI_TransparentBlt ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $hSrcDC, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $iRGB )',
+    documentation:
+      'Performs a bit-block transfer of the color data corresponding to a rectangle of pixels',
+    label:
+      '_WinAPI_TransparentBlt ( $hDestDC, $iXDest, $iYDest, $iWidthDest, $iHeightDest, $hSrcDC, $iXSrc, $iYSrc, $iWidthSrc, $iHeightSrc, $iRGB )',
     params: [
       {
         label: '$hDestDC',
@@ -869,7 +901,7 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateBrushIndirect: {
@@ -883,12 +915,14 @@ const signatures = {
       {
         label: '$iRGB [, $iHatch',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ExtCreatePen: {
-    documentation: 'Creates a logical cosmetic or geometric pen that has the specified style, width, and brush attributes',
-    label: '_WinAPI_ExtCreatePen ( $iPenStyle, $iWidth, $iBrushStyle, $iRGB [, $iHatch = 0 [, $aUserStyle = 0 [, $iStart = 0 [, $iEnd = -1]]]] )',
+    documentation:
+      'Creates a logical cosmetic or geometric pen that has the specified style, width, and brush attributes',
+    label:
+      '_WinAPI_ExtCreatePen ( $iPenStyle, $iWidth, $iBrushStyle, $iRGB [, $iHatch = 0 [, $aUserStyle = 0 [, $iStart = 0 [, $iEnd = -1]]]] )',
     params: [
       {
         label: '$iPenStyle',
@@ -905,7 +939,7 @@ const signatures = {
       {
         label: '$iRGB [, $iHatch',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetBrushOrg: {
@@ -915,11 +949,12 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PatBlt: {
-    documentation: 'Paints the specified rectangle using the brush that is currently selected into the specified device context',
+    documentation:
+      'Paints the specified rectangle using the brush that is currently selected into the specified device context',
     label: '_WinAPI_PatBlt ( $hDC, $iX, $iY, $iWidth, $iHeight, $iRop )',
     params: [
       {
@@ -945,11 +980,12 @@ const signatures = {
       {
         label: '$iRop',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetBrushOrg: {
-    documentation: 'Sets the brush origin that GDI assigns to the next brush an application selects into the specified device context',
+    documentation:
+      'Sets the brush origin that GDI assigns to the next brush an application selects into the specified device context',
     label: '_WinAPI_SetBrushOrg ( $hDC, $iX, $iY )',
     params: [
       {
@@ -963,7 +999,7 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetDCBrushColor: {
@@ -977,7 +1013,7 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetDCPenColor: {
@@ -991,11 +1027,12 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ExcludeClipRect: {
-    documentation: 'Creates a new clipping region that consists of the existing clipping region minus the specified rectangle',
+    documentation:
+      'Creates a new clipping region that consists of the existing clipping region minus the specified rectangle',
     label: '_WinAPI_ExcludeClipRect ( $hDC, $tRECT )',
     params: [
       {
@@ -1005,7 +1042,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ExtSelectClipRgn: {
@@ -1019,7 +1056,7 @@ const signatures = {
       {
         label: '$hRgn [, $iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetClipBox: {
@@ -1033,7 +1070,7 @@ const signatures = {
       {
         label: 'ByRef $tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetClipRgn: {
@@ -1043,11 +1080,12 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IntersectClipRect: {
-    documentation: 'Creates a new clipping region from the intersection of the current clipping region and the specified rectangle',
+    documentation:
+      'Creates a new clipping region from the intersection of the current clipping region and the specified rectangle',
     label: '_WinAPI_IntersectClipRect ( $hDC, $tRECT )',
     params: [
       {
@@ -1057,7 +1095,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OffsetClipRgn: {
@@ -1075,7 +1113,7 @@ const signatures = {
       {
         label: '$iYOffset',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PtVisible: {
@@ -1093,11 +1131,12 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RectVisible: {
-    documentation: 'Determines whether any part of the specified rectangle lies within the clipping region',
+    documentation:
+      'Determines whether any part of the specified rectangle lies within the clipping region',
     label: '_WinAPI_RectVisible ( $hDC, $tRECT )',
     params: [
       {
@@ -1107,21 +1146,23 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SelectClipPath: {
-    documentation: 'Selects the current path as a clipping region, combining the new region with any existing clipping region',
+    documentation:
+      'Selects the current path as a clipping region, combining the new region with any existing clipping region',
     label: '_WinAPI_SelectClipPath ( $hDC [, $iMode = 5] )',
     params: [
       {
         label: '$hDC [, $iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SelectClipRgn: {
-    documentation: 'Selects a region as the current clipping region for the specified device context',
+    documentation:
+      'Selects a region as the current clipping region for the specified device context',
     label: '_WinAPI_SelectClipRgn ( $hDC, $hRgn )',
     params: [
       {
@@ -1131,7 +1172,7 @@ const signatures = {
       {
         label: '$hRgn',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ColorAdjustLuma: {
@@ -1145,7 +1186,7 @@ const signatures = {
       {
         label: '$iPercent [, $bScale',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ColorHLSToRGB: {
@@ -1163,7 +1204,7 @@ const signatures = {
       {
         label: '$iSaturation',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ColorRGBToHLS: {
@@ -1185,17 +1226,18 @@ const signatures = {
       {
         label: 'ByRef $iSaturation',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateColorAdjustment: {
     documentation: 'Creates $tagCOLORADJUSTMENT structure specifies the color adjustment',
-    label: '_WinAPI_CreateColorAdjustment ( [$iFlags = 0 [, $iIlluminant = 0 [, $iGammaR = 10000 [, $iGammaG = 10000 [, $iGammaB = 10000 [, $iBlack = 0 [, $iWhite = 10000 [, $iContrast = 0 [, $iBrightness = 0 [, $iColorfulness = 0 [, $iTint = 0]]]]]]]]]]] )',
+    label:
+      '_WinAPI_CreateColorAdjustment ( [$iFlags = 0 [, $iIlluminant = 0 [, $iGammaR = 10000 [, $iGammaG = 10000 [, $iGammaB = 10000 [, $iBlack = 0 [, $iWhite = 10000 [, $iContrast = 0 [, $iBrightness = 0 [, $iColorfulness = 0 [, $iTint = 0]]]]]]]]]]] )',
     params: [
       {
         label: '$iFlags',
         documentation: '**[optional]** Default is 0 [, $iIlluminant.',
-      }
+      },
     ],
   },
   _WinAPI_GetBValue: {
@@ -1205,7 +1247,7 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetColorAdjustment: {
@@ -1215,11 +1257,12 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDeviceGammaRamp: {
-    documentation: 'Gets the gamma ramp on direct color display boards that support downloadable gamma ramps in hardware',
+    documentation:
+      'Gets the gamma ramp on direct color display boards that support downloadable gamma ramps in hardware',
     label: '_WinAPI_GetDeviceGammaRamp ( $hDC, ByRef $aRamp )',
     params: [
       {
@@ -1229,7 +1272,7 @@ const signatures = {
       {
         label: 'ByRef $aRamp',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetGValue: {
@@ -1239,7 +1282,7 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetRValue: {
@@ -1249,15 +1292,13 @@ const signatures = {
       {
         label: '$iRGB',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetUDFColorMode: {
     documentation: 'Retrieves the current color mode for WinAPIEx UDF library',
     label: '_WinAPI_GetUDFColorMode ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_InvertColor: {
     documentation: 'Inverts (negative) the specified color',
@@ -1266,7 +1307,7 @@ const signatures = {
       {
         label: '$iColor',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RGB: {
@@ -1284,7 +1325,7 @@ const signatures = {
       {
         label: '$iBlue',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetColorAdjustment: {
@@ -1298,11 +1339,12 @@ const signatures = {
       {
         label: '$tAdjustment',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetDeviceGammaRamp: {
-    documentation: 'Sets the gamma ramp on direct color display boards that support downloadable gamma ramps in hardware',
+    documentation:
+      'Sets the gamma ramp on direct color display boards that support downloadable gamma ramps in hardware',
     label: '_WinAPI_SetDeviceGammaRamp ( $hDC, Const ByRef $aRamp )',
     params: [
       {
@@ -1312,7 +1354,7 @@ const signatures = {
       {
         label: 'Const ByRef $aRamp',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetUDFColorMode: {
@@ -1322,7 +1364,7 @@ const signatures = {
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SwitchColor: {
@@ -1332,7 +1374,7 @@ const signatures = {
       {
         label: '$iColor',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CombineTransform: {
@@ -1346,17 +1388,19 @@ const signatures = {
       {
         label: '$tXFORM2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateTransform: {
-    documentation: 'Creates $tagXFORM structure specifies a world-space to page-space transformation',
-    label: '_WinAPI_CreateTransform ( [$nM11 = 1 [, $nM12 = 0 [, $nM21 = 0 [, $nM22 = 1 [, $nDX = 0 [, $nDY = 0]]]]]] )',
+    documentation:
+      'Creates $tagXFORM structure specifies a world-space to page-space transformation',
+    label:
+      '_WinAPI_CreateTransform ( [$nM11 = 1 [, $nM12 = 0 [, $nM21 = 0 [, $nM22 = 1 [, $nDX = 0 [, $nDY = 0]]]]]] )',
     params: [
       {
         label: '$nM11',
         documentation: '**[optional]** Default is 1 [, $nM12.',
-      }
+      },
     ],
   },
   _WinAPI_DPtoLP: {
@@ -1370,7 +1414,7 @@ const signatures = {
       {
         label: 'ByRef $tPOINT [, $iCount',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetCurrentPosition: {
@@ -1380,7 +1424,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetGraphicsMode: {
@@ -1390,7 +1434,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetMapMode: {
@@ -1400,7 +1444,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetPosFromRect: {
@@ -1410,27 +1454,29 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetWindowExt: {
-    documentation: 'Retrieves the x-extent and y-extent of the window for the specified device context',
+    documentation:
+      'Retrieves the x-extent and y-extent of the window for the specified device context',
     label: '_WinAPI_GetWindowExt ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetWindowOrg: {
-    documentation: 'Retrieves the x-coordinates and y-coordinates of the window origin for the specified device context',
+    documentation:
+      'Retrieves the x-coordinates and y-coordinates of the window origin for the specified device context',
     label: '_WinAPI_GetWindowOrg ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetWorldTransform: {
@@ -1440,7 +1486,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LPtoDP: {
@@ -1454,7 +1500,7 @@ const signatures = {
       {
         label: 'ByRef $tPOINT [, $iCount',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ModifyWorldTransform: {
@@ -1472,12 +1518,13 @@ const signatures = {
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OffsetPoints: {
     documentation: 'Moves a points from the array by the specified offsets',
-    label: '_WinAPI_OffsetPoints ( ByRef $aPoint, $iXOffset, $iYOffset [, $iStart = 0 [, $iEnd = -1]] )',
+    label:
+      '_WinAPI_OffsetPoints ( ByRef $aPoint, $iXOffset, $iYOffset [, $iStart = 0 [, $iEnd = -1]] )',
     params: [
       {
         label: 'ByRef $aPoint',
@@ -1490,11 +1537,12 @@ const signatures = {
       {
         label: '$iYOffset [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OffsetWindowOrg: {
-    documentation: 'Modifies the window origin for a device context using the specified horizontal and vertical offsets',
+    documentation:
+      'Modifies the window origin for a device context using the specified horizontal and vertical offsets',
     label: '_WinAPI_OffsetWindowOrg ( $hDC, $iXOffset, $iYOffset )',
     params: [
       {
@@ -1508,12 +1556,13 @@ const signatures = {
       {
         label: '$iYOffset',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RotatePoints: {
     documentation: 'Rotates a points from the array by the specified angle',
-    label: '_WinAPI_RotatePoints ( ByRef $aPoint, $iXC, $iYC, $fAngle [, $iStart = 0 [, $iEnd = -1]] )',
+    label:
+      '_WinAPI_RotatePoints ( ByRef $aPoint, $iXC, $iYC, $fAngle [, $iStart = 0 [, $iEnd = -1]] )',
     params: [
       {
         label: 'ByRef $aPoint',
@@ -1530,11 +1579,12 @@ const signatures = {
       {
         label: '$fAngle [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ScaleWindowExt: {
-    documentation: 'Modifies the window for a device context using the ratios formed by the specified multiplicands and divisors',
+    documentation:
+      'Modifies the window for a device context using the ratios formed by the specified multiplicands and divisors',
     label: '_WinAPI_ScaleWindowExt ( $hDC, $iXNum, $iXDenom, $iYNum, $iYDenom )',
     params: [
       {
@@ -1556,7 +1606,7 @@ const signatures = {
       {
         label: '$iYDenom',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetGraphicsMode: {
@@ -1570,7 +1620,7 @@ const signatures = {
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetMapMode: {
@@ -1584,11 +1634,12 @@ const signatures = {
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetWindowExt: {
-    documentation: 'Sets the horizontal and vertical extents of the window for a device context by using the specified values',
+    documentation:
+      'Sets the horizontal and vertical extents of the window for a device context by using the specified values',
     label: '_WinAPI_SetWindowExt ( $hDC, $iXExtent, $iYExtent )',
     params: [
       {
@@ -1602,7 +1653,7 @@ const signatures = {
       {
         label: '$iYExtent',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetWindowOrg: {
@@ -1620,11 +1671,12 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetWorldTransform: {
-    documentation: 'Sets a two-dimensional linear transformation between world space and page space for the specified device context',
+    documentation:
+      'Sets a two-dimensional linear transformation between world space and page space for the specified device context',
     label: '_WinAPI_SetWorldTransform ( $hDC, $tXFORM )',
     params: [
       {
@@ -1634,11 +1686,12 @@ const signatures = {
       {
         label: '$tXFORM',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmDefWindowProc: {
-    documentation: 'Default window procedure for Desktop Window Manager (DWM) hit testing within the non-client area',
+    documentation:
+      'Default window procedure for Desktop Window Manager (DWM) hit testing within the non-client area',
     label: '_WinAPI_DwmDefWindowProc ( $hWnd, $iMsg, $wParam, $lParam )',
     params: [
       {
@@ -1656,17 +1709,18 @@ const signatures = {
       {
         label: '$lParam',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmEnableBlurBehindWindow: {
     documentation: 'Enables the blur effect on a specified window',
-    label: '_WinAPI_DwmEnableBlurBehindWindow ( $hWnd [, $bEnable = True [, $bTransition = False [, $hRgn = 0]]] )',
+    label:
+      '_WinAPI_DwmEnableBlurBehindWindow ( $hWnd [, $bEnable = True [, $bTransition = False [, $hRgn = 0]]] )',
     params: [
       {
         label: '$hWnd [, $bEnable',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmEnableComposition: {
@@ -1676,7 +1730,7 @@ const signatures = {
       {
         label: '$bEnable',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmExtendFrameIntoClientArea: {
@@ -1686,22 +1740,19 @@ const signatures = {
       {
         label: '$hWnd [, $tMARGINS',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmGetColorizationColor: {
-    documentation: 'Retrieves the current color used for Desktop Window Manager (DWM) glass composition',
+    documentation:
+      'Retrieves the current color used for Desktop Window Manager (DWM) glass composition',
     label: '_WinAPI_DwmGetColorizationColor ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_DwmGetColorizationParameters: {
     documentation: 'Retrieves the colorization parameters used for Desktop Window Manager (DWM)',
     label: '_WinAPI_DwmGetColorizationParameters ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_DwmGetWindowAttribute: {
     documentation: 'Retrieves the current value of a specified attribute applied to the window',
@@ -1714,25 +1765,24 @@ const signatures = {
       {
         label: '$iAttribute',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmInvalidateIconicBitmaps: {
-    documentation: 'Indicates that all previously provided iconic bitmaps from a window, both thumbnails and peek representations, should be refreshed',
+    documentation:
+      'Indicates that all previously provided iconic bitmaps from a window, both thumbnails and peek representations, should be refreshed',
     label: '_WinAPI_DwmInvalidateIconicBitmaps ( $hWnd )',
     params: [
       {
         label: '$hWnd',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmIsCompositionEnabled: {
     documentation: 'Determines whether Desktop Window Manager (DWM) composition is enabled',
     label: '_WinAPI_DwmIsCompositionEnabled ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_DwmQueryThumbnailSourceSize: {
     documentation: 'Returns the source size of the Desktop Window Manager (DWM) thumbnail',
@@ -1741,11 +1791,12 @@ const signatures = {
       {
         label: '$hThumbnail',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmRegisterThumbnail: {
-    documentation: 'Creates a Desktop Window Manager (DWM) thumbnail relationship between the destination and source windows',
+    documentation:
+      'Creates a Desktop Window Manager (DWM) thumbnail relationship between the destination and source windows',
     label: '_WinAPI_DwmRegisterThumbnail ( $hDestination, $hSource )',
     params: [
       {
@@ -1755,7 +1806,7 @@ const signatures = {
       {
         label: '$hSource',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmSetColorizationParameters: {
@@ -1765,12 +1816,14 @@ const signatures = {
       {
         label: '$tDWMCP',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmSetIconicLivePreviewBitmap: {
-    documentation: 'Sets a static, iconic bitmap to display a live preview (also known as a Peek preview) of a window or tab',
-    label: '_WinAPI_DwmSetIconicLivePreviewBitmap ( $hWnd, $hBitmap [, $bFrame = False [, $tClient = 0]] )',
+    documentation:
+      'Sets a static, iconic bitmap to display a live preview (also known as a Peek preview) of a window or tab',
+    label:
+      '_WinAPI_DwmSetIconicLivePreviewBitmap ( $hWnd, $hBitmap [, $bFrame = False [, $tClient = 0]] )',
     params: [
       {
         label: '$hWnd',
@@ -1779,11 +1832,12 @@ const signatures = {
       {
         label: '$hBitmap [, $bFrame',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmSetIconicThumbnail: {
-    documentation: 'Sets a static, iconic bitmap on a window or tab to use as a thumbnail representation',
+    documentation:
+      'Sets a static, iconic bitmap on a window or tab to use as a thumbnail representation',
     label: '_WinAPI_DwmSetIconicThumbnail ( $hWnd, $hBitmap [, $bFrame = False] )',
     params: [
       {
@@ -1793,11 +1847,12 @@ const signatures = {
       {
         label: '$hBitmap [, $bFrame',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmSetWindowAttribute: {
-    documentation: 'Sets the value of the specified attributes for non-client rendering to apply to the window',
+    documentation:
+      'Sets the value of the specified attributes for non-client rendering to apply to the window',
     label: '_WinAPI_DwmSetWindowAttribute ( $hWnd, $iAttribute, $iData )',
     params: [
       {
@@ -1811,7 +1866,7 @@ const signatures = {
       {
         label: '$iData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmUnregisterThumbnail: {
@@ -1821,17 +1876,18 @@ const signatures = {
       {
         label: '$hThumbnail',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DwmUpdateThumbnailProperties: {
     documentation: 'Specifies Desktop Window Manager (DWM) thumbnail properties',
-    label: '_WinAPI_DwmUpdateThumbnailProperties ( $hThumbnail [, $bVisible = True [, $bClientAreaOnly = False [, $iOpacity = 255 [, $tRectDest = 0 [, $tRectSrc = 0]]]]] )',
+    label:
+      '_WinAPI_DwmUpdateThumbnailProperties ( $hThumbnail [, $bVisible = True [, $bClientAreaOnly = False [, $iOpacity = 255 [, $tRectDest = 0 [, $tRectSrc = 0]]]]] )',
     params: [
       {
         label: '$hThumbnail [, $bVisible',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumDisplaySettings: {
@@ -1845,11 +1901,12 @@ const signatures = {
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetCurrentObject: {
-    documentation: 'Retrieves a handle to an object of the specified type that has been selected into the specified device context',
+    documentation:
+      'Retrieves a handle to an object of the specified type that has been selected into the specified device context',
     label: '_WinAPI_GetCurrentObject ( $hDC, $iType )',
     params: [
       {
@@ -1859,11 +1916,12 @@ const signatures = {
       {
         label: '$iType',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDCEx: {
-    documentation: 'Retrieves a handle to a device context (DC) for the client area of a specified window',
+    documentation:
+      'Retrieves a handle to a device context (DC) for the client area of a specified window',
     label: '_WinAPI_GetDCEx ( $hWnd, $hRgn, $iFlags )',
     params: [
       {
@@ -1877,7 +1935,7 @@ const signatures = {
       {
         label: '$iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetObjectType: {
@@ -1887,7 +1945,7 @@ const signatures = {
       {
         label: '$hObject',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PrintWindow: {
@@ -1901,7 +1959,7 @@ const signatures = {
       {
         label: '$hDC [, $bClient',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RestoreDC: {
@@ -1915,17 +1973,18 @@ const signatures = {
       {
         label: '$iID',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SaveDC: {
-    documentation: 'Saves the current state of the specified device context (DC) by copying data describing selected objects and graphic modes to a context stack',
+    documentation:
+      'Saves the current state of the specified device context (DC) by copying data describing selected objects and graphic modes to a context stack',
     label: '_WinAPI_SaveDC ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AddFontMemResourceEx: {
@@ -1939,7 +1998,7 @@ const signatures = {
       {
         label: '$iSize',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AddFontResourceEx: {
@@ -1949,37 +2008,41 @@ const signatures = {
       {
         label: '$sFont [, $iFlag',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateFontEx: {
     documentation: 'Creates a logical font with the specified characteristics',
-    label: '_WinAPI_CreateFontEx ( $iHeight [, $iWidth = 0 [, $iEscapement = 0 [, $iOrientation = 0 [, $iWeight = 400 [, $bItalic = False [, $bUnderline = False [, $bStrikeOut = False [, $iCharSet = 1 [, $iOutPrecision = 0 [, $iClipPrecision = 0 [, $iQuality = 0 [, $iPitchAndFamily = 0 [, $sFaceName = \'\' [, $iStyle = 0]]]]]]]]]]]]]] )',
+    label:
+      "_WinAPI_CreateFontEx ( $iHeight [, $iWidth = 0 [, $iEscapement = 0 [, $iOrientation = 0 [, $iWeight = 400 [, $bItalic = False [, $bUnderline = False [, $bStrikeOut = False [, $iCharSet = 1 [, $iOutPrecision = 0 [, $iClipPrecision = 0 [, $iQuality = 0 [, $iPitchAndFamily = 0 [, $sFaceName = '' [, $iStyle = 0]]]]]]]]]]]]]] )",
     params: [
       {
         label: '$iHeight [, $iWidth',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumFontFamilies: {
-    documentation: 'Enumerates all uniquely-named fonts in the system that match the specified font characteristics',
-    label: '_WinAPI_EnumFontFamilies ( [$hDC = 0 [, $sFaceName = \'\' [, $iCharSet = 1 [, $iFontType = 0x07 [, $sPattern = \'\' [, $bExclude = False]]]]]] )',
+    documentation:
+      'Enumerates all uniquely-named fonts in the system that match the specified font characteristics',
+    label:
+      "_WinAPI_EnumFontFamilies ( [$hDC = 0 [, $sFaceName = '' [, $iCharSet = 1 [, $iFontType = 0x07 [, $sPattern = '' [, $bExclude = False]]]]]] )",
     params: [
       {
         label: '$hDC',
         documentation: '**[optional]** Default is 0 [, $sFaceName.',
-      }
+      },
     ],
   },
   _WinAPI_GetFontName: {
-    documentation: 'Retrieves the unique name of the font based on its typeface name, character set, and style',
+    documentation:
+      'Retrieves the unique name of the font based on its typeface name, character set, and style',
     label: '_WinAPI_GetFontName ( $sFaceName [, $iStyle = 0 [, $iCharSet = 1]] )',
     params: [
       {
         label: '$sFaceName [, $iStyle',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFontResourceInfo: {
@@ -1989,7 +2052,7 @@ const signatures = {
       {
         label: '$sFont [, $bForce',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetFontMemoryResourceInfo: {
@@ -1999,7 +2062,7 @@ const signatures = {
       {
         label: '$pMemory [, $iFlag',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetGlyphOutline: {
@@ -2021,7 +2084,7 @@ const signatures = {
       {
         label: 'ByRef $pBuffer [, $tMAT2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetOutlineTextMetrics: {
@@ -2031,12 +2094,14 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetTabbedTextExtent: {
-    documentation: 'Computes the width and height of a character string which may contain one or more tab characters',
-    label: '_WinAPI_GetTabbedTextExtent ( $hDC, $sText [, $aTab = 0 [, $iStart = 0 [, $iEnd = -1]]] )',
+    documentation:
+      'Computes the width and height of a character string which may contain one or more tab characters',
+    label:
+      '_WinAPI_GetTabbedTextExtent ( $hDC, $sText [, $aTab = 0 [, $iStart = 0 [, $iEnd = -1]]] )',
     params: [
       {
         label: '$hDC',
@@ -2045,7 +2110,7 @@ const signatures = {
       {
         label: '$sText [, $aTab',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetTextAlign: {
@@ -2055,7 +2120,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetTextCharacterExtra: {
@@ -2065,7 +2130,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetTextColor: {
@@ -2075,17 +2140,18 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetTextFace: {
-    documentation: 'Retrieves the typeface name of the font that is selected into the specified device context',
+    documentation:
+      'Retrieves the typeface name of the font that is selected into the specified device context',
     label: '_WinAPI_GetTextFace ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RemoveFontMemResourceEx: {
@@ -2095,7 +2161,7 @@ const signatures = {
       {
         label: '$hFont',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RemoveFontResourceEx: {
@@ -2105,7 +2171,7 @@ const signatures = {
       {
         label: '$sFont [, $iFlag',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetTextAlign: {
@@ -2115,7 +2181,7 @@ const signatures = {
       {
         label: '$hDC [, $iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetTextCharacterExtra: {
@@ -2129,11 +2195,12 @@ const signatures = {
       {
         label: '$iCharExtra',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetTextJustification: {
-    documentation: 'Specifies the amount of space the system should add to the break characters in a string of text',
+    documentation:
+      'Specifies the amount of space the system should add to the break characters in a string of text',
     label: '_WinAPI_SetTextJustification ( $hDC, $iBreakExtra, $iBreakCount )',
     params: [
       {
@@ -2147,12 +2214,14 @@ const signatures = {
       {
         label: '$iBreakCount',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_TabbedTextOut: {
-    documentation: 'Writes a character string at a specified location and expanding tabs to the specified tab-stop positions',
-    label: '_WinAPI_TabbedTextOut ( $hDC, $iX, $iY, $sText [, $aTab = 0 [, $iStart = 0 [, $iEnd = -1 [, $iOrigin = 0]]]] )',
+    documentation:
+      'Writes a character string at a specified location and expanding tabs to the specified tab-stop positions',
+    label:
+      '_WinAPI_TabbedTextOut ( $hDC, $iX, $iY, $sText [, $aTab = 0 [, $iStart = 0 [, $iEnd = -1 [, $iOrigin = 0]]]] )',
     params: [
       {
         label: '$hDC',
@@ -2169,11 +2238,12 @@ const signatures = {
       {
         label: '$sText [, $aTab',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_TextOut: {
-    documentation: 'Writes a string at the specified location, using the currently selected font, background color, and text color',
+    documentation:
+      'Writes a string at the specified location, using the currently selected font, background color, and text color',
     label: '_WinAPI_TextOut ( $hDC, $iX, $iY, $sText )',
     params: [
       {
@@ -2191,7 +2261,7 @@ const signatures = {
       {
         label: '$sText',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AngleArc: {
@@ -2221,7 +2291,7 @@ const signatures = {
       {
         label: '$nSweepAngle',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_Arc: {
@@ -2251,7 +2321,7 @@ const signatures = {
       {
         label: '$iYEndArc',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ArcTo: {
@@ -2281,7 +2351,7 @@ const signatures = {
       {
         label: '$iYRadial2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetArcDirection: {
@@ -2291,7 +2361,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LineDDA: {
@@ -2317,7 +2387,7 @@ const signatures = {
       {
         label: '$pLineProc [, $pData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_MoveToEx: {
@@ -2335,7 +2405,7 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PolyBezier: {
@@ -2349,7 +2419,7 @@ const signatures = {
       {
         label: 'Const ByRef $aPoint [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PolyBezierTo: {
@@ -2363,7 +2433,7 @@ const signatures = {
       {
         label: 'Const ByRef $aPoint [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PolyDraw: {
@@ -2377,7 +2447,7 @@ const signatures = {
       {
         label: 'Const ByRef $aPoint [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetArcDirection: {
@@ -2391,37 +2461,39 @@ const signatures = {
       {
         label: '$iDirection',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CloseEnhMetaFile: {
-    documentation: 'Closes an enhanced-metafile device context and returns a handle that identifies an enhanced-format metafile',
+    documentation:
+      'Closes an enhanced-metafile device context and returns a handle that identifies an enhanced-format metafile',
     label: '_WinAPI_CloseEnhMetaFile ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CopyEnhMetaFile: {
     documentation: 'Copies the contents of an enhanced-format metafile to a specified file',
-    label: '_WinAPI_CopyEnhMetaFile ( $hEmf [, $sFilePath = \'\'] )',
+    label: "_WinAPI_CopyEnhMetaFile ( $hEmf [, $sFilePath = ''] )",
     params: [
       {
         label: '$hEmf [, $sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateEnhMetaFile: {
     documentation: 'Creates a device context for an enhanced-format metafile',
-    label: '_WinAPI_CreateEnhMetaFile ( [$hDC = 0 [, $tRECT = 0 [, $bPixels = False [, $sFilePath = \'\' [, $sDescription = \'\']]]]] )',
+    label:
+      "_WinAPI_CreateEnhMetaFile ( [$hDC = 0 [, $tRECT = 0 [, $bPixels = False [, $sFilePath = '' [, $sDescription = '']]]]] )",
     params: [
       {
         label: '$hDC',
         documentation: '**[optional]** Default is 0 [, $tRECT.',
-      }
+      },
     ],
   },
   _WinAPI_DeleteEnhMetaFile: {
@@ -2431,7 +2503,7 @@ const signatures = {
       {
         label: '$hEmf',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GdiComment: {
@@ -2449,17 +2521,18 @@ const signatures = {
       {
         label: '$iSize',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetEnhMetaFile: {
-    documentation: 'Creates a handle that identifies the enhanced-format metafile stored in the specified file',
+    documentation:
+      'Creates a handle that identifies the enhanced-format metafile stored in the specified file',
     label: '_WinAPI_GetEnhMetaFile ( $sFilePath )',
     params: [
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetEnhMetaFileBits: {
@@ -2473,7 +2546,7 @@ const signatures = {
       {
         label: 'ByRef $pBuffer',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetEnhMetaFileDescription: {
@@ -2483,7 +2556,7 @@ const signatures = {
       {
         label: '$hEmf',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetEnhMetaFileDimension: {
@@ -2493,17 +2566,18 @@ const signatures = {
       {
         label: '$hEmf',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetEnhMetaFileHeader: {
-    documentation: 'Retrieves the record containing the header for the specified enhanced-format metafile',
+    documentation:
+      'Retrieves the record containing the header for the specified enhanced-format metafile',
     label: '_WinAPI_GetEnhMetaFileHeader ( $hEmf )',
     params: [
       {
         label: '$hEmf',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PlayEnhMetaFile: {
@@ -2521,7 +2595,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetEnhMetaFileBits: {
@@ -2535,17 +2609,18 @@ const signatures = {
       {
         label: '$iLength',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumDisplayMonitors: {
-    documentation: 'Enumerates display monitors (including invisible pseudo-monitors associated with the mirroring drivers)',
+    documentation:
+      'Enumerates display monitors (including invisible pseudo-monitors associated with the mirroring drivers)',
     label: '_WinAPI_EnumDisplayMonitors ( [$hDC = 0 [, $tRECT = 0]] )',
     params: [
       {
         label: '$hDC',
         documentation: '**[optional]** Default is 0 [, $tRECT.',
-      }
+      },
     ],
   },
   _WinAPI_MonitorFromPoint: {
@@ -2555,27 +2630,29 @@ const signatures = {
       {
         label: '$tPOINT [, $iFlag',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_MonitorFromRect: {
-    documentation: 'Retrieves a handle to the display monitor that has the largest area of intersection with a specified rectangle',
+    documentation:
+      'Retrieves a handle to the display monitor that has the largest area of intersection with a specified rectangle',
     label: '_WinAPI_MonitorFromRect ( $tRECT [, $iFlag = 1] )',
     params: [
       {
         label: '$tRECT [, $iFlag',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_MonitorFromWindow: {
-    documentation: 'Retrieves a handle to the display monitor that has the largest area of intersection with the specified window',
+    documentation:
+      'Retrieves a handle to the display monitor that has the largest area of intersection with the specified window',
     label: '_WinAPI_MonitorFromWindow ( $hWnd [, $iFlag = 1] )',
     params: [
       {
         label: '$hWnd [, $iFlag',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_BeginPaint: {
@@ -2589,11 +2666,12 @@ const signatures = {
       {
         label: 'ByRef $tPAINTSTRUCT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DrawAnimatedRects: {
-    documentation: 'Animates the caption of a window to indicate the opening of an icon or the minimizing or maximizing of a window',
+    documentation:
+      'Animates the caption of a window to indicate the opening of an icon or the minimizing or maximizing of a window',
     label: '_WinAPI_DrawAnimatedRects ( $hWnd, $tRectFrom, $tRectTo )',
     params: [
       {
@@ -2607,12 +2685,13 @@ const signatures = {
       {
         label: '$tRectTo',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DrawShadowText: {
     documentation: 'Draws formatted text in the specified rectangle with a drop shadow',
-    label: '_WinAPI_DrawShadowText ( $hDC, $sText, $iRGBText, $iRGBShadow [, $iXOffset = 0 [, $iYOffset = 0 [, $tRECT = 0 [, $iFlags = 0]]]] )',
+    label:
+      '_WinAPI_DrawShadowText ( $hDC, $sText, $iRGBText, $iRGBShadow [, $iXOffset = 0 [, $iYOffset = 0 [, $tRECT = 0 [, $iFlags = 0]]]] )',
     params: [
       {
         label: '$hDC',
@@ -2629,7 +2708,7 @@ const signatures = {
       {
         label: '$iRGBShadow [, $iXOffset',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EndPaint: {
@@ -2643,7 +2722,7 @@ const signatures = {
       {
         label: 'ByRef $tPAINTSTRUCT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetBkColor: {
@@ -2653,17 +2732,18 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetBoundsRect: {
-    documentation: 'Obtains the current accumulated bounding rectangle for a specified device context',
+    documentation:
+      'Obtains the current accumulated bounding rectangle for a specified device context',
     label: '_WinAPI_GetBoundsRect ( $hDC [, $iFlags = 0] )',
     params: [
       {
         label: '$hDC [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetROP2: {
@@ -2673,21 +2753,23 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetUpdateRect: {
-    documentation: 'Retrieves the coordinates of the rectangle that completely encloses the update region of the specified window',
+    documentation:
+      'Retrieves the coordinates of the rectangle that completely encloses the update region of the specified window',
     label: '_WinAPI_GetUpdateRect ( $hWnd [, $bErase = True] )',
     params: [
       {
         label: '$hWnd [, $bErase',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetUpdateRgn: {
-    documentation: 'Retrieves the update region of a window by copying it into the specified region',
+    documentation:
+      'Retrieves the update region of a window by copying it into the specified region',
     label: '_WinAPI_GetUpdateRgn ( $hWnd, $hRgn [, $bErase = True] )',
     params: [
       {
@@ -2697,11 +2779,12 @@ const signatures = {
       {
         label: '$hRgn [, $bErase',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetWindowRgnBox: {
-    documentation: 'Retrieves the dimensions of the tightest bounding rectangle for the window region of a window',
+    documentation:
+      'Retrieves the dimensions of the tightest bounding rectangle for the window region of a window',
     label: '_WinAPI_GetWindowRgnBox ( $hWnd, ByRef $tRECT )',
     params: [
       {
@@ -2711,17 +2794,17 @@ const signatures = {
       {
         label: 'ByRef $tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_InvalidateRgn: {
-    documentation: 'Adds a region to the specified window\'s update region',
+    documentation: "Adds a region to the specified window's update region",
     label: '_WinAPI_InvalidateRgn ( $hWnd [, $hRgn = 0 [, $bErase = True]] )',
     params: [
       {
         label: '$hWnd [, $hRgn',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_LockWindowUpdate: {
@@ -2731,21 +2814,23 @@ const signatures = {
       {
         label: '$hWnd',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PaintDesktop: {
-    documentation: 'Fills the clipping region in the specified device context with the desktop pattern or wallpaper',
+    documentation:
+      'Fills the clipping region in the specified device context with the desktop pattern or wallpaper',
     label: '_WinAPI_PaintDesktop ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetBoundsRect: {
-    documentation: 'Controls the accumulation of bounding rectangle information for the specified device context',
+    documentation:
+      'Controls the accumulation of bounding rectangle information for the specified device context',
     label: '_WinAPI_SetBoundsRect ( $hDC, $iFlags [, $tRECT = 0] )',
     params: [
       {
@@ -2755,7 +2840,7 @@ const signatures = {
       {
         label: '$iFlags [, $tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetROP2: {
@@ -2769,7 +2854,7 @@ const signatures = {
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ValidateRect: {
@@ -2779,7 +2864,7 @@ const signatures = {
       {
         label: '$hWnd [, $tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ValidateRgn: {
@@ -2789,17 +2874,18 @@ const signatures = {
       {
         label: '$hWnd [, $hRgn',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_WindowFromDC: {
-    documentation: 'Retrieves a handle to the window associated with the specified display device context (DC)',
+    documentation:
+      'Retrieves a handle to the window associated with the specified display device context (DC)',
     label: '_WinAPI_WindowFromDC ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AbortPath: {
@@ -2809,7 +2895,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_BeginPath: {
@@ -2819,7 +2905,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CloseFigure: {
@@ -2829,57 +2915,62 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EndPath: {
-    documentation: 'Closes a path bracket and selects the path defined by the bracket into the specified device context',
+    documentation:
+      'Closes a path bracket and selects the path defined by the bracket into the specified device context',
     label: '_WinAPI_EndPath ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FillPath: {
-    documentation: 'Closes any open figures in the current path and fills the path\'s interior by using the current brush',
+    documentation:
+      "Closes any open figures in the current path and fills the path's interior by using the current brush",
     label: '_WinAPI_FillPath ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FlattenPath: {
-    documentation: 'Transforms any curves in the path that is selected into the current DC, turning each curve into a sequence of lines',
+    documentation:
+      'Transforms any curves in the path that is selected into the current DC, turning each curve into a sequence of lines',
     label: '_WinAPI_FlattenPath ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PathToRegion: {
-    documentation: 'Creates a region from the path that is selected into the specified device context',
+    documentation:
+      'Creates a region from the path that is selected into the specified device context',
     label: '_WinAPI_PathToRegion ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StrokeAndFillPath: {
-    documentation: 'Closes any open figures in a path, strokes the outline of the path, and fills its interior',
+    documentation:
+      'Closes any open figures in a path, strokes the outline of the path, and fills its interior',
     label: '_WinAPI_StrokeAndFillPath ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_StrokePath: {
@@ -2889,17 +2980,18 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_WidenPath: {
-    documentation: 'Redefines the current path as the area that would be painted if the path were stroked',
+    documentation:
+      'Redefines the current path as the area that would be painted if the path were stroked',
     label: '_WinAPI_WidenPath ( $hDC )',
     params: [
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CopyRect: {
@@ -2909,11 +3001,12 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DrawFocusRect: {
-    documentation: 'Draws a rectangle in the style used to indicate that the rectangle has the focus',
+    documentation:
+      'Draws a rectangle in the style used to indicate that the rectangle has the focus',
     label: '_WinAPI_DrawFocusRect ( $hDC, $tRECT )',
     params: [
       {
@@ -2923,7 +3016,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EqualRect: {
@@ -2937,7 +3030,7 @@ const signatures = {
       {
         label: '$tRECT2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_InflateRect: {
@@ -2955,7 +3048,7 @@ const signatures = {
       {
         label: '$iDY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IntersectRect: {
@@ -2969,7 +3062,7 @@ const signatures = {
       {
         label: '$tRECT2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsRectEmpty: {
@@ -2979,7 +3072,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OffsetRect: {
@@ -2997,7 +3090,7 @@ const signatures = {
       {
         label: '$iDY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PtInRectEx: {
@@ -3027,11 +3120,12 @@ const signatures = {
       {
         label: '$iBottom',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SubtractRect: {
-    documentation: 'Determines the coordinates of a rectangle formed by subtracting one rectangle from another',
+    documentation:
+      'Determines the coordinates of a rectangle formed by subtracting one rectangle from another',
     label: '_WinAPI_SubtractRect ( $tRECT1, $tRECT2 )',
     params: [
       {
@@ -3041,7 +3135,7 @@ const signatures = {
       {
         label: '$tRECT2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UnionRect: {
@@ -3055,7 +3149,7 @@ const signatures = {
       {
         label: '$tRECT2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateEllipticRgn: {
@@ -3065,24 +3159,23 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateNullRgn: {
     documentation: 'Creates an empty region',
     label: '_WinAPI_CreateNullRgn ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_CreatePolygonRgn: {
     documentation: 'Creates a polygonal region',
-    label: '_WinAPI_CreatePolygonRgn ( Const ByRef $aPoint [, $iStart = 0 [, $iEnd = -1 [, $iMode = 1]]] )',
+    label:
+      '_WinAPI_CreatePolygonRgn ( Const ByRef $aPoint [, $iStart = 0 [, $iEnd = -1 [, $iMode = 1]]] )',
     params: [
       {
         label: 'Const ByRef $aPoint [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateRectRgnIndirect: {
@@ -3092,7 +3185,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EqualRgn: {
@@ -3106,7 +3199,7 @@ const signatures = {
       {
         label: '$hRgn2',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ExtCreateRegion: {
@@ -3116,7 +3209,7 @@ const signatures = {
       {
         label: '$tRGNDATA [, $tXFORM',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FillRgn: {
@@ -3134,7 +3227,7 @@ const signatures = {
       {
         label: '$hBrush',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FrameRgn: {
@@ -3160,7 +3253,7 @@ const signatures = {
       {
         label: '$iHeight',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetPolyFillMode: {
@@ -3170,7 +3263,7 @@ const signatures = {
       {
         label: '$hDC',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetRegionData: {
@@ -3184,7 +3277,7 @@ const signatures = {
       {
         label: 'ByRef $tRGNDATA',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetRgnBox: {
@@ -3198,7 +3291,7 @@ const signatures = {
       {
         label: 'ByRef $tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_InvertRgn: {
@@ -3212,7 +3305,7 @@ const signatures = {
       {
         label: '$hRgn',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OffsetRgn: {
@@ -3230,11 +3323,12 @@ const signatures = {
       {
         label: '$iYOffset',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PaintRgn: {
-    documentation: 'Paints the specified region by using the brush currently selected into the device context',
+    documentation:
+      'Paints the specified region by using the brush currently selected into the device context',
     label: '_WinAPI_PaintRgn ( $hDC, $hRgn )',
     params: [
       {
@@ -3244,7 +3338,7 @@ const signatures = {
       {
         label: '$hRgn',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_PtInRegion: {
@@ -3262,11 +3356,12 @@ const signatures = {
       {
         label: '$iY',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RectInRegion: {
-    documentation: 'Determines whether any part of the specified rectangle is within the boundaries of a region',
+    documentation:
+      'Determines whether any part of the specified rectangle is within the boundaries of a region',
     label: '_WinAPI_RectInRegion ( $hRgn, $tRECT )',
     params: [
       {
@@ -3276,7 +3371,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetPolyFillMode: {
@@ -3286,7 +3381,7 @@ const signatures = {
       {
         label: '$hDC [, $iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetRectRgn: {
@@ -3300,7 +3395,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_Ellipse: {
@@ -3314,11 +3409,12 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_InvertRect: {
-    documentation: 'Inverts a rectangle in a window by performing a logical NOT operation on the color values for each pixel',
+    documentation:
+      'Inverts a rectangle in a window by performing a logical NOT operation on the color values for each pixel',
     label: '_WinAPI_InvertRect ( $hDC, $tRECT )',
     params: [
       {
@@ -3328,7 +3424,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_Polygon: {
@@ -3342,7 +3438,7 @@ const signatures = {
       {
         label: 'Const ByRef $aPoint [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_Rectangle: {
@@ -3356,7 +3452,7 @@ const signatures = {
       {
         label: '$tRECT',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RoundRect: {
@@ -3378,9 +3474,9 @@ const signatures = {
       {
         label: '$iHeight',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);

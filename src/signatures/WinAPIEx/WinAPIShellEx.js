@@ -11,31 +11,29 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetAllUsersProfileDirectory: {
-    documentation: 'Retrieves the path to the root of the directory that contains program data shared by all users',
+    documentation:
+      'Retrieves the path to the root of the directory that contains program data shared by all users',
     label: '_WinAPI_GetAllUsersProfileDirectory ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetDefaultUserProfileDirectory: {
-    documentation: 'Retrieves the path to the root of the default user\'s profile',
+    documentation: "Retrieves the path to the root of the default user's profile",
     label: '_WinAPI_GetDefaultUserProfileDirectory ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_SetCurrentProcessExplicitAppUserModelID: {
-    documentation: 'Specifies a unique application-defined Application User Model ID that identifies the current process to the taskbar',
+    documentation:
+      'Specifies a unique application-defined Application User Model ID that identifies the current process to the taskbar',
     label: '_WinAPI_SetCurrentProcessExplicitAppUserModelID ( $sAppID )',
     params: [
       {
         label: '$sAppID',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellAddToRecentDocs: {
@@ -45,7 +43,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellChangeNotify: {
@@ -59,22 +57,23 @@ const signatures = {
       {
         label: '$iFlags [, $iItem1',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellChangeNotifyDeregister: {
-    documentation: 'Unregisters the client\'s window',
+    documentation: "Unregisters the client's window",
     label: '_WinAPI_ShellChangeNotifyDeregister ( $iID )',
     params: [
       {
         label: '$iID',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellChangeNotifyRegister: {
     documentation: 'Registers a window to receive notifications from the file system or Shell',
-    label: '_WinAPI_ShellChangeNotifyRegister ( $hWnd, $iMsg, $iEvents, $iSources, $aPaths [, $bRecursive = False] )',
+    label:
+      '_WinAPI_ShellChangeNotifyRegister ( $hWnd, $iMsg, $iEvents, $iSources, $aPaths [, $bRecursive = False] )',
     params: [
       {
         label: '$hWnd',
@@ -95,7 +94,7 @@ const signatures = {
       {
         label: '$aPaths [, $bRecursive',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellCreateDirectory: {
@@ -105,27 +104,28 @@ const signatures = {
       {
         label: '$sFilePath [, $hParent',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellEmptyRecycleBin: {
     documentation: 'Empties the Recycle Bin on the specified drive',
-    label: '_WinAPI_ShellEmptyRecycleBin ( [$sRoot = \'\' [, $iFlags = 0 [, $hParent = 0]]] )',
+    label: "_WinAPI_ShellEmptyRecycleBin ( [$sRoot = '' [, $iFlags = 0 [, $hParent = 0]]] )",
     params: [
       {
         label: '$sRoot',
-        documentation: '**[optional]** Default is \'\' [, $iFlags.',
-      }
+        documentation: "**[optional]** Default is '' [, $iFlags.",
+      },
     ],
   },
   _WinAPI_ShellExecute: {
     documentation: 'Performs an operation on a specified file',
-    label: '_WinAPI_ShellExecute ( $sFilePath [, $sArgs = \'\' [, $sDir = \'\' [, $sVerb = \'\' [, $iShow = 1 [, $hParent = 0]]]]] )',
+    label:
+      "_WinAPI_ShellExecute ( $sFilePath [, $sArgs = '' [, $sDir = '' [, $sVerb = '' [, $iShow = 1 [, $hParent = 0]]]]] )",
     params: [
       {
         label: '$sFilePath [, $sArgs',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellExecuteEx: {
@@ -135,17 +135,17 @@ const signatures = {
       {
         label: 'ByRef $tSHEXINFO',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellExtractAssociatedIcon: {
-    documentation: 'Returns a handle to the icon that associated with the specified file\'s',
+    documentation: "Returns a handle to the icon that associated with the specified file's",
     label: '_WinAPI_ShellExtractAssociatedIcon ( $sFilePath [, $bSmall = False] )',
     params: [
       {
         label: '$sFilePath [, $bSmall',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellExtractIcon: {
@@ -167,12 +167,13 @@ const signatures = {
       {
         label: '$iHeight',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellFileOperation: {
     documentation: 'Copies, moves, renames, or deletes a file system object',
-    label: '_WinAPI_ShellFileOperation ( $sFrom, $sTo, $iFunc, $iFlags [, $sTitle = \'\' [, $hParent = 0]] )',
+    label:
+      "_WinAPI_ShellFileOperation ( $sFrom, $sTo, $iFunc, $iFlags [, $sTitle = '' [, $hParent = 0]] )",
     params: [
       {
         label: '$sFrom',
@@ -189,15 +190,13 @@ const signatures = {
       {
         label: '$iFlags [, $sTitle',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellFlushSFCache: {
     documentation: 'Flushes the special folder cache',
     label: '_WinAPI_ShellFlushSFCache ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_ShellGetFileInfo: {
     documentation: 'Retrieves information about an object in the file system',
@@ -218,7 +217,7 @@ const signatures = {
       {
         label: 'ByRef $tSHFILEINFO',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetIconOverlayIndex: {
@@ -232,7 +231,7 @@ const signatures = {
       {
         label: '$iIndex',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetKnownFolderIDList: {
@@ -242,7 +241,7 @@ const signatures = {
       {
         label: '$sGUID [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetKnownFolderPath: {
@@ -252,7 +251,7 @@ const signatures = {
       {
         label: '$sGUID [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetLocalizedName: {
@@ -262,7 +261,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetPathFromIDList: {
@@ -272,7 +271,7 @@ const signatures = {
       {
         label: '$pPIDL',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetSetFolderCustomSettings: {
@@ -290,7 +289,7 @@ const signatures = {
       {
         label: 'ByRef $tSHFCS',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetSettings: {
@@ -300,7 +299,7 @@ const signatures = {
       {
         label: '$iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetSpecialFolderLocation: {
@@ -310,7 +309,7 @@ const signatures = {
       {
         label: '$iCSIDL',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetSpecialFolderPath: {
@@ -320,7 +319,7 @@ const signatures = {
       {
         label: '$iCSIDL [, $bCreate',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellGetStockIconInfo: {
@@ -334,7 +333,7 @@ const signatures = {
       {
         label: '$iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellILCreateFromPath: {
@@ -344,11 +343,11 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellNotifyIcon: {
-    documentation: 'Sends a message to the taskbar\'s status area',
+    documentation: "Sends a message to the taskbar's status area",
     label: '_WinAPI_ShellNotifyIcon ( $iMessage, $tNOTIFYICONDATA )',
     params: [
       {
@@ -358,7 +357,7 @@ const signatures = {
       {
         label: '$tNOTIFYICONDATA',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellNotifyIconGetRect: {
@@ -372,45 +371,47 @@ const signatures = {
       {
         label: '$iID [, $tGUID',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellObjectProperties: {
     documentation: 'Invokes the Properties context menu command on a Shell object',
-    label: '_WinAPI_ShellObjectProperties ( $sFilePath [, $iType = 2 [, $sProperty = \'\' [, $hParent = 0]]] )',
+    label:
+      "_WinAPI_ShellObjectProperties ( $sFilePath [, $iType = 2 [, $sProperty = '' [, $hParent = 0]]] )",
     params: [
       {
         label: '$sFilePath [, $iType',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellOpenFolderAndSelectItems: {
-    documentation: 'Opens a Windows Explorer window with specified items in a particular folder selected',
-    label: '_WinAPI_ShellOpenFolderAndSelectItems ( $sFilePath [, $aNames = 0 [, $iStart = 0 [, $iEnd = -1 [, $iFlags = 0]]]] )',
+    documentation:
+      'Opens a Windows Explorer window with specified items in a particular folder selected',
+    label:
+      '_WinAPI_ShellOpenFolderAndSelectItems ( $sFilePath [, $aNames = 0 [, $iStart = 0 [, $iEnd = -1 [, $iFlags = 0]]]] )',
     params: [
       {
         label: '$sFilePath [, $aNames',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellQueryRecycleBin: {
-    documentation: 'Retrieves the size of the Recycle Bin and the number of items in it, for a specified drive',
-    label: '_WinAPI_ShellQueryRecycleBin ( [$sRoot = \'\'] )',
+    documentation:
+      'Retrieves the size of the Recycle Bin and the number of items in it, for a specified drive',
+    label: "_WinAPI_ShellQueryRecycleBin ( [$sRoot = ''] )",
     params: [
       {
         label: '$sRoot',
-        documentation: '**[optional]** Default is \'\'.',
-      }
+        documentation: "**[optional]** Default is ''.",
+      },
     ],
   },
   _WinAPI_ShellQueryUserNotificationState: {
     documentation: 'Checks the state of the computer for the current user',
     label: '_WinAPI_ShellQueryUserNotificationState ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_ShellRemoveLocalizedName: {
     documentation: 'Removes the localized name of a file in a Shell folder',
@@ -419,7 +420,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellRestricted: {
@@ -429,7 +430,7 @@ const signatures = {
       {
         label: '$iRestriction',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellSetKnownFolderPath: {
@@ -443,7 +444,7 @@ const signatures = {
       {
         label: '$sFilePath [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellSetLocalizedName: {
@@ -461,7 +462,7 @@ const signatures = {
       {
         label: '$iResID',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellSetSettings: {
@@ -475,7 +476,7 @@ const signatures = {
       {
         label: '$bSet',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ShellUpdateImage: {
@@ -493,9 +494,9 @@ const signatures = {
       {
         label: '$iImage [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);

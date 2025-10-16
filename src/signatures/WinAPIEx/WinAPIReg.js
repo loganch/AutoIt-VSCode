@@ -15,22 +15,23 @@ const signatures = {
       {
         label: '$sStr',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AssocGetPerceivedType: {
-    documentation: 'Retrieves a file\'s perceived type based on its extension',
+    documentation: "Retrieves a file's perceived type based on its extension",
     label: '_WinAPI_AssocGetPerceivedType ( $sExt )',
     params: [
       {
         label: '$sExt',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AssocQueryString: {
-    documentation: 'Searches for and retrieves a file or protocol association-related string from the registry',
-    label: '_WinAPI_AssocQueryString ( $sAssoc, $iType [, $iFlags = 0 [, $sExtra = \'\']] )',
+    documentation:
+      'Searches for and retrieves a file or protocol association-related string from the registry',
+    label: "_WinAPI_AssocQueryString ( $sAssoc, $iType [, $iFlags = 0 [, $sExtra = '']] )",
     params: [
       {
         label: '$sAssoc',
@@ -39,7 +40,7 @@ const signatures = {
       {
         label: '$iType [, $iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateMRUList: {
@@ -53,7 +54,7 @@ const signatures = {
       {
         label: '$sSubKey [, $iMax',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DllInstall: {
@@ -63,7 +64,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DllUninstall: {
@@ -73,7 +74,7 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EnumMRUList: {
@@ -87,17 +88,18 @@ const signatures = {
       {
         label: '$iItem',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_FreeMRUList: {
-    documentation: 'Frees the handle associated with the most recently used (MRU) list and writes cached data to the registry',
+    documentation:
+      'Frees the handle associated with the most recently used (MRU) list and writes cached data to the registry',
     label: '_WinAPI_FreeMRUList ( $hMRU )',
     params: [
       {
         label: '$hMRU',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetRegKeyNameByHandle: {
@@ -107,7 +109,7 @@ const signatures = {
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegCloseKey: {
@@ -117,7 +119,7 @@ const signatures = {
       {
         label: '$hKey [, $bFlush',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegConnectRegistry: {
@@ -131,11 +133,12 @@ const signatures = {
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegCopyTree: {
-    documentation: 'Recursively copies the subkeys and values of the source subkey to the destination key',
+    documentation:
+      'Recursively copies the subkeys and values of the source subkey to the destination key',
     label: '_WinAPI_RegCopyTree ( $hSrcKey, $sSrcSubKey, $hDestKey )',
     params: [
       {
@@ -149,11 +152,12 @@ const signatures = {
       {
         label: '$hDestKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegCopyTreeEx: {
-    documentation: 'Copies the specified registry key, along with its values and subkeys, to the specified destination key',
+    documentation:
+      'Copies the specified registry key, along with its values and subkeys, to the specified destination key',
     label: '_WinAPI_RegCopyTreeEx ( $hSrcKey, $sSrcSubKey, $hDestKey )',
     params: [
       {
@@ -167,37 +171,38 @@ const signatures = {
       {
         label: '$hDestKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegCreateKey: {
     documentation: 'Creates the specified registry key',
-    label: '_WinAPI_RegCreateKey ( $hKey [, $sSubKey = \'\' [, $iAccess = $KEY_ALL_ACCESS [, $iOptions = 0 [, $tSecurity = 0]]]] )',
+    label:
+      "_WinAPI_RegCreateKey ( $hKey [, $sSubKey = '' [, $iAccess = $KEY_ALL_ACCESS [, $iOptions = 0 [, $tSecurity = 0]]]] )",
     params: [
       {
         label: '$hKey [, $sSubKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDeleteEmptyKey: {
     documentation: 'Deletes an empty key',
-    label: '_WinAPI_RegDeleteEmptyKey ( $hKey [, $sSubKey = \'\'] )',
+    label: "_WinAPI_RegDeleteEmptyKey ( $hKey [, $sSubKey = ''] )",
     params: [
       {
         label: '$hKey [, $sSubKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDeleteKey: {
     documentation: 'Deletes a subkey and its values',
-    label: '_WinAPI_RegDeleteKey ( $hKey [, $sSubKey = \'\'] )',
+    label: "_WinAPI_RegDeleteKey ( $hKey [, $sSubKey = ''] )",
     params: [
       {
         label: '$hKey [, $sSubKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDeleteKeyValue: {
@@ -215,17 +220,17 @@ const signatures = {
       {
         label: '$sValueName',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDeleteTree: {
     documentation: 'Deletes a subkey and all its descendants',
-    label: '_WinAPI_RegDeleteTree ( $hKey [, $sSubKey = \'\'] )',
+    label: "_WinAPI_RegDeleteTree ( $hKey [, $sSubKey = ''] )",
     params: [
       {
         label: '$hKey [, $sSubKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDeleteTreeEx: {
@@ -235,7 +240,7 @@ const signatures = {
       {
         label: '$hKey [, $sSubKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDeleteValue: {
@@ -249,7 +254,7 @@ const signatures = {
       {
         label: '$sValueName',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDisableReflectionKey: {
@@ -259,17 +264,17 @@ const signatures = {
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegDuplicateHKey: {
-    documentation: 'Duplicates a registry key\'s handle',
+    documentation: "Duplicates a registry key's handle",
     label: '_WinAPI_RegDuplicateHKey ( $hKey )',
     params: [
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegEnableReflectionKey: {
@@ -279,7 +284,7 @@ const signatures = {
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegEnumKey: {
@@ -293,7 +298,7 @@ const signatures = {
       {
         label: '$iIndex',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegEnumValue: {
@@ -307,7 +312,7 @@ const signatures = {
       {
         label: '$iIndex',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegFlushKey: {
@@ -317,12 +322,12 @@ const signatures = {
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegLoadMUIString: {
     documentation: 'Loads the specified string from the specified key and subkey',
-    label: '_WinAPI_RegLoadMUIString ( $hKey, $sValueName [, $sDirectory = \'\'] )',
+    label: "_WinAPI_RegLoadMUIString ( $hKey, $sValueName [, $sDirectory = ''] )",
     params: [
       {
         label: '$hKey',
@@ -331,12 +336,14 @@ const signatures = {
       {
         label: '$sValueName [, $sDirectory',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegNotifyChangeKeyValue: {
-    documentation: 'Notifies the caller about changes to the attributes or contents of a specified registry key',
-    label: '_WinAPI_RegNotifyChangeKeyValue ( $hKey, $iFilter [, $bSubtree = False [, $bAsync = False [, $hEvent = 0]]] )',
+    documentation:
+      'Notifies the caller about changes to the attributes or contents of a specified registry key',
+    label:
+      '_WinAPI_RegNotifyChangeKeyValue ( $hKey, $iFilter [, $bSubtree = False [, $bAsync = False [, $hEvent = 0]]] )',
     params: [
       {
         label: '$hKey',
@@ -345,17 +352,17 @@ const signatures = {
       {
         label: '$iFilter [, $bSubtree',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegOpenKey: {
     documentation: 'Opens the specified registry key',
-    label: '_WinAPI_RegOpenKey ( $hKey [, $sSubKey = \'\' [, $iAccess = 0x000F003F]] )',
+    label: "_WinAPI_RegOpenKey ( $hKey [, $sSubKey = '' [, $iAccess = 0x000F003F]] )",
     params: [
       {
         label: '$hKey [, $sSubKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegQueryInfoKey: {
@@ -365,7 +372,7 @@ const signatures = {
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegQueryLastWriteTime: {
@@ -375,12 +382,14 @@ const signatures = {
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegQueryMultipleValues: {
-    documentation: 'Retrieves the type and data for a list of value names associated with an open registry key',
-    label: '_WinAPI_RegQueryMultipleValues ( $hKey, ByRef $aValent, ByRef $pBuffer [, $iStart = 0 [, $iEnd = -1]] )',
+    documentation:
+      'Retrieves the type and data for a list of value names associated with an open registry key',
+    label:
+      '_WinAPI_RegQueryMultipleValues ( $hKey, ByRef $aValent, ByRef $pBuffer [, $iStart = 0 [, $iEnd = -1]] )',
     params: [
       {
         label: '$hKey',
@@ -393,21 +402,23 @@ const signatures = {
       {
         label: 'ByRef $pBuffer [, $iStart',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegQueryReflectionKey: {
-    documentation: 'Determines whether reflection has been disabled or enabled for the specified key',
+    documentation:
+      'Determines whether reflection has been disabled or enabled for the specified key',
     label: '_WinAPI_RegQueryReflectionKey ( $hKey )',
     params: [
       {
         label: '$hKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegQueryValue: {
-    documentation: 'Retrieves the type and data for the specified value name associated with an open registry key',
+    documentation:
+      'Retrieves the type and data for the specified value name associated with an open registry key',
     label: '_WinAPI_RegQueryValue ( $hKey, $sValueName, ByRef $tValueData )',
     params: [
       {
@@ -421,11 +432,12 @@ const signatures = {
       {
         label: 'ByRef $tValueData',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegRestoreKey: {
-    documentation: 'Reads the registry information in a specified file and copies it over the specified key',
+    documentation:
+      'Reads the registry information in a specified file and copies it over the specified key',
     label: '_WinAPI_RegRestoreKey ( $hKey, $sFilePath )',
     params: [
       {
@@ -435,11 +447,12 @@ const signatures = {
       {
         label: '$sFilePath',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegSaveKey: {
-    documentation: 'Saves the specified key and all of its subkeys and values to a new file, in the standard format',
+    documentation:
+      'Saves the specified key and all of its subkeys and values to a new file, in the standard format',
     label: '_WinAPI_RegSaveKey ( $hKey, $sFilePath [, $bReplace = False [, $tSecurity = 0]] )',
     params: [
       {
@@ -449,7 +462,7 @@ const signatures = {
       {
         label: '$sFilePath [, $bReplace',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_RegSetValue: {
@@ -475,7 +488,7 @@ const signatures = {
       {
         label: '$iBytes',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SfcIsKeyProtected: {
@@ -485,9 +498,9 @@ const signatures = {
       {
         label: '$hKey [, $sSubKey',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);

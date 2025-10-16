@@ -23,7 +23,7 @@ const signatures = {
       {
         label: 'ByRef $aAdjust',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_AssignProcessToJobObject: {
@@ -37,22 +37,24 @@ const signatures = {
       {
         label: '$hProcess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateJobObject: {
     documentation: 'Creates or opens a job object',
-    label: '_WinAPI_CreateJobObject ( [$sName = \'\' [, $tSecurity = 0]] )',
+    label: "_WinAPI_CreateJobObject ( [$sName = '' [, $tSecurity = 0]] )",
     params: [
       {
         label: '$sName',
-        documentation: '**[optional]** Default is \'\' [, $tSecurity.',
-      }
+        documentation: "**[optional]** Default is '' [, $tSecurity.",
+      },
     ],
   },
   _WinAPI_CreateProcessWithToken: {
-    documentation: 'Creates a new process and its primary thread in the security context of the specified token',
-    label: '_WinAPI_CreateProcessWithToken ( $sApp, $sCmd, $iFlags, $tStartupInfo, $tProcessInfo, $hToken [, $iLogon = 0 [, $pEnvironment = 0 [, $sDir = \'\']]] )',
+    documentation:
+      'Creates a new process and its primary thread in the security context of the specified token',
+    label:
+      "_WinAPI_CreateProcessWithToken ( $sApp, $sCmd, $iFlags, $tStartupInfo, $tProcessInfo, $hToken [, $iLogon = 0 [, $pEnvironment = 0 [, $sDir = '']]] )",
     params: [
       {
         label: '$sApp',
@@ -77,12 +79,14 @@ const signatures = {
       {
         label: '$hToken [, $iLogon',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_DuplicateTokenEx: {
-    documentation: 'Creates a new primary or impersonation access token that duplicates an existing token',
-    label: '_WinAPI_DuplicateTokenEx ( $hToken, $iAccess, $iLevel [, $iType = 1 [, $tSecurity = 0]] )',
+    documentation:
+      'Creates a new primary or impersonation access token that duplicates an existing token',
+    label:
+      '_WinAPI_DuplicateTokenEx ( $hToken, $iAccess, $iLevel [, $iType = 1 [, $tSecurity = 0]] )',
     params: [
       {
         label: '$hToken',
@@ -95,17 +99,18 @@ const signatures = {
       {
         label: '$iLevel [, $iType',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_EmptyWorkingSet: {
-    documentation: 'Removes as many pages as possible from the working set of the specified process',
+    documentation:
+      'Removes as many pages as possible from the working set of the specified process',
     label: '_WinAPI_EmptyWorkingSet ( [$iPID = 0] )',
     params: [
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_EnumChildProcess: {
@@ -115,15 +120,13 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_EnumDeviceDrivers: {
     documentation: 'Retrieves the load address for each device driver in the system',
     label: '_WinAPI_EnumDeviceDrivers ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_EnumProcessHandles: {
     documentation: 'Enumerates a handles that belong to the specified process',
@@ -132,7 +135,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0 [, $iType.',
-      }
+      },
     ],
   },
   _WinAPI_EnumProcessModules: {
@@ -142,7 +145,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0 [, $iFlag.',
-      }
+      },
     ],
   },
   _WinAPI_EnumProcessThreads: {
@@ -152,7 +155,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_EnumProcessWindows: {
@@ -162,15 +165,14 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0 [, $bVisible.',
-      }
+      },
     ],
   },
   _WinAPI_GetCurrentProcessExplicitAppUserModelID: {
-    documentation: 'Retrieves the application-defined, explicit Application User Model ID for the current process',
+    documentation:
+      'Retrieves the application-defined, explicit Application User Model ID for the current process',
     label: '_WinAPI_GetCurrentProcessExplicitAppUserModelID ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetDeviceDriverBaseName: {
     documentation: 'Retrieves the base name of the specified device driver',
@@ -179,7 +181,7 @@ const signatures = {
       {
         label: '$pDriver',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetDeviceDriverFileName: {
@@ -189,7 +191,7 @@ const signatures = {
       {
         label: '$pDriver',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetExitCodeProcess: {
@@ -199,17 +201,18 @@ const signatures = {
       {
         label: '$hProcess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetModuleFileNameEx: {
-    documentation: 'Retrieves the fully-qualified path for the file containing the specified module',
+    documentation:
+      'Retrieves the fully-qualified path for the file containing the specified module',
     label: '_WinAPI_GetModuleFileNameEx ( $hProcess [, $hModule = 0] )',
     params: [
       {
         label: '$hProcess [, $hModule',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetModuleInformation: {
@@ -219,7 +222,7 @@ const signatures = {
       {
         label: '$hProcess [, $hModule',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetParentProcess: {
@@ -229,7 +232,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetPriorityClass: {
@@ -239,7 +242,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessCommandLine: {
@@ -249,17 +252,18 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessFileName: {
-    documentation: 'Retrieves the fully-qualified path of the executable file for the specified process',
+    documentation:
+      'Retrieves the fully-qualified path of the executable file for the specified process',
     label: '_WinAPI_GetProcessFileName ( [$iPID = 0] )',
     params: [
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessHandleCount: {
@@ -269,7 +273,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessID: {
@@ -279,17 +283,18 @@ const signatures = {
       {
         label: '$hProcess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessIoCounters: {
-    documentation: 'Retrieves accounting information for all I/O operations performed by the specified process',
+    documentation:
+      'Retrieves accounting information for all I/O operations performed by the specified process',
     label: '_WinAPI_GetProcessIoCounters ( [$iPID = 0] )',
     params: [
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessMemoryInfo: {
@@ -299,7 +304,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessName: {
@@ -309,7 +314,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessTimes: {
@@ -319,7 +324,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessUser: {
@@ -329,7 +334,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetProcessWorkingDirectory: {
@@ -339,7 +344,7 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_GetThreadDesktop: {
@@ -349,32 +354,29 @@ const signatures = {
       {
         label: '$iThreadId',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_GetThreadErrorMode: {
     documentation: 'Retrieves the error mode for the calling thread',
     label: '_WinAPI_GetThreadErrorMode ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_GetWindowFileName: {
-    documentation: 'Retrieves the fully-qualified path of the module associated with the specified window handle',
+    documentation:
+      'Retrieves the fully-qualified path of the module associated with the specified window handle',
     label: '_WinAPI_GetWindowFileName ( $hWnd )',
     params: [
       {
         label: '$hWnd',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsElevated: {
     documentation: 'Determines whether the current process is elevated',
     label: '_WinAPI_IsElevated ( )',
-    params: [
-
-    ],
+    params: [],
   },
   _WinAPI_IsProcessInJob: {
     documentation: 'Determines whether the process is running in the specified job',
@@ -383,7 +385,7 @@ const signatures = {
       {
         label: '$hProcess [, $hJob',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_IsWow64Process: {
@@ -393,17 +395,18 @@ const signatures = {
       {
         label: '$iPID',
         documentation: '**[optional]** Default is 0.',
-      }
+      },
     ],
   },
   _WinAPI_OpenJobObject: {
     documentation: 'Opens an existing job object',
-    label: '_WinAPI_OpenJobObject ( $sName [, $iAccess = $JOB_OBJECT_ALL_ACCESS [, $bInherit = False]] )',
+    label:
+      '_WinAPI_OpenJobObject ( $sName [, $iAccess = $JOB_OBJECT_ALL_ACCESS [, $bInherit = False]] )',
     params: [
       {
         label: '$sName [, $iAccess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OpenProcessToken: {
@@ -413,12 +416,13 @@ const signatures = {
       {
         label: '$iAccess [, $hProcess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_QueryInformationJobObject: {
     documentation: 'Retrieves limit and job state information from the job object',
-    label: '_WinAPI_QueryInformationJobObject ( $hJob, $iJobObjectInfoClass, ByRef $tJobObjectInfo )',
+    label:
+      '_WinAPI_QueryInformationJobObject ( $hJob, $iJobObjectInfoClass, ByRef $tJobObjectInfo )',
     params: [
       {
         label: '$hJob',
@@ -431,7 +435,7 @@ const signatures = {
       {
         label: 'ByRef $tJobObjectInfo',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetInformationJobObject: {
@@ -449,7 +453,7 @@ const signatures = {
       {
         label: '$tJobObjectInfo',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetPriorityClass: {
@@ -459,7 +463,7 @@ const signatures = {
       {
         label: '$iPriority [, $iPID',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetThreadDesktop: {
@@ -469,27 +473,29 @@ const signatures = {
       {
         label: '$hDesktop',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetThreadErrorMode: {
-    documentation: 'Controls whether the system will handle the specified types of serious errors or whether the calling thread will handle them',
+    documentation:
+      'Controls whether the system will handle the specified types of serious errors or whether the calling thread will handle them',
     label: '_WinAPI_SetThreadErrorMode ( $iMode )',
     params: [
       {
         label: '$iMode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_SetThreadExecutionState: {
-    documentation: 'Prevents the system from entering sleep or turning off the display while the current application is running',
+    documentation:
+      'Prevents the system from entering sleep or turning off the display while the current application is running',
     label: '_WinAPI_SetThreadExecutionState ( $iFlags )',
     params: [
       {
         label: '$iFlags',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_TerminateJobObject: {
@@ -499,7 +505,7 @@ const signatures = {
       {
         label: '$hJob [, $iExitCode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_TerminateProcess: {
@@ -509,11 +515,12 @@ const signatures = {
       {
         label: '$hProcess [, $iExitCode',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_UserHandleGrantAccess: {
-    documentation: 'Grants or denies access to a handle to a User object to a job that has a user-interface restriction',
+    documentation:
+      'Grants or denies access to a handle to a User object to a job that has a user-interface restriction',
     label: '_WinAPI_UserHandleGrantAccess ( $hObject, $hJob, $bGrant )',
     params: [
       {
@@ -527,7 +534,7 @@ const signatures = {
       {
         label: '$bGrant',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateMutex: {
@@ -537,7 +544,7 @@ const signatures = {
       {
         label: '$sMutex [, $bInitial',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_CreateSemaphore: {
@@ -555,7 +562,7 @@ const signatures = {
       {
         label: '$iMaximum [, $tSecurity',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OpenMutex: {
@@ -565,7 +572,7 @@ const signatures = {
       {
         label: '$sMutex [, $iAccess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_OpenSemaphore: {
@@ -575,7 +582,7 @@ const signatures = {
       {
         label: '$sSemaphore [, $iAccess',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ReleaseMutex: {
@@ -585,7 +592,7 @@ const signatures = {
       {
         label: '$hMutex',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ReleaseSemaphore: {
@@ -595,7 +602,7 @@ const signatures = {
       {
         label: '$hSemaphore [, $iIncrease',
         documentation: 'Parameter description',
-      }
+      },
     ],
   },
   _WinAPI_ResetEvent: {
@@ -605,9 +612,9 @@ const signatures = {
       {
         label: '$hEvent',
         documentation: 'Parameter description',
-      }
+      },
     ],
-  }
+  },
 };
 
 const hovers = signatureToHover(signatures);
