@@ -40,7 +40,8 @@ function getDebugText() {
     );
   }
 
-  const lineCount = thisDoc.lineCount - 2;
+  const LINE_COUNT_OFFSET = 2;
+  const lineCount = thisDoc.lineCount - LINE_COUNT_OFFSET;
   const isContinue = /\s_\b\s*(;.*)?\s*/;
 
   // Check if not the last line
