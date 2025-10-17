@@ -1,5 +1,7 @@
 const { EventEmitter } = require('events');
 
+const MILLISECONDS_PER_SECOND = 1000;
+
 /**
  * @typedef {Object} RunnerInfo
  * @property {number} id - Process ID
@@ -109,7 +111,7 @@ class ProcessManager extends EventEmitter {
   cleanup() {
     try {
       const now = new Date().getTime();
-      const timeout = this.config.multiOutputFinishedTimeout * 1000;
+      const timeout = this.config.multiOutputFinishedTimeout * MILLISECONDS_PER_SECOND;
       const endTime = now - timeout;
       // get list of finished processes, ordered by endTime descent
       const values = [...this.runners.entries()]
