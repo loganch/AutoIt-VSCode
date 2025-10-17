@@ -25,43 +25,49 @@ const { config } = conf;
 const runCheckProcess = document => {
   return new Promise((resolve, reject) => {
     let consoleOutput = '';
-    const params = [
-      /* https://www.autoitscript.com/autoit3/docs/intro/au3check.htm */
-      '-w',
-      '1', // already included file (on)
-      '-w',
-      '2', // missing #comments-end (on)
-      '-w',
-      '3', // already declared var (off)
-      '-w',
-      '4', // local var used in global scope (off)
-      '-w',
-      '5', // local var declared but not used (off)
-      '-w',
-      '6', // warn when using Dim (off)
-      '-w',
-      '7', // warn when passing Const or expression on ByRef param(s) (on)
-    ];
+    // Start with empty params - let Au3Check use its own defaults
+    // Only add parameters from include paths and #AutoIt3Wrapper_AU3Check_Parameters directive
+    // See https://www.autoitscript.com/autoit3/docs/intro/au3check.htm
+    const params = [];
 
     // Add -I for each include path
     config.includePaths.forEach(path => {
       params.push('-I', path);
     });
 
-    // find last occurrence of #AutoIt3Wrapper_AU3Check_Parameters=
+    // Parse #AutoIt3Wrapper_AU3Check_Parameters directive if present
     const match = [
-      ...document.getText().matchAll(/^\s*#AutoIt3Wrapper_AU3Check_Parameters=.*$/gm),
+      ...document.getText().matchAll(/^\s*#AutoIt3Wrapper_AU3Check_Parameters=(.*)$/gm),
     ].pop();
-    const regexp = /(-w-?)\s+([0-9]+)/g;
-    while (match) {
-      const [, param, value] = regexp.exec(match[0]) || [];
-      if (!param) break;
-      const numValue = Number(value);
-      const i = (numValue - 1) * 2;
-      // only update existing params
-      if (params[i] === undefined) continue;
-      params[i] = param;
-      params[i + 1] = String(numValue);
+    if (match) {
+      // Extract the parameter string after the = sign
+      const paramString = match[1].trim();
+
+      // Parse standalone flags first: -q (quiet) and -d (must declare vars)
+      // These flags are safe because they don't alter the output format:
+      // - -q: suppresses info messages, keeps error/warning format
+      // - -d: enables additional checks, produces standard format errors
+      if (/\s-q\b/.test(paramString) || paramString.startsWith('-q')) {
+        params.push('-q');
+      }
+      if (/\s-d\b/.test(paramString) || paramString.startsWith('-d')) {
+        params.push('-d');
+      }
+
+      // Parse -w (warning) parameters: -w or -w- followed by a number
+      // Append all warning parameters from the directive
+      const warnRegex = /(-w-?)\s+([0-9]+)/g;
+      let regexMatch;
+      while ((regexMatch = warnRegex.exec(paramString)) !== null) {
+        const [, param, value] = regexMatch;
+        params.push(param, value);
+      }
+
+      // NOTE: -v (verbosity) parameters are intentionally NOT supported here
+      // Verbosity flags (-v 1, -v 2, -v 3) add extra output lines that would break
+      // the diagnostic parser which expects a specific format:
+      //   "file.au3"(line,col) : severity: message
+      // See diagnosticUtils.js OUTPUT_REGEXP for the expected format
     }
     const checkProcess = execFile(config.checkPath, [...params, document.fileName], {
       cwd: dirname(document.fileName),
