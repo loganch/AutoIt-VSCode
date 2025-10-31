@@ -54,6 +54,12 @@
         <string>entity.name.function.autoit</string>
       </dict>
       <dict>
+        <key>name</key>
+        <string>support.class.com.autoit</string>
+        <key>match</key>
+        <string>(?<=\.)\b[_a-zA-Z]+[a-zA-Z0-9]*\b(?=\.|\(|)</string>
+      </dict>
+      <dict>
         <key>match</key>
         <string>@\b(?i:trayiconflashing|a(?:utoit(?:version|x64|pid|exe)|ppdata(?:common)?dir)|desktopheight|(?:gui_drop|tray_)id|(?:osbuil|gui_(?:drag|ctrl)i|exitmetho|(?:sw_showm(?:in|ax)imiz|hotkeypress|extend)e|compile)d|(?:(?:scriptfull|home)pat|desktop(?:refres|widt|dept))h|(?:logond(?:nsd)?omai|m[io])n|(?:sw_(?:shownoactivat|m(?:in|ax)imiz)|sw_showminnoactiv|(?:script|user)nam|gui_(?:ctrlhand|winhand|dragfi)l|home(?:shar|driv)|computernam|sw_restor|exitcod|sw_hid|ostyp|(?:trayiconvisi|sw_(?:dis|en)a)bl)e|(?:scriptlinenumbe|logonserve|desktopdi|erro|yea|hou)r|(?:sw_showdefaul|kblayou)t|sw_shown(?:ormal|a)|c(?:puarch|rlf|om(?:_eventobj|spec))|m(?:uilang|day)|ipaddress[1-4]|(?:localappdata|userprofile|working|system|temp|(?:mydocument|window)s|programfiles|commonfiles)dir|(?:start(?:menu|up)|favorites|programs)(?:common)?dir|numparams|osversion|sw_show|osarch|oslang|msec|[wy]day|sec|tab|lf|cr|scriptdir|osservicepack|sw_(?:un)?lock|d(?:ocuments|esktop)commondir)\b</string>
         <key>name</key>
