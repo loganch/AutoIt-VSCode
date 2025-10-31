@@ -49,7 +49,7 @@
       </dict>
       <dict>
         <key>match</key>
-        <string>[a-zA-Z_]+[\w_]*(?=\()</string>
+        <string>(?<!\.)\b[a-zA-Z_]+[\w_]*(?=\()</string>
         <key>name</key>
         <string>entity.name.function.autoit</string>
       </dict>
