@@ -101,7 +101,6 @@ import wrapperDirectivesCompletionItems, {
 const completions = [
   ...AVI,
   ...ButtonConstants,
-  ...Clipboard,
   ...ComboConstants,
   ...DateTimeConstants,
   ...DirConstants,
