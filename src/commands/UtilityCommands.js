@@ -9,9 +9,16 @@ import aiConfig from '../ai_config';
 const { config } = aiConfig;
 const aiOutCommon = globalOutputChannel;
 
-const SUBSTRING_DOUBLE_UNDERSCORE_LENGTH = 2;
-const SUBSTRING_BYREF_LENGTH = 5;
+/** @type {number} Length of double underscore prefix for internal functions. */
+const DOUBLE_UNDERSCORE_LENGTH = 2;
+
+/** @type {number} Length of the 'byref' keyword. */
+const BYREF_KEYWORD_LENGTH = 5;
+
+/** @type {number} Length of the byref prefix including keyword and spacing. */
 const BYREF_PREFIX_LENGTH = 6;
+
+/** @type {number} Padding length for parameter names in documentation. */
 const PARAMETER_PAD_LENGTH = 21;
 
 const runners = {
@@ -208,7 +215,7 @@ const insertHeader = () => {
     }
 
     const hdrType =
-      found[2].substring(0, SUBSTRING_DOUBLE_UNDERSCORE_LENGTH) === '__'
+      found[2].substring(0, DOUBLE_UNDERSCORE_LENGTH) === '__'
         ? '#INTERNAL_USE_ONLY# '
         : '#FUNCTION# =========';
     let syntaxBegin = `${found[2]}(`;
@@ -225,7 +232,7 @@ const insertHeader = () => {
           syntaxEnd = `]${syntaxEnd}`;
         }
         let byref = '';
-        if (parameter.substring(0, SUBSTRING_BYREF_LENGTH).toLowerCase() === 'byref') {
+        if (parameter.substring(0, BYREF_KEYWORD_LENGTH).toLowerCase() === 'byref') {
           byref = 'ByRef ';
           parameter = parameter.substring(BYREF_PREFIX_LENGTH).trim(); // strip off byref keyword
           tag += '[in/out] ';
