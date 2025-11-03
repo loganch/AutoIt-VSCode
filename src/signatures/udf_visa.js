@@ -25,7 +25,7 @@ const signatures = {
   },
 
   _viFindGpib: {
-    documentation: `Send a Command/Query to an Instrument/Device through the VISA interface (GPIB / TCP)\n\n${include}`,
+    documentation: `Find and enumerate GPIB devices on the VISA interface\n\n${include}`,
     label: '_viFindGpib ( ByRef $aDescriptorList, ByRef $aIDNList [, $iShow_Search_Results = 0] )',
     params: [
       { label: '$aDescriptorList', documentation: 'Array to receive descriptor list' },
@@ -36,7 +36,6 @@ const signatures = {
       },
     ],
   },
-
   _viGpibBusReset: {
     documentation: `GPIB BUS "reset": Use this function when the GPIB BUS gets stuck for some reason. You might be lucky and resolve the problem by calling this function\n\n${include}`,
     label: '_viGpibBusReset ( )',
@@ -73,7 +72,7 @@ const signatures = {
   },
 
   _viSetAttribute: {
-    documentation: `Set any VISA attribute This function, which is called by _viSetTimeout, can ALSO be used to set the other VISA specific attributes. Read the VISA documentation for more information and a list of VISA attributes and their corresponding values\n\n${include}`,
+    documentation: `Set any VISA attribute. This function, which is called by _viSetTimeout, can ALSO be used to set the other VISA specific attributes. Read the VISA documentation for more information and a list of VISA attributes and their corresponding values\n\n${include}`,
     label: '_viSetAttribute ( $hSession, $iAttribute, $iValue )',
     params: [
       { label: '$hSession', documentation: 'VISA session handle' },
@@ -81,9 +80,8 @@ const signatures = {
       { label: '$iValue', documentation: 'Value to set for the attribute' },
     ],
   },
-
   _viSetTimeout: {
-    documentation: `Sets the VISA timeout in MILISECONDS\n\n${include}`,
+    documentation: `Sets the VISA timeout in MILLISECONDS\n\n${include}`,
     label: '_viSetTimeout ( $hSession, $iTimeoutMS )',
     params: [
       { label: '$hSession', documentation: 'VISA session handle' },
