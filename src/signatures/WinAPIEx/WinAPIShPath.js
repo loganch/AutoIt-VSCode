@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { signatureToCompletion, signatureToHover } from '../../util';
+import { signatureToCompletion, signatureToHover, opt } from '../../util';
 
 const include = '(Requires: `#include <WinAPIShPath.au3>`)';
 
@@ -21,11 +21,16 @@ const signatures = {
     params: [
       {
         label: '$sString',
-        documentation: 'Parameter description',
+        documentation:
+          'The string to be compared against the pattern. This string cannot contain wildcard characters.',
       },
       {
-        label: '$sPattern [, $bCaseSensitive',
-        documentation: 'Parameter description',
+        label: '$sPattern',
+        documentation: 'The pattern string. This string can contain wildcard characters.',
+      },
+      {
+        label: '$bCaseSensitive',
+        documentation: `${opt} Specifies whether to treat the string as case sensitive when matching, valid values:\n\nTrue - The case-sensitive matching.\n\nFalse - The case-insensitive matching(Default).`,
       },
     ],
   },
