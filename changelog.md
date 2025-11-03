@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Missing AutoIt macros: `@exitMethod`, `@GUI_DropId`, and `@SW_ENABLE` to completions and hovers
+- Added missing AutoIt macros: `@exitMethod`, `@GUI_DropId`, and `@SW_ENABLE` to completions and hovers
 
 ### Fixed
 
