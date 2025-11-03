@@ -161,7 +161,7 @@ function getIncludedFunctionSignatures(doc) {
 
 /**
  * Returns an object of AutoIt functions found within the current AutoIt script
- * @param {'import("vscode").TextDocument} doc The TextDocument object representing the AutoIt script
+ * @param {import("vscode").TextDocument} doc The TextDocument object representing the AutoIt script
  * @returns {Object} Object containing SignatureInformation objects
  */
 function getLocalFunctionSignatures(doc) {
@@ -201,9 +201,8 @@ function createSignatureInfo(foundSig) {
 /**
  * Creates a Hover object for the user created functions.
  *
- * @param {'import("vscode").TextDocument} document - The TextDocument object representing the AutoIt script
- * @param {'import("vscode").Position} position - The position of the cursor when the function was called
- * @returns {Hover | null} - A Hover object containing the hover info, or null if no info found.
+ * @param {import("vscode").TextDocument} document - The TextDocument object representing the AutoIt script
+ * @param {import("vscode").Position} position - The position of the cursor when the function was called * @returns {Hover | null} - A Hover object containing the hover info, or null if no info found.
  */
 export const signatureHoverProvider = languages.registerHoverProvider(AUTOIT_MODE, {
   provideHover(document, position) {
@@ -233,10 +232,9 @@ export default languages.registerSignatureHelpProvider(
   {
     /**
      * Provides signature help for a given document and position.
-     * @param {'import("vscode").TextDocument} document - The document to provide signature help for.
-     * @param {'import("vscode").Position} position - The position in the document to provide signature help for.
-     * @returns {SignatureHelp | null} The signature help or null if no help is available.
-     */
+     * @param {import("vscode").TextDocument} document - The document to provide signature help for.
+     * @param {import("vscode").TextDocument} document - The document to provide signature help for.
+     * @param {import("vscode").Position} position - The position in the document to provide signature help for.     */
     provideSignatureHelp(document, position) {
       const caller = getCallInfo(document, position);
       if (!caller.func) return null;
