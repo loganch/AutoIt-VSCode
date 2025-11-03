@@ -9,7 +9,7 @@ A comprehensive AutoIt language extension for Visual Studio Code, providing synt
 
 > This extension has been forked and developed from Damien122's original release.
 
-**Quick Links:** [Installation](#installation) | [Features](#features) | [Quick Start](#quick-start) | [Configuration](#configuration) | [Keyboard Shortcuts](#keyboard-shortcuts) | [Platform Support](#platform-support) | [Troubleshooting](#troubleshooting) | [Contributing](#contributing)
+**Quick Links:** [Installation](#installation) | [Features](#features) | [Quick Start](#quick-start) | [Configuration](#configuration) | [Keyboard Shortcuts](#keyboard-shortcuts) | [Platform Support](#platform-support) | [Troubleshooting](#troubleshooting) | [Contributing](#contributing) | [Contributors](#contributors)
 
 ---
 
@@ -284,6 +284,16 @@ Please follow the existing code style and include tests for new features.
 
 ---
 
+## Contributors
+
+<a href="https://github.com/loganch/autoit-vscode/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=loganch/autoit-vscode" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
+---
+
 ## License
 
 See [LICENSE](LICENSE) file for details.
@@ -296,4 +306,4 @@ See [CHANGELOG.md](changelog.md) for version history and release notes.
 
 ---
 
-**Quick Links:** [Installation](#installation) | [Features](#features) | [Quick Start](#quick-start) | [Configuration](#configuration) | [Keyboard Shortcuts](#keyboard-shortcuts) | [Platform Support](#platform-support) | [Troubleshooting](#troubleshooting) | [Contributing](#contributing)
+**Quick Links:** [Installation](#installation) | [Features](#features) | [Quick Start](#quick-start) | [Configuration](#configuration) | [Keyboard Shortcuts](#keyboard-shortcuts) | [Platform Support](#platform-support) | [Troubleshooting](#troubleshooting) | [Contributing](#contributing) | [Contributors](#contributors)
