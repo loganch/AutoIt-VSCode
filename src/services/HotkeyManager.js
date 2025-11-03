@@ -13,6 +13,8 @@ const path = require('path');
 const OTHER_SECTION = '[Other]';
 const OTHER_SECTION_LENGTH = OTHER_SECTION.length; // used when inserting placeholders
 const SAFE_TIMER_MS = 10000;
+// Placeholder entries to ensure SciTE hotkey keys exist but are empty
+const HOTKEY_PLACEHOLDER = '\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n';
 
 class HotkeyManager {
   /**
@@ -109,10 +111,9 @@ class HotkeyManager {
       }
 
       // Insert empty SciTE hotkey placeholders immediately after the [Other] section header
-      const placeholder = '\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n';
       iniData =
         iniData.substring(0, otherIndex + OTHER_SECTION_LENGTH) +
-        placeholder +
+        HOTKEY_PLACEHOLDER +
         iniData.substring(otherIndex + OTHER_SECTION_LENGTH);
     } catch (error) {
       this.iniDataOrig = null;
