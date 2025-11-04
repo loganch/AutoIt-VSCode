@@ -233,8 +233,8 @@ export default languages.registerSignatureHelpProvider(
     /**
      * Provides signature help for a given document and position.
      * @param {import("vscode").TextDocument} document - The document to provide signature help for.
-     * @param {import("vscode").TextDocument} document - The document to provide signature help for.
-     * @param {import("vscode").Position} position - The position in the document to provide signature help for.     */
+     * @param {import("vscode").Position} position - The position in the document to provide signature help for.
+     */
     provideSignatureHelp(document, position) {
       const caller = getCallInfo(document, position);
       if (!caller.func) return null;
