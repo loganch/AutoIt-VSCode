@@ -1,9 +1,8 @@
 const { window } = require('vscode');
 const { HOTKEY_LINE_DELAY_MS, NO_BREAK_SPACE } = require('../command_constants');
 // Constants to avoid magic numbers when checking for CRLF endings
-const CRLF = '\\r\\n';
-const CRLF_LENGTH = CRLF.length;
-
+const CRLF = '\r\n';
+const CRLF_LENGTH = 2;
 /**
  * Module-level cache for output channels keyed by channel name.
  * This cache ensures singleton behavior for global channels (such as
