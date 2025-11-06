@@ -10,19 +10,23 @@ const signatures = {
     params: [
       {
         label: '$hToken',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the access token that contains the privileges to be modified. The handle must have $TOKEN_ADJUST_PRIVILEGES and $TOKEN_QUERY accesses to the token.',
       },
       {
         label: '$aPrivileges',
-        documentation: 'Parameter description',
+        documentation:
+          "The variable that specifies a privileges. If this parameter is (-1), the function disables of the token's privileges and ignores the $iAttributes parameter. $aPrivileges can be one of the following types. The privilege constant ($SE_*). 1D array of $SE_* constants. 2D array of $SE_* constants and their attributes (see below). [0][0] - Privilege [0][1] - Attributes [n][0] - Privilege [n][1] - Attributes",
       },
       {
         label: '$iAttributes',
-        documentation: 'Parameter description',
+        documentation:
+          'The privilege attributes. If $aPrivileges parameter is 1D array, $iAttributes applied to the entire array. If $aPrivileges parameter is (-1) or 2D array, the function ignores this parameter and will use the attributes that specified in this array. This parameter can be 0 (disables privilege) or any combination of the following values: $SE_PRIVILEGE_ENABLED $SE_PRIVILEGE_ENABLED_BY_DEFAULT $SE_PRIVILEGE_REMOVED $SE_PRIVILEGE_USED_FOR_ACCESS',
       },
       {
         label: 'ByRef $aAdjust',
-        documentation: 'Parameter description',
+        documentation:
+          '2D array of the previous state of any privileges that the function modifies. That is, if a privilege has been modified by this function, the privilege and its previous state are contained in this array.',
       },
     ],
   },
@@ -32,11 +36,13 @@ const signatures = {
     params: [
       {
         label: '$hJob',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the job object to which the process will be associated. The handle must have the $JOB_OBJECT_ASSIGN_PROCESS access right.',
       },
       {
         label: '$hProcess',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the process to associate with the job object. The process must not already be assigned to a job.',
       },
     ],
   },
@@ -46,7 +52,13 @@ const signatures = {
     params: [
       {
         label: '$sName',
-        documentation: "**[optional]** Default is '' [, $tSecurity.",
+        documentation:
+          "**[optional]** The name of the job. Name comparison is case-sensitive. If this parameter is '', the job is created without a name.",
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that specifies the security descriptor for the job object and determines whether child processes can inherit the returned handle. If this parameter is 0 (Default), the job object gets a default security descriptor and the handle cannot be inherited.',
       },
     ],
   },
@@ -58,27 +70,46 @@ const signatures = {
     params: [
       {
         label: '$sApp',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the module to be executed. If this parameter is an empty string, the module name must be the first white space–delimited token in the command line string.',
       },
       {
         label: '$sCmd',
-        documentation: 'Parameter description',
+        documentation:
+          'The command line to be executed. If this parameter is an empty string, the function uses the module name as the command line.',
       },
       {
         label: '$iFlags',
-        documentation: 'Parameter description',
+        documentation:
+          'The flags that control how the process is created. The $CREATE_DEFAULT_ERROR_MODE, $CREATE_NEW_CONSOLE, and $CREATE_NEW_PROCESS_GROUP are enabled by default. You can specify additional flags as noted: $CREATE_DEFAULT_ERROR_MODE $CREATE_NEW_CONSOLE $CREATE_NEW_PROCESS_GROUP $CREATE_SEPARATE_WOW_VDM $CREATE_SUSPENDED $CREATE_UNICODE_ENVIRONMENT',
       },
       {
         label: '$tStartupInfo',
-        documentation: 'Parameter description',
+        documentation: 'a $tagSTARTUPINFO structure or a pointer to it.',
       },
       {
         label: '$tProcessInfo',
-        documentation: 'Parameter description',
+        documentation:
+          'a $tagPROCESS_INFORMATION structure or a pointer to it that receives information for the new process, including a handle to the process.',
       },
       {
-        label: '$hToken [, $iLogon',
-        documentation: 'Parameter description',
+        label: '$hToken',
+        documentation:
+          'A handle to the primary token that represents a user. The handle must have the $TOKEN_QUERY, $TOKEN_DUPLICATE, and $TOKEN_ASSIGN_PRIMARY access rights.',
+      },
+      {
+        label: '$iLogon',
+        documentation:
+          '**[optional]** The logon option. This parameter can be zero or one of the following values: $LOGON_WITH_PROFILE $LOGON_NETCREDENTIALS_ONLY',
+      },
+      {
+        label: '$pEnvironment',
+        documentation: '**[optional]** A pointer to an environment block for the new process.',
+      },
+      {
+        label: '$sDir',
+        documentation:
+          '**[optional]** The path to the current directory for the process. If this parameter is an empty string (Default), the new process will have the same current drive and directory as the calling process. Constants are defined in APIProcConstants.au3',
       },
     ],
   },
@@ -90,15 +121,26 @@ const signatures = {
     params: [
       {
         label: '$hToken',
-        documentation: 'Parameter description',
+        documentation: 'A handle to an access token opened with $TOKEN_DUPLICATE access.',
       },
       {
         label: '$iAccess',
-        documentation: 'Parameter description',
+        documentation:
+          'The requested access rights for the new token. To request the same access rights as the existing token, specify zero. To request all access rights that are valid for the caller, specify the $TOKEN_ALL_ACCESS access.',
       },
       {
-        label: '$iLevel [, $iType',
-        documentation: 'Parameter description',
+        label: '$iLevel',
+        documentation:
+          'The security impersonation levels. $SECURITYANONYMOUS $SECURITYIDENTIFICATION $SECURITYIMPERSONATION $SECURITYDELEGATION',
+      },
+      {
+        label: '$iType',
+        documentation: '**[optional]** The token type. $TOKENPRIMARY (Default) $TOKENIMPERSONATION',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that specifies a security descriptor for the new token and determines whether child processes can inherit the token. If this parameter is 0 (Default), the token gets a default security descriptor and the handle cannot be inherited. If the security descriptor contains a system access control list, the token gets $ACCESS_SYSTEM_SECURITY access right, even if it was not requested.',
       },
     ],
   },
@@ -109,7 +151,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -119,7 +161,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -134,7 +176,12 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0 [, $iType.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
+      },
+      {
+        label: '$iType',
+        documentation:
+          '**[optional]** The value associated with the type of the objects that should be enumerated. This value depends on the operating system. If this parameter is 0 (Default), all handles of the specified process will be enumerated.',
       },
     ],
   },
@@ -144,7 +191,12 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0 [, $iFlag.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          '**[optional]** The filter criteria. This parameter is valid only for Windows Vista or later, and can be one of the following values: $LIST_MODULES_32BIT $LIST_MODULES_64BIT $LIST_MODULES_ALL $LIST_MODULES_DEFAULT (Default) Constants are defined in APIProcConstants.au3',
       },
     ],
   },
@@ -154,7 +206,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -164,7 +216,12 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0 [, $bVisible.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
+      },
+      {
+        label: '$bVisible',
+        documentation:
+          '**[optional]** Specifies whether enumerates the invisible window, valid values: True - Enumerate only visible windows (Default). False - Enumerate all windows.',
       },
     ],
   },
@@ -180,7 +237,8 @@ const signatures = {
     params: [
       {
         label: '$pDriver',
-        documentation: 'Parameter description',
+        documentation:
+          'The load address of the device driver. This value can be retrieved using the _WinAPI_EnumDeviceDrivers() function.',
       },
     ],
   },
@@ -190,7 +248,8 @@ const signatures = {
     params: [
       {
         label: '$pDriver',
-        documentation: 'Parameter description',
+        documentation:
+          'The load address of the device driver. This value can be retrieved using the _WinAPI_EnumDeviceDrivers() function.',
       },
     ],
   },
@@ -200,7 +259,7 @@ const signatures = {
     params: [
       {
         label: '$hProcess',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the process.',
       },
     ],
   },
@@ -210,8 +269,14 @@ const signatures = {
     label: '_WinAPI_GetModuleFileNameEx ( $hProcess [, $hModule = 0] )',
     params: [
       {
-        label: '$hProcess [, $hModule',
-        documentation: 'Parameter description',
+        label: '$hProcess',
+        documentation:
+          'Handle to the process that contains the module. The handle must have the $PROCESS_QUERY_INFORMATION or $PROCESS_QUERY_LIMITED_INFORMATION access right and the $PROCESS_VM_READ access right.',
+      },
+      {
+        label: '$hModule',
+        documentation:
+          '**[optional]** Handle to the module. If this parameter is 0 (Default), the function retrieves the path of the executable file of the process.',
       },
     ],
   },
@@ -220,8 +285,14 @@ const signatures = {
     label: '_WinAPI_GetModuleInformation ( $hProcess [, $hModule = 0] )',
     params: [
       {
-        label: '$hProcess [, $hModule',
-        documentation: 'Parameter description',
+        label: '$hProcess',
+        documentation:
+          'Handle to the process that contains the module. The handle must have the $PROCESS_QUERY_INFORMATION or $PROCESS_QUERY_LIMITED_INFORMATION access right and the $PROCESS_VM_READ access right.',
+      },
+      {
+        label: '$hModule',
+        documentation:
+          '**[optional]** Handle to the module. If this parameter is 0, the function retrieves information only about the executable file ("SizeOfImage" and "EntryPoint" members of the $tagMODULEINFO structure).',
       },
     ],
   },
@@ -231,7 +302,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -241,7 +312,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -251,7 +322,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -262,7 +333,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -272,7 +343,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -282,7 +353,8 @@ const signatures = {
     params: [
       {
         label: '$hProcess',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the process. The handle must have the $PROCESS_QUERY_INFORMATION or $PROCESS_QUERY_LIMITED_INFORMATION access right.',
       },
     ],
   },
@@ -293,7 +365,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -303,7 +375,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -313,7 +385,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -323,7 +395,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -333,7 +405,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -343,7 +415,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -353,7 +425,8 @@ const signatures = {
     params: [
       {
         label: '$iThreadId',
-        documentation: 'Parameter description',
+        documentation:
+          'The thread identifier. The _WinAPI_CreateProcess() and _WinAPI_GetCurrentThreadId() return thread identifiers.',
       },
     ],
   },
@@ -369,7 +442,7 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window whose module file name will be retrieved.',
       },
     ],
   },
@@ -383,8 +456,14 @@ const signatures = {
     label: '_WinAPI_IsProcessInJob ( $hProcess [, $hJob = 0] )',
     params: [
       {
-        label: '$hProcess [, $hJob',
-        documentation: 'Parameter description',
+        label: '$hProcess',
+        documentation:
+          'Handle to the process to be tested. The handle must have the $PROCESS_QUERY_INFORMATION or $PROCESS_QUERY_LIMITED_INFORMATION access right.',
+      },
+      {
+        label: '$hJob',
+        documentation:
+          '**[optional]** Handle to the job. If this parameter is 0 (Default), the function tests if the process is running under any job.',
       },
     ],
   },
@@ -394,7 +473,7 @@ const signatures = {
     params: [
       {
         label: '$iPID',
-        documentation: '**[optional]** Default is 0.',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -404,8 +483,18 @@ const signatures = {
       '_WinAPI_OpenJobObject ( $sName [, $iAccess = $JOB_OBJECT_ALL_ACCESS [, $bInherit = False]] )',
     params: [
       {
-        label: '$sName [, $iAccess',
-        documentation: 'Parameter description',
+        label: '$sName',
+        documentation: 'The name of the job to be opened. Name comparisons are case sensitive.',
+      },
+      {
+        label: '$iAccess',
+        documentation:
+          '**[optional]** The access to the job object. This parameter can be one or more of the following values: $JOB_OBJECT_ALL_ACCESS $JOB_OBJECT_ASSIGN_PROCESS $JOB_OBJECT_QUERY $JOB_OBJECT_SET_ATTRIBUTES $JOB_OBJECT_SET_SECURITY_ATTRIBUTES $JOB_OBJECT_TERMINATE',
+      },
+      {
+        label: '$bInherit',
+        documentation:
+          '**[optional]** Specifies whether inherites the handle by a processes, valid values: True - The processes created by this process will inherit the handle. False - The processes do not inherit this handle (Default).',
       },
     ],
   },
@@ -414,8 +503,14 @@ const signatures = {
     label: '_WinAPI_OpenProcessToken ( $iAccess [, $hProcess = 0] )',
     params: [
       {
-        label: '$iAccess [, $hProcess',
-        documentation: 'Parameter description',
+        label: '$iAccess',
+        documentation:
+          'Access mask that specifies the requested types of access to the access token. This parameter can be one or more of the following values: $TOKEN_ALL_ACCESS $TOKEN_ADJUST_DEFAULT $TOKEN_ADJUST_GROUPS $TOKEN_ADJUST_PRIVILEGES $TOKEN_ADJUST_SESSIONID $TOKEN_ASSIGN_PRIMARY $TOKEN_DUPLICATE $TOKEN_EXECUTE $TOKEN_IMPERSONATE $TOKEN_QUERY $TOKEN_QUERY_SOURCE $TOKEN_READ $TOKEN_WRITE',
+      },
+      {
+        label: '$hProcess',
+        documentation:
+          '**[optional]** Handle to the process whose access token is opened. The process must have the $PROCESS_QUERY_INFORMATION access permission. If this parameter is 0 (Default), will use the current process.',
       },
     ],
   },
@@ -426,15 +521,18 @@ const signatures = {
     params: [
       {
         label: '$hJob',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the job whose information is being queried. The handle must have the $JOB_OBJECT_QUERY access right. If this value is 0 and the calling process is associated with a job, the job associated with the calling process is used.',
       },
       {
         label: '$iJobObjectInfoClass',
-        documentation: 'Parameter description',
+        documentation:
+          'The information class for the limits to be queried. This parameter specifies the type of $tJobObjectInfo structure, valid values: 1 - $tagJOBOBJECT_BASIC_ACCOUNTING_INFORMATION 2 - $tagJOBOBJECT_BASIC_LIMIT_INFORMATION 3 - $tagJOBOBJECT_BASIC_PROCESS_ID_LIST 4 - $tagJOBOBJECT_BASIC_UI_RESTRICTIONS 5 - $tagJOBOBJECT_SECURITY_LIMIT_INFORMATION 8 - $tagJOBOBJECT_BASIC_AND_IO_ACCOUNTING_INFORMATION 9 - $tagJOBOBJECT_EXTENDED_LIMIT_INFORMATION 11 - $tagJOBOBJECT_GROUP_INFORMATION',
       },
       {
         label: 'ByRef $tJobObjectInfo',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagJOBOBJECT_* structure (see above) that retrieves the limit and job state information. This structure must be created before function call.',
       },
     ],
   },
@@ -444,15 +542,17 @@ const signatures = {
     params: [
       {
         label: '$hJob',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the job whose limits are being set. The handle must have the $JOB_OBJECT_SET_ATTRIBUTES access right.',
       },
       {
         label: '$iJobObjectInfoClass',
-        documentation: 'Parameter description',
+        documentation:
+          'The information class for the limits to be set. This parameter specifies the type of $tJobObjectInfo structure, valid values: 2 - $tagJOBOBJECT_BASIC_LIMIT_INFORMATION 4 - $tagJOBOBJECT_BASIC_UI_RESTRICTIONS 5 - $tagJOBOBJECT_SECURITY_LIMIT_INFORMATION 6 - $tagJOBOBJECT_END_OF_JOB_TIME_INFORMATION 7 - $tagJOBOBJECT_ASSOCIATE_COMPLETION_PORT 9 - $tagJOBOBJECT_EXTENDED_LIMIT_INFORMATION 11 - $tagJOBOBJECT_GROUP_INFORMATION',
       },
       {
         label: '$tJobObjectInfo',
-        documentation: 'Parameter description',
+        documentation: '$tagJOBOBJECT_* structure that sets the limit and job state information.',
       },
     ],
   },
@@ -461,8 +561,13 @@ const signatures = {
     label: '_WinAPI_SetPriorityClass ( $iPriority [, $iPID = 0] )',
     params: [
       {
-        label: '$iPriority [, $iPID',
-        documentation: 'Parameter description',
+        label: '$iPriority',
+        documentation:
+          'The priority class for the process. This parameter can be one of the following values. $ABOVE_NORMAL_PRIORITY_CLASS $BELOW_NORMAL_PRIORITY_CLASS $HIGH_PRIORITY_CLASS $IDLE_PRIORITY_CLASS $NORMAL_PRIORITY_CLASS $REALTIME_PRIORITY_CLASS **Windows Vista or later** $PROCESS_MODE_BACKGROUND_BEGIN $PROCESS_MODE_BACKGROUND_END',
+      },
+      {
+        label: '$iPID',
+        documentation: '**[optional]** The PID of the process. Default (0) is the current process.',
       },
     ],
   },
@@ -472,7 +577,8 @@ const signatures = {
     params: [
       {
         label: '$hDesktop',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the desktop to be assigned to the calling thread. This desktop must be associated with the current window station for the process.',
       },
     ],
   },
@@ -483,7 +589,8 @@ const signatures = {
     params: [
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation:
+          'The thread error mode. This parameter can be one or more of the following values. $SEM_FAILCRITICALERRORS $SEM_NOGPFAULTERRORBOX $SEM_NOOPENFILEERRORBOX',
       },
     ],
   },
@@ -494,7 +601,8 @@ const signatures = {
     params: [
       {
         label: '$iFlags',
-        documentation: 'Parameter description',
+        documentation:
+          "The thread's execution requirements. This parameter can be one or more of the following values. $ES_AWAYMODE_REQUIRED $ES_CONTINUOUS $ES_DISPLAY_REQUIRED $ES_SYSTEM_REQUIRED $ES_USER_PRESENT",
       },
     ],
   },
@@ -503,8 +611,14 @@ const signatures = {
     label: '_WinAPI_TerminateJobObject ( $hJob [, $iExitCode = 0] )',
     params: [
       {
-        label: '$hJob [, $iExitCode',
-        documentation: 'Parameter description',
+        label: '$hJob',
+        documentation:
+          'A handle to the job whose processes will be terminated. This handle must have the $JOB_OBJECT_TERMINATE access right. Furthermore, the handle for each process in the job object must have the $PROCESS_TERMINATE access right.',
+      },
+      {
+        label: '$iExitCode',
+        documentation:
+          '**[optional]** The exit code to be used by all processes and threads in the job object.',
       },
     ],
   },
@@ -513,8 +627,14 @@ const signatures = {
     label: '_WinAPI_TerminateProcess ( $hProcess [, $iExitCode = 0] )',
     params: [
       {
-        label: '$hProcess [, $iExitCode',
-        documentation: 'Parameter description',
+        label: '$hProcess',
+        documentation:
+          'A handle to the process to be terminated. The handle must have the $PROCESS_TERMINATE access right.',
+      },
+      {
+        label: '$iExitCode',
+        documentation:
+          '**[optional]** The exit code to be used by the process and threads terminated as a result of this call.',
       },
     ],
   },
@@ -525,15 +645,16 @@ const signatures = {
     params: [
       {
         label: '$hObject',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the User object.',
       },
       {
         label: '$hJob',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the job to be granted access to the User handle.',
       },
       {
         label: '$bGrant',
-        documentation: 'Parameter description',
+        documentation:
+          'Specifies whether to grant or deny access to the User handle, valid values: True - The processes associated with the job can recognize and use the handle. False - The processes cannot use the handle.',
       },
     ],
   },
@@ -542,8 +663,18 @@ const signatures = {
     label: '_WinAPI_CreateMutex ( $sMutex [, $bInitial = True [, $tSecurity = 0]] )',
     params: [
       {
-        label: '$sMutex [, $bInitial',
-        documentation: 'Parameter description',
+        label: '$sMutex',
+        documentation: 'The name of the mutex object. Name comparisons are case sensitive.',
+      },
+      {
+        label: '$bInitial',
+        documentation:
+          '**[optional]** Specifies whether the calling process obtains the initial ownership of the mutex object, valid values: True - The calling thread obtains initial ownership of the mutex object (Default). False - The calling thread does not obtain ownership of the mutex object.',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that specifies a security descriptor for the new mutex. If this parameter is 0 (Default), the mutex gets a default security descriptor.',
       },
     ],
   },
@@ -553,15 +684,23 @@ const signatures = {
     params: [
       {
         label: '$sSemaphore',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the semaphore to be opened. Name comparisons are case sensitive.',
       },
       {
         label: '$iInitial',
-        documentation: 'Parameter description',
+        documentation:
+          'The initial count for the semaphore object. This value must be greater than or equal to zero and less than or equal to $iMaximum.',
       },
       {
-        label: '$iMaximum [, $tSecurity',
-        documentation: 'Parameter description',
+        label: '$iMaximum',
+        documentation:
+          'The maximum count for the semaphore object. This value must be greater than zero.',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that specifies a security descriptor for the new semaphore. If this parameter is 0 (Default), the semaphore gets a default security descriptor.',
       },
     ],
   },
@@ -570,8 +709,18 @@ const signatures = {
     label: '_WinAPI_OpenMutex ( $sMutex [, $iAccess = $MUTEX_ALL_ACCESS [, $bInherit = False]] )',
     params: [
       {
-        label: '$sMutex [, $iAccess',
-        documentation: 'Parameter description',
+        label: '$sMutex',
+        documentation: 'The name of the mutex to be opened. Name comparisons are case sensitive.',
+      },
+      {
+        label: '$iAccess',
+        documentation:
+          '**[optional]** The access to the mutex object. The function fails if the security descriptor of the specified object does not permit the requested access for the calling process. This parameter can be one of the following values: $MUTEX_ALL_ACCESS (Default) $MUTEX_MODIFY_STATE',
+      },
+      {
+        label: '$bInherit',
+        documentation:
+          '**[optional]** Specifies whether inherites the handle by a processes, valid values: True - The processes created by this process will inherit the handle. False - The processes do not inherit this handle (Default).',
       },
     ],
   },
@@ -580,8 +729,19 @@ const signatures = {
     label: '_WinAPI_OpenSemaphore ( $sSemaphore [, $iAccess = 0x001F0003 [, $bInherit = False]] )',
     params: [
       {
-        label: '$sSemaphore [, $iAccess',
-        documentation: 'Parameter description',
+        label: '$sSemaphore',
+        documentation:
+          'The name of the semaphore to be opened. Name comparisons are case sensitive.',
+      },
+      {
+        label: '$iAccess',
+        documentation:
+          '**[optional]** The access to the semaphore object. The function fails if the security descriptor of the specified object does not permit the requested access for the calling process. This parameter can be one of the following values: $SEMAPHORE_ALL_ACCESS (Default) $SEMAPHORE_MODIFY_STATE',
+      },
+      {
+        label: '$bInherit',
+        documentation:
+          '**[optional]** Specifies whether inherites the handle by a processes, valid values: True - The processes created by this process will inherit the handle. False - The processes do not inherit this handle (Default).',
       },
     ],
   },
@@ -591,7 +751,8 @@ const signatures = {
     params: [
       {
         label: '$hMutex',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the mutex object. The _WinAPI_CreateMutex() or _WinAPI_OpenMutex() function returns this handle.',
       },
     ],
   },
@@ -600,8 +761,14 @@ const signatures = {
     label: '_WinAPI_ReleaseSemaphore ( $hSemaphore [, $iIncrease = 1] )',
     params: [
       {
-        label: '$hSemaphore [, $iIncrease',
-        documentation: 'Parameter description',
+        label: '$hSemaphore',
+        documentation:
+          'Handle to the semaphore object. The _WinAPI_CreateSemaphore() or _WinAPI_OpenSemaphore() function returns this handle.',
+      },
+      {
+        label: '$iIncrease',
+        documentation:
+          "**[optional]** The amount by which the semaphore object's current count is to be increased. The value must be greater than zero. If the specified amount would cause the semaphore's count to exceed the maximum count that was specified when the semaphore was created, the count is not changed and the function returns 0. Default is 1.",
       },
     ],
   },
@@ -611,7 +778,8 @@ const signatures = {
     params: [
       {
         label: '$hEvent',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the event object. The _WinAPI_CreateEvent() function returns this handle.',
       },
     ],
   },
