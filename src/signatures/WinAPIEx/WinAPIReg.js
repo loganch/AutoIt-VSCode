@@ -10,11 +10,11 @@ const signatures = {
     params: [
       {
         label: '$hMRU',
-        documentation: 'Parameter description',
+        documentation: 'Handle of the MRU list.',
       },
       {
         label: '$sStr',
-        documentation: 'Parameter description',
+        documentation: 'The string be added.',
       },
     ],
   },
@@ -24,7 +24,8 @@ const signatures = {
     params: [
       {
         label: '$sExt',
-        documentation: 'Parameter description',
+        documentation:
+          'The file\'s extension. This should include the leading period, for example ".txt".',
       },
     ],
   },
@@ -35,11 +36,23 @@ const signatures = {
     params: [
       {
         label: '$sAssoc',
-        documentation: 'Parameter description',
+        documentation:
+          'The string that is used to determine the root key. The following four types of strings can be used.The file name extension, such as ".txt".The class identifier (CLSID) GUID in the standard "{GUID}" format.The application\'s ProgID, such as Word.Document.8.The name of an application\'s .exe file. The $ASSOCF_OPEN_BYEXENAME flag must be set.',
       },
       {
-        label: '$iType [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$iType',
+        documentation:
+          'The value that specifies the type of string that is to be returned. This parameter can be one of the following values: $ASSOCSTR_COMMAND $ASSOCSTR_EXECUTABLE $ASSOCSTR_FRIENDLYDOCNAME $ASSOCSTR_FRIENDLYAPPNAME $ASSOCSTR_NOOPEN $ASSOCSTR_SHELLNEWVALUE $ASSOCSTR_DDECOMMAND $ASSOCSTR_DDEIFEXEC $ASSOCSTR_DDEAPPLICATION $ASSOCSTR_DDETOPIC $ASSOCSTR_INFOTIP $ASSOCSTR_QUICKTIP $ASSOCSTR_TILEINFO $ASSOCSTR_CONTENTTYPE $ASSOCSTR_DEFAULTICON $ASSOCSTR_SHELLEXTENSION',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '**[optional]** The flags that can be used to control the search. It can be any combination of the following values, except that only one $ASSOCF_INIT_* value can be included. $ASSOCF_INIT_NOREMAPCLSID $ASSOCF_INIT_BYEXENAME $ASSOCF_OPEN_BYEXENAME $ASSOCF_INIT_DEFAULTTOSTAR $ASSOCF_INIT_DEFAULTTOFOLDER $ASSOCF_NOUSERSETTINGS $ASSOCF_NOTRUNCATE $ASSOCF_VERIFY $ASSOCF_REMAPRUNDLL $ASSOCF_NOFIXUPS $ASSOCF_IGNOREBASECLASS $ASSOCF_INIT_IGNOREUNKNOWN',
+      },
+      {
+        label: '$sExtra',
+        documentation:
+          '**[optional]** The string with additional information about the location of the string.It is typically set to a Shell verb such as open.',
       },
     ],
   },
@@ -49,11 +62,17 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the currently open key, or one of the following predefined values under which to store the MRU data.$HKEY_CURRENT_USER$HKEY_LOCAL_MACHINE',
       },
       {
-        label: '$sSubKey [, $iMax',
-        documentation: 'Parameter description',
+        label: '$sSubKey',
+        documentation: 'The subkey under which to store the MRU data.',
+      },
+      {
+        label: '$iMax',
+        documentation:
+          '**[optional]** The maximum number of entries in the MRU list. Default is 26 (A..Z).',
       },
     ],
   },
@@ -63,7 +82,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to the DLL file that will be registered.',
       },
     ],
   },
@@ -73,7 +92,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to the DLL file that will be unregistered.',
       },
     ],
   },
@@ -83,11 +102,12 @@ const signatures = {
     params: [
       {
         label: '$hMRU',
-        documentation: 'Parameter description',
+        documentation: 'Handle of the MRU list, obtained when the list was created.',
       },
       {
         label: '$iItem',
-        documentation: 'Parameter description',
+        documentation:
+          'The item to return. If this value is (-1), the function returns the number of items in the MRU list.',
       },
     ],
   },
@@ -98,7 +118,7 @@ const signatures = {
     params: [
       {
         label: '$hMRU',
-        documentation: 'Parameter description',
+        documentation: 'Handle of the MRU list to free.',
       },
     ],
   },
@@ -108,7 +128,7 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation: 'Handle to an open registry key.',
       },
     ],
   },
@@ -117,8 +137,14 @@ const signatures = {
     label: '_WinAPI_RegCloseKey ( $hKey [, $bFlush = False] )',
     params: [
       {
-        label: '$hKey [, $bFlush',
-        documentation: 'Parameter description',
+        label: '$hKey',
+        documentation:
+          'Handle to the open key to be closed.The handle must have been opened by the [_WinAPI_RegCreateKey()](_WinAPI_RegCreateKey.htm) or [_WinAPI_RegOpenKey()](_WinAPI_RegOpenKey.htm) function.',
+      },
+      {
+        label: '$bFlush',
+        documentation:
+          "**[optional]** Specifies whether writes all the attributes of the specified registry key into the registry, valid values: True - Write changes to disk before close the handle. False - Don't write (Default).",
       },
     ],
   },
@@ -128,11 +154,13 @@ const signatures = {
     params: [
       {
         label: '$sComputer',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the remote computer. The string has the form as "\\computername".The caller must have access to the remote computer or the function fails.If this parameter is 0, the local computer name is used.',
       },
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'The predefined registry handle. This parameter can be one of the following predefined keys on the remote computer: $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
     ],
   },
@@ -143,15 +171,15 @@ const signatures = {
     params: [
       {
         label: '$hSrcKey',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source key or one of the predefined registry keys ($HKEY_*).',
       },
       {
         label: '$sSrcSubKey',
-        documentation: 'Parameter description',
+        documentation: 'The subkey whose subkeys and values are to be copied.',
       },
       {
         label: '$hDestKey',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the destination key.',
       },
     ],
   },
@@ -162,15 +190,18 @@ const signatures = {
     params: [
       {
         label: '$hSrcKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_READ access right.This handle is returned by the [_WinAPI_RegCreateKey()](_WinAPI_RegCreateKey.htm) or [_WinAPI_RegOpenKey()](_WinAPI_RegOpenKey.htm) function,or it can be one of the predefined registry keys ($HKEY_*).',
       },
       {
         label: '$sSrcSubKey',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the key. This key must be a subkey of the key identified by the $hSrcKey parameter.',
       },
       {
         label: '$hDestKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the destination key. The calling process must have $KEY_CREATE_SUB_KEY access to the key.This handle is returned by the [_WinAPI_RegCreateKey()](_WinAPI_RegCreateKey.htm) or [_WinAPI_RegOpenKey()](_WinAPI_RegOpenKey.htm) function,or it can be one of the predefined registry keys ($HKEY_*).',
       },
     ],
   },
@@ -180,8 +211,29 @@ const signatures = {
       "_WinAPI_RegCreateKey ( $hKey [, $sSubKey = '' [, $iAccess = $KEY_ALL_ACCESS [, $iOptions = 0 [, $tSecurity = 0]]]] )",
     params: [
       {
-        label: '$hKey [, $sSubKey',
-        documentation: 'Parameter description',
+        label: '$vKey',
+        documentation:
+          'Name of the key to be open (see remarks). orHandle to an open registry key. If the key already exists, the function opens it.The calling process must have $KEY_CREATE_SUB_KEY access to the key.This handle is returned by the [_WinAPI_RegCreateKey()](_WinAPI_RegCreateKey.htm) or [_WinAPI_RegOpenKey()](_WinAPI_RegOpenKey.htm) function,or it can be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
+      },
+      {
+        label: '$sSubKey',
+        documentation:
+          '**[optional]** The name of a subkey that this function opens or creates.The subkey specified must be a subkey of the key identified by the $vKey parameter; it can be up to 32 levels deep in the registry tree.If an empty string (Default), the return is a new handle to the key specified by $vKey.',
+      },
+      {
+        label: '$iAccess',
+        documentation:
+          '**[optional]** The mask that specifies the access rights for the key.This parameter can be one or more of the following values: $KEY_ALL_ACCESS $KEY_CREATE_LINK $KEY_CREATE_SUB_KEY $KEY_ENUMERATE_SUB_KEYS $KEY_EXECUTE $KEY_NOTIFY $KEY_QUERY_VALUE $KEY_READ $KEY_SET_VALUE $KEY_WOW64_32KEY for creation in the 32-bit key area $KEY_WOW64_64KEY for creation un the 64-bit key area $KEY_WRITE',
+      },
+      {
+        label: '$iOptions',
+        documentation:
+          '**[optional]** This parameter can be one of the following values: $REG_OPTION_BACKUP_RESTORE $REG_OPTION_CREATE_LINK $REG_OPTION_NON_VOLATILE (Default) $REG_OPTION_VOLATILE',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that determines whether the returned handle can be inherited by child processes.If this parameter is 0 (Default), the handle cannot be inherited.',
       },
     ],
   },
@@ -190,18 +242,34 @@ const signatures = {
     label: "_WinAPI_RegDeleteEmptyKey ( $hKey [, $sSubKey = ''] )",
     params: [
       {
-        label: '$hKey [, $sSubKey',
-        documentation: 'Parameter description',
+        label: '$hKey',
+        documentation:
+          'Handle to an open registry key, or any of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
+      },
+      {
+        label: '$sSubKey',
+        documentation: '**[optional]** The name of the key to delete.',
       },
     ],
   },
   _WinAPI_RegDeleteKey: {
     documentation: 'Deletes a subkey and its values',
-    label: "_WinAPI_RegDeleteKey ( $hKey [, $sSubKey = ''] )",
+    label: "_WinAPI_RegDeleteKey ( $vKey [, $sSubKey = '' [, $iSamDesired = Default]] )",
     params: [
       {
-        label: '$hKey [, $sSubKey',
-        documentation: 'Parameter description',
+        label: '$vKey',
+        documentation:
+          'Name of the key to be open (see remarks). orHandle to an open registry key. The access rights of this key do not affect the delete operation.This handle is returned by the [_WinAPI_RegCreateKey()](_WinAPI_RegCreateKey.htm) or [_WinAPI_RegOpenKey()](_WinAPI_RegOpenKey.htm) function,or it can be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
+      },
+      {
+        label: '$sSubKey',
+        documentation:
+          '**[optional]** The name of the key to be deleted. It must be a subkey of the key that $hKey identifies, but it cannot have subkeys.',
+      },
+      {
+        label: '$iSamDesired',
+        documentation:
+          '**[optional]** An access mask the specifies the platform-specific view of the registry.This parameter can be one of the following values: $KEY_WOW64_32KEY for an 32-bit Key $KEY_WOW64_64KEY for an 64-bit KeyBy Default the key correspond to the @AutoItX64 value.',
       },
     ],
   },
@@ -211,15 +279,17 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_SET_VALUE access right.This handle is returned by the [_WinAPI_RegCreateKey()](_WinAPI_RegCreateKey.htm) or [_WinAPI_RegOpenKey()](_WinAPI_RegOpenKey.htm) function,or it can be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
       },
       {
         label: '$sSubKey',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the registry key. This key must be a subkey of the key identified by the $hKey parameter.',
       },
       {
         label: '$sValueName',
-        documentation: 'Parameter description',
+        documentation: 'The registry value to be removed from the key.',
       },
     ],
   },
@@ -228,8 +298,13 @@ const signatures = {
     label: "_WinAPI_RegDeleteTree ( $hKey [, $sSubKey = ''] )",
     params: [
       {
-        label: '$hKey [, $sSubKey',
-        documentation: 'Parameter description',
+        label: '$hKey',
+        documentation:
+          'Handle to an open registry key, or any of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
+      },
+      {
+        label: '$sSubKey',
+        documentation: '**[optional]** The name of the key to delete.',
       },
     ],
   },
@@ -238,8 +313,14 @@ const signatures = {
     label: '_WinAPI_RegDeleteTreeEx ( $hKey [, $sSubKey = 0] )',
     params: [
       {
-        label: '$hKey [, $sSubKey',
-        documentation: 'Parameter description',
+        label: '$hKey',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the following access rights $STANDARD_RIGHT_DELETE, $KEY_ENUMERATE_SUB_KEYS, and $KEY_QUERY_VALUE. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function, or it can be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
+      },
+      {
+        label: '$sSubKey',
+        documentation:
+          '**[optional]** The name of the key to delete. This key must be a subkey of the key identified by the $hKey parameter. If this parameter is not specified (Default), the subkeys and values of $hKey are deleted.',
       },
     ],
   },
@@ -249,11 +330,13 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_SET_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function, or it can be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
       },
       {
         label: '$sValueName',
-        documentation: 'Parameter description',
+        documentation:
+          "The registry value to be removed. If this parameter is empty string, the key's unnamed or default value is removed.",
       },
     ],
   },
@@ -263,7 +346,8 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function; it cannot specify a key on a remote computer. If the key is not on the reflection list, the function succeeds but has no effect.',
       },
     ],
   },
@@ -273,7 +357,7 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation: 'Handle to an open registry key to be duplicated.',
       },
     ],
   },
@@ -283,7 +367,8 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function; it cannot specify a key on a remote computer. If the key is not on the reflection list, the function succeeds but has no effect.',
       },
     ],
   },
@@ -293,11 +378,13 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_ENUMERATE_SUB_KEYS access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
       {
         label: '$iIndex',
-        documentation: 'Parameter description',
+        documentation:
+          'The index of the subkey to retrieve. This parameter should be zero for the first call to the _WinAPI_RegEnumKey() function and then incremented for subsequent calls.',
       },
     ],
   },
@@ -307,11 +394,13 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_QUERY_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
       {
         label: '$iIndex',
-        documentation: 'Parameter description',
+        documentation:
+          'The index of the value to be retrieved. This parameter should be zero for the first call to the _WinAPI_RegEnumValue() function and then be incremented for subsequent calls.',
       },
     ],
   },
@@ -321,7 +410,8 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_QUERY_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
     ],
   },
@@ -331,11 +421,16 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_QUERY_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
       },
       {
-        label: '$sValueName [, $sDirectory',
-        documentation: 'Parameter description',
+        label: '$sValueName',
+        documentation: 'The name of the registry value.',
+      },
+      {
+        label: '$sDirectory',
+        documentation: '**[optional]** The directory path.',
       },
     ],
   },
@@ -347,21 +442,48 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the KEY_NOTIFY access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
       },
       {
-        label: '$iFilter [, $bSubtree',
-        documentation: 'Parameter description',
+        label: '$iFilter',
+        documentation:
+          'Indicates the changes that should be reported. This parameter can be one or more of the following values: $REG_NOTIFY_CHANGE_NAME $REG_NOTIFY_CHANGE_ATTRIBUTES $REG_NOTIFY_CHANGE_LAST_SET $REG_NOTIFY_CHANGE_SECURITY',
+      },
+      {
+        label: '$bSubtree',
+        documentation:
+          '**[optional]** Specifies whether report changes in the subkeys of the specified key, valid values: True - The function reports changes in the specified key and all its subkeys. False - The function reports changes only in the specified key (Default).',
+      },
+      {
+        label: '$bAsync',
+        documentation:
+          '**[optional]** Specifies whether return immediately, valid values: True - The function returns immediately and reports changes by signaling the specified event. False - The function does not return until a change has occurred (Default).',
+      },
+      {
+        label: '$hEvent',
+        documentation:
+          '**[optional]** Handle to an event. If the $fAsync parameter is True, the function returns immediately and changes are reported by signaling this event, otherwise this parameter is ignored (Default).',
       },
     ],
   },
   _WinAPI_RegOpenKey: {
     documentation: 'Opens the specified registry key',
-    label: "_WinAPI_RegOpenKey ( $hKey [, $sSubKey = '' [, $iAccess = 0x000F003F]] )",
+    label: "_WinAPI_RegOpenKey ( $vKey [, $sSubKey = '' [, $iAccess = $KEY_ALL_ACCESS]] )",
     params: [
       {
-        label: '$hKey [, $sSubKey',
-        documentation: 'Parameter description',
+        label: '$vKey',
+        documentation:
+          'Name of the key to be open (see remarks). or Handle to an open registry key. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function, or it can be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
+      },
+      {
+        label: '$sSubKey',
+        documentation: '**[optional]** The name of the registry subkey to be opened (see remarks).',
+      },
+      {
+        label: '$iAccess',
+        documentation:
+          ' **[optional]** A mask that specifies the desired access rights to the key. The function fails if the security descriptor of the key does not permit the requested access for the calling process. This parameter can be one or more of the $KEY_* constants. Default is $KEY_ALL_ACCESS. This parameter can have also the following values for opening whatever AutoIt running mode: $KEY_WOW64_32KEY for an 32-bit Key $KEY_WOW64_64KEY for an 64-bit Key By Default the key correspond to the @AutoItX64 value unless overrided by $KEY_WOW64_32KEY.',
       },
     ],
   },
@@ -371,7 +493,8 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_QUERY_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
     ],
   },
@@ -381,7 +504,8 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_QUERY_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
     ],
   },
@@ -393,15 +517,26 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the KEY_QUERY_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys : $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
       {
         label: 'ByRef $aValent',
-        documentation: 'Parameter description',
+        documentation:
+          'The 2D array ([valuename1, *, *, *], ... [valuenameN, *, *, *]) that contains a value names to be retrieved. On input, 1, 2, and 3 array elements are not used, but array dimensions should be [n][4], otherwise the function fails. Also, this function fails if any of the specified values do not exist in the specified registry key.',
       },
       {
-        label: 'ByRef $pBuffer [, $iStart',
-        documentation: 'Parameter description',
+        label: 'ByRef $pBuffer',
+        documentation:
+          'A pointer to a memory buffer that contains a registry data. Typically, you should not use this buffer directly (see remarks).',
+      },
+      {
+        label: '$iStart',
+        documentation: '**[optional]** The index of array to start querying at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '**[optional]** The index of array to stop querying at.',
       },
     ],
   },
@@ -412,7 +547,8 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function; it cannot specify a key on a remote computer. If the key is not on the reflection list, the function succeeds but has no effect.',
       },
     ],
   },
@@ -423,15 +559,18 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the KEY_QUERY_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_PERFORMANCE_NLSTEXT $HKEY_PERFORMANCE_TEXT $HKEY_USERS',
       },
       {
         label: '$sValueName',
-        documentation: 'Parameter description',
+        documentation:
+          "The name of the registry value. If $sValueName is empty string, the function retrieves the type and data for the key's unnamed or default value, if any.",
       },
       {
         label: 'ByRef $tValueData',
-        documentation: 'Parameter description',
+        documentation:
+          'The structure (buffer) that receives the value data. This structure must be created before function call.',
       },
     ],
   },
@@ -442,11 +581,13 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_USERS',
       },
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the file with the registry information. This file is typically created by using the _WinAPI_RegSaveKey() function.',
       },
     ],
   },
@@ -457,11 +598,22 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation: 'Handle to an open registry key.',
       },
       {
-        label: '$sFilePath [, $bReplace',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation:
+          'The name of the file in which the specified key and subkeys are to be saved.',
+      },
+      {
+        label: '$bReplace',
+        documentation:
+          '**[optional]** Specifies whether to replace the file if it already exists, valid values: True - The function attempts to replace the existing file. False - The function fails if the file already exists (Default).',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that specifies a security descriptor for the new file. If this parameter is 0 (Default), the file gets a default security descriptor.',
       },
     ],
   },
@@ -471,23 +623,28 @@ const signatures = {
     params: [
       {
         label: '$hKey',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an open registry key. The key must have been opened with the $KEY_SET_VALUE access right. This handle is returned by the _WinAPI_RegCreateKey() or _WinAPI_RegOpenKey() function. It can also be one of the following predefined keys: $HKEY_CLASSES_ROOT $HKEY_CURRENT_CONFIG $HKEY_CURRENT_USER $HKEY_LOCAL_MACHINE $HKEY_PERFORMANCE_DATA $HKEY_USERS',
       },
       {
         label: '$sValueName',
-        documentation: 'Parameter description',
+        documentation:
+          "The name of the value to be set. If a value with this name is not already present in the key, the function adds it to the key. If $sValueName is empty string, the function sets the type and data for the key's unnamed or default value.",
       },
       {
         label: '$iType',
-        documentation: 'Parameter description',
+        documentation:
+          'The type of data. This parameter can be one of the following values : $REG_BINARY $REG_DWORD $REG_DWORD_BIG_ENDIAN $REG_DWORD_LITTLE_ENDIAN $REG_EXPAND_SZ $REG_LINK $REG_MULTI_SZ $REG_NONE $REG_QWORD $REG_QWORD_LITTLE_ENDIAN $REG_SZ',
       },
       {
         label: '$tValueData',
-        documentation: 'Parameter description',
+        documentation:
+          'The structure (buffer) that contains the data to be stored. For string-based types, such as REG_SZ, the string must be null-terminated. With the REG_MULTI_SZ data type, the string must be terminated with two null characters. A backslash must be preceded by another backslash as an escape character. For example, specify "C\\mydir\\myfile" to store the string "C\\mydir\\myfile".',
       },
       {
         label: '$iBytes',
-        documentation: 'Parameter description',
+        documentation:
+          'The size of the data, in bytes. If the data has the REG_SZ, REG_MULTI_SZ or REG_EXPAND_SZ type, this size includes any terminating null character or characters unless the data was stored without them.',
       },
     ],
   },
@@ -496,8 +653,19 @@ const signatures = {
     label: '_WinAPI_SfcIsKeyProtected ( $hKey [, $sSubKey = Default [, $iFlag = 0]] )',
     params: [
       {
-        label: '$hKey [, $sSubKey',
-        documentation: 'Parameter description',
+        label: '$hKey',
+        documentation:
+          'Handle to the root registry key, it must be one of the following predefined keys:     $HKEY_CLASSES_ROOT     $HKEY_CURRENT_USER     $HKEY_LOCAL_MACHINE     $HKEY_USERS',
+      },
+      {
+        label: '$sSubKey',
+        documentation:
+          '**[optional]** The name of the key to test. This key must be a subkey of the key identified by the $hKey parameter. If this parameter is not specified (Default), the function only checks whether the root registry key is protected.',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          '**[optional]** The flag that specifies the alternate registry view that should be used by applications that run on 64-bit Windows. This flag is ignored on the x86 platform. It can be one of the following values:     $KEY_WOW64_32KEY     $KEY_WOW64_64KEY',
       },
     ],
   },
