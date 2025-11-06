@@ -58,7 +58,7 @@ const signatures = {
     ],
   },
   AdlibUnRegister: {
-    documentation: 'Registers an Adlib function.',
+    documentation: 'Unregisters an adlib function.',
     label: 'AdlibUnRegister ( ["function"] )',
     params: [
       {
@@ -175,7 +175,7 @@ const signatures = {
     ],
   },
   BinaryMid: {
-    documentation: 'Returns the number of bytes in a binary variant.',
+    documentation: 'Extracts a number of bytes from a binary variant.',
     label: 'BinaryMid ( binary, start [, count] )',
     params: [
       {
@@ -870,7 +870,7 @@ const signatures = {
     ],
   },
   DirMove: {
-    documentation: 'Copies a directory and all sub-directories and files (Similar to xcopy).',
+    documentation: 'Moves a directory and all sub-directories and files.',
     label: 'DirMove ( "source dir", "dest dir" [, flag = 0] )',
     params: [
       {
