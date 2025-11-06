@@ -11,11 +11,22 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window that owns the caret.',
       },
       {
-        label: '$hBitmap [, $iWidth',
-        documentation: 'Parameter description',
+        label: '$hBitmap',
+        documentation:
+          'Handle to the bitmap that defines the caret shape. If this parameter is 0, the caret is solid. If this parameter is 1, the caret is gray. If this parameter is a bitmap handle, the caret is the specified bitmap.',
+      },
+      {
+        label: '$iWidth',
+        documentation:
+          'The width of the caret in logical units. If this parameter is 0 (Default), the width is set to the system-defined window border width. If $hBitmap is a bitmap handle, this parameter is ignored.',
+      },
+      {
+        label: '$iHeight',
+        documentation:
+          'The height of the caret in logical units. If this parameter is 0 (Default), the height is set to the system-defined window border height. If $hBitmap is a bitmap handle, this parameter is ignored.',
       },
     ],
   },
@@ -41,7 +52,8 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the window that owns the caret. If this parameter is 0, _WinAPI_HideCaret() searches the current task for the window that owns the caret.',
       },
     ],
   },
@@ -51,7 +63,8 @@ const signatures = {
     params: [
       {
         label: '$iDuration',
-        documentation: 'Parameter description',
+        documentation:
+          'The new blink time, in milliseconds. If this parameter is (-1), caret does not blink.',
       },
     ],
   },
@@ -61,11 +74,11 @@ const signatures = {
     params: [
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The new x-coordinate of the caret.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The new y-coordinate of the caret.',
       },
     ],
   },
@@ -75,7 +88,8 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation:
+          'A handle to the window that owns the caret. If set to 0, the function searches the current task for the window that owns the caret.',
       },
     ],
   },
@@ -85,7 +99,8 @@ const signatures = {
     params: [
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          'A $tagRECT structure that contains the screen coordinates of the confining rectangle. If this parameter is 0, the cursor is free to move anywhere on the screen.',
       },
     ],
   },
@@ -95,7 +110,7 @@ const signatures = {
     params: [
       {
         label: '$hCursor',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the cursor to be duplicated.',
       },
     ],
   },
@@ -105,7 +120,8 @@ const signatures = {
     params: [
       {
         label: '$hCursor',
-        documentation: 'Parameter description',
+        documentation:
+          'A handle to the cursor to be destroyed. The cursor must not currently be in active use.',
       },
     ],
   },
@@ -126,11 +142,13 @@ const signatures = {
     params: [
       {
         label: '$hInstance',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to an instance of the module whose executable file contains the cursor to be loaded. To use predefined cursors, set this to 0.',
       },
       {
         label: '$sName',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the cursor resource or resource identifier to be loaded. When $hInstance is 0, this accepts predefined cursor constants like $OCR_NORMAL, $OCR_IBEAM, $OCR_WAIT, $OCR_CROSS, $OCR_UP, $OCR_SIZE, $OCR_ICON, $OCR_SIZENWSE, $OCR_SIZENESW, $OCR_SIZEWE, $OCR_SIZENS, $OCR_SIZEALL, $OCR_NO, $OCR_HAND, $OCR_APPSTARTING, and $OCR_HELP.',
       },
     ],
   },
@@ -140,7 +158,8 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation:
+          'The file data to be used to create the cursor. The data in the file must be in either .CUR or .ANI format.',
       },
     ],
   },
@@ -150,11 +169,17 @@ const signatures = {
     params: [
       {
         label: '$hCursor',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a cursor.',
       },
       {
-        label: '$iID [, $bCopy',
-        documentation: 'Parameter description',
+        label: '$iID',
+        documentation:
+          'Identifies which system cursor to replace. Accepts values like $OCR_NORMAL, $OCR_IBEAM, $OCR_WAIT, $OCR_CROSS, $OCR_UP, $OCR_SIZE, $OCR_ICON, $OCR_SIZENWSE, $OCR_SIZENESW, $OCR_SIZEWE, $OCR_SIZENS, $OCR_SIZEALL, $OCR_ICOCUR, $OCR_NO, $OCR_HAND, $OCR_APPSTARTING, and $OCR_HELP.',
+      },
+      {
+        label: '$bCopy',
+        documentation:
+          'Specifies whether the cursor should be duplicated. True - The cursor is duplicated. False - The cursor is not duplicated (Default).',
       },
     ],
   },
@@ -163,8 +188,18 @@ const signatures = {
     label: '_WinAPI_AddIconTransparency ( $hIcon [, $iPercent = 50 [, $bDelete = False]] )',
     params: [
       {
-        label: '$hIcon [, $iPercent',
-        documentation: 'Parameter description',
+        label: '$hIcon',
+        documentation: 'Handle to the icon.',
+      },
+      {
+        label: '$iPercent',
+        documentation:
+          'A value (in percent) that specifies how much to decrease the values of the alpha channel for the specified icon. Default is 80. A value of 0 produces a fully transparent icon.',
+      },
+      {
+        label: '$bDelete',
+        documentation:
+          'When set to True, the icon is automatically deleted upon successful function completion. When False (Default), the caller must manually release the icon using _WinAPI_DestroyIcon() when finished.',
       },
     ],
   },
@@ -175,31 +210,33 @@ const signatures = {
     params: [
       {
         label: '$hInstance',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the instance of the module creating the icon.',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width, in pixels, of the icon.',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height, in pixels, of the icon.',
       },
       {
         label: '$iPlanes',
-        documentation: 'Parameter description',
+        documentation: 'The number of planes in the XOR bitmask of the icon.',
       },
       {
         label: '$iBitsPixel',
-        documentation: 'Parameter description',
+        documentation: 'The number of bits-per-pixel in the XOR bitmask of the icon.',
       },
       {
         label: '$pANDBits',
-        documentation: 'Parameter description',
+        documentation:
+          'An array of bytes that contains the bit values for the AND bitmask of the icon. This represents a monochrome bitmap.',
       },
       {
         label: '$pXORBits',
-        documentation: 'Parameter description',
+        documentation:
+          'An array of bytes that contains the bit values for the XOR bitmask of the icon. This can describe either monochrome or device-dependent color bitmaps.',
       },
     ],
   },
@@ -210,11 +247,32 @@ const signatures = {
     params: [
       {
         label: '$pData',
-        documentation: 'Parameter description',
+        documentation:
+          'The icon or cursor resource bits. These bits are typically loaded by calls to the _WinAPI_LookupIconIdFromDirectoryEx() and _WinAPI_LoadResource() functions.',
       },
       {
-        label: '$iSize [, $bIcon',
-        documentation: 'Parameter description',
+        label: '$iSize',
+        documentation: 'The size, in bytes, of the set of bits pointed to by the $pData parameter.',
+      },
+      {
+        label: '$bIcon',
+        documentation:
+          'Determines output type: True creates an icon (Default), False creates a cursor.',
+      },
+      {
+        label: '$iXDesiredPixels',
+        documentation:
+          'The desired width, in pixels, of the icon or cursor. If this parameter is zero (Default), the function uses the system metric value to set the width.',
+      },
+      {
+        label: '$iYDesiredPixels',
+        documentation:
+          'The desired height, in pixels, of the icon or cursor. If this parameter is zero (Default), the function uses the system metric value to set the height.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          'This parameter can be one or more of the following values: $LR_DEFAULTCOLOR (Default), $LR_DEFAULTSIZE, $LR_MONOCHROME, $LR_SHARED.',
       },
     ],
   },
@@ -224,11 +282,18 @@ const signatures = {
     params: [
       {
         label: '$sIcon',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of an executable file, DLL, or icon file from which icons will be extracted.',
       },
       {
-        label: '$iIndex [, $bSmall',
-        documentation: 'Parameter description',
+        label: '$iIndex',
+        documentation:
+          'The 0-based index of the icon to extract. If this value is a negative number, the function extracts the icon whose resource identifier is equal to the absolute value of $iIndex.',
+      },
+      {
+        label: '$bSmall',
+        documentation:
+          'Specifies whether to extract a small icon. True - Extract a small icon. False - Extract a large icon (Default).',
       },
     ],
   },
@@ -248,7 +313,8 @@ const signatures = {
     params: [
       {
         label: '$hIcon',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the icon or cursor. To retrieve information about a standard icon or cursor, use $OCR_* constants.',
       },
     ],
   },
@@ -259,11 +325,13 @@ const signatures = {
     params: [
       {
         label: '$hInstance',
-        documentation: 'Parameter description',
+        documentation:
+          'A handle to an instance of the module whose executable file contains the icon to be loaded.',
       },
       {
         label: '$sName',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the icon resource to be loaded. Alternatively, if $hInstance is 0, it can be one of the following predefined values: $IDI_APPLICATION, $IDI_HAND, $IDI_QUESTION, $IDI_EXCLAMATION, $IDI_ASTERISK, $IDI_WINLOGO, $IDI_SHIELD, $IDI_ERROR, $IDI_INFORMATION, or $IDI_WARNING.',
       },
     ],
   },
@@ -274,8 +342,29 @@ const signatures = {
       '_WinAPI_LookupIconIdFromDirectoryEx ( $pData [, $bIcon = True [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
     params: [
       {
-        label: '$pData [, $bIcon',
-        documentation: 'Parameter description',
+        label: '$pData',
+        documentation:
+          'The icon or cursor directory data. Because this function does not validate the resource data, it causes a general protection (GP) fault if invalid data is passed.',
+      },
+      {
+        label: '$bIcon',
+        documentation:
+          'Determines the resource type being searched. Set to True for icons (Default) or False for cursors.',
+      },
+      {
+        label: '$iXDesiredPixels',
+        documentation:
+          'The desired width, in pixels, of the icon or cursor. If this parameter is zero (Default), the function uses the system metric value.',
+      },
+      {
+        label: '$iYDesiredPixels',
+        documentation:
+          'The desired height, in pixels, of the icon or cursor. If this parameter is zero (Default), the function uses the system metric value.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          'Accepts color mode values: $LR_DEFAULTCOLOR (Default) or $LR_MONOCHROME to specify how the icon/cursor should be rendered.',
       },
     ],
   },
@@ -285,8 +374,14 @@ const signatures = {
     label: '_WinAPI_BeginUpdateResource ( $sFilePath [, $bDelete = False] )',
     params: [
       {
-        label: '$sFilePath [, $bDelete',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation:
+          'The binary file in which to update resources. An application must be able to obtain write-access to this file; the file referenced by $sFilePath cannot be currently executing.',
+      },
+      {
+        label: '$bDelete',
+        documentation:
+          'Indicates whether existing resources should be removed. When set to True, only newly added resources are retained. When False (Default), the updated file preserves all existing resources alongside any new ones.',
       },
     ],
   },
@@ -295,8 +390,14 @@ const signatures = {
     label: '_WinAPI_EndUpdateResource ( $hUpdate [, $bDiscard = False] )',
     params: [
       {
-        label: '$hUpdate [, $bDiscard',
-        documentation: 'Parameter description',
+        label: '$hUpdate',
+        documentation:
+          'A module handle returned by the _WinAPI_BeginUpdateResource(), and used by _WinAPI_UpdateResource(), referencing the file to be updated.',
+      },
+      {
+        label: '$bDiscard',
+        documentation:
+          'Determines the action taken with resource modifications. When set to True, changes are discarded without saving. When False (Default), modifications are committed to the file.',
       },
     ],
   },
@@ -307,15 +408,18 @@ const signatures = {
     params: [
       {
         label: '$hModule',
-        documentation: 'Parameter description',
+        documentation:
+          'The handle to a module to be searched. Also, this parameter can specify the name of the module to load, it must be a full or relative path. It can also be 0 or empty to reference the current process module.',
       },
       {
         label: '$sType',
-        documentation: 'Parameter description',
+        documentation:
+          'The type of resource for which the language is being enumerated. It can be a string or an integer value representing a predefined resource type.',
       },
       {
         label: '$sName',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the resource for which the language is being enumerated. It can be a string or an integer value representing a predefined resource type.',
       },
     ],
   },
@@ -325,11 +429,13 @@ const signatures = {
     params: [
       {
         label: '$hModule',
-        documentation: 'Parameter description',
+        documentation:
+          'The handle to a module to be searched. Also, this parameter can specify the name of the module to load, it must be a full or relative path. A value of 0 or empty string refers to the current process module.',
       },
       {
         label: '$sType',
-        documentation: 'Parameter description',
+        documentation:
+          'The type of the resource for which the name is being enumerated. It can be a string or an integer value representing a predefined resource type.',
       },
     ],
   },
@@ -339,7 +445,8 @@ const signatures = {
     params: [
       {
         label: '$hModule',
-        documentation: 'Parameter description',
+        documentation:
+          'The handle to a module to be searched. Also, this parameter can specify the name of the module to load, it must be a full or relative path. When set to 0 or an empty string, it functions as a reference to the module that initialized the current process.',
       },
     ],
   },
@@ -350,15 +457,16 @@ const signatures = {
     params: [
       {
         label: '$hInstance',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the module whose executable file contains the resource. A value of 0 specifies the module handle associated with the image file that the operating system used to create the current process.',
       },
       {
         label: '$sType',
-        documentation: 'Parameter description',
+        documentation: 'The type of the resource. This parameter can be string or integer value.',
       },
       {
         label: '$sName',
-        documentation: 'Parameter description',
+        documentation: 'The name of the resource. This parameter can be string or integer value.',
       },
     ],
   },
@@ -369,19 +477,20 @@ const signatures = {
     params: [
       {
         label: '$hInstance',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the module whose executable file contains the resource. A value of 0 specifies the module handle associated with the image file that the operating system used to create the current process.',
       },
       {
         label: '$sType',
-        documentation: 'Parameter description',
+        documentation: 'The type of the resource. This parameter can be string or integer value.',
       },
       {
         label: '$sName',
-        documentation: 'Parameter description',
+        documentation: 'The name of the resource. This parameter can be string or integer value.',
       },
       {
         label: '$iLanguage',
-        documentation: 'Parameter description',
+        documentation: 'Indicates which language version of the resource to locate.',
       },
     ],
   },
@@ -391,7 +500,8 @@ const signatures = {
     params: [
       {
         label: '$hData',
-        documentation: 'Parameter description',
+        documentation:
+          "A handle to the resource that was previously created by the _WinAPI_LoadResource() function. This parameter identifies which resource's reference count should be decremented.",
       },
     ],
   },
@@ -401,11 +511,17 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file.',
       },
       {
-        label: 'ByRef $pBuffer [, $iFlags',
-        documentation: 'Parameter description',
+        label: 'ByRef $pBuffer',
+        documentation:
+          'This parameter receives a pointer to a memory block containing file-version information. You may pass 0 to let the function allocate memory automatically, or provide a valid pointer from _WinAPI_CreateBuffer() or a previous call to this function.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          'The flags that controls which MUI DLLs (if any) from which the version resource is extracted. Valid only for Windows Vista or later. Options include $FILE_VER_GET_LOCALISED, $FILE_VER_GET_NEUTRAL, and $FILE_VER_GET_PREFETCHED. Default is 0.',
       },
     ],
   },
@@ -415,7 +531,8 @@ const signatures = {
     params: [
       {
         label: '$sStrIn',
-        documentation: 'Parameter description',
+        documentation:
+          "The input indirect string. This parameter accepts a string that may begin with an '@' symbol, following the indirect string format: @filename,resource or @filename,resource;v2. The function processes this input to extract the actual string resource from the specified file.",
       },
     ],
   },
@@ -425,11 +542,13 @@ const signatures = {
     params: [
       {
         label: '$hInstance',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the module whose executable file contains the resource. If this parameter is 0, the system loads the resource from the module that was used to create the current process.',
       },
       {
         label: '$hResource',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the resource to be loaded. This handle is returned by the _WinAPI_FindResource() or _WinAPI_FindResourceEx() function.',
       },
     ],
   },
@@ -439,11 +558,17 @@ const signatures = {
     params: [
       {
         label: '$hModule',
-        documentation: 'Parameter description',
+        documentation:
+          'A handle to an instance of the module whose executable file contains the string resource. Can also be a file path, or 0/empty string to reference the current process module.',
       },
       {
-        label: '$iID [, $iLanguage',
-        documentation: 'Parameter description',
+        label: '$iID',
+        documentation: 'The identifier of the string to be loaded.',
+      },
+      {
+        label: '$iLanguage',
+        documentation:
+          "The language identifier of the string resource of interest. Defaults to $LOCALE_USER_DEFAULT for the user's default language preference.",
       },
     ],
   },
@@ -453,7 +578,8 @@ const signatures = {
     params: [
       {
         label: '$hData',
-        documentation: 'Parameter description',
+        documentation:
+          'A handle to the resource requiring memory locking. This handle must be obtained from the _WinAPI_LoadResource() function. Do not pass any value as a parameter other than a successful return value from the LoadResource function.',
       },
     ],
   },
@@ -463,11 +589,12 @@ const signatures = {
     params: [
       {
         label: '$hInstance',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the module whose executable file contains the resource.',
       },
       {
         label: '$hResource',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the resource. This handle must be created by using the _WinAPI_FindResource() or _WinAPI_FindResourceEx() function.',
       },
     ],
   },
@@ -477,27 +604,31 @@ const signatures = {
     params: [
       {
         label: '$hUpdate',
-        documentation: 'Parameter description',
+        documentation:
+          'A module handle returned by the _WinAPI_BeginUpdateResource(), referencing the file to be updated.',
       },
       {
         label: '$sType',
-        documentation: 'Parameter description',
+        documentation:
+          "The resource type being modified. Can be a string, integer, or predefined constant (like $RT_*). If the string begins with '#', the remaining characters represent a decimal identifier.",
       },
       {
         label: '$sName',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of the resource to be updated. This parameter can be string or integer value.',
       },
       {
         label: '$iLanguage',
-        documentation: 'Parameter description',
+        documentation: 'The language identifier of the resource.',
       },
       {
         label: '$pData',
-        documentation: 'Parameter description',
+        documentation:
+          'Raw binary resource data for insertion. Must be valid and properly aligned for predefined types. String/text data must use Unicode format. Pass 0 with $iSize of 0 to delete a resource.',
       },
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The size, in bytes, of the resource data at $pData.',
       },
     ],
   },
@@ -508,7 +639,8 @@ const signatures = {
     params: [
       {
         label: '$pData',
-        documentation: 'Parameter description',
+        documentation:
+          'A pointer to the buffer that contains the version-information resource returned by the _WinAPI_GetFileVersionInfo() function.',
       },
     ],
   },
@@ -518,8 +650,14 @@ const signatures = {
     label: "_WinAPI_VerQueryValue ( $pData [, $sValues = ''] )",
     params: [
       {
-        label: '$pData [, $sValues',
-        documentation: 'Parameter description',
+        label: '$pData',
+        documentation:
+          'A pointer to the buffer that contains the version-information resource returned by the _WinAPI_GetFileVersionInfo() function.',
+      },
+      {
+        label: '$sValues',
+        documentation:
+          "An optional input field for specifying which version details to retrieve. When provided as a pipe-separated string (e.g., 'name1|name2'), it returns values for those specific fields. If omitted or left empty, the function defaults to retrieving 12 reserved fields including Comments, CompanyName, FileDescription, FileVersion, InternalName, LegalCopyright, LegalTrademarks, OriginalFilename, ProductName, ProductVersion, PrivateBuild, and SpecialBuild.",
       },
     ],
   },
@@ -529,8 +667,19 @@ const signatures = {
     label: "_WinAPI_VerQueryValueEx ( $hModule [, $sValues = '' [, $iLanguage = 0x0400]] )",
     params: [
       {
-        label: '$hModule [, $sValues',
-        documentation: 'Parameter description',
+        label: '$hModule',
+        documentation:
+          'The handle to a module to retrieve information. Also, this parameter can specify the name of the module to load, it must be a full or relative path.',
+      },
+      {
+        label: '$sValues',
+        documentation:
+          "The string containing the field names for which you want to get values. The names must be separated by a '|'. If left empty, the function defaults to 12 reserved field names including Comments, CompanyName, FileDescription, FileVersion, and others.",
+      },
+      {
+        label: '$iLanguage',
+        documentation:
+          "This parameter accepts a language identifier for the version-information resource. Users can set it to $LOCALE_USER_DEFAULT to retrieve data matching the current user's language preferences, or use (-1) to retrieve information for all available languages within the resource. Default is 0x0400.",
       },
     ],
   },
