@@ -47,13 +47,12 @@ const runCheckProcess = document => {
       // These flags are safe because they don't alter the output format:
       // - -q: suppresses info messages, keeps error/warning format
       // - -d: enables additional checks, produces standard format errors
-      if (/\s-q\b/.test(paramString) || paramString.startsWith('-q')) {
+      if (/(?:^|\s)-q\b/.test(paramString)) {
         params.push('-q');
       }
-      if (/\s-d\b/.test(paramString) || paramString.startsWith('-d')) {
+      if (/(?:^|\s)-d\b/.test(paramString)) {
         params.push('-d');
       }
-
       // Parse -w (warning) parameters: -w or -w- followed by a number
       // Append all warning parameters from the directive
       const warnRegex = /(-w-?)\s+([0-9]+)/g;
