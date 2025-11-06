@@ -10,8 +10,43 @@ const signatures = {
       "_WinAPI_DisplayStruct ( $tStruct [, $sStruct = '' [, $sTitle = '' [, $iItem = 0 [, $iSubItem = 0 [, $iFlags = 0 [, $bTop = True [, $hParent = 0]]]]]]] )",
     params: [
       {
-        label: '$tStruct [, $sStruct',
-        documentation: 'Parameter description',
+        label: '$tStruct',
+        documentation:
+          'A structure that was created by DllStructCreate(), or memory address to be display its data.',
+      },
+      {
+        label: '$sStruct',
+        documentation:
+          '**[optional]** A string representing the structure.If $tStruct is a structure, this parameter can be omitted or be an empty string. In this case, the structure will display as "byte[n]" structure.If $tStruct is a memory address, $sStruct should be a string representing the structure, otherwise, the function fail, and @error set to 10.',
+      },
+      {
+        label: '$sTitle',
+        documentation:
+          '**[optional]** The title of the window, deault is "Structure: ListView Display".',
+      },
+      {
+        label: '$iItem',
+        documentation:
+          '**[optional]** The 1-based index or name of the structure member to be selected in the list.If this parameter is 0 (Default), or an incorrect index or name, the first element of the structure will be selected.',
+      },
+      {
+        label: '$iSubItem',
+        documentation:
+          '**[optional]** The 1-based index of the array in the structure member pointed to by the $iItem parameter to be selected.If $iItem was not defined as an array in the $sStruct, or invalid array index, the element pointed to by the $iItem parameter will be selected.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '**[optional]** A set of bit flags that specifies an additional displaying options.This parameter can be 0, or any combination of the following values: 1 - Prevent displaying "<struct>" and "<endstruct>" fields at the beginning and end of the list. 2 - Prevent displaying "<alignment>" fields. 4 - Prevent displaying "<unnamed>" in "Member" column of the list if the structure element has no name. 8 - Prevent highlighting structure elements that are defined as an array. 16 - Prevent perceiving structure elements named "Reserved*" as unused elements. 32 - Prevent using double-click to copy values of the structure elements to the clipboard. 64 - Forced to expand structure elements of BYTE[n] and BOOLEAN[n] types (elements of CHAR[n] and WCHAR[n] types always displays as a string). 128 - Forced to display the values of the structure elements in the hexadecimal representation, if possible. 256 - Forced to return error code instead of displaying a message box if a memory access error occurred. 512 - Forced to disable checking the read access memory allocated to a given structure.',
+      },
+      {
+        label: '$bTop',
+        documentation:
+          '**[optional]** Specifies whether create a window with "Always On Top" attribute, valid values: True - The window is created with the $WS_EX_TOPMOST extended style (Default). False - The window will not have the "TOPMOST" flag set.',
+      },
+      {
+        label: '$hParent',
+        documentation: '**[optional]** Handle to the parent window.',
       },
     ],
   },
@@ -20,8 +55,19 @@ const signatures = {
     label: "_WinAPI_EnumDllProc ( $sFilePath [, $sMask = '' [, $iFlags = 0]] )",
     params: [
       {
-        label: '$sFilePath [, $sMask',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation:
+          'The path to the library.Although this function searches for a file path when it specified as the relative path or the name without a path, will better to specify a fully qualified path to the library for an unequivocal result.',
+      },
+      {
+        label: '$sMask',
+        documentation:
+          '**[optional]** A wildcard string that indicates the function names to be enumerated.This string can optionally contain the wildcards, "*" and "?". If this parameter is an empty string or omitted (Default), all the exported functions will be enumerated.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '**[optional]** The optional flags. This parameter can be one or more of the following values: $SYMOPT_CASE_INSENSITIVE $SYMOPT_UNDNAME',
       },
     ],
   },
@@ -31,7 +77,7 @@ const signatures = {
     params: [
       {
         label: '$iCode',
-        documentation: 'Parameter description',
+        documentation: 'The error code associated with the exit.',
       },
     ],
   },
@@ -50,8 +96,12 @@ const signatures = {
     label: '_WinAPI_GetErrorMessage ( $iCode [, $iLanguage = 0] )',
     params: [
       {
-        label: '$iCode [, $iLanguage',
-        documentation: 'Parameter description',
+        label: '$iCode',
+        documentation: 'The system error code to retrieve a message.',
+      },
+      {
+        label: '$iLanguage',
+        documentation: '**[optional]** The language identifier.',
       },
     ],
   },
@@ -77,7 +127,7 @@ const signatures = {
     params: [
       {
         label: '$iStatus',
-        documentation: 'Parameter description',
+        documentation: 'The NTSTATUS error code to be converted.',
       },
     ],
   },
@@ -87,7 +137,13 @@ const signatures = {
     params: [
       {
         label: '$iFlags',
-        documentation: '**[optional]** Default is 0 [, $sCmd.',
+        documentation:
+          '**[optional]** The flags that specifies an events when application will not be restarted. This parameter can be0 or one or more of the following values.$RESTART_NO_CRASH$RESTART_NO_HANG$RESTART_NO_PATCH$RESTART_NO_REBOOT',
+      },
+      {
+        label: '$sCmd',
+        documentation:
+          '**[optional]** The command-line arguments for the application when it is restarted. The maximum size of the commandline that you can specify is 2048 characters. If this parameter is empty string (Default), the previouslyregistered command line is removed.',
       },
     ],
   },
@@ -98,7 +154,8 @@ const signatures = {
     params: [
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation:
+          'The process error mode. This parameter can be one or more of the following values.$SEM_FAILCRITICALERRORS$SEM_NOALIGNMENTFAULTEXCEPT$SEM_NOGPFAULTERRORBOX$SEM_NOOPENFILEERRORBOX',
       },
     ],
   },
@@ -108,7 +165,16 @@ const signatures = {
     params: [
       {
         label: '$sText',
-        documentation: "**[optional]** Default is '' [, $bAbort.",
+        documentation: "**[optional]** The user's text that to be displayed with the message.",
+      },
+      {
+        label: '$bAbort',
+        documentation:
+          '**[optional]** Specifies whether to exit the script after displaying an error message, valid values:True - Exit the script after displaying a message if it indicates an error.False - Always return normally (Default).',
+      },
+      {
+        label: '$iLanguage',
+        documentation: '**[optional]** The language identifier for the message.',
       },
     ],
   },
