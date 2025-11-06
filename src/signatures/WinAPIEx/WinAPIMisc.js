@@ -14,8 +14,19 @@ const signatures = {
     label: '_WinAPI_PlaySound ( $sSound [, $iFlags = $SND_SYSTEM_NOSTOP [, $hInstance = 0]] )',
     params: [
       {
-        label: '$sSound [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$sSound',
+        documentation:
+          'The string that specifies the sound to play. The maximum length is 255 characters. If $sSound isempty, any currently playing waveform sound is stopped.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '**[optional]** The flags for sound playing. This parameter can be one or more of the following values.$SND_APPLICATION$SND_ALIAS$SND_ALIAS_ID$SND_ASYNC$SND_FILENAME$SND_LOOP$SND_MEMORY$SND_NODEFAULT$SND_NOSTOP$SND_NOWAIT$SND_PURGE$SND_RESOURCE$SND_SYNC **Windows Vista or later**$SND_SENTRY$SND_SYSTEM Three flags ($SND_ALIAS, $SND_FILENAME, and $SND_RESOURCE) determine whether the name is interpretedas an alias for a system event, a file name, or a resource identifier. If none of these flags arespecified, [_WinAPI_PlaySound()] searches the registry or the WIN.INI file for an association withthe specified sound name. If an association is found, the sound event is played. If no associationis found in the registry, the name is interpreted as a file name. If the $SND_ALIAS_ID flag is specified in $iFlags, the $sSound parameter must be one of the$SND_ALIAS_* values.(See MSDN for more information)',
+      },
+      {
+        label: '$hInstance',
+        documentation:
+          '**[optional]** Handle to the executable file that contains the resource to be loaded. If $iFlags does notcontain the $SND_RESOURCE, this parameter will be ignored.',
       },
     ],
   },
@@ -25,7 +36,7 @@ const signatures = {
     params: [
       {
         label: '$sStr',
-        documentation: 'Parameter description',
+        documentation: 'The string that must be converted.',
       },
     ],
   },
@@ -35,7 +46,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The value to be converted.',
       },
     ],
   },
@@ -45,7 +56,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The value to be converted.',
       },
     ],
   },
@@ -55,7 +66,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The value to be converted.',
       },
     ],
   },
@@ -64,8 +75,13 @@ const signatures = {
     label: '_WinAPI_GetString ( $pString [, $bUnicode = True] )',
     params: [
       {
-        label: '$pString [, $bUnicode',
-        documentation: 'Parameter description',
+        label: '$pString',
+        documentation: 'Pointer to a null-terminated string.',
+      },
+      {
+        label: '$bUnicode',
+        documentation:
+          '**[optional]** Specifies whether a string is Unicode or ASCII code of a character, valid values: True - Unicode (Default). False - ASCII.',
       },
     ],
   },
@@ -75,11 +91,16 @@ const signatures = {
     params: [
       {
         label: '$pMemory',
-        documentation: 'Parameter description',
+        documentation: 'A pointer to a memory block containing data to hash.',
       },
       {
-        label: '$iSize [, $iLength',
-        documentation: 'Parameter description',
+        label: '$iSize',
+        documentation: 'The size of the memory block, in bytes.',
+      },
+      {
+        label: '$iLength',
+        documentation:
+          '**[optional]** The length of the hash data, in bytes. It should be no larger than 256, otherwise, the function fails. Default is 32.',
       },
     ],
   },
@@ -88,8 +109,18 @@ const signatures = {
     label: '_WinAPI_HashString ( $sString [, $bCaseSensitive = True [, $iLength = 32]] )',
     params: [
       {
-        label: '$sString [, $bCaseSensitive',
-        documentation: 'Parameter description',
+        label: '$sString',
+        documentation: 'The string to hash.',
+      },
+      {
+        label: '$bCaseSensitive',
+        documentation:
+          '**[optional]** Specifies whether to treat the string as case sensitive when computing the hash value, valid values: True - The lowercase and uppercase string hash to the different value (Default). False - The lowercase and uppercase string hash to the same value.',
+      },
+      {
+        label: '$iLength',
+        documentation:
+          '**[optional]** The length of the hash data, in bytes. It should be no larger than 256, otherwise, the function fails. Default is 32.',
       },
     ],
   },
@@ -99,7 +130,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: '16-bit value.',
       },
     ],
   },
@@ -109,7 +140,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: '64-bit value.',
       },
     ],
   },
@@ -119,7 +150,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The value to be converted.',
       },
     ],
   },
@@ -129,7 +160,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: '16-bit value.',
       },
     ],
   },
@@ -139,7 +170,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: '64-bit value.',
       },
     ],
   },
@@ -149,15 +180,15 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: '32-bit value.',
       },
       {
         label: '$iStart',
-        documentation: 'Parameter description',
+        documentation: 'The bit position to start. (0 - first bit)',
       },
       {
         label: '$iCount',
-        documentation: 'Parameter description',
+        documentation: 'The number of bits to extract.',
       },
     ],
   },
@@ -167,11 +198,11 @@ const signatures = {
     params: [
       {
         label: '$iLo',
-        documentation: 'Parameter description',
+        documentation: 'Low byte.',
       },
       {
         label: '$iHi',
-        documentation: 'Parameter description',
+        documentation: 'Hi byte.',
       },
     ],
   },
@@ -182,7 +213,7 @@ const signatures = {
     params: [
       {
         label: '$sStr',
-        documentation: 'Parameter description',
+        documentation: 'The string of characters from the OEM-defined character set.',
       },
     ],
   },
@@ -192,7 +223,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The value to be converted.',
       },
     ],
   },
@@ -203,7 +234,7 @@ const signatures = {
     params: [
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The numeric value to be converted.',
       },
     ],
   },
@@ -214,7 +245,7 @@ const signatures = {
     params: [
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The numeric value to be converted.',
       },
     ],
   },
@@ -225,7 +256,7 @@ const signatures = {
     params: [
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The numeric value to be converted.',
       },
     ],
   },
@@ -234,8 +265,13 @@ const signatures = {
     label: '_WinAPI_StrFromTimeInterval ( $iTime [, $iDigits = 7] )',
     params: [
       {
-        label: '$iTime [, $iDigits',
-        documentation: 'Parameter description',
+        label: '$iTime',
+        documentation: 'The time interval, in milliseconds.',
+      },
+      {
+        label: '$iDigits',
+        documentation:
+          '**[optional]** The maximum number of significant digits to be represented in converted string. Default is 7.',
       },
     ],
   },
@@ -244,8 +280,13 @@ const signatures = {
     label: '_WinAPI_StrLen ( $pString [, $bUnicode = True] )',
     params: [
       {
-        label: '$pString [, $bUnicode',
-        documentation: 'Parameter description',
+        label: '$pString',
+        documentation: 'Pointer to a null-terminated string.',
+      },
+      {
+        label: '$bUnicode',
+        documentation:
+          '**[optional]** Specifies whether a string is Unicode or ASCII code of a character, valid values: True - Unicode (Default). False - ASCII.',
       },
     ],
   },
@@ -255,7 +296,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The ULONG value to convert.',
       },
     ],
   },
@@ -265,7 +306,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The ULONGLONG value to convert.',
       },
     ],
   },
@@ -275,7 +316,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The USHORT value to convert.',
       },
     ],
   },
@@ -285,7 +326,7 @@ const signatures = {
     params: [
       {
         label: '$iValue',
-        documentation: 'Parameter description',
+        documentation: 'The value to be converted.',
       },
     ],
   },
@@ -294,8 +335,16 @@ const signatures = {
     label: '_WinAPI_ArrayToStruct ( Const ByRef $aData [, $iStart = 0 [, $iEnd = -1]] )',
     params: [
       {
-        label: 'Const ByRef $aData [, $iStart',
-        documentation: 'Parameter description',
+        label: 'Const ByRef $aData',
+        documentation: 'The array to convert.',
+      },
+      {
+        label: '$iStart',
+        documentation: '**[optional]** The index of array to start converting at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '**[optional]** The index of array to stop converting at.',
       },
     ],
   },
@@ -304,8 +353,13 @@ const signatures = {
     label: "_WinAPI_CopyStruct ( $tStruct [, $sStruct = ''] )",
     params: [
       {
-        label: '$tStruct [, $sStruct',
-        documentation: 'Parameter description',
+        label: '$tStruct',
+        documentation: 'The structure to be duplicated.',
+      },
+      {
+        label: '$sStruct',
+        documentation:
+          '**[optional]** The string representing the structure (same as for the DllStructCreate() function).',
       },
     ],
   },
@@ -316,19 +370,19 @@ const signatures = {
     params: [
       {
         label: '$iLeftWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the left border that retains its size.',
       },
       {
         label: '$iRightWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the right border that retains its size.',
       },
       {
         label: '$iTopHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the top border that retains its size.',
       },
       {
         label: '$iBottomHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the bottom border that retains its size.',
       },
     ],
   },
@@ -339,11 +393,11 @@ const signatures = {
     params: [
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the point.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the point.',
       },
     ],
   },
@@ -353,19 +407,19 @@ const signatures = {
     params: [
       {
         label: '$iLeft',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the upper-left corner of the rectangle.',
       },
       {
         label: '$iTop',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the upper-left corner of the rectangle.',
       },
       {
         label: '$iRight',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the lower-right corner of the rectangle.',
       },
       {
         label: '$iBottom',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the lower-right corner of the rectangle.',
       },
     ],
   },
@@ -375,19 +429,19 @@ const signatures = {
     params: [
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the upper-left corner of the rectangle.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the upper-left corner of the rectangle.',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the rectangle.',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the rectangle.',
       },
     ],
   },
@@ -398,11 +452,11 @@ const signatures = {
     params: [
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the rectangle.',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the rectangle.',
       },
     ],
   },
@@ -411,8 +465,14 @@ const signatures = {
     label: '_WinAPI_StructToArray ( $tStruct [, $iItems = 0] )',
     params: [
       {
-        label: '$tStruct [, $iItems',
-        documentation: 'Parameter description',
+        label: '$tStruct',
+        documentation:
+          'The structure to convert. This structure should be same as for [_WinAPI_ArrayToStruct()].',
+      },
+      {
+        label: '$iItems',
+        documentation:
+          '**[optional]** The number of strings that contains the structure. If this parameter is 0 (Default), the end of the structuredetermined by a double null-terminated character ("... ; {0};{0}").',
       },
     ],
   },
@@ -422,11 +482,16 @@ const signatures = {
     params: [
       {
         label: '$tStruct1',
-        documentation: 'Parameter description',
+        documentation: 'The structure that contains the first source data.',
       },
       {
-        label: '$tStruct2 [, $sStruct',
-        documentation: 'Parameter description',
+        label: '$tStruct2',
+        documentation: 'The structure that contains the second source data.',
+      },
+      {
+        label: '$sStruct',
+        documentation:
+          '**[optional]** The string representing the final structure (same as for the DllStructCreate() function).',
       },
     ],
   },
