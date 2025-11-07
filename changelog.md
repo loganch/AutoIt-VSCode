@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- COM object syntax highlighting for properties and methods using dot notation
+- Distinct token scopes for COM identifiers (`support.class.com.autoit`) to enable theme-specific styling
 - File path validation to prevent path traversal attacks
 - Parameter safety warnings for `autoit.consoleParams` to detect potentially dangerous shell metacharacters
 - Workspace symbol performance optimizations with batch processing to prevent UI freezing on large projects
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Function pattern incorrectly matching COM object methods (e.g., `$obj.Method()` now correctly identified as COM, not function)
 - Command injection risk in registry update functionality by replacing `exec` with `execFile` for safer argument handling
 - Multiple global output panels opening for AutoIt on startup
 - Memory leak in completion provider where include cache grew indefinitely across document switches

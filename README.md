@@ -100,6 +100,17 @@ Open include files at cursor position with Alt+I, with support for custom includ
 
 Run multiple scripts simultaneously with separate output panels for each.
 
+### Syntax Highlighting
+
+Comprehensive syntax highlighting for AutoIt code, including:
+
+- Keywords, functions, and macros
+- Variables, constants, and strings
+- Comments and documentation blocks
+- **COM object properties and methods** with distinct highlighting for dot notation (e.g., `$oExcel.Workbooks.Add()`)
+
+COM objects are highlighted with a special token scope (`support.class.com.autoit`), allowing themes to style them distinctly from regular functions.
+
 ---
 
 ## Platform Support
