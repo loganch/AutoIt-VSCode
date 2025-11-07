@@ -158,8 +158,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation:
-          'The file data to be used to create the cursor. The data in the file must be in either .CUR or .ANI format.',
+        documentation: 'The path to a .CUR or .ANI file to be used to create the cursor.',
       },
     ],
   },
@@ -194,7 +193,7 @@ const signatures = {
       {
         label: '$iPercent',
         documentation:
-          'A value (in percent) that specifies how much to decrease the values of the alpha channel for the specified icon. Default is 80. A value of 0 produces a fully transparent icon.',
+          'A value (in percent) that specifies how much to decrease the values of the alpha channel for the specified icon. Default is 50. A value of 0 produces a fully transparent icon.',
       },
       {
         label: '$bDelete',
@@ -501,7 +500,7 @@ const signatures = {
       {
         label: '$hData',
         documentation:
-          "A handle to the resource that was previously created by the _WinAPI_LoadResource() function. This parameter identifies which resource's reference count should be decremented.",
+          "A handle to the resource that was previously returned by _WinAPI_LoadResource(). This parameter identifies which resource's reference count should be decremented.",
       },
     ],
   },

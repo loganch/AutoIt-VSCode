@@ -14,7 +14,7 @@ const signatures = {
       },
       {
         label: '$sStr',
-        documentation: 'The string be added.',
+        documentation: 'The string to be added.',
       },
     ],
   },

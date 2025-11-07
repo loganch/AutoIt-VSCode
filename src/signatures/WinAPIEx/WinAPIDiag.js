@@ -22,7 +22,7 @@ const signatures = {
       {
         label: '$sTitle',
         documentation:
-          '**[optional]** The title of the window, deault is "Structure: ListView Display".',
+          '**[optional]** The title of the window, default is "Structure: ListView Display".',
       },
       {
         label: '$iItem',
@@ -138,12 +138,12 @@ const signatures = {
       {
         label: '$iFlags',
         documentation:
-          '**[optional]** The flags that specifies an events when application will not be restarted. This parameter can be0 or one or more of the following values.$RESTART_NO_CRASH$RESTART_NO_HANG$RESTART_NO_PATCH$RESTART_NO_REBOOT',
+          '**[optional]** The flags that specify events when the application will not be restarted. This parameter can be 0 or one or more of the following values: $RESTART_NO_CRASH, $RESTART_NO_HANG, $RESTART_NO_PATCH, $RESTART_NO_REBOOT',
       },
       {
         label: '$sCmd',
         documentation:
-          '**[optional]** The command-line arguments for the application when it is restarted. The maximum size of the commandline that you can specify is 2048 characters. If this parameter is empty string (Default), the previouslyregistered command line is removed.',
+          '**[optional]** The command-line arguments for the application when it is restarted. The maximum size of the command line that you can specify is 2048 characters. If this parameter is an empty string (Default), the previously registered command line is removed.',
       },
     ],
   },
@@ -155,7 +155,7 @@ const signatures = {
       {
         label: '$iMode',
         documentation:
-          'The process error mode. This parameter can be one or more of the following values.$SEM_FAILCRITICALERRORS$SEM_NOALIGNMENTFAULTEXCEPT$SEM_NOGPFAULTERRORBOX$SEM_NOOPENFILEERRORBOX',
+          'The process error mode. This parameter can be one or more of the following values: $SEM_FAILCRITICALERRORS, $SEM_NOALIGNMENTFAULTEXCEPT, $SEM_NOGPFAULTERRORBOX, $SEM_NOOPENFILEERRORBOX',
       },
     ],
   },

@@ -16,7 +16,7 @@ const signatures = {
       {
         label: '$sSound',
         documentation:
-          'The string that specifies the sound to play. The maximum length is 255 characters. If $sSound isempty, any currently playing waveform sound is stopped.',
+          'The string that specifies the sound to play. The maximum length is 255 characters. If $sSound is empty, any currently playing waveform sound is stopped.',
       },
       {
         label: '$iFlags',
@@ -472,7 +472,7 @@ const signatures = {
       {
         label: '$iItems',
         documentation:
-          '**[optional]** The number of strings that contains the structure. If this parameter is 0 (Default), the end of the structuredetermined by a double null-terminated character ("... ; {0};{0}").',
+          '**[optional]** The number of strings that contains the structure. If this parameter is 0 (Default), the end of the structure determined by a double null-terminated character ("... ; {0};{0}").',
       },
     ],
   },

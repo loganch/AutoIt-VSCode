@@ -550,8 +550,7 @@ const signatures = {
       },
       {
         label: '$iType',
-        documentation:
-          '**[optional]** The value that specifies the type of object.\n\n`$SHOP_PRINTERNAME`\n\n`$SHOP_FILEPATH` (Default)\n\n`$SHOP_VOLUMEGUID`',
+        documentation: `**[optional]** The value that specifies the type of object.${br}${br}\`$SHOP_PRINTERNAME\`${br}${br}\`$SHOP_FILEPATH\` (Default)${br}${br}\`$SHOP_VOLUMEGUID\``,
       },
       {
         label: '$sProperty',
@@ -589,8 +588,7 @@ const signatures = {
       },
       {
         label: '$iFlags',
-        documentation:
-          '**[optional]** The optional flags. This parameter can be one or more of the following values.\n\n**Windows Vista or later**\n\n`$OFASI_EDIT`\n\n`$OFASI_OPENDESKTOP`',
+        documentation: `**[optional]** The optional flags. This parameter can be one or more of the following values.${br}${br}**Windows Vista or later**${br}${br}\`$OFASI_EDIT\`${br}${br}\`$OFASI_OPENDESKTOP\``,
       },
     ],
   },
@@ -601,8 +599,7 @@ const signatures = {
     params: [
       {
         label: '$sRoot',
-        documentation:
-          '**[optional]** The string that contains the path of the root drive on which the Recycle Bin is located. This string can be formatted with the drive, folder, and subfolder names, for example "c:\\windows\\system".\n\nIf this parameter is empty string, information is retrieved for all Recycle Bins on all drives.',
+        documentation: `**[optional]** The string that contains the path of the root drive on which the Recycle Bin is located. This string can be formatted with the drive, folder, and subfolder names, for example "c:\\windows\\system".${br}${br}If this parameter is empty string, information is retrieved for all Recycle Bins on all drives.`,
       },
     ],
   },
@@ -646,8 +643,7 @@ const signatures = {
       },
       {
         label: '$iFlags',
-        documentation:
-          '**[optional]** This parameter can be 0 or the following value.\n\n`$KF_FLAG_DONT_UNEXPAND`',
+        documentation: `**[optional]** This parameter can be 0 or the following value.${br}${br}\`$KF_FLAG_DONT_UNEXPAND\``,
       },
       {
         label: '$hToken',
@@ -731,8 +727,7 @@ const signatures = {
       },
       {
         label: '$iFlags',
-        documentation:
-          '**[optional]** The flags that determine the icon attributes. It can be 0 or a combination of the following values.\n\n`$GIL_NOTFILENAME`\n\n`$GIL_SIMULATEDOC`',
+        documentation: `**[optional]** The flags that determine the icon attributes. It can be 0 or a combination of the following values.${br}${br}\`$GIL_NOTFILENAME\`${br}${br}\`$GIL_SIMULATEDOC\``,
       },
     ],
   },
