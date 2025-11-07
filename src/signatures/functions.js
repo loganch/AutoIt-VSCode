@@ -58,12 +58,12 @@ const signatures = {
     ],
   },
   AdlibUnRegister: {
-    documentation: 'Unregisters an adlib function.',
+    documentation: 'Unregisters an Adlib function.',
     label: 'AdlibUnRegister ( ["function"] )',
     params: [
       {
         label: 'function',
-        documentation: '**[optional]** The name of the adlib function to be Unregistered.',
+        documentation: '**[optional]** The name of the Adlib function to be unregistered.',
       },
     ],
   },
