@@ -12,7 +12,7 @@ const signatures = {
     label: 'ByRef',
   },
   Case: {
-    documentation: '',
+    documentation: 'Specifies a branch in a Select or Switch structure.',
     label: 'Case',
   },
   Const: {
@@ -33,19 +33,19 @@ const signatures = {
     label: 'Default',
   },
   Dim: {
-    documentation: '',
+    documentation: 'Declare a variable or array.',
     label: 'Dim',
   },
   Do: {
-    documentation: '',
+    documentation: 'Begins a Do/Until loop.',
     label: 'Do',
   },
   Else: {
-    documentation: '',
+    documentation: 'Alternative branch of an If structure.',
     label: 'Else',
   },
   ElseIf: {
-    documentation: '',
+    documentation: 'Additional condition branch in an If structure.',
     label: 'ElseIf',
   },
   EndFunc: {
@@ -85,7 +85,7 @@ const signatures = {
     label: 'False',
   },
   For: {
-    documentation: '',
+    documentation: 'Begins a counted For loop.',
     label: 'For',
   },
   Func: {
@@ -94,7 +94,7 @@ const signatures = {
     label: 'Func',
   },
   Global: {
-    documentation: '',
+    documentation: 'Declare a global variable or create a global array.',
     label: 'Global',
   },
   If: {
@@ -102,15 +102,15 @@ const signatures = {
     label: 'If',
   },
   In: {
-    documentation: '',
+    documentation: 'Iterator keyword for For/In/Next loops.',
     label: 'In',
   },
   Local: {
-    documentation: '',
+    documentation: 'Declare a local variable or create a local array.',
     label: 'Local',
   },
   Next: {
-    documentation: '',
+    documentation: 'Closes a For/Next loop.',
     label: 'Next',
   },
   Not: {
@@ -142,7 +142,7 @@ const signatures = {
     label: 'Static',
   },
   Step: {
-    documentation: '',
+    documentation: 'Specifies the increment in a For loop.',
     label: 'Step',
   },
   Switch: {
@@ -150,11 +150,11 @@ const signatures = {
     label: 'Switch',
   },
   Then: {
-    documentation: '',
+    documentation: 'Introduces the True branch of an If/ElseIf.',
     label: 'Then',
   },
   To: {
-    documentation: '',
+    documentation: 'Specifies the end value in a For loop.',
     label: 'To',
   },
   True: {
@@ -162,7 +162,7 @@ const signatures = {
     label: 'True',
   },
   Until: {
-    documentation: '',
+    documentation: 'Closes a Do/Until loop.',
     label: 'Until',
   },
   Volatile: {
