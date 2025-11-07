@@ -11,23 +11,31 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the file or directory to be backed up. To obtain the handle, call the _WinAPI_CreateFileEx() function. The SACLs are not read unless the file handle was created with the $ACCESS_SYSTEM_SECURITY access right.',
       },
       {
         label: '$pBuffer',
-        documentation: 'Parameter description',
+        documentation: 'A pointer to a buffer that receives the data.',
       },
       {
         label: '$iLength',
-        documentation: 'Parameter description',
+        documentation:
+          'The size of the buffer, in bytes. The buffer size must be greater than the size of the $tagWIN32_STREAM_ID structure. (see also MSDN for more information)',
       },
       {
-        label: 'ByRef $iBytes',
-        documentation: 'Parameter description',
+        label: '$iBytes',
+        documentation: 'The number of bytes read.',
       },
       {
-        label: 'ByRef $pContext [, $bSecurity',
-        documentation: 'Parameter description',
+        label: '$pContext',
+        documentation:
+          'A pointer to an internal data structure used by this function to maintain context information during a backup operation. You must set this variable to 0 before the first call to _WinAPI_BackupRead() for the specified file or directory. The function allocates memory for the data structure, and then sets the variable to point to that structure. You must not change this variable or the variable that it points to between calls to _WinAPI_BackupRead().',
+      },
+      {
+        label: '$bSecurity',
+        documentation:
+          '**[optional]** Specifies whether the function will backup the access-control list (ACL) data, valid values: True - The ACL data will be backed up. False - The ACL data will be omitted (Default).',
       },
     ],
   },
@@ -36,8 +44,9 @@ const signatures = {
     label: '_WinAPI_BackupReadAbort ( ByRef $pContext )',
     params: [
       {
-        label: 'ByRef $pContext',
-        documentation: 'Parameter description',
+        label: '$pContext',
+        documentation:
+          'A pointer to an internal data structure used by _WinAPI_BackupRead() function to maintain context information during a backup operation.',
       },
     ],
   },
@@ -48,19 +57,20 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file or directory.',
       },
       {
         label: '$iSeek',
-        documentation: 'Parameter description',
+        documentation: 'The number of bytes to seek.',
       },
       {
-        label: 'ByRef $iBytes',
-        documentation: 'Parameter description',
+        label: '$iBytes',
+        documentation: 'The number of bytes the function actually seeks.',
       },
       {
-        label: 'ByRef $pContext',
-        documentation: 'Parameter description',
+        label: '$pContext',
+        documentation:
+          'A pointer to an internal data structure. This structure must be the same structure that was initialized by the _WinAPI_BackupRead(). An application must not touch the contents of this structure.',
       },
     ],
   },
@@ -71,23 +81,31 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the file or directory to be restored. To obtain the handle, call the _WinAPI_CreateFileEx() function. The SACLs are not restored unless the file handle was created with the $ACCESS_SYSTEM_SECURITY access right. To ensure that the integrity ACEs are restored correctly, the file handle must also have been created with the $WRITE_OWNER access right.',
       },
       {
         label: '$pBuffer',
-        documentation: 'Parameter description',
+        documentation: 'A pointer to a buffer that the function writes data from.',
       },
       {
         label: '$iLength',
-        documentation: 'Parameter description',
+        documentation:
+          'The size of the buffer, in bytes. The buffer size must be greater than the size of the $tagWIN32_STREAM_ID structure. (see MSDN for more information)',
       },
       {
-        label: 'ByRef $iBytes',
-        documentation: 'Parameter description',
+        label: '$iBytes',
+        documentation: 'The number of bytes written.',
       },
       {
-        label: 'ByRef $pContext [, $bSecurity',
-        documentation: 'Parameter description',
+        label: '$pContext',
+        documentation:
+          'A pointer to an internal data structure used by this function to maintain context information during a restore operation. You must set this variable to 0 before the first call to _WinAPI_BackupWrite() for the specified file or directory. The function allocates memory for the data structure, and then sets the variable to point to that structure. You must not change this variable or the variable that it points to between calls to _WinAPI_BackupWrite().',
+      },
+      {
+        label: '$bSecurity',
+        documentation:
+          '**[optional]** Specifies whether the function will restore the access-control list (ACL) data, valid values: True - The ACL data will be restored. Furthermore, you need to specify $WRITE_OWNER and $WRITE_DAC access when opening the file or directory handle. If the handle does not have those access rights, the operating system denies access to the ACL data, and ACL data restoration will not occur. False - The ACL data will be omitted (Default).',
       },
     ],
   },
@@ -96,8 +114,9 @@ const signatures = {
     label: '_WinAPI_BackupWriteAbort ( ByRef $pContext )',
     params: [
       {
-        label: 'ByRef $pContext',
-        documentation: 'Parameter description',
+        label: '$pContext',
+        documentation:
+          'A pointer to an internal data structure used by _WinAPI_BackupWrite() function to maintain context information during a restore operation.',
       },
     ],
   },
@@ -107,11 +126,16 @@ const signatures = {
     params: [
       {
         label: '$sDevice',
-        documentation: 'Parameter description',
+        documentation: 'The name of the MS-DOS device.',
       },
       {
-        label: '$iFlags [, $sFilePath',
-        documentation: 'Parameter description',
+        label: '$iFlags',
+        documentation:
+          'This parameter can be one or more of the following values.$DDD_EXACT_MATCH_ON_REMOVE$DDD_NO_BROADCAST_SYSTEM$DDD_RAW_TARGET_PATH$DDD_REMOVE_DEFINITION',
+      },
+      {
+        label: '$sFilePath',
+        documentation: '**[optional]** The path that will implement device.',
       },
     ],
   },
@@ -122,7 +146,8 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: "**[optional]** Default is ''.",
+        documentation:
+          '**[optional]** The drive letter to retrieve information, in the format D:, E:, etc.',
       },
     ],
   },
@@ -137,7 +162,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The full path of the PE whose machine type is to be retrieved.',
       },
     ],
   },
@@ -147,7 +172,7 @@ const signatures = {
     params: [
       {
         label: '$sDevice',
-        documentation: 'Parameter description',
+        documentation: 'The name of the MS-DOS device.',
       },
     ],
   },
@@ -157,7 +182,8 @@ const signatures = {
     params: [
       {
         label: '$bEnable',
-        documentation: 'Parameter description',
+        documentation:
+          'Specifies whether enable or disable the WOW64 system folder redirection, valid values: True - Enable. False - Disable.',
       },
     ],
   },
@@ -167,7 +193,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'Path to the file or directory to create or retrieve object identifier.',
       },
     ],
   },
@@ -177,7 +203,8 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation:
+          'Path to the file or directory from the object identifier that is to be deleted.',
       },
     ],
   },
@@ -188,11 +215,31 @@ const signatures = {
     params: [
       {
         label: '$hDevice',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the device on which the operation is to be performed.The device is typically a volume, directory, file, or stream. To retrieve a device handle, use the _WinAPI_CreateFileEx() function.To specify a device name, use the following format: _WinAPI_CreateFileEx("\\\\.\\DeviceName", ...)',
       },
       {
-        label: '$iControlCode [, $pInBuffer',
-        documentation: 'Parameter description',
+        label: '$iControlCode',
+        documentation:
+          'The control code for the operation.This value identifies the specific operation to be performed and the type of device on which to perform it.',
+      },
+      {
+        label: '$pInBuffer',
+        documentation:
+          '**[optional]** A pointer to the input buffer that contains the data required to perform the operation.',
+      },
+      {
+        label: '$iInBufferSize',
+        documentation: '**[optional]** The size of the input buffer, in bytes. Default is 0.',
+      },
+      {
+        label: '$pOutBuffer',
+        documentation:
+          '**[optional]** A pointer to the output buffer that is to receive the data returned by the operation.',
+      },
+      {
+        label: '$iOutBufferSize',
+        documentation: '**[optional]** The size of the output buffer, in bytes. Default is 0.',
       },
     ],
   },
@@ -202,7 +249,7 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive letter of the CD tray to eject, in the format D:, E:, etc.',
       },
     ],
   },
@@ -212,7 +259,8 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation:
+          'The drive letter of the CD tray to retrieve information, in the format D:, E:, etc.',
       },
     ],
   },
@@ -222,7 +270,7 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive letter to retrieve information, in the format D:, E:, etc.',
       },
     ],
   },
@@ -232,7 +280,7 @@ const signatures = {
     params: [
       {
         label: '$iDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive number of the device to retrieve information.',
       },
     ],
   },
@@ -243,7 +291,7 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive letter to retrieve information, in the format D:, E:, etc.',
       },
     ],
   },
@@ -253,7 +301,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'Path to the file or directory to retrieve object identifier.',
       },
     ],
   },
@@ -263,19 +311,19 @@ const signatures = {
     params: [
       {
         label: '$iDeviceType',
-        documentation: 'Parameter description',
+        documentation: 'The device type value.',
       },
       {
         label: '$iFunction',
-        documentation: 'Parameter description',
+        documentation: 'The function code value.',
       },
       {
         label: '$iMethod',
-        documentation: 'Parameter description',
+        documentation: 'The method value.',
       },
       {
         label: '$iAccess',
-        documentation: 'Parameter description',
+        documentation: 'The access value.',
       },
     ],
   },
@@ -285,7 +333,7 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive letter to check, in the format D:, E:, etc.',
       },
     ],
   },
@@ -295,7 +343,7 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive letter to check, in the format D:, E:, etc.',
       },
     ],
   },
@@ -305,7 +353,7 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive letter of the CD tray to load media, in the format D:, E:, etc.',
       },
     ],
   },
@@ -317,11 +365,26 @@ const signatures = {
     params: [
       {
         label: '$sExistingFile',
-        documentation: 'Parameter description',
+        documentation: 'The name of an existing file.',
       },
       {
-        label: '$sNewFile [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$sNewFile',
+        documentation: 'The name of the new file.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '**[optional]** The flags that specify how the file is to be copied. This parameter can be a combination of the following values: $COPY_FILE_ALLOW_DECRYPTED_DESTINATION (0x0008) $COPY_FILE_COPY_SYMLINK (0x0800) $COPY_FILE_FAIL_IF_EXISTS (0x0001) $COPY_FILE_NO_BUFFERING (0x1000) $COPY_FILE_OPEN_SOURCE_FOR_WRITE (0x0004) $COPY_FILE_RESTARTABLE (0x0002)',
+      },
+      {
+        label: '$pProgressProc',
+        documentation:
+          '**[optional]** The address of a callback function that is called each time another portion of the file has been copied.(See MSDN for more information)',
+      },
+      {
+        label: '$pData',
+        documentation:
+          '**[optional]** pointer to an argument to be passed to the callback function. Can be NULL.',
       },
     ],
   },
@@ -330,8 +393,13 @@ const signatures = {
     label: '_WinAPI_CreateDirectory ( $sDir [, $tSecurity = 0] )',
     params: [
       {
-        label: '$sDir [, $tSecurity',
-        documentation: 'Parameter description',
+        label: '$sDir',
+        documentation: 'The path of the directory to be created.',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that contains the security attributes.',
       },
     ],
   },
@@ -341,26 +409,57 @@ const signatures = {
     params: [
       {
         label: '$sNewDir',
-        documentation: 'Parameter description',
+        documentation: 'The path of the directory to be created.',
       },
       {
-        label: '$sTemplateDir [, $tSecurity',
-        documentation: 'Parameter description',
+        label: '$sTemplateDir',
+        documentation: 'The path of the directory to use as a template.',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that contains the security attributes.',
       },
     ],
   },
   _WinAPI_CreateFileEx: {
     documentation: 'Creates or opens a file or I/O device',
     label:
-      '_WinAPI_CreateFileEx ( $sFilePath, $iCreation [, $iAccess = 0 [, $iShare = 0 [, $iFlagsAndAttributes = 0 [, $tSecurity = 0 [, $hTemplate = 0]]]]] )',
+      '_WinAPI_CreateFileEx ( $sFilePath, $iCreation [, $iAccess = 0 [, $iShare = 0 [, $iFlagsAndAttributes = $SECURITY_ANONYMOUS [, $tSecurity = 0 [, $hTemplate = 0]]]]] )',
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or device to be created or opened.',
       },
       {
-        label: '$iCreation [, $iAccess',
-        documentation: 'Parameter description',
+        label: '$iCreation',
+        documentation:
+          'The action to take on a file or device that exists or does not exist. This parameter must be one of the following values, which cannot be combined. $CREATE_NEW $CREATE_ALWAYS $OPEN_EXISTING $OPEN_ALWAYS $TRUNCATE_EXISTING',
+      },
+      {
+        label: '$iAccess',
+        documentation:
+          '**[optional]** The requested access to the file or device, which can be summarized as read, write, both or neither (zero) (Default). $GENERIC_READ $GENERIC_WRITE (See MSDN for more information)',
+      },
+      {
+        label: '$iShare',
+        documentation:
+          '**[optional]** The requested sharing mode of the file or device, which can be read, write, both, delete, all of these, or none. If this parameter is 0 (Default) and _WinAPI_CreateFileEx() succeeds, the file or device cannot be shared and cannot be opened again until the handle to the file or device is closed. $FILE_SHARE_DELETE $FILE_SHARE_READ $FILE_SHARE_WRITE',
+      },
+      {
+        label: '$iFlagsAndAttributes',
+        documentation:
+          '**[optional]** The file or device attributes and flags. This parameter can be one or more of the following values: $FILE_ATTRIBUTE_READONLY $FILE_ATTRIBUTE_HIDDEN $FILE_ATTRIBUTE_SYSTEM $FILE_ATTRIBUTE_DIRECTORY $FILE_ATTRIBUTE_ARCHIVE $FILE_ATTRIBUTE_DEVICE $FILE_ATTRIBUTE_NORMAL $FILE_ATTRIBUTE_TEMPORARY $FILE_ATTRIBUTE_SPARSE_FILE $FILE_ATTRIBUTE_REPARSE_POINT $FILE_ATTRIBUTE_COMPRESSED $FILE_ATTRIBUTE_OFFLINE $FILE_ATTRIBUTE_NOT_CONTENT_INDEXED $FILE_ATTRIBUTE_ENCRYPTED $FILE_FLAG_BACKUP_SEMANTICS $FILE_FLAG_DELETE_ON_CLOSE $FILE_FLAG_NO_BUFFERING $FILE_FLAG_OPEN_NO_RECALL $FILE_FLAG_OPEN_REPARSE_POINT $FILE_FLAG_OVERLAPPED $FILE_FLAG_POSIX_SEMANTICS $FILE_FLAG_RANDOM_ACCESS $FILE_FLAG_SEQUENTIAL_SCAN $FILE_FLAG_WRITE_THROUGH $SECURITY_ANONYMOUS (Default) $SECURITY_CONTEXT_TRACKING $SECURITY_DELEGATION $SECURITY_EFFECTIVE_ONLY $SECURITY_IDENTIFICATION $SECURITY_IMPERSONATION',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that contains two separate but related data members: an optional security descriptor, and a Boolean value that determines whether the returned handle can be inherited by child processes. If this parameter is 0 (Default), the handle cannot be inherited by any child processes the application may create and the file or device associated with the returned handle gets a default security descriptor.',
+      },
+      {
+        label: '$hTemplate',
+        documentation:
+          '**[optional]** Handle to a template file with the $GENERIC_READ access right. The template file supplies file attributes and extended attributes for the file that is being created.',
       },
     ],
   },
@@ -370,8 +469,25 @@ const signatures = {
       "_WinAPI_CreateFileMapping ( $hFile [, $iSize = 0 [, $sName = '' [, $iProtect = 0x0004 [, $tSecurity = 0]]]] )",
     params: [
       {
-        label: '$hFile [, $iSize',
-        documentation: 'Parameter description',
+        label: '$hFile',
+        documentation: 'Handle to the file from which to create a mapping object.',
+      },
+      {
+        label: '$iSize',
+        documentation: '**[optional]** The maximum size of the file mapping object.',
+      },
+      {
+        label: '$sName',
+        documentation: '**[optional]** The name of the file mapping object.',
+      },
+      {
+        label: '$iProtect',
+        documentation: '**[optional]** The protection of the file mapping object.',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that contains the security attributes.',
       },
     ],
   },
@@ -381,11 +497,11 @@ const signatures = {
     params: [
       {
         label: '$sNewFile',
-        documentation: 'Parameter description',
+        documentation: 'The name of the new hard link.',
       },
       {
         label: '$sExistingFile',
-        documentation: 'Parameter description',
+        documentation: 'The name of an existing file.',
       },
     ],
   },
@@ -395,11 +511,16 @@ const signatures = {
     params: [
       {
         label: '$sSymlink',
-        documentation: 'Parameter description',
+        documentation: 'The name of the symbolic link to be created.',
       },
       {
-        label: '$sTarget [, $bDirectory',
-        documentation: 'Parameter description',
+        label: '$sTarget',
+        documentation: 'The name of the file or directory that the link points to.',
+      },
+      {
+        label: '$bDirectory',
+        documentation:
+          '**[optional]** Specifies whether the link is a directory. False - The link is a file (Default). True - The link is a directory.',
       },
     ],
   },
@@ -409,7 +530,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to the file or directory to be decrypted.',
       },
     ],
   },
@@ -419,7 +540,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file to be deleted.',
       },
     ],
   },
@@ -429,7 +550,7 @@ const signatures = {
     params: [
       {
         label: '$sMountedPath',
-        documentation: 'Parameter description',
+        documentation: 'The mount point to be deleted.',
       },
     ],
   },
@@ -440,11 +561,24 @@ const signatures = {
     params: [
       {
         label: '$sSrcFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the source file.',
       },
       {
-        label: '$sDestFilePath [, $iCreation',
-        documentation: 'Parameter description',
+        label: '$sDestFilePath',
+        documentation: 'The name of the destination file.',
+      },
+      {
+        label: '$iCreation',
+        documentation: '**[optional]** The creation mode for the destination file.',
+      },
+      {
+        label: '$iAttributes',
+        documentation: '**[optional]** The attributes for the destination file.',
+      },
+      {
+        label: '$tSecurity',
+        documentation:
+          '**[optional]** $tagSECURITY_ATTRIBUTES structure that contains the security attributes.',
       },
     ],
   },
@@ -454,7 +588,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to the file or directory to be encrypted.',
       },
     ],
   },
@@ -464,11 +598,12 @@ const signatures = {
     params: [
       {
         label: '$sDir',
-        documentation: 'Parameter description',
+        documentation: 'The path to the directory to disable encryption.',
       },
       {
         label: '$bDisable',
-        documentation: 'Parameter description',
+        documentation:
+          'Specifies whether to disable encryption. True - Disable encryption. False - Enable encryption.',
       },
     ],
   },
@@ -478,8 +613,21 @@ const signatures = {
     label: "_WinAPI_EnumFiles ( $sDir [, $iFlag = 0 [, $sTemplate = '' [, $bExclude = False]]] )",
     params: [
       {
-        label: '$sDir [, $iFlag',
-        documentation: 'Parameter description',
+        label: '$sDir',
+        documentation: 'The directory to enumerate files.',
+      },
+      {
+        label: '$iFlag',
+        documentation: '**[optional]** The search flags.',
+      },
+      {
+        label: '$sTemplate',
+        documentation: '**[optional]** The search template.',
+      },
+      {
+        label: '$bExclude',
+        documentation:
+          '**[optional]** Specifies whether to exclude the directory itself from the results.',
       },
     ],
   },
@@ -490,7 +638,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory to enumerate streams.',
       },
     ],
   },
@@ -500,7 +648,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file to enumerate hard links.',
       },
     ],
   },
@@ -510,7 +658,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file to retrieve encryption status.',
       },
     ],
   },
@@ -520,7 +668,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to test.',
       },
     ],
   },
@@ -530,7 +678,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file to test.',
       },
     ],
   },
@@ -540,7 +688,7 @@ const signatures = {
     params: [
       {
         label: '$hSearch',
-        documentation: 'Parameter description',
+        documentation: 'The search handle returned by _WinAPI_FindFirstFile.',
       },
     ],
   },
@@ -550,7 +698,8 @@ const signatures = {
     params: [
       {
         label: '$hChange',
-        documentation: 'Parameter description',
+        documentation:
+          'The change notification handle returned by _WinAPI_FindFirstChangeNotification.',
       },
     ],
   },
@@ -561,11 +710,15 @@ const signatures = {
     params: [
       {
         label: '$sDirectory',
-        documentation: 'Parameter description',
+        documentation: 'The name of the directory to monitor.',
       },
       {
-        label: '$iFlags [, $bSubtree',
-        documentation: 'Parameter description',
+        label: '$iFlags',
+        documentation: 'The filter criteria.',
+      },
+      {
+        label: '$bSubtree',
+        documentation: '**[optional]** Specifies whether to monitor the directory tree.',
       },
     ],
   },
@@ -576,11 +729,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory to search.',
       },
       {
         label: '$tData',
-        documentation: 'Parameter description',
+        documentation: '$tagWIN32_FIND_DATA structure that receives file information.',
       },
     ],
   },
@@ -590,11 +743,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file to find hard links.',
       },
       {
-        label: 'ByRef $sLink',
-        documentation: 'Parameter description',
+        label: '$sLink',
+        documentation: 'The name of the first hard link found.',
       },
     ],
   },
@@ -605,11 +758,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory to enumerate streams.',
       },
       {
         label: '$tData',
-        documentation: 'Parameter description',
+        documentation: '$tagWIN32_FIND_STREAM_DATA structure that receives stream information.',
       },
     ],
   },
@@ -620,7 +773,8 @@ const signatures = {
     params: [
       {
         label: '$hChange',
-        documentation: 'Parameter description',
+        documentation:
+          'The change notification handle returned by _WinAPI_FindFirstChangeNotification.',
       },
     ],
   },
@@ -630,11 +784,11 @@ const signatures = {
     params: [
       {
         label: '$hSearch',
-        documentation: 'Parameter description',
+        documentation: 'The search handle returned by _WinAPI_FindFirstFile.',
       },
       {
         label: '$tData',
-        documentation: 'Parameter description',
+        documentation: '$tagWIN32_FIND_DATA structure that receives file information.',
       },
     ],
   },
@@ -644,11 +798,11 @@ const signatures = {
     params: [
       {
         label: '$hSearch',
-        documentation: 'Parameter description',
+        documentation: 'The search handle returned by _WinAPI_FindFirstFileName.',
       },
       {
-        label: 'ByRef $sLink',
-        documentation: 'Parameter description',
+        label: '$sLink',
+        documentation: 'The name of the next hard link found.',
       },
     ],
   },
@@ -658,11 +812,11 @@ const signatures = {
     params: [
       {
         label: '$hSearch',
-        documentation: 'Parameter description',
+        documentation: 'The search handle returned by _WinAPI_FindFirstStream.',
       },
       {
         label: '$tData',
-        documentation: 'Parameter description',
+        documentation: '$tagWIN32_FIND_STREAM_DATA structure that receives stream information.',
       },
     ],
   },
@@ -671,8 +825,12 @@ const signatures = {
     label: '_WinAPI_FlushViewOfFile ( $pAddress [, $iBytes = 0] )',
     params: [
       {
-        label: '$pAddress [, $iBytes',
-        documentation: 'Parameter description',
+        label: '$pAddress',
+        documentation: 'The starting address of the byte range to flush.',
+      },
+      {
+        label: '$iBytes',
+        documentation: '**[optional]** The number of bytes to flush.',
       },
     ],
   },
@@ -683,7 +841,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file whose binary type is to be determined.',
       },
     ],
   },
@@ -694,7 +852,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file.',
       },
     ],
   },
@@ -704,7 +862,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory.',
       },
     ],
   },
@@ -720,7 +878,7 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive to get information.',
       },
     ],
   },
@@ -730,7 +888,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory.',
       },
     ],
   },
@@ -740,7 +898,7 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
     ],
   },
@@ -750,7 +908,7 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
     ],
   },
@@ -760,7 +918,7 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
     ],
   },
@@ -770,7 +928,7 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
     ],
   },
@@ -780,7 +938,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file.',
       },
     ],
   },
@@ -790,7 +948,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file.',
       },
     ],
   },
@@ -800,7 +958,7 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
     ],
   },
@@ -810,7 +968,7 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
     ],
   },
@@ -819,8 +977,12 @@ const signatures = {
     label: '_WinAPI_GetFinalPathNameByHandleEx ( $hFile [, $iFlags = 0] )',
     params: [
       {
-        label: '$hFile [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$hFile',
+        documentation: 'Handle to the file.',
+      },
+      {
+        label: '$iFlags',
+        documentation: '**[optional]** The format of the path.',
       },
     ],
   },
@@ -830,7 +992,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file.',
       },
     ],
   },
@@ -844,8 +1006,12 @@ const signatures = {
     label: "_WinAPI_GetTempFileName ( $sFilePath [, $sPrefix = ''] )",
     params: [
       {
-        label: '$sFilePath [, $sPrefix',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation: 'The directory that will contain the temporary file.',
+      },
+      {
+        label: '$sPrefix',
+        documentation: '**[optional]** The string to use for the temporary file name.',
       },
     ],
   },
@@ -856,7 +1022,7 @@ const signatures = {
     params: [
       {
         label: '$sRoot',
-        documentation: "**[optional]** Default is ''.",
+        documentation: '**[optional]** The root directory.',
       },
     ],
   },
@@ -867,7 +1033,7 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
     ],
   },
@@ -878,7 +1044,7 @@ const signatures = {
     params: [
       {
         label: '$sMountedPath',
-        documentation: 'Parameter description',
+        documentation: 'The volume mount point.',
       },
     ],
   },
@@ -888,7 +1054,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory.',
       },
     ],
   },
@@ -899,11 +1065,11 @@ const signatures = {
     params: [
       {
         label: '$sDrive',
-        documentation: 'Parameter description',
+        documentation: 'The drive letter of the device to lock/unlock.',
       },
       {
         label: '$bLock',
-        documentation: 'Parameter description',
+        documentation: 'Specifies whether to lock or unlock the device.',
       },
     ],
   },
@@ -913,15 +1079,15 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
       {
         label: '$iOffset',
-        documentation: 'Parameter description',
+        documentation: 'The starting byte offset for the lock.',
       },
       {
         label: '$iLength',
-        documentation: 'Parameter description',
+        documentation: 'The length of the byte range to lock.',
       },
     ],
   },
@@ -931,8 +1097,20 @@ const signatures = {
       '_WinAPI_MapViewOfFile ( $hMapping [, $iOffset = 0 [, $iBytes = 0 [, $iAccess = 0x0006]]] )',
     params: [
       {
-        label: '$hMapping [, $iOffset',
-        documentation: 'Parameter description',
+        label: '$hMapping',
+        documentation: 'Handle to the file mapping.',
+      },
+      {
+        label: '$iOffset',
+        documentation: '**[optional]** The file offset where the view begins.',
+      },
+      {
+        label: '$iBytes',
+        documentation: '**[optional]** The number of bytes of the view to map.',
+      },
+      {
+        label: '$iAccess',
+        documentation: '**[optional]** The access to the file view.',
       },
     ],
   },
@@ -944,11 +1122,23 @@ const signatures = {
     params: [
       {
         label: '$sExistingFile',
-        documentation: 'Parameter description',
+        documentation: 'The name of the existing file or directory.',
       },
       {
-        label: '$sNewFile [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$sNewFile',
+        documentation: 'The new name of the file or directory.',
+      },
+      {
+        label: '$iFlags',
+        documentation: '**[optional]** The move options.',
+      },
+      {
+        label: '$pProgressProc',
+        documentation: '**[optional]** The address of a callback function.',
+      },
+      {
+        label: '$pData',
+        documentation: '**[optional]** Data to be passed to the callback function.',
       },
     ],
   },
@@ -958,11 +1148,23 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file or directory.',
       },
       {
-        label: '$vID [, $iAccess',
-        documentation: 'Parameter description',
+        label: '$vID',
+        documentation: 'The object identifier to open.',
+      },
+      {
+        label: '$iAccess',
+        documentation: '**[optional]** The requested access to the file.',
+      },
+      {
+        label: '$iShare',
+        documentation: '**[optional]** The sharing mode of the file.',
+      },
+      {
+        label: '$iFlags',
+        documentation: '**[optional]** The file attributes and flags.',
       },
     ],
   },
@@ -971,8 +1173,16 @@ const signatures = {
     label: '_WinAPI_OpenFileMapping ( $sName [, $iAccess = 0x0006 [, $bInherit = False]] )',
     params: [
       {
-        label: '$sName [, $iAccess',
-        documentation: 'Parameter description',
+        label: '$sName',
+        documentation: 'The name of the file mapping object.',
+      },
+      {
+        label: '$iAccess',
+        documentation: '**[optional]** The access to the file mapping object.',
+      },
+      {
+        label: '$bInherit',
+        documentation: '**[optional]** Specifies whether the returned handle can be inherited.',
       },
     ],
   },
@@ -982,7 +1192,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to test.',
       },
     ],
   },
@@ -992,7 +1202,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to test.',
       },
     ],
   },
@@ -1004,19 +1214,23 @@ const signatures = {
     params: [
       {
         label: '$hDirectory',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the directory.',
       },
       {
         label: '$iFilter',
-        documentation: 'Parameter description',
+        documentation: 'The filter criteria.',
       },
       {
         label: '$pBuffer',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to the buffer that receives the read results.',
       },
       {
-        label: '$iLength [, $bSubtree',
-        documentation: 'Parameter description',
+        label: '$iLength',
+        documentation: 'The size of the buffer.',
+      },
+      {
+        label: '$bSubtree',
+        documentation: '**[optional]** Specifies whether to monitor the directory tree.',
       },
     ],
   },
@@ -1026,7 +1240,7 @@ const signatures = {
     params: [
       {
         label: '$sDirPath',
-        documentation: 'Parameter description',
+        documentation: 'The path to the directory to be removed.',
       },
     ],
   },
@@ -1037,15 +1251,19 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
       {
         label: '$iAccess',
-        documentation: 'Parameter description',
+        documentation: 'The access mode.',
       },
       {
-        label: '$iShare [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$iShare',
+        documentation: 'The sharing mode.',
+      },
+      {
+        label: '$iFlags',
+        documentation: '**[optional]** The flags.',
       },
     ],
   },
@@ -1057,11 +1275,19 @@ const signatures = {
     params: [
       {
         label: '$sReplacedFile',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file to be replaced.',
       },
       {
-        label: '$sReplacementFile [, $sBackupFile',
-        documentation: 'Parameter description',
+        label: '$sReplacementFile',
+        documentation: 'The name of the file that will replace the existing file.',
+      },
+      {
+        label: '$sBackupFile',
+        documentation: '**[optional]** The name of the backup file.',
+      },
+      {
+        label: '$iFlags',
+        documentation: '**[optional]** The replacement options.',
       },
     ],
   },
@@ -1070,8 +1296,12 @@ const signatures = {
     label: "_WinAPI_SearchPath ( $sFilePath [, $sSearchPath = ''] )",
     params: [
       {
-        label: '$sFilePath [, $sSearchPath',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation: 'The name of the file to search for.',
+      },
+      {
+        label: '$sSearchPath',
+        documentation: '**[optional]** The path to search.',
       },
     ],
   },
@@ -1081,11 +1311,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory.',
       },
       {
         label: '$iCompression',
-        documentation: 'Parameter description',
+        documentation: 'The compression state.',
       },
     ],
   },
@@ -1095,7 +1325,7 @@ const signatures = {
     params: [
       {
         label: '$sDir',
-        documentation: 'Parameter description',
+        documentation: 'The new current directory.',
       },
     ],
   },
@@ -1105,11 +1335,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file or directory.',
       },
       {
         label: '$iAttributes',
-        documentation: 'Parameter description',
+        documentation: 'The file attributes.',
       },
     ],
   },
@@ -1119,11 +1349,12 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
       {
         label: '$tFILEINFO',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagFILE_INFO_BY_HANDLE_CLASS structure that contains the file information.',
       },
     ],
   },
@@ -1133,11 +1364,15 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
       {
-        label: '$iPos [, $iMethod',
-        documentation: 'Parameter description',
+        label: '$iPos',
+        documentation: 'The new file pointer position.',
+      },
+      {
+        label: '$iMethod',
+        documentation: '**[optional]** The starting point for the file pointer move.',
       },
     ],
   },
@@ -1147,11 +1382,11 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
       {
         label: '$sShortName',
-        documentation: 'Parameter description',
+        documentation: 'The short name for the file.',
       },
     ],
   },
@@ -1161,11 +1396,11 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
       {
         label: '$iLength',
-        documentation: 'Parameter description',
+        documentation: 'The valid data length.',
       },
     ],
   },
@@ -1176,7 +1411,7 @@ const signatures = {
     params: [
       {
         label: '$iFlags',
-        documentation: 'Parameter description',
+        documentation: 'The search path mode flags.',
       },
     ],
   },
@@ -1186,11 +1421,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The mount point to associate with the volume.',
       },
       {
         label: '$sGUID',
-        documentation: 'Parameter description',
+        documentation: 'The volume GUID path.',
       },
     ],
   },
@@ -1200,7 +1435,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of the file to check.',
       },
     ],
   },
@@ -1210,15 +1445,15 @@ const signatures = {
     params: [
       {
         label: '$hFile',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the file.',
       },
       {
         label: '$iOffset',
-        documentation: 'Parameter description',
+        documentation: 'The starting byte offset for the lock.',
       },
       {
         label: '$iLength',
-        documentation: 'Parameter description',
+        documentation: 'The length of the byte range to lock.',
       },
     ],
   },
@@ -1228,7 +1463,7 @@ const signatures = {
     params: [
       {
         label: '$pAddress',
-        documentation: 'Parameter description',
+        documentation: 'The starting address of the mapped view.',
       },
     ],
   },

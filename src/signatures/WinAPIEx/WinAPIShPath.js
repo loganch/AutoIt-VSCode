@@ -11,7 +11,8 @@ const signatures = {
     params: [
       {
         label: '$sCmd',
-        documentation: 'Parameter description',
+        documentation:
+          'The string that contains the full command line. If this parameter is an empty string the function returns an empty array (zeroth element is 0).',
       },
     ],
   },
@@ -40,7 +41,7 @@ const signatures = {
     params: [
       {
         label: '$sUrl',
-        documentation: 'Parameter description',
+        documentation: 'The URL to be parsed.',
       },
     ],
   },
@@ -50,7 +51,8 @@ const signatures = {
     params: [
       {
         label: '$sUser',
-        documentation: 'Parameter description',
+        documentation:
+          'The user name to be parsed. The name must be in UPN or down-level format, or a certificate.',
       },
     ],
   },
@@ -61,7 +63,8 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation:
+          'The path to which the backslash will be appended. If this path already has a trailing backslash, no backslash will be added.',
       },
     ],
   },
@@ -70,8 +73,14 @@ const signatures = {
     label: "_WinAPI_PathAddExtension ( $sFilePath [, $sExt = ''] )",
     params: [
       {
-        label: '$sFilePath [, $sExt',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation:
+          'The path to which the file name extension will be appended. If there is already a file name extension present, no extension will be added.',
+      },
+      {
+        label: '$sExt',
+        documentation:
+          '[optional] The file name extension. If this parameter is empty string, an ".exe" extension will be added.',
       },
     ],
   },
@@ -81,11 +90,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The string to which the path is appended.',
       },
       {
         label: '$sMore',
-        documentation: 'Parameter description',
+        documentation: 'The path to be appended.',
       },
     ],
   },
@@ -95,7 +104,7 @@ const signatures = {
     params: [
       {
         label: '$iDrive',
-        documentation: 'Parameter description',
+        documentation: 'The desired drive number. It should be between 0 and 25.',
       },
     ],
   },
@@ -106,7 +115,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be canonicalized.',
       },
     ],
   },
@@ -116,11 +125,11 @@ const signatures = {
     params: [
       {
         label: '$sPath1',
-        documentation: 'Parameter description',
+        documentation: 'The first path name.',
       },
       {
         label: '$sPath2',
-        documentation: 'Parameter description',
+        documentation: 'The second path name.',
       },
     ],
   },
@@ -131,11 +140,16 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window used for font metrics.',
       },
       {
-        label: '$sFilePath [, $iWidth',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation: 'The path to be modified.',
+      },
+      {
+        label: '$iWidth',
+        documentation:
+          "[optional] The width, in pixels, in which the string must fit. If this parameter is 0 (Default), width will be equal to the width of the window's client area. If this parameter is a negative number, the width will be decreased to its absolute value.",
       },
     ],
   },
@@ -146,11 +160,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be modified.',
       },
       {
         label: '$iMax',
-        documentation: 'Parameter description',
+        documentation: 'The maximum number of characters to be contained in the modified path.',
       },
     ],
   },
@@ -160,7 +174,7 @@ const signatures = {
     params: [
       {
         label: '$sUrl',
-        documentation: 'Parameter description',
+        documentation: 'The URL.',
       },
     ],
   },
@@ -170,7 +184,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to search, including the extension being searched for.',
       },
     ],
   },
@@ -180,7 +194,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to search.',
       },
     ],
   },
@@ -191,7 +205,8 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation:
+          'The path to parse. Path components are delimited by backslashes. For instance, the path "c:\\path1\\path2\\file.txt" has four components: c:, path1, path2, and file.txt.',
       },
     ],
   },
@@ -201,7 +216,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be searched.',
       },
     ],
   },
@@ -211,7 +226,7 @@ const signatures = {
     params: [
       {
         label: '$sChar',
-        documentation: 'Parameter description',
+        documentation: 'The character for which to determine the type.',
       },
     ],
   },
@@ -222,7 +237,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be searched.',
       },
     ],
   },
@@ -233,11 +248,12 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The file whose content type will be compared.',
       },
       {
         label: '$sType',
-        documentation: 'Parameter description',
+        documentation:
+          'The content type string. For example, "application/x-msdownload", "image/jpeg", "text/plain", etc.',
       },
     ],
   },
@@ -247,7 +263,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be searched.',
       },
     ],
   },
@@ -257,7 +273,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be searched.',
       },
     ],
   },
@@ -267,7 +283,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The file name to be tested.',
       },
     ],
   },
@@ -277,7 +293,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be searched.',
       },
     ],
   },
@@ -287,7 +303,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be validated.',
       },
     ],
   },
@@ -297,11 +313,11 @@ const signatures = {
     params: [
       {
         label: '$sPath1',
-        documentation: 'Parameter description',
+        documentation: 'The first path to be compared.',
       },
       {
         label: '$sPath2',
-        documentation: 'Parameter description',
+        documentation: 'The second path to be compared.',
       },
     ],
   },
@@ -312,7 +328,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of an existing folder to check the system folder attributes.',
       },
     ],
   },
@@ -323,7 +339,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to validate.',
       },
     ],
   },
@@ -334,7 +350,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to validate.',
       },
     ],
   },
@@ -344,7 +360,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to validate.',
       },
     ],
   },
@@ -354,7 +370,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of an existing folder that will be made into a system folder.',
       },
     ],
   },
@@ -364,11 +380,12 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be searched.',
       },
       {
         label: '$sSpec',
-        documentation: 'Parameter description',
+        documentation:
+          'The file type for which to search. For example, to test whether $sFilePath is a .doc file, $sSpec should be set to "*.doc".',
       },
     ],
   },
@@ -378,7 +395,8 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation:
+          'The path that contains a file location string. It should be in the form "path,iconindex".',
       },
     ],
   },
@@ -388,19 +406,23 @@ const signatures = {
     params: [
       {
         label: '$sPathFrom',
-        documentation: 'Parameter description',
+        documentation:
+          'The path to the file or directory that defines the start of the relative path.',
       },
       {
         label: '$bDirFrom',
-        documentation: 'Parameter description',
+        documentation:
+          'Specifies whether is $sPathFrom path to the directory, valid values:     True - Directory.     False - File.',
       },
       {
         label: '$sPathTo',
-        documentation: 'Parameter description',
+        documentation:
+          'The path to the file or directory that defines the endpoint of the relative path.',
       },
       {
         label: '$bDirTo',
-        documentation: 'Parameter description',
+        documentation:
+          'Specifies whether is $fDirTo path to the directory, valid values:     True - Directory.     False - File.',
       },
     ],
   },
@@ -410,7 +432,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path that contains the path from which to remove arguments.',
       },
     ],
   },
@@ -420,7 +442,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path from which to remove the backslash.',
       },
     ],
   },
@@ -430,7 +452,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path from which to remove the extension.',
       },
     ],
   },
@@ -440,7 +462,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path from which to remove the file name.',
       },
     ],
   },
@@ -450,11 +472,11 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path in which to replace the extension.',
       },
       {
         label: '$sExt',
-        documentation: 'Parameter description',
+        documentation: 'The string that contains a "." character followed by the new extension.',
       },
     ],
   },
@@ -463,8 +485,13 @@ const signatures = {
     label: '_WinAPI_PathSearchAndQualify ( $sFilePath [, $bExists = False] )',
     params: [
       {
-        label: '$sFilePath [, $bExists',
-        documentation: 'Parameter description',
+        label: '$sFilePath',
+        documentation: 'The path to be formated.',
+      },
+      {
+        label: '$bExists',
+        documentation:
+          '[optional] Specifies whether the path should be existing, valid values:     True - The path must be an existing path, otherwise, the function fails.     False - The path may not exist (Default).',
       },
     ],
   },
@@ -475,7 +502,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to parse.',
       },
     ],
   },
@@ -485,7 +512,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path and file name.',
       },
     ],
   },
@@ -495,7 +522,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be converted.',
       },
     ],
   },
@@ -505,7 +532,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path.',
       },
     ],
   },
@@ -516,7 +543,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to be unexpanded.',
       },
     ],
   },
@@ -526,7 +553,8 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation:
+          'The name of an existing folder that will have the system folder attributes removed.',
       },
     ],
   },
@@ -536,7 +564,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path.',
       },
     ],
   },
@@ -546,7 +574,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The file name that the unique name will be based on.',
       },
     ],
   },
@@ -566,8 +594,13 @@ const signatures = {
     label: '_WinAPI_UrlApplyScheme ( $sUrl [, $iFlags = 1] )',
     params: [
       {
-        label: '$sUrl [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$sUrl',
+        documentation: 'The URL.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '[optional] The flags that specify how to determine the scheme. It can be a combination of the following values. $URL_APPLY_DEFAULT (Default) $URL_APPLY_GUESSSCHEME $URL_APPLY_GUESSFILE $URL_APPLY_FORCEAPPLY',
       },
     ],
   },
@@ -577,11 +610,12 @@ const signatures = {
     params: [
       {
         label: '$sUrl',
-        documentation: 'Parameter description',
+        documentation: 'The URL.',
       },
       {
         label: '$iFlags',
-        documentation: 'Parameter description',
+        documentation:
+          'The flags that specify how the URL is to be converted. It can be a combination of the following values.     $URL_DONT_SIMPLIFY     $URL_ESCAPE_PERCENT     $URL_ESCAPE_SPACES_ONLY     $URL_ESCAPE_UNSAFE     $URL_NO_META     $URL_PLUGGABLE_PROTOCOL     $URL_UNESCAPE Windows 7 or later     $URL_ESCAPE_AS_UTF8',
       },
     ],
   },
@@ -591,11 +625,16 @@ const signatures = {
     params: [
       {
         label: '$sUrl',
-        documentation: 'Parameter description',
+        documentation: 'The base URL.',
       },
       {
-        label: '$sPart [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$sPart',
+        documentation: 'The relative URL.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '[optional] The flags that specify how the URL is to be converted. It can be a combination of the following values.     $URL_DONT_SIMPLIFY     $URL_ESCAPE_PERCENT     $URL_ESCAPE_SPACES_ONLY     $URL_ESCAPE_UNSAFE     $URL_NO_META     $URL_PLUGGABLE_PROTOCOL     $URL_UNESCAPE Windows 7 or later     $URL_ESCAPE_AS_UTF8',
       },
     ],
   },
@@ -605,11 +644,16 @@ const signatures = {
     params: [
       {
         label: '$sUrl1',
-        documentation: 'Parameter description',
+        documentation: 'The first URL.',
       },
       {
-        label: '$sUrl2 [, $bIgnoreSlash',
-        documentation: 'Parameter description',
+        label: '$sUrl2',
+        documentation: 'The second URL.',
+      },
+      {
+        label: '$bIgnoreSlash',
+        documentation:
+          "[optional] Specifies whether to ignore a trailing '/' character on either or both URLs, valid values:     True - The function ignores a trailing characters.     False - The function takes into account the trailing characters (Default).",
       },
     ],
   },
@@ -619,7 +663,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The MS-DOS path.',
       },
     ],
   },
@@ -629,7 +673,7 @@ const signatures = {
     params: [
       {
         label: '$sUrl',
-        documentation: 'Parameter description',
+        documentation: 'The URL to be corrected.',
       },
     ],
   },
@@ -639,11 +683,12 @@ const signatures = {
     params: [
       {
         label: '$sUrl',
-        documentation: 'Parameter description',
+        documentation: 'The URL.',
       },
       {
         label: '$iPart',
-        documentation: 'Parameter description',
+        documentation:
+          'The part of the URL to retrieve. It can be one of the following values. $URL_PART_HOSTNAME $URL_PART_PASSWORD $URL_PART_PORT $URL_PART_QUERY $URL_PART_SCHEME $URL_PART_USERNAME',
       },
     ],
   },
@@ -652,8 +697,13 @@ const signatures = {
     label: '_WinAPI_UrlHash ( $sUrl [, $iLength = 32] )',
     params: [
       {
-        label: '$sUrl [, $iLength',
-        documentation: 'Parameter description',
+        label: '$sUrl',
+        documentation: 'The URL.',
+      },
+      {
+        label: '$iLength',
+        documentation:
+          '[optional] The length of the hash data, in bytes. It should be no larger than 256, otherwise, the function fails. Default is 32.',
       },
     ],
   },
@@ -662,8 +712,13 @@ const signatures = {
     label: '_WinAPI_UrlIs ( $sUrl [, $iType = 0] )',
     params: [
       {
-        label: '$sUrl [, $iType',
-        documentation: 'Parameter description',
+        label: '$sUrl',
+        documentation: 'The URL.',
+      },
+      {
+        label: '$iType',
+        documentation:
+          ' [optional] The type of URL to be tested for. It can be one of the following values. $URLIS_APPLIABLE $URLIS_DIRECTORY $URLIS_FILEURL $URLIS_HASQUERY $URLIS_NOHISTORY $URLIS_OPAQUE $URLIS_URL (Default)',
       },
     ],
   },

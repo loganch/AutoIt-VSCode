@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { signatureToCompletion, signatureToHover } from '../../util';
+import { signatureToCompletion, signatureToHover, br } from '../../util';
 
 const include = '(Requires: `#include <WinAPIGdi.au3>`)';
 
@@ -12,11 +12,24 @@ const signatures = {
     params: [
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the bitmap, in pixels',
       },
       {
-        label: '$iHeight [, $iBitsPerPel',
-        documentation: 'Parameter description',
+        label: '$iHeight',
+        documentation: 'The height of the bitmap, in pixels',
+      },
+      {
+        label: '$iBitsPerPel',
+        documentation: 'The number of bits per pixel (1, 4, 8, 16, 24, or 32)',
+      },
+      {
+        label: '$tColorTable',
+        documentation:
+          'Pointer to an array of RGBQUAD structures containing the color table for the DIB',
+      },
+      {
+        label: '$iColorCount',
+        documentation: 'The number of colors in the color table (0 = all colors)',
       },
     ],
   },
@@ -28,15 +41,24 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source bitmap',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the new bitmap, in pixels',
       },
       {
-        label: '$iHeight [, $iMode',
-        documentation: 'Parameter description',
+        label: '$iHeight',
+        documentation: 'The height of the new bitmap, in pixels',
+      },
+      {
+        label: '$iMode',
+        documentation: 'Interpolation mode (0=default, 1=point, 2=linear, 3=cubic, 4=4x4, 5=8x8)',
+      },
+      {
+        label: '$tAdjustment',
+        documentation:
+          'Pointer to a $tagCOLORADJUSTMENT structure containing the color adjustment values',
       },
     ],
   },
@@ -47,47 +69,55 @@ const signatures = {
     params: [
       {
         label: '$hDestDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the destination device context',
       },
       {
         label: '$iXDest',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinate, in pixels, of the upper-left corner of the destination rectangle',
       },
       {
         label: '$iYDest',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinate, in pixels, of the upper-left corner of the destination rectangle',
       },
       {
         label: '$iWidthDest',
-        documentation: 'Parameter description',
+        documentation: 'The width, in pixels, of the destination rectangle',
       },
       {
         label: '$iHeightDest',
-        documentation: 'Parameter description',
+        documentation: 'The height, in pixels, of the destination rectangle',
       },
       {
         label: '$hSrcDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source device context',
       },
       {
         label: '$iXSrc',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinate, in pixels, of the upper-left corner of the source rectangle',
       },
       {
         label: '$iYSrc',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinate, in pixels, of the upper-left corner of the source rectangle',
       },
       {
         label: '$iWidthSrc',
-        documentation: 'Parameter description',
+        documentation: 'The width, in pixels, of the source rectangle',
       },
       {
         label: '$iHeightSrc',
-        documentation: 'Parameter description',
+        documentation: 'The height, in pixels, of the source rectangle',
       },
       {
-        label: '$iAlpha [, $bAlpha',
-        documentation: 'Parameter description',
+        label: '$iAlpha',
+        documentation: 'Alpha blending value (0-255)',
+      },
+      {
+        label: '$bAlpha',
+        documentation: 'If True, use the alpha channel in the source bitmap',
       },
     ],
   },
@@ -98,11 +128,19 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap to compress',
       },
       {
-        label: 'ByRef $pBuffer [, $iCompression',
-        documentation: 'Parameter description',
+        label: '$pBuffer',
+        documentation: 'Buffer that receives the compressed data',
+      },
+      {
+        label: '$iCompression',
+        documentation: 'Compression type (0=none, 1=RLE, 2=JPEG)',
+      },
+      {
+        label: '$iQuality',
+        documentation: 'JPEG compression quality (1-100, default is 100)',
       },
     ],
   },
@@ -113,7 +151,7 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap to be copied',
       },
     ],
   },
@@ -124,8 +162,25 @@ const signatures = {
       '_WinAPI_CopyImage ( $hImage [, $iType = 0 [, $iXDesiredPixels = 0 [, $iYDesiredPixels = 0 [, $iFlags = 0]]]] )',
     params: [
       {
-        label: '$hImage [, $iType',
-        documentation: 'Parameter description',
+        label: '$hImage',
+        documentation: 'Handle to the image to be copied',
+      },
+      {
+        label: '$iType',
+        documentation: 'Type of image (0=auto, 1=bitmap, 2=icon, 3=cursor)',
+      },
+      {
+        label: '$iXDesiredPixels',
+        documentation: 'Desired width in pixels (0=original size)',
+      },
+      {
+        label: '$iYDesiredPixels',
+        documentation: 'Desired height in pixels (0=original size)',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          'Copy flags (0x0001=LR_COPYDELETEORG, 0x0002=LR_COPYFROMRESOURCE, 0x0004=LR_MONOCHROME)',
       },
     ],
   },
@@ -134,8 +189,16 @@ const signatures = {
     label: '_WinAPI_Create32BitHBITMAP ( $hIcon [, $bDib = False [, $bDelete = False]] )',
     params: [
       {
-        label: '$hIcon [, $bDib',
-        documentation: 'Parameter description',
+        label: '$hIcon',
+        documentation: 'Handle to the icon',
+      },
+      {
+        label: '$bDib',
+        documentation: 'If True, creates a DIB section instead of a DDB',
+      },
+      {
+        label: '$bDelete',
+        documentation: 'If True, deletes the original icon after conversion',
       },
     ],
   },
@@ -144,8 +207,12 @@ const signatures = {
     label: '_WinAPI_Create32BitHICON ( $hIcon [, $bDelete = False] )',
     params: [
       {
-        label: '$hIcon [, $bDelete',
-        documentation: 'Parameter description',
+        label: '$hIcon',
+        documentation: 'Handle to the icon to convert',
+      },
+      {
+        label: '$bDelete',
+        documentation: 'If True, deletes the original icon after conversion',
       },
     ],
   },
@@ -155,7 +222,7 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source bitmap',
       },
     ],
   },
@@ -166,7 +233,7 @@ const signatures = {
     params: [
       {
         label: '$tBITMAP',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagBITMAP structure containing the bitmap information',
       },
     ],
   },
@@ -176,19 +243,19 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the bitmap, in pixels',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the bitmap, in pixels',
       },
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The RGB color value to fill the bitmap',
       },
     ],
   },
@@ -198,8 +265,16 @@ const signatures = {
       '_WinAPI_CreateDIBColorTable ( Const ByRef $aColorTable [, $iStart = 0 [, $iEnd = -1]] )',
     params: [
       {
-        label: 'Const ByRef $aColorTable [, $iStart',
-        documentation: 'Parameter description',
+        label: '$aColorTable',
+        documentation: 'Array of RGB color values',
+      },
+      {
+        label: '$iStart',
+        documentation: 'Index of first color to include (0-based)',
+      },
+      {
+        label: '$iEnd',
+        documentation: 'Index of last color to include (-1 = all remaining colors)',
       },
     ],
   },
@@ -210,15 +285,19 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tBITMAPINFO',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagBITMAPINFO structure',
       },
       {
-        label: '$iUsage [, $pBits',
-        documentation: 'Parameter description',
+        label: '$iUsage',
+        documentation: 'Usage flag (0=DIB_PAL_COLORS, 1=DIB_RGB_COLORS)',
+      },
+      {
+        label: '$pBits',
+        documentation: 'Pointer to the bitmap bits',
       },
     ],
   },
@@ -229,19 +308,27 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tBITMAPINFO',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagBITMAPINFO structure',
       },
       {
         label: '$iUsage',
-        documentation: 'Parameter description',
+        documentation: 'Usage flag (0=DIB_PAL_COLORS, 1=DIB_RGB_COLORS)',
       },
       {
-        label: 'ByRef $pBits [, $hSection',
-        documentation: 'Parameter description',
+        label: '$pBits',
+        documentation: 'Pointer to receive a pointer to the location of the DIB bit values',
+      },
+      {
+        label: '$hSection',
+        documentation: 'Handle to a file-mapping object',
+      },
+      {
+        label: '$iOffset',
+        documentation: 'The offset from the beginning of the file-mapping object',
       },
     ],
   },
@@ -252,11 +339,15 @@ const signatures = {
     params: [
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the icon, in pixels',
       },
       {
-        label: '$iHeight [, $iBitsPerPel',
-        documentation: 'Parameter description',
+        label: '$iHeight',
+        documentation: 'The height of the icon, in pixels',
+      },
+      {
+        label: '$iBitsPerPel',
+        documentation: 'The number of bits per pixel (1, 4, 8, 16, 24, or 32)',
       },
     ],
   },
@@ -268,11 +359,23 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the color bitmap',
       },
       {
-        label: '$hMask [, $iXHotspot',
-        documentation: 'Parameter description',
+        label: '$hMask',
+        documentation: 'Handle to the monochrome bitmap',
+      },
+      {
+        label: '$iXHotspot',
+        documentation: "The x-coordinate of the icon's hot spot",
+      },
+      {
+        label: '$iYHotspot',
+        documentation: "The y-coordinate of the icon's hot spot",
+      },
+      {
+        label: '$bIcon',
+        documentation: 'If True, creates an icon; otherwise, creates a cursor',
       },
     ],
   },
@@ -282,19 +385,23 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the upper-left corner of the destination rectangle',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the upper-left corner of the destination rectangle',
       },
       {
-        label: '$hBitmap [, $iRop',
-        documentation: 'Parameter description',
+        label: '$hBitmap',
+        documentation: 'Handle to the bitmap to be drawn',
+      },
+      {
+        label: '$iRop',
+        documentation: 'Raster operation code (default is 0x00CC0020)',
       },
     ],
   },
@@ -304,19 +411,23 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the point where filling begins',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the point where filling begins',
       },
       {
-        label: '$iRGB [, $iType',
-        documentation: 'Parameter description',
+        label: '$iRGB',
+        documentation: 'The color to be used for filling (RGB value)',
+      },
+      {
+        label: '$iType',
+        documentation: 'Flood fill type (0=stroke boundary, 1=fill area)',
       },
     ],
   },
@@ -326,15 +437,15 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap to retrieve bits from',
       },
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The number of bytes to copy',
       },
       {
         label: '$pBits',
-        documentation: 'Parameter description',
+        documentation: 'Buffer to receive the bitmap bits',
       },
     ],
   },
@@ -344,7 +455,7 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap to get dimension from',
       },
     ],
   },
@@ -354,7 +465,7 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap to get dimensions from',
       },
     ],
   },
@@ -364,7 +475,7 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the DIB section bitmap',
       },
     ],
   },
@@ -374,7 +485,7 @@ const signatures = {
     params: [
       {
         label: '$hIcon',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the icon to get dimension from',
       },
     ],
   },
@@ -384,15 +495,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the pixel to retrieve color from',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the pixel to retrieve color from',
       },
     ],
   },
@@ -402,7 +513,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -413,11 +524,23 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
-        label: 'Const ByRef $aVertex [, $iStart',
-        documentation: 'Parameter description',
+        label: '$aVertex',
+        documentation: 'Array of TRIVERTEX structures defining the gradient vertices',
+      },
+      {
+        label: '$iStart',
+        documentation: 'Index of first vertex to use',
+      },
+      {
+        label: '$iEnd',
+        documentation: 'Index of last vertex to use (-1 = all remaining)',
+      },
+      {
+        label: '$bRotate',
+        documentation: 'If True, rotate the gradient',
       },
     ],
   },
@@ -426,8 +549,12 @@ const signatures = {
     label: '_WinAPI_InvertANDBitmap ( $hBitmap [, $bDelete = False] )',
     params: [
       {
-        label: '$hBitmap [, $bDelete',
-        documentation: 'Parameter description',
+        label: '$hBitmap',
+        documentation: 'Handle to the AND bitmask bitmap to invert',
+      },
+      {
+        label: '$bDelete',
+        documentation: 'If True, delete the bitmap after inversion',
       },
     ],
   },
@@ -437,7 +564,7 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap to check',
       },
     ],
   },
@@ -449,51 +576,51 @@ const signatures = {
     params: [
       {
         label: '$hDestDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the destination device context',
       },
       {
         label: '$iXDest',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the destination rectangle',
       },
       {
         label: '$iYDest',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the destination rectangle',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the destination rectangle and source rectangle',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the destination rectangle and source rectangle',
       },
       {
         label: '$hSrcDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source device context',
       },
       {
         label: '$iXSrc',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the source rectangle',
       },
       {
         label: '$iYSrc',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the source rectangle',
       },
       {
         label: '$hMask',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the mask bitmap',
       },
       {
         label: '$iXMask',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the mask rectangle',
       },
       {
         label: '$iYMask',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the mask rectangle',
       },
       {
         label: '$iRop',
-        documentation: 'Parameter description',
+        documentation: 'Raster operation code',
       },
     ],
   },
@@ -505,31 +632,44 @@ const signatures = {
     params: [
       {
         label: '$hDestDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the destination device context',
       },
       {
-        label: 'Const ByRef $aPoint',
-        documentation: 'Parameter description',
+        label: '$aPoint',
+        documentation:
+          'Array of three POINT structures that identify the destination parallelogram',
       },
       {
         label: '$hSrcDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source device context',
       },
       {
         label: '$iXSrc',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the source rectangle',
       },
       {
         label: '$iYSrc',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the source rectangle',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the source rectangle',
       },
       {
-        label: '$iHeight [, $hMask',
-        documentation: 'Parameter description',
+        label: '$iHeight',
+        documentation: 'The height of the source rectangle',
+      },
+      {
+        label: '$hMask',
+        documentation: 'Handle to the mask bitmap (0 if no mask)',
+      },
+      {
+        label: '$iXMask',
+        documentation: 'The x-coordinate of the mask rectangle',
+      },
+      {
+        label: '$iYMask',
+        documentation: 'The y-coordinate of the mask rectangle',
       },
     ],
   },
@@ -540,27 +680,39 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the center of the radial gradient',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the center of the radial gradient',
       },
       {
         label: '$iRadius',
-        documentation: 'Parameter description',
+        documentation: 'The radius of the gradient circle',
       },
       {
         label: '$iRGB1',
-        documentation: 'Parameter description',
+        documentation: 'The starting RGB color value',
       },
       {
-        label: '$iRGB2 [, $fAngleStart',
-        documentation: 'Parameter description',
+        label: '$iRGB2',
+        documentation: 'The ending RGB color value',
+      },
+      {
+        label: '$fAngleStart',
+        documentation: 'The starting angle in degrees',
+      },
+      {
+        label: '$fAngleEnd',
+        documentation: 'The ending angle in degrees',
+      },
+      {
+        label: '$fStep',
+        documentation: 'The angle step size in degrees',
       },
     ],
   },
@@ -571,11 +723,19 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to the bitmap file to save',
       },
       {
-        label: '$hBitmap [, $iXPelsPerMeter',
-        documentation: 'Parameter description',
+        label: '$hBitmap',
+        documentation: 'Handle to the bitmap to save',
+      },
+      {
+        label: '$iXPelsPerMeter',
+        documentation: 'Horizontal resolution in pixels per meter',
+      },
+      {
+        label: '$iYPelsPerMeter',
+        documentation: 'Vertical resolution in pixels per meter',
       },
     ],
   },
@@ -587,11 +747,23 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The path to the icon file to save',
       },
       {
-        label: 'Const ByRef $vIcon [, $bCompress',
-        documentation: 'Parameter description',
+        label: '$vIcon',
+        documentation: 'Handle to the icon or array of icons',
+      },
+      {
+        label: '$bCompress',
+        documentation: 'Compression flag (0=none, 1=compress)',
+      },
+      {
+        label: '$iStart',
+        documentation: 'Index of first icon to save',
+      },
+      {
+        label: '$iEnd',
+        documentation: 'Index of last icon to save (-1 = all remaining)',
       },
     ],
   },
@@ -601,15 +773,15 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap to set bits for',
       },
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The number of bytes to set',
       },
       {
         label: '$pBits',
-        documentation: 'Parameter description',
+        documentation: 'Buffer containing the bitmap bits',
       },
     ],
   },
@@ -619,15 +791,15 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the bitmap',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The preferred width of the bitmap',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The preferred height of the bitmap',
       },
     ],
   },
@@ -637,15 +809,15 @@ const signatures = {
     params: [
       {
         label: '$hBitmap',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the DIB section bitmap',
       },
       {
         label: '$tColorTable',
-        documentation: 'Parameter description',
+        documentation: 'Array of RGB color values',
       },
       {
         label: '$iColorCount',
-        documentation: 'Parameter description',
+        documentation: 'The number of colors to set',
       },
     ],
   },
@@ -656,51 +828,51 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iXDest',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the destination rectangle',
       },
       {
         label: '$iYDest',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the destination rectangle',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the destination rectangle',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the destination rectangle',
       },
       {
         label: '$iXSrc',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the source rectangle',
       },
       {
         label: '$iYSrc',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the source rectangle',
       },
       {
         label: '$iStartScan',
-        documentation: 'Parameter description',
+        documentation: 'The starting scan line',
       },
       {
         label: '$iScanLines',
-        documentation: 'Parameter description',
+        documentation: 'The number of scan lines to copy',
       },
       {
         label: '$tBITMAPINFO',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagBITMAPINFO structure',
       },
       {
         label: '$iUsage',
-        documentation: 'Parameter description',
+        documentation: 'Usage flag (0=DIB_PAL_COLORS, 1=DIB_RGB_COLORS)',
       },
       {
         label: '$pBits',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to the bitmap bits',
       },
     ],
   },
@@ -710,19 +882,19 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the pixel to set',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the pixel to set',
       },
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The color to set (RGB value)',
       },
     ],
   },
@@ -732,11 +904,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation: 'Stretching mode (0=default, 1=black, 2=white, 3=color)',
       },
     ],
   },
@@ -748,47 +920,47 @@ const signatures = {
     params: [
       {
         label: '$hDestDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the destination device context',
       },
       {
         label: '$iXDest',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the destination rectangle',
       },
       {
         label: '$iYDest',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the destination rectangle',
       },
       {
         label: '$iWidthDest',
-        documentation: 'Parameter description',
+        documentation: 'The width of the destination rectangle',
       },
       {
         label: '$iHeightDest',
-        documentation: 'Parameter description',
+        documentation: 'The height of the destination rectangle',
       },
       {
         label: '$hSrcDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source device context',
       },
       {
         label: '$iXSrc',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the source rectangle',
       },
       {
         label: '$iYSrc',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the source rectangle',
       },
       {
         label: '$iWidthSrc',
-        documentation: 'Parameter description',
+        documentation: 'The width of the source rectangle',
       },
       {
         label: '$iHeightSrc',
-        documentation: 'Parameter description',
+        documentation: 'The height of the source rectangle',
       },
       {
         label: '$iRop',
-        documentation: 'Parameter description',
+        documentation: 'Raster operation code',
       },
     ],
   },
@@ -800,55 +972,55 @@ const signatures = {
     params: [
       {
         label: '$hDestDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the destination device context',
       },
       {
         label: '$iXDest',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the destination rectangle',
       },
       {
         label: '$iYDest',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the destination rectangle',
       },
       {
         label: '$iWidthDest',
-        documentation: 'Parameter description',
+        documentation: 'The width of the destination rectangle',
       },
       {
         label: '$iHeightDest',
-        documentation: 'Parameter description',
+        documentation: 'The height of the destination rectangle',
       },
       {
         label: '$iXSrc',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the source rectangle',
       },
       {
         label: '$iYSrc',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the source rectangle',
       },
       {
         label: '$iWidthSrc',
-        documentation: 'Parameter description',
+        documentation: 'The width of the source rectangle',
       },
       {
         label: '$iHeightSrc',
-        documentation: 'Parameter description',
+        documentation: 'The height of the source rectangle',
       },
       {
         label: '$tBITMAPINFO',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagBITMAPINFO structure',
       },
       {
         label: '$iUsage',
-        documentation: 'Parameter description',
+        documentation: 'Usage flag (0=DIB_PAL_COLORS, 1=DIB_RGB_COLORS)',
       },
       {
         label: '$pBits',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to the bitmap bits',
       },
       {
         label: '$iRop',
-        documentation: 'Parameter description',
+        documentation: 'Raster operation code',
       },
     ],
   },
@@ -860,47 +1032,47 @@ const signatures = {
     params: [
       {
         label: '$hDestDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the destination device context',
       },
       {
         label: '$iXDest',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the destination rectangle',
       },
       {
         label: '$iYDest',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the destination rectangle',
       },
       {
         label: '$iWidthDest',
-        documentation: 'Parameter description',
+        documentation: 'The width of the destination rectangle',
       },
       {
         label: '$iHeightDest',
-        documentation: 'Parameter description',
+        documentation: 'The height of the destination rectangle',
       },
       {
         label: '$hSrcDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the source device context',
       },
       {
         label: '$iXSrc',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the source rectangle',
       },
       {
         label: '$iYSrc',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the source rectangle',
       },
       {
         label: '$iWidthSrc',
-        documentation: 'Parameter description',
+        documentation: 'The width of the source rectangle',
       },
       {
         label: '$iHeightSrc',
-        documentation: 'Parameter description',
+        documentation: 'The height of the source rectangle',
       },
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The color to treat as transparent (RGB value)',
       },
     ],
   },
@@ -910,11 +1082,15 @@ const signatures = {
     params: [
       {
         label: '$iStyle',
-        documentation: 'Parameter description',
+        documentation: 'Brush style (0=solid, 1=hatched, 2=pattern)',
       },
       {
-        label: '$iRGB [, $iHatch',
-        documentation: 'Parameter description',
+        label: '$iRGB',
+        documentation: 'The RGB color value',
+      },
+      {
+        label: '$iHatch',
+        documentation: 'Hatch style (used only when style is hatched)',
       },
     ],
   },
@@ -926,19 +1102,35 @@ const signatures = {
     params: [
       {
         label: '$iPenStyle',
-        documentation: 'Parameter description',
+        documentation: 'Pen style (combination of cosmetic/geometry and dash styles)',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the pen in logical units',
       },
       {
         label: '$iBrushStyle',
-        documentation: 'Parameter description',
+        documentation: 'Brush style for geometric pens',
       },
       {
-        label: '$iRGB [, $iHatch',
-        documentation: 'Parameter description',
+        label: '$iRGB',
+        documentation: 'The RGB color value',
+      },
+      {
+        label: '$iHatch',
+        documentation: 'Hatch style (used only when brush style is hatched)',
+      },
+      {
+        label: '$aUserStyle',
+        documentation: 'Array of user-defined dash lengths',
+      },
+      {
+        label: '$iStart',
+        documentation: 'Index of first dash length to use',
+      },
+      {
+        label: '$iEnd',
+        documentation: 'Index of last dash length to use (-1 = all remaining)',
       },
     ],
   },
@@ -948,7 +1140,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -959,27 +1151,27 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the upper-left corner of the rectangle',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the upper-left corner of the rectangle',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width of the rectangle',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height of the rectangle',
       },
       {
         label: '$iRop',
-        documentation: 'Parameter description',
+        documentation: 'Raster operation code',
       },
     ],
   },
@@ -990,15 +1182,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the brush origin',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the brush origin',
       },
     ],
   },
@@ -1008,11 +1200,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The RGB color value to set',
       },
     ],
   },
@@ -1022,11 +1214,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The RGB color value to set',
       },
     ],
   },
@@ -1037,11 +1229,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -1051,11 +1243,16 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
-        label: '$hRgn [, $iMode',
-        documentation: 'Parameter description',
+        label: '$hRgn',
+        documentation: 'Handle to the region',
+      },
+      {
+        label: '$iMode',
+        documentation:
+          'Region selection mode (1=replace, 2=intersect, 3=union, 4=xor, 5=diff, 6=copy)',
       },
     ],
   },
@@ -1065,11 +1262,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
-        label: 'ByRef $tRECT',
-        documentation: 'Parameter description',
+        label: '$tRECT',
+        documentation:
+          '`$tagRECT` structure that is created by this function, and contains the rectangle dimensions, in logical units.',
       },
     ],
   },
@@ -1079,7 +1277,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1090,11 +1288,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -1104,15 +1302,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iXOffset',
-        documentation: 'Parameter description',
+        documentation: 'The number of logical units to move left or right.',
       },
       {
         label: '$iYOffset',
-        documentation: 'Parameter description',
+        documentation: 'The number of logical units to move up or down.',
       },
     ],
   },
@@ -1122,15 +1320,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the brush origin',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the brush origin',
       },
     ],
   },
@@ -1141,11 +1339,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -1155,8 +1353,17 @@ const signatures = {
     label: '_WinAPI_SelectClipPath ( $hDC [, $iMode = 5] )',
     params: [
       {
-        label: '$hDC [, $iMode',
-        documentation: 'Parameter description',
+        label: '$hDC',
+        documentation: 'Handle to the device context of the path.',
+      },
+      {
+        label: '$iMode',
+        documentation: `**[optional]** The way to use the path. This parameter can be one of the following values.${br}
+          \`$RGN_AND\`${br}
+          \`$RGN_COP\` (Default)${br}
+          \`$RGN_DIF\`${br}
+          \`$RGN_OR\`${br}
+          \`$RGN_XOR\``,
       },
     ],
   },
@@ -1167,11 +1374,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation:
+          "Handle to the region to be selected. To remove a device-context's clipping region, set this parameter to 0.",
       },
     ],
   },
@@ -1181,11 +1389,18 @@ const signatures = {
     params: [
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The initial RGB value.',
       },
       {
-        label: '$iPercent [, $bScale',
-        documentation: 'Parameter description',
+        label: '$iPercent',
+        documentation: 'The luminance of the total range, in percent, or absolute luminance.',
+      },
+      {
+        label: '$bScale',
+        documentation: `**[optional]** Specifies how to use the $iPercent parameter, valid values:${br}
+            \`True\` - The \`$iPercent\` specifies how much to increment or decrement the current luminance, \`$iPercent\` can range from -1000 to +1000.${br}
+            \`False\` - The \`$iPercent\` specifies the absolute luminance, \`$iPercent\` can range 0 to 1000. Available luminance values range from 0 to a maximum. If the requested value is negative or exceeds the maximum, the luminance will be set to either zero or the maximum value, respectively.${br}
+            Default is \`True\`.`,
       },
     ],
   },
@@ -1195,15 +1410,15 @@ const signatures = {
     params: [
       {
         label: '$iHue',
-        documentation: 'Parameter description',
+        documentation: 'HLS hue value.',
       },
       {
         label: '$iLuminance',
-        documentation: 'Parameter description',
+        documentation: 'HLS luminance value.',
       },
       {
         label: '$iSaturation',
-        documentation: 'Parameter description',
+        documentation: 'HLS saturation value.',
       },
     ],
   },
@@ -1213,19 +1428,19 @@ const signatures = {
     params: [
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'RGB color.',
       },
       {
         label: 'ByRef $iHue',
-        documentation: 'Parameter description',
+        documentation: 'Returns HLS hue value.',
       },
       {
         label: 'ByRef $iLuminance',
-        documentation: 'Parameter description',
+        documentation: 'Returns HLS luminance value.',
       },
       {
         label: 'ByRef $iSaturation',
-        documentation: 'Parameter description',
+        documentation: 'Returns HLS saturation value.',
       },
     ],
   },
@@ -1236,7 +1451,58 @@ const signatures = {
     params: [
       {
         label: '$iFlags',
-        documentation: '**[optional]** Default is 0 [, $iIlluminant.',
+        documentation:
+          'The flags that specify how the output image should be prepared. This parameter can be 0 or any combination of the following values: $CA_NEGATIVE, $CA_LOG_FILTER',
+      },
+      {
+        label: '$iIlluminant',
+        documentation:
+          'The type of standard light source under which the image is viewed. This parameter can be only one of the following values including $ILLUMINANT_DEVICE_DEFAULT, $ILLUMINANT_A through $ILLUMINANT_NTSC.',
+      },
+      {
+        label: '$iGammaR',
+        documentation:
+          'The n(th) power gamma-correction value for the red primary of the source colors. The value must be in the range from 2500 to 65,000. A value of 10,000 means no gamma correction.',
+      },
+      {
+        label: '$iGammaG',
+        documentation:
+          'The n(th) power gamma-correction value for the green primary of the source colors. The value must be in the range from 2500 to 65,000. A value of 10,000 means no gamma correction.',
+      },
+      {
+        label: '$iGammaB',
+        documentation:
+          'The n(th) power gamma-correction value for the blue primary of the source colors. The value must be in the range from 2500 to 65,000. A value of 10,000 means no gamma correction.',
+      },
+      {
+        label: '$iBlack',
+        documentation:
+          'The black reference for the source colors. Any colors darker than this are treated as black. The value must be in the range from 0 to 4000.',
+      },
+      {
+        label: '$iWhite',
+        documentation:
+          'The white reference for the source colors. Any colors lighter than this are treated as white. The value must be in the range from 6000 to 10,000.',
+      },
+      {
+        label: '$iContrast',
+        documentation:
+          'The amount of contrast to be applied to the source object. The value must be in the range from -100 to 100. A value of 0 means no contrast adjustment.',
+      },
+      {
+        label: '$iBrightness',
+        documentation:
+          'The amount of brightness to be applied to the source object. The value must be in the range from -100 to 100. A value of 0 means no brightness adjustment.',
+      },
+      {
+        label: '$iColorfulness',
+        documentation:
+          'The amount of colorfulness to be applied to the source object. The value must be in the range from -100 to 100. A value of 0 means no colorfulness adjustment.',
+      },
+      {
+        label: '$iTint',
+        documentation:
+          'The amount of red or green tint adjustment to be applied to the source object. The value must be in the range from -100 to 100. Positive numbers adjust toward red; negative toward green. A value of 0 means no tint adjustment.',
       },
     ],
   },
@@ -1246,7 +1512,7 @@ const signatures = {
     params: [
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The RGB color value to set',
       },
     ],
   },
@@ -1256,7 +1522,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1267,11 +1533,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a device context of the direct color display board in question.',
       },
       {
         label: 'ByRef $aRamp',
-        documentation: 'Parameter description',
+        documentation:
+          'Returns the 2D array ([r1, g1, b1], [r2, g2, b2], ... [r256, g256, b256]) that is created by this function, and where the function place the current gamma ramp of the color display board. Each element in this array is an integer value with a range from 0 to 65535 which is a mapping between RGB values in the frame buffer and digital-analog-converter (DAC) values.',
       },
     ],
   },
@@ -1281,7 +1548,7 @@ const signatures = {
     params: [
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The RGB color value to set',
       },
     ],
   },
@@ -1291,7 +1558,7 @@ const signatures = {
     params: [
       {
         label: '$iRGB',
-        documentation: 'Parameter description',
+        documentation: 'The RGB color value to set',
       },
     ],
   },
@@ -1306,7 +1573,8 @@ const signatures = {
     params: [
       {
         label: '$iColor',
-        documentation: 'Parameter description',
+        documentation:
+          'The color to be inverted. This color can be specified in RGB or BGR format.',
       },
     ],
   },
@@ -1316,15 +1584,15 @@ const signatures = {
     params: [
       {
         label: '$iRed',
-        documentation: 'Parameter description',
+        documentation: 'The intensity of the red color.',
       },
       {
         label: '$iGreen',
-        documentation: 'Parameter description',
+        documentation: 'The intensity of the green color.',
       },
       {
         label: '$iBlue',
-        documentation: 'Parameter description',
+        documentation: 'The intensity of the blue color.',
       },
     ],
   },
@@ -1334,11 +1602,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'A handle to the device context.',
       },
       {
         label: '$tAdjustment',
-        documentation: 'Parameter description',
+        documentation: '$tagCOLORADJUSTMENT structure containing the color adjustment values.',
       },
     ],
   },
@@ -1349,11 +1617,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a device context of the direct color display board in question.',
       },
       {
         label: 'Const ByRef $aRamp',
-        documentation: 'Parameter description',
+        documentation:
+          'The 2D array ([r1, g1, b1], [r2, g2, b2], ... [r256, g256, b256]) that contains the gamma ramp to be set. Each element in this array is an integer value with a range from 0 to 65535 which is a mapping between RGB values in the frame buffer and digital-analog-converter (DAC) values. The RGB values must be stored in the most significant bits of each WORD to increase DAC independence.',
       },
     ],
   },
@@ -1363,7 +1632,8 @@ const signatures = {
     params: [
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation:
+          'The color mode. This parameter can be one of the following values. $UDF_BGR $UDF_RGB',
       },
     ],
   },
@@ -1373,7 +1643,7 @@ const signatures = {
     params: [
       {
         label: '$iColor',
-        documentation: 'Parameter description',
+        documentation: 'The color to conversion.',
       },
     ],
   },
@@ -1383,11 +1653,11 @@ const signatures = {
     params: [
       {
         label: '$tXFORM1',
-        documentation: 'Parameter description',
+        documentation: '$tagXFORM structure that specifies the first transformation.',
       },
       {
         label: '$tXFORM2',
-        documentation: 'Parameter description',
+        documentation: '$tagXFORM structure that specifies the second transformation.',
       },
     ],
   },
@@ -1409,11 +1679,16 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
-        label: 'ByRef $tPOINT [, $iCount',
-        documentation: 'Parameter description',
+        label: 'ByRef $tPOINT',
+        documentation:
+          '$tagPOINT structure or structure of points ("long x1;long y1;...long xN;long yN") containing the x- and y-coordinates to be transformed.',
+      },
+      {
+        label: '$iCount',
+        documentation: '[optional] The number of points. Default is 1.',
       },
     ],
   },
@@ -1423,7 +1698,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1433,7 +1708,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1443,7 +1718,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1453,7 +1728,7 @@ const signatures = {
     params: [
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -1464,7 +1739,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1475,7 +1750,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1485,7 +1760,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1495,11 +1770,16 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
-        label: 'ByRef $tPOINT [, $iCount',
-        documentation: 'Parameter description',
+        label: 'ByRef $tPOINT',
+        documentation:
+          '$tagPOINT structure or structure of points ("long x1;long y1;...long xN;long yN") containing the x- and y-coordinates to be transformed.',
+      },
+      {
+        label: '$iCount',
+        documentation: '[optional] The number of points. Default is 1.',
       },
     ],
   },
@@ -1509,15 +1789,17 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$tXFORM',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagXFORM structure used to modify the world transformation for the given device context.',
       },
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation:
+          'Specifies how the transformation data modifies the current world transformation. This parameter must be one of the following values. $MWT_IDENTITY, $MWT_LEFTMULTIPLY, $MWT_RIGHTMULTIPLY',
       },
     ],
   },
@@ -1528,15 +1810,24 @@ const signatures = {
     params: [
       {
         label: 'ByRef $aPoint',
-        documentation: 'Parameter description',
+        documentation:
+          'The 2D array ([x1, y1, ...], [x2, y2, ...], ... [xN, yN, ...]). Every first two elements from this array specifies a point to be move. Other array elements (if any) do not change.',
       },
       {
         label: '$iXOffset',
-        documentation: 'Parameter description',
+        documentation: 'The number of logical units to move left or right.',
       },
       {
-        label: '$iYOffset [, $iStart',
-        documentation: 'Parameter description',
+        label: '$iYOffset',
+        documentation: 'The number of logical units to move up or down.',
+      },
+      {
+        label: '$iStart',
+        documentation: '[optional] The index of array to start moving at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '[optional] The index of array to stop moving at.',
       },
     ],
   },
@@ -1547,15 +1838,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iXOffset',
-        documentation: 'Parameter description',
+        documentation: 'The horizontal offset, in logical units.',
       },
       {
         label: '$iYOffset',
-        documentation: 'Parameter description',
+        documentation: 'The vertical offset, in logical units.',
       },
     ],
   },
@@ -1566,19 +1857,30 @@ const signatures = {
     params: [
       {
         label: 'ByRef $aPoint',
-        documentation: 'Parameter description',
+        documentation:
+          'The 2D array ([x1, y1, ...], [x2, y2, ...], ... [xN, yN, ...]). Every first two elements from this array specifies a point to be rotate. Other array elements (if any) do not change.',
       },
       {
         label: '$iXC',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinates of the point on which there is a rotation, in logical units.',
       },
       {
         label: '$iYC',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinates of the point on which there is a rotation, in logical units.',
       },
       {
-        label: '$fAngle [, $iStart',
-        documentation: 'Parameter description',
+        label: '$fAngle',
+        documentation: 'The angle to rotate, in degree.',
+      },
+      {
+        label: '$iStart',
+        documentation: '[optional] The index of array to start rotating at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '[optional] The index of array to stop rotating at.',
       },
     ],
   },
@@ -1589,23 +1891,23 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iXNum',
-        documentation: 'Parameter description',
+        documentation: 'The amount by which to multiply the current horizontal extent.',
       },
       {
         label: '$iXDenom',
-        documentation: 'Parameter description',
+        documentation: 'The amount by which to divide the current horizontal extent.',
       },
       {
         label: '$iYNum',
-        documentation: 'Parameter description',
+        documentation: 'The amount by which to multiply the current vertical extent.',
       },
       {
         label: '$iYDenom',
-        documentation: 'Parameter description',
+        documentation: 'The amount by which to divide the current vertical extent.',
       },
     ],
   },
@@ -1615,11 +1917,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation:
+          'The graphics mode. This parameter can be one of the following values. $GM_COMPATIBLE $GM_ADVANCED',
       },
     ],
   },
@@ -1629,11 +1932,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation:
+          'The new mapping mode. This parameter can be one of the following values. $MM_ANISOTROPIC $MM_HIENGLISH $MM_HIMETRIC $MM_ISOTROPIC $MM_LOENGLISH $MM_LOMETRIC $MM_TEXT $MM_TWIPS',
       },
     ],
   },
@@ -1644,15 +1948,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iXExtent',
-        documentation: 'Parameter description',
+        documentation: "The window's horizontal extent in logical units.",
       },
       {
         label: '$iYExtent',
-        documentation: 'Parameter description',
+        documentation: "The window's vertical extent in logical units.",
       },
     ],
   },
@@ -1662,15 +1966,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the brush origin',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the brush origin',
       },
     ],
   },
@@ -1681,11 +1985,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$tXFORM',
-        documentation: 'Parameter description',
+        documentation: '$tagXFORM structure that contains the transformation data.',
       },
     ],
   },
@@ -1696,19 +2000,21 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'A handle to the window procedure that received the message.',
       },
       {
         label: '$iMsg',
-        documentation: 'Parameter description',
+        documentation: 'The message.',
       },
       {
         label: '$wParam',
-        documentation: 'Parameter description',
+        documentation:
+          'Additional message-specific information. The content of this parameter depends on the message.',
       },
       {
         label: '$lParam',
-        documentation: 'Parameter description',
+        documentation:
+          'Additional message-specific information. The content of this parameter depends on the message.',
       },
     ],
   },
@@ -1718,8 +2024,23 @@ const signatures = {
       '_WinAPI_DwmEnableBlurBehindWindow ( $hWnd [, $bEnable = True [, $bTransition = False [, $hRgn = 0]]] )',
     params: [
       {
-        label: '$hWnd [, $bEnable',
-        documentation: 'Parameter description',
+        label: '$hWnd',
+        documentation: 'Handle to the window on which the blur behind data is applied.',
+      },
+      {
+        label: '$bEnable',
+        documentation:
+          'Specifies whether register or unregister the window handle to DWM blur behind, valid values: True - Register (Default). False - Unregister.',
+      },
+      {
+        label: '$bTransition',
+        documentation:
+          "Specifies whether colorize transition to match the maximized windows, valid values: True - The window's should be colorized. False - Otherwise (Default).",
+      },
+      {
+        label: '$hRgn',
+        documentation:
+          'The region within the client area to apply the blur behind. A value of zero (Default) will apply the blur behind the entire client area.',
       },
     ],
   },
@@ -1729,7 +2050,8 @@ const signatures = {
     params: [
       {
         label: '$bEnable',
-        documentation: 'Parameter description',
+        documentation:
+          'Specifies whether enable or disable DWM composition, valid values: True - Enable. False - Disable.',
       },
     ],
   },
@@ -1738,8 +2060,13 @@ const signatures = {
     label: '_WinAPI_DwmExtendFrameIntoClientArea ( $hWnd [, $tMARGINS = 0] )',
     params: [
       {
-        label: '$hWnd [, $tMARGINS',
-        documentation: 'Parameter description',
+        label: '$hWnd',
+        documentation: 'Handle to the window for which the frame is extended into the client area.',
+      },
+      {
+        label: '$tMARGINS',
+        documentation:
+          '[optional] $tagMARGINS structure that describes the margins to use when extending the frame into the client area. Negative margins are used to create the "sheet of glass" effect where the client area is rendered as a solid surface with no window border (Default).',
       },
     ],
   },
@@ -1760,11 +2087,12 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window for which the attribute data is retrieved.',
       },
       {
         label: '$iAttribute',
-        documentation: 'Parameter description',
+        documentation:
+          'The attribute to retrieve. This parameter can be one of the following values: **Windows Vista or later** $DWMWA_NCRENDERING_ENABLED return True/False $DWMWA_CAPTION_BUTTON_BOUNDS return $tRect $DWMWA_EXTENDED_FRAME_BOUNDS return $tRect **Windows 8 or later** $DWMWA_CLOAKED return True/False',
       },
     ],
   },
@@ -1775,7 +2103,8 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the window or tab whose bitmaps are being invalidated through this call.',
       },
     ],
   },
@@ -1790,7 +2119,7 @@ const signatures = {
     params: [
       {
         label: '$hThumbnail',
-        documentation: 'Parameter description',
+        documentation: 'Handle of the thumbnail to retrieve the source window size from.',
       },
     ],
   },
@@ -1801,11 +2130,11 @@ const signatures = {
     params: [
       {
         label: '$hDestination',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window that will use the DWM thumbnail.',
       },
       {
         label: '$hSource',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window to use as the thumbnail source.',
       },
     ],
   },
@@ -1815,7 +2144,8 @@ const signatures = {
     params: [
       {
         label: '$tDWMCP',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagDWM_COLORIZATION_PARAMETERS containing the colorization parameters to be set.',
       },
     ],
   },
@@ -1827,11 +2157,22 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window or tab.',
       },
       {
-        label: '$hBitmap [, $bFrame',
-        documentation: 'Parameter description',
+        label: '$hBitmap',
+        documentation:
+          'Handle to the device-independent bitmap (DIB) to represent the specified window.',
+      },
+      {
+        label: '$bFrame',
+        documentation:
+          '[optional] Specifies whether display a frame around the provided bitmap, valid values: True - Display frame. False - Do not display frame (Default).',
+      },
+      {
+        label: '$tClient',
+        documentation:
+          "[optional] $tagPOINT structure that contains The offset of a tab window's client region from the host window's frame. This offset enables the tab window's contents to be drawn correctly in a live preview when it is drawn without its frame.",
       },
     ],
   },
@@ -1842,11 +2183,17 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window or tab.',
       },
       {
-        label: '$hBitmap [, $bFrame',
-        documentation: 'Parameter description',
+        label: '$hBitmap',
+        documentation:
+          'Handle to the device-independent bitmap (DIB) to represent the specified window.',
+      },
+      {
+        label: '$bFrame',
+        documentation:
+          '[optional] Specifies whether display a frame around the provided thumbnail, valid values: True - Display frame. False - Do not display frame (Default).',
       },
     ],
   },
@@ -1857,15 +2204,17 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'The window handle to apply the given attribute.',
       },
       {
         label: '$iAttribute',
-        documentation: 'Parameter description',
+        documentation:
+          'The attribute to apply to the window. This parameter can be one of the following values:',
       },
       {
         label: '$iData',
-        documentation: 'Parameter description',
+        documentation:
+          'The value of the attribute. See $iAttribute for specific values, otherwise True/False.',
       },
     ],
   },
@@ -1875,7 +2224,7 @@ const signatures = {
     params: [
       {
         label: '$hThumbnail',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the thumbnail relationship to be removed.',
       },
     ],
   },
@@ -1885,8 +2234,33 @@ const signatures = {
       '_WinAPI_DwmUpdateThumbnailProperties ( $hThumbnail [, $bVisible = True [, $bClientAreaOnly = False [, $iOpacity = 255 [, $tRectDest = 0 [, $tRectSrc = 0]]]]] )',
     params: [
       {
-        label: '$hThumbnail [, $bVisible',
-        documentation: 'Parameter description',
+        label: '$hThumbnail',
+        documentation: 'Handle of the thumbnail to retrieve the source window size from.',
+      },
+      {
+        label: '$bVisible',
+        documentation:
+          '[optional] Specifies whether make the thumbnail visible or invisible, valid values: True - Visible (Default). False - Invisible.',
+      },
+      {
+        label: '$bClientAreaOnly',
+        documentation:
+          "[optional] Specifies whether use only the thumbnail source's client area or entire window, valid values: True - Use only source's client area. False - Use entire window (Default).",
+      },
+      {
+        label: '$iOpacity',
+        documentation:
+          '[optional] The opacity with which to render the thumbnail. 0 is fully transparent while 255 (Default) is fully opaque.',
+      },
+      {
+        label: '$tRectDest',
+        documentation:
+          '[optional] $tagRECT structure containing the rectangle in the destination window the thumbnail will be rendered. By default, the size of this rectangle equal to the source size of the DWM thumbnail which returns the _WinAPI_DwmQueryThumbnailSourceSize() function.',
+      },
+      {
+        label: '$tRectSrc',
+        documentation:
+          '[optional] $tagRECT structure containing the rectangle that specifies the region of the source window to use as the thumbnail. By default, the entire window is used as the thumbnail.',
       },
     ],
   },
@@ -1896,11 +2270,13 @@ const signatures = {
     params: [
       {
         label: '$sDevice',
-        documentation: 'Parameter description',
+        documentation:
+          'The display device about whose graphics mode the function will obtain information. An empty string specifies the current display device on the computer on which the calling process is running.',
       },
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation:
+          'The type of information to be retrieved. This value can be a graphics mode index or one of the following values: $ENUM_CURRENT_SETTINGS $ENUM_REGISTRY_SETTINGS The graphics mode indexes start at zero.',
       },
     ],
   },
@@ -1911,11 +2287,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iType',
-        documentation: 'Parameter description',
+        documentation:
+          'The object type to be queried. This parameter can be one of the following values.',
       },
     ],
   },
@@ -1926,15 +2303,17 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the window whose DC is to be retrieved. If this value is 0, _WinAPI_GetDCEx() retrieves the DC for the entire screen.',
       },
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation: 'A clipping region that may be combined with the visible region of the DC.',
       },
       {
         label: '$iFlags',
-        documentation: 'Parameter description',
+        documentation:
+          'Flags that specifies how the DC is created. This parameter can be one or more of the following values: $DCX_WINDOW, $DCX_CACHE, $DCX_PARENTCLIP, $DCX_CLIPSIBLINGS, $DCX_CLIPCHILDREN, $DCX_NORESETATTRS, $DCX_LOCKWINDOWUPDATE, $DCX_EXCLUDERGN, $DCX_INTERSECTRGN, $DCX_INTERSECTUPDATE, $DCX_VALIDATE',
       },
     ],
   },
@@ -1944,7 +2323,7 @@ const signatures = {
     params: [
       {
         label: '$hObject',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the graphics object.',
       },
     ],
   },
@@ -1954,11 +2333,16 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window that will be copied.',
       },
       {
-        label: '$hDC [, $bClient',
-        documentation: 'Parameter description',
+        label: '$hDC',
+        documentation: 'Handle to the device context.',
+      },
+      {
+        label: '$bClient',
+        documentation:
+          '[optional] Specifies whether copies only the client area of the window, valid values: True - Only the client area of the window is copied to device context. False - The entire window is copied (Default).',
       },
     ],
   },
@@ -1968,11 +2352,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the DC.',
       },
       {
         label: '$iID',
-        documentation: 'Parameter description',
+        documentation:
+          'The saved state to be restored. If this parameter is positive, $DC represents a specific instance of the state to be restored. If this parameter is negative, $DC represents an instance relative to the current state. For example, (-1) restores the most recently saved state.',
       },
     ],
   },
@@ -1983,7 +2368,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -1993,11 +2378,11 @@ const signatures = {
     params: [
       {
         label: '$pData',
-        documentation: 'Parameter description',
+        documentation: 'The pointer to a font resource.',
       },
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The number of bytes in the font resource.',
       },
     ],
   },
@@ -2006,8 +2391,19 @@ const signatures = {
     label: '_WinAPI_AddFontResourceEx ( $sFont [, $iFlag = 0 [, $bNotify = False]] )',
     params: [
       {
-        label: '$sFont [, $iFlag',
-        documentation: 'Parameter description',
+        label: '$sFont',
+        documentation:
+          'String that contains a valid font file name. This parameter can specify any of the following files: .fon - Font resource file. .fnt - Raw bitmap font file. .ttf - Raw TrueType file. .ttc - East Asian Windows: TrueType font collection. .fot - TrueType resource file. .otf - PostScript OpenType font. .mmm - Multiple master Type1 font resource file. It must be used with .pfm and .pfb files. .pfb - Type 1 font bits file. It is used with a .pfm file. .pfm - Type 1 font metrics file. It is used with a .pfb file.',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          'The characteristics of the font to be added to the system. This parameter can be one of the following values. $FR_PRIVATE $FR_NOT_ENUM',
+      },
+      {
+        label: '$bNotify',
+        documentation:
+          "Specifies whether sends a WM_FONTCHANGE message, valid values: True - Send the WM_FONTCHANGE message to all top-level windows after changing the pool of font resources. False - Don't send (Default).",
       },
     ],
   },
@@ -2017,8 +2413,71 @@ const signatures = {
       "_WinAPI_CreateFontEx ( $iHeight [, $iWidth = 0 [, $iEscapement = 0 [, $iOrientation = 0 [, $iWeight = 400 [, $bItalic = False [, $bUnderline = False [, $bStrikeOut = False [, $iCharSet = 1 [, $iOutPrecision = 0 [, $iClipPrecision = 0 [, $iQuality = 0 [, $iPitchAndFamily = 0 [, $sFaceName = '' [, $iStyle = 0]]]]]]]]]]]]]] )",
     params: [
       {
-        label: '$iHeight [, $iWidth',
-        documentation: 'Parameter description',
+        label: '$iHeight',
+        documentation: "The height of the font's character cell or character, in logical units.",
+      },
+      {
+        label: '$iWidth',
+        documentation: 'The average width, in logical units. Default is 0.',
+      },
+      {
+        label: '$iEscapement',
+        documentation:
+          'The angle, in tenths of degrees, between the escapement vector and the x-axis of the device. Default is 0',
+      },
+      {
+        label: '$iOrientation',
+        documentation:
+          "The angle, in tenths of degrees, between each character's base line and the x-axis of the device. Default is 0",
+      },
+      {
+        label: '$iWeight',
+        documentation:
+          'The weight of the font in the range 0 through 1000, or one of the following values.',
+      },
+      {
+        label: '$bItalic',
+        documentation:
+          'Specifies whether to set italic font attribute, valid values: True - The attribute is set. False - The attribute is not set (Default).',
+      },
+      {
+        label: '$bUnderline',
+        documentation:
+          'Specifies whether to set underlined font attribute, valid values: True - The attribute is set. False - The attribute is not set (Default).',
+      },
+      {
+        label: '$bStrikeOut',
+        documentation:
+          'Specifies whether to set strikeout font attribute, valid values: True - The attribute is set. False - The attribute is not set (Default).',
+      },
+      {
+        label: '$iCharSet',
+        documentation: 'The character set. It can be one of the following values.',
+      },
+      {
+        label: '$iOutPrecision',
+        documentation: 'The output precision. It can be one of the following values.',
+      },
+      {
+        label: '$iClipPrecision',
+        documentation: 'The clipping precision. It can be one or more of the following values.',
+      },
+      {
+        label: '$iQuality',
+        documentation: 'The output quality. It can be one of the following values.',
+      },
+      {
+        label: '$iPitchAndFamily',
+        documentation: 'The pitch and family of the font',
+      },
+      {
+        label: '$sFaceName',
+        documentation:
+          'The typeface name of the font (not including style). For example, "Arial", "Tahoma", etc.',
+      },
+      {
+        label: '$iStyle',
+        documentation: 'The style of the font. It can be one or more of the following values.',
       },
     ],
   },
@@ -2030,7 +2489,33 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: '**[optional]** Default is 0 [, $sFaceName.',
+        documentation:
+          "A handle to the device context from which to enumerate the fonts. If this parameter is 0, the function uses a DC for the application's current screen.",
+      },
+      {
+        label: '$sFaceName',
+        documentation:
+          'The typeface name of the font. If this parameter is an empty string (Default), the function enumerates one font is each available typeface name. If this parameter is a valid typeface name, the function enumerates all fonts with the specified name.',
+      },
+      {
+        label: '$iCharSet',
+        documentation:
+          'The character set. It can be one of the following predefined values. If this parameter is set to $DEFAULT_CHARSET (Default), the function enumerates all uniquely-named fonts in all character sets.',
+      },
+      {
+        label: '$iFontType',
+        documentation:
+          'The type of the fonts to enumerating. This parameter can be 0 (vector fonts), (-1) (all fonts), or any combination of the following values.',
+      },
+      {
+        label: '$sPattern',
+        documentation:
+          'The pattern string to include (exclude) the fonts in (from) the enumerating. This makes sense only if the typeface name is not specified. This string can contain wildcard characters.',
+      },
+      {
+        label: '$bExclude',
+        documentation:
+          'Specifies whether to use the pattern to exclude the fonts, valid values: True - Exclude the matching fonts. False - Include the matching fonts (Default).',
       },
     ],
   },
@@ -2040,8 +2525,19 @@ const signatures = {
     label: '_WinAPI_GetFontName ( $sFaceName [, $iStyle = 0 [, $iCharSet = 1]] )',
     params: [
       {
-        label: '$sFaceName [, $iStyle',
-        documentation: 'Parameter description',
+        label: '$sFaceName',
+        documentation:
+          'The typeface name of the font (not including style). For example, "Arial", "Tahoma", etc.',
+      },
+      {
+        label: '$iStyle',
+        documentation:
+          'The style of the font. It can be one or more of the following values: $FS_REGULAR Default) $FS_BOLD $FS_ITALIC',
+      },
+      {
+        label: '$iCharSet',
+        documentation:
+          'The character set. It can be one of the following values: $ANSI_CHARSET $BALTIC_CHARSET $CHINESEBIG5_CHARSET $DEFAULT_CHARSET (Default)...',
       },
     ],
   },
@@ -2050,8 +2546,19 @@ const signatures = {
     label: '_WinAPI_GetFontResourceInfo ( $sFont [, $bForce = False [, $iFlag = Default]] )',
     params: [
       {
-        label: '$sFont [, $bForce',
-        documentation: 'Parameter description',
+        label: '$sFont',
+        documentation:
+          'String that names a font resource file. To retrieve a fontname whose information comes from several resource files, they must be separated by "|".',
+      },
+      {
+        label: '$bForce',
+        documentation:
+          "[optional] Specifies whether adds a file to the font table, valid values: True - Forced add the specified file to the system font table and remove it after retrieving the fontname. False - Don't add and remove (Default).",
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          '[optional] An integer value. See _WinAPI_GetFontMemoryResourceInfo() for value definition.',
       },
     ],
   },
@@ -2060,8 +2567,13 @@ const signatures = {
     label: '_WinAPI_GetFontMemoryResourceInfo ( $pMemory [, $iFlag = 1] )',
     params: [
       {
-        label: '$pMemory [, $iFlag',
-        documentation: 'Parameter description',
+        label: '$pMemory',
+        documentation: 'A pointer value the struct that contains the binary data of the TTF',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          'An integer value. Default is 1 (Font Family name). See remarks for others values',
       },
     ],
   },
@@ -2071,19 +2583,26 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'A handle to the device context which font is selected.',
       },
       {
         label: '$sChar',
-        documentation: 'Parameter description',
+        documentation: 'The character for which data is to be returned.',
       },
       {
         label: '$iFormat',
-        documentation: 'Parameter description',
+        documentation:
+          'The format of the data that the function retrieves. This parameter can be one of the following values: $GGO_BEZIER, $GGO_BITMAP, $GGO_GLYPH_INDEX, $GGO_GRAY2_BITMAP, $GGO_GRAY4_BITMAP, $GGO_GRAY8_BITMAP, $GGO_METRICS, $GGO_NATIVE, $GGO_UNHINTED',
       },
       {
-        label: 'ByRef $pBuffer [, $tMAT2',
-        documentation: 'Parameter description',
+        label: 'ByRef $pBuffer',
+        documentation:
+          'Returns a pointer to a memory block (buffer) that receives the outline or bitmap data. Optionally, you can set this parameter to 0 before function call, then the function will allocate the required memory block itself. Otherwise, it must be a valid memory pointer returned by the _WinAPI_CreateBuffer() function, or by previously calling this function. If the $GGO_METRICS is specified, this parameter is ignored, and function only returns the information about a glyph.',
+      },
+      {
+        label: '$tMAT2',
+        documentation:
+          '[optional] $tagMAT2 structure specifying a transformation matrix for the character. If this parameter is 0 (Default), the transformation will not be used (it is identity matrix).',
       },
     ],
   },
@@ -2093,7 +2612,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2105,11 +2624,26 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'A handle to the device context.',
       },
       {
-        label: '$sText [, $aTab',
-        documentation: 'Parameter description',
+        label: '$sText',
+        documentation: 'A character string.',
+      },
+      {
+        label: '$aTab',
+        documentation:
+          '[optional] The array containing the tab-stop positions, in device units. The tab stops must be sorted in increasing order; the smallest x-value should be the first item in the array. Also, it can be an integer value that is one tab-stop position. In this case, the tab stops are separated by the distance specified by this value. If this parameter is 0 (Default), tabs are expanded to eight times the average character width.',
+      },
+      {
+        label: '$iStart',
+        documentation:
+          '[optional] The index of array element that contains the first tab-stop position.',
+      },
+      {
+        label: '$iEnd',
+        documentation:
+          '[optional] The index of array element that contains the last tab-stop position.',
       },
     ],
   },
@@ -2119,7 +2653,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2129,7 +2663,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2139,7 +2673,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2150,7 +2684,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2160,7 +2694,8 @@ const signatures = {
     params: [
       {
         label: '$hFont',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the font-resource. This handle is returned by the _WinAPI_AddFontMemResourceEx() function.',
       },
     ],
   },
@@ -2169,8 +2704,19 @@ const signatures = {
     label: '_WinAPI_RemoveFontResourceEx ( $sFont [, $iFlag = 0 [, $bNotify = False]] )',
     params: [
       {
-        label: '$sFont [, $iFlag',
-        documentation: 'Parameter description',
+        label: '$sFont',
+        documentation:
+          'String that names a font resource file. To remove a font whose information comes from several resource files, they must be separated by a "|".',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          'The characteristics of the font to be removed from the system. In order for the font to be removed, the flags used must be the same as when the font was added with the _WinAPI_AddFontResourceEx() function.',
+      },
+      {
+        label: '$bNotify',
+        documentation:
+          "Specifies whether sends a WM_FONTCHANGE message, valid values: True - Send the WM_FONTCHANGE message to all top-level windows after changing the pool of font resources. False - Don't send (Default).",
       },
     ],
   },
@@ -2179,8 +2725,13 @@ const signatures = {
     label: '_WinAPI_SetTextAlign ( $hDC [, $iMode = 0] )',
     params: [
       {
-        label: '$hDC [, $iMode',
-        documentation: 'Parameter description',
+        label: '$hDC',
+        documentation: 'Handle to the device context.',
+      },
+      {
+        label: '$iMode',
+        documentation:
+          '[optional] The text alignment by using a mask of the values in the following list. Only one flag can be chosen from those that affect horizontal and vertical alignment.',
       },
     ],
   },
@@ -2190,11 +2741,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iCharExtra',
-        documentation: 'Parameter description',
+        documentation:
+          'The amount of extra space, in logical units, to be added to each character.',
       },
     ],
   },
@@ -2205,15 +2757,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iBreakExtra',
-        documentation: 'Parameter description',
+        documentation: 'The total extra space, in logical units, to be added to the line of text.',
       },
       {
         label: '$iBreakCount',
-        documentation: 'Parameter description',
+        documentation: 'The number of break characters in the line.',
       },
     ],
   },
@@ -2225,19 +2777,37 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'A handle to the device context.',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the starting point of the string, in logical units.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the starting point of the string, in logical units.',
       },
       {
-        label: '$sText [, $aTab',
-        documentation: 'Parameter description',
+        label: '$sText',
+        documentation: 'The character string to draw.',
+      },
+      {
+        label: '$aTab',
+        documentation:
+          'The array containing the tab-stop positions, in logical units. The tab stops must be sorted in increasing order; the smallest x-value should be the first item in the array. Also, it can be an integer value that is one tab-stop position. In this case, the tab stops are separated by the distance specified by this value. If this parameter is 0, tabs are expanded to eight times the average character width.',
+      },
+      {
+        label: '$iStart',
+        documentation: 'The index of array element that contains the first tab-stop position.',
+      },
+      {
+        label: '$iEnd',
+        documentation: 'The index of array element that contains the last tab-stop position.',
+      },
+      {
+        label: '$iOrigin',
+        documentation:
+          'The x-coordinate of the starting position from which tabs are expanded, in logical units. This allows an application to call the function several times for a single line.',
       },
     ],
   },
@@ -2248,19 +2818,21 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinate, in logical coordinates, of the reference point that the system uses to align the string.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinate, in logical coordinates, of the reference point that the system uses to align the string.',
       },
       {
         label: '$sText',
-        documentation: 'Parameter description',
+        documentation: 'The string to be drawn.',
       },
     ],
   },
@@ -2270,27 +2842,27 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a device context.',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate, in logical units, of the center of the circle.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate, in logical units, of the center of the circle.',
       },
       {
         label: '$iRadius',
-        documentation: 'Parameter description',
+        documentation: 'The radius, in logical units, of the circle.',
       },
       {
         label: '$nStartAngle',
-        documentation: 'Parameter description',
+        documentation: 'The start angle, in degrees, relative to the x-axis.',
       },
       {
         label: '$nSweepAngle',
-        documentation: 'Parameter description',
+        documentation: 'The sweep angle, in degrees, relative to the starting angle.',
       },
     ],
   },
@@ -2300,27 +2872,32 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that contains the logical coordinates of the bounding rectangle.',
       },
       {
         label: '$iXStartArc',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinate, in logical units, of the ending point of the radial line defining the starting point of the arc.',
       },
       {
         label: '$iYStartArc',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinate, in logical units, of the ending point of the radial line defining the starting point of the arc.',
       },
       {
         label: '$iXEndArc',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinate, in logical units, of the ending point of the radial line defining the ending point of the arc.',
       },
       {
         label: '$iYEndArc',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinate, in logical units, of the ending point of the radial line defining the ending point of the arc.',
       },
     ],
   },
@@ -2330,27 +2907,32 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that contains the logical coordinates of the bounding rectangle.',
       },
       {
         label: '$iXRadial1',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinate, in logical units, of the endpoint of the radial defining the starting point of the arc.',
       },
       {
         label: '$iYRadial1',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinate, in logical units, of the endpoint of the radial defining the starting point of the arc.',
       },
       {
         label: '$iXRadial2',
-        documentation: 'Parameter description',
+        documentation:
+          'The x-coordinate, in logical units, of the endpoint of the radial defining the ending point of the arc.',
       },
       {
         label: '$iYRadial2',
-        documentation: 'Parameter description',
+        documentation:
+          'The y-coordinate, in logical units, of the endpoint of the radial defining the ending point of the arc.',
       },
     ],
   },
@@ -2360,7 +2942,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2370,23 +2952,29 @@ const signatures = {
     params: [
       {
         label: '$iX1',
-        documentation: 'Parameter description',
+        documentation:
+          "Specifies the x-coordinate, in logical units, of the line's starting point.",
       },
       {
         label: '$iY1',
-        documentation: 'Parameter description',
+        documentation:
+          "Specifies the y-coordinate, in logical units, of the line's starting point.",
       },
       {
         label: '$iX2',
-        documentation: 'Parameter description',
+        documentation: "Specifies the x-coordinate, in logical units, of the line's ending point.",
       },
       {
         label: '$iY2',
-        documentation: 'Parameter description',
+        documentation: "Specifies the y-coordinate, in logical units, of the line's ending point.",
       },
       {
-        label: '$pLineProc [, $pData',
-        documentation: 'Parameter description',
+        label: '$pLineProc',
+        documentation: 'Pointer to an application-defined callback function.',
+      },
+      {
+        label: '$pData',
+        documentation: '[optional] Pointer to the application-defined data.',
       },
     ],
   },
@@ -2396,15 +2984,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the brush origin',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the brush origin',
       },
     ],
   },
@@ -2414,11 +3002,20 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a device context.',
       },
       {
-        label: 'Const ByRef $aPoint [, $iStart',
-        documentation: 'Parameter description',
+        label: 'Const ByRef $aPoint',
+        documentation:
+          'The 2D array ([x1, y1], [x2, y2], ... [xN, yN]) that contains the endpoints and control points of the curve(s), in logical units. The number of points must be one more than three times the number of curves to be drawn, because each Bezier curve requires two control points and an endpoint, and the initial curve requires an additional starting point.',
+      },
+      {
+        label: '$iStart',
+        documentation: '[optional] The index of array to start drawing at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '[optional] The index of array to stop drawing at.',
       },
     ],
   },
@@ -2428,11 +3025,20 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a device context.',
       },
       {
-        label: 'Const ByRef $aPoint [, $iStart',
-        documentation: 'Parameter description',
+        label: 'Const ByRef $aPoint',
+        documentation:
+          'The 2D array ([x1, y1], [x2, y2], ... [xN, yN]) that contains the endpoints and control points of the curve(s), in logical units. The number of points must be three times the number of curves to be drawn, because each Bezier curve requires two control points and an ending point.',
+      },
+      {
+        label: '$iStart',
+        documentation: '[optional] The index of array to start drawing at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '[optional] The index of array to stop drawing at.',
       },
     ],
   },
@@ -2442,11 +3048,20 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a device context.',
       },
       {
-        label: 'Const ByRef $aPoint [, $iStart',
-        documentation: 'Parameter description',
+        label: 'Const ByRef $aPoint',
+        documentation:
+          'The 2D array ([x1, y1, type1], [x2, y2, type2], ... [xN, yN, typeN]) that contains the endpoints for each line segment and the endpoints and control points for each Bezier curve, in logical units.',
+      },
+      {
+        label: '$iStart',
+        documentation: '[optional] The index of array to start drawing at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '[optional] The index of array to stop drawing at.',
       },
     ],
   },
@@ -2456,11 +3071,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iDirection',
-        documentation: 'Parameter description',
+        documentation:
+          'The new arc direction. This parameter can be one of the following values. $AD_COUNTERCLOCKWISE $AD_CLOCKWISE',
       },
     ],
   },
@@ -2471,7 +3087,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2480,8 +3096,13 @@ const signatures = {
     label: "_WinAPI_CopyEnhMetaFile ( $hEmf [, $sFilePath = ''] )",
     params: [
       {
-        label: '$hEmf [, $sFilePath',
-        documentation: 'Parameter description',
+        label: '$hEmf',
+        documentation: 'Handle to the enhanced metafile to be copied.',
+      },
+      {
+        label: '$sFilePath',
+        documentation:
+          "[optional] The name of the destination file (.emf). If this parameter is '' (Default), the source metafile is copied to memory.",
       },
     ],
   },
@@ -2502,7 +3123,7 @@ const signatures = {
     params: [
       {
         label: '$hEmf',
-        documentation: 'Parameter description',
+        documentation: 'Handle to an enhanced metafile.',
       },
     ],
   },
@@ -2512,15 +3133,15 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to an enhanced-metafile device context.',
       },
       {
         label: '$pBuffer',
-        documentation: 'Parameter description',
+        documentation: 'A pointer to the buffer that contains the comment.',
       },
       {
         label: '$iSize',
-        documentation: 'Parameter description',
+        documentation: 'The length of the comment buffer, in bytes.',
       },
     ],
   },
@@ -2531,7 +3152,7 @@ const signatures = {
     params: [
       {
         label: '$sFilePath',
-        documentation: 'Parameter description',
+        documentation: 'The name of an enhanced metafile (.emf).',
       },
     ],
   },
@@ -2541,11 +3162,12 @@ const signatures = {
     params: [
       {
         label: '$hEmf',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the enhanced metafile.',
       },
       {
         label: 'ByRef $pBuffer',
-        documentation: 'Parameter description',
+        documentation:
+          'Returns a pointer to a memory block (buffer) that receives the metafile data. Optionaly, you can set this parameter to 0 before function call, then the function will allocate the required memory block itself. Otherwise, it must be a valid memory pointer returned by the _WinAPI_CreateBuffer() function, or by previously calling this function.',
       },
     ],
   },
@@ -2555,7 +3177,7 @@ const signatures = {
     params: [
       {
         label: '$hEmf',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the enhanced metafile.',
       },
     ],
   },
@@ -2565,7 +3187,7 @@ const signatures = {
     params: [
       {
         label: '$hEmf',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the enhanced metafile to retrieve dimension.',
       },
     ],
   },
@@ -2576,7 +3198,7 @@ const signatures = {
     params: [
       {
         label: '$hEmf',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the enhanced metafile for which the header is to be retrieved.',
       },
     ],
   },
@@ -2586,15 +3208,17 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the device context for the output device on which the picture will appear.',
       },
       {
         label: '$hEmf',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the enhanced metafile.',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that contains the coordinates of the bounding rectangle used to display the picture, in logical units',
       },
     ],
   },
@@ -2604,11 +3228,12 @@ const signatures = {
     params: [
       {
         label: '$pData',
-        documentation: 'Parameter description',
+        documentation:
+          'A pointer to the buffer that contains the enhanced-metafile data. To obtain the metafile data, call the _WinAPI_GetEnhMetaFileBits() function.',
       },
       {
         label: '$iLength',
-        documentation: 'Parameter description',
+        documentation: 'The size of the buffer, in bytes.',
       },
     ],
   },
@@ -2628,8 +3253,14 @@ const signatures = {
     label: '_WinAPI_MonitorFromPoint ( $tPOINT [, $iFlag = 1] )',
     params: [
       {
-        label: '$tPOINT [, $iFlag',
-        documentation: 'Parameter description',
+        label: '$tPOINT',
+        documentation:
+          '$tagPOINT structure that specifies the point of interest in virtual-screen coordinates.',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          "[optional] The flag that specifies the function's return value if the point is not contained within any display monitor. This parameter can be one of the following values.",
       },
     ],
   },
@@ -2639,8 +3270,14 @@ const signatures = {
     label: '_WinAPI_MonitorFromRect ( $tRECT [, $iFlag = 1] )',
     params: [
       {
-        label: '$tRECT [, $iFlag',
-        documentation: 'Parameter description',
+        label: '$tRECT',
+        documentation:
+          '$tagRECT structure that specifies the rectangle of interest in virtual-screen coordinates.',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          "[optional] The flag that specifies the function's return value if the rectangle does not intersect any display monitor.",
       },
     ],
   },
@@ -2650,8 +3287,13 @@ const signatures = {
     label: '_WinAPI_MonitorFromWindow ( $hWnd [, $iFlag = 1] )',
     params: [
       {
-        label: '$hWnd [, $iFlag',
-        documentation: 'Parameter description',
+        label: '$hWnd',
+        documentation: 'A handle to the window of interest.',
+      },
+      {
+        label: '$iFlag',
+        documentation:
+          "[optional] The flag that specifies the function's return value if the window does not intersect any display monitor. This parameter can be one of the following values. $MONITOR_DEFAULTTONULL $MONITOR_DEFAULTTONEAREST (Default) $MONITOR_DEFAULTTOPRIMARY",
       },
     ],
   },
@@ -2661,11 +3303,12 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window to be repainted.',
       },
       {
         label: 'ByRef $tPAINTSTRUCT',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagPAINTSTRUCT structure that will receive painting information. When the function call, this parameter should be any valid variable, the function creates this structure itself.',
       },
     ],
   },
@@ -2676,15 +3319,17 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window whose caption should be animated on the screen.',
       },
       {
         label: '$tRectFrom',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure specifying the location and size of the icon or minimized window.',
       },
       {
         label: '$tRectTo',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure specifying the location and size of the restored window.',
       },
     ],
   },
@@ -2695,19 +3340,37 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a device context.',
       },
       {
         label: '$sText',
-        documentation: 'Parameter description',
+        documentation: 'The string that contains the text to be drawn.',
       },
       {
         label: '$iRGBText',
-        documentation: 'Parameter description',
+        documentation: 'The color of the text, in RGB.',
       },
       {
-        label: '$iRGBShadow [, $iXOffset',
-        documentation: 'Parameter description',
+        label: '$iRGBShadow',
+        documentation: 'The color of the shadow, in RGB.',
+      },
+      {
+        label: '$iXOffset',
+        documentation: '[optional] The x-coordinate of where the text should begin. Default is 0.',
+      },
+      {
+        label: '$iYOffset',
+        documentation: '[optional] The y-coordinate of where the text should begin. Default is 0.',
+      },
+      {
+        label: '$tRECT',
+        documentation:
+          '[optional] $tagRECT structure that contains, in logical coordinates, the rectangle in which the text is to be drawn. If this parameter is 0 (Default), the size will be equal size of the device context ($hDC).',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '[optional] The flags that specifies how the text is to be drawn. This parameter can be a combination of the formatting text constants ($DT_*), (Default $DT_LEFT).',
       },
     ],
   },
@@ -2717,11 +3380,12 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window that has been repainted.',
       },
       {
         label: 'ByRef $tPAINTSTRUCT',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagPAINTSTRUCT structure that contains the painting information retrieved by _WinAPI_BeginPaint().',
       },
     ],
   },
@@ -2731,7 +3395,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2741,8 +3405,14 @@ const signatures = {
     label: '_WinAPI_GetBoundsRect ( $hDC [, $iFlags = 0] )',
     params: [
       {
-        label: '$hDC [, $iFlags',
-        documentation: 'Parameter description',
+        label: '$hDC',
+        documentation:
+          'Handle to the device context whose bounding rectangle the function will return.',
+      },
+      {
+        label: '$iFlags',
+        documentation:
+          '[optional] The flags that specifies how the function will behave. This parameter can be the following value: $DCB_RESET',
       },
     ],
   },
@@ -2752,7 +3422,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2762,8 +3432,13 @@ const signatures = {
     label: '_WinAPI_GetUpdateRect ( $hWnd [, $bErase = True] )',
     params: [
       {
-        label: '$hWnd [, $bErase',
-        documentation: 'Parameter description',
+        label: '$hWnd',
+        documentation: 'Handle to the window whose update region is to be retrieved.',
+      },
+      {
+        label: '$bErase',
+        documentation:
+          '[optional] Specifies whether the background in the update region is to be erased, valid values: True - The background is erased (Default). False - The background remains unchanged.',
       },
     ],
   },
@@ -2774,11 +3449,16 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window with an update region that is to be retrieved.',
       },
       {
-        label: '$hRgn [, $bErase',
-        documentation: 'Parameter description',
+        label: '$hRgn',
+        documentation: 'Handle to the region to receive the update region.',
+      },
+      {
+        label: '$bErase',
+        documentation:
+          '[optional] Specifies whether the background in the update region is to be erased, valid values: True - The background is erased (Default). False - The background remains unchanged.',
       },
     ],
   },
@@ -2789,11 +3469,12 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the window.',
       },
       {
         label: 'ByRef $tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          'Returns a $tagRECT structure that is created by this function, and contains the rectangle dimensions, in device units relative to the upper-left corner of the window.',
       },
     ],
   },
@@ -2802,8 +3483,18 @@ const signatures = {
     label: '_WinAPI_InvalidateRgn ( $hWnd [, $hRgn = 0 [, $bErase = True]] )',
     params: [
       {
-        label: '$hWnd [, $hRgn',
-        documentation: 'Parameter description',
+        label: '$hWnd',
+        documentation: 'Handle to the window with an update region that is to be modified.',
+      },
+      {
+        label: '$hRgn',
+        documentation:
+          '[optional] Handle to the region to be added to the update region. The region is assumed to have client coordinates. If this parameter is 0, the entire client area is added to the update region.',
+      },
+      {
+        label: '$bErase',
+        documentation:
+          '[optional] Specifies whether the background within the update region is to be erased when the update region is processed, valid values: True - The background is erased (Default). False - The background remains unchanged.',
       },
     ],
   },
@@ -2813,7 +3504,8 @@ const signatures = {
     params: [
       {
         label: '$hWnd',
-        documentation: 'Parameter description',
+        documentation:
+          'Handle to the window in which drawing will be disabled. If this parameter is 0, drawing in the locked window is enabled.',
       },
     ],
   },
@@ -2824,7 +3516,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2835,11 +3527,17 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context for which to accumulate bounding rectangles.',
       },
       {
-        label: '$iFlags [, $tRECT',
-        documentation: 'Parameter description',
+        label: '$iFlags',
+        documentation:
+          'The flags that specifies how the new rectangle will be combined with the accumulated rectangle. This parameter can be one of more of the following values. $DCB_ACCUMULATE $DCB_DISABLE $DCB_ENABLE $DCB_RESET',
+      },
+      {
+        label: '$tRECT',
+        documentation:
+          '[optional] $tagRECT structure used to set the bounding rectangle in logical coordinates.',
       },
     ],
   },
@@ -2849,11 +3547,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$iMode',
-        documentation: 'Parameter description',
+        documentation: 'The mix mode. This parameter can be one of the following values.',
       },
     ],
   },
@@ -2862,8 +3560,14 @@ const signatures = {
     label: '_WinAPI_ValidateRect ( $hWnd [, $tRECT = 0] )',
     params: [
       {
-        label: '$hWnd [, $tRECT',
-        documentation: 'Parameter description',
+        label: '$hWnd',
+        documentation:
+          'Handle to the window whose update region is to be modified. If this parameter is 0, the system invalidates and redraws all windows and sends the WM_ERASEBKGND and WM_NCPAINT messages to the window procedure before the function returns.',
+      },
+      {
+        label: '$tRECT',
+        documentation:
+          '[optional] $tagRECT structure that contains the client coordinates of the rectangle to be removed from the update region. If this parameter is 0 (Default), the entire client area is removed.',
       },
     ],
   },
@@ -2872,8 +3576,13 @@ const signatures = {
     label: '_WinAPI_ValidateRgn ( $hWnd [, $hRgn = 0] )',
     params: [
       {
-        label: '$hWnd [, $hRgn',
-        documentation: 'Parameter description',
+        label: '$hWnd',
+        documentation: 'Handle to the window whose update region is to be modified.',
+      },
+      {
+        label: '$hRgn',
+        documentation:
+          '[optional] Handle to a region that defines the area to be removed from the update region. If this parameter is 0 (Default), the entire client area is removed.',
       },
     ],
   },
@@ -2884,7 +3593,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2894,7 +3603,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2904,7 +3613,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2914,7 +3623,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2925,7 +3634,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2936,7 +3645,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2947,7 +3656,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2958,7 +3667,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2969,7 +3678,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2979,7 +3688,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -2990,7 +3699,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -3000,7 +3709,7 @@ const signatures = {
     params: [
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3011,11 +3720,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3025,11 +3734,13 @@ const signatures = {
     params: [
       {
         label: '$tRECT1',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that contains the logical coordinates of the first rectangle.',
       },
       {
         label: '$tRECT2',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that contains the logical coordinates of the second rectangle.',
       },
     ],
   },
@@ -3039,15 +3750,15 @@ const signatures = {
     params: [
       {
         label: 'ByRef $tRECT',
-        documentation: 'Parameter description',
+        documentation: '$tagRECT structure that increases or decreases in size.',
       },
       {
         label: '$iDX',
-        documentation: 'Parameter description',
+        documentation: 'The amount to increase or decrease (negative value) the rectangle width.',
       },
       {
         label: '$iDY',
-        documentation: 'Parameter description',
+        documentation: 'The amount to increase or decrease (negative value) the rectangle height.',
       },
     ],
   },
@@ -3057,11 +3768,11 @@ const signatures = {
     params: [
       {
         label: '$tRECT1',
-        documentation: 'Parameter description',
+        documentation: '$tagRECT structure that contains the first source rectangle.',
       },
       {
         label: '$tRECT2',
-        documentation: 'Parameter description',
+        documentation: '$tagRECT structure that contains the second source rectangle.',
       },
     ],
   },
@@ -3071,7 +3782,7 @@ const signatures = {
     params: [
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3081,15 +3792,15 @@ const signatures = {
     params: [
       {
         label: 'ByRef $tRECT',
-        documentation: 'Parameter description',
+        documentation: '$tagRECT structure that to be moved.',
       },
       {
         label: '$iDX',
-        documentation: 'Parameter description',
+        documentation: 'The amount to move the rectangle left (negative value) or right.',
       },
       {
         label: '$iDY',
-        documentation: 'Parameter description',
+        documentation: 'The amount to move the rectangle up (negative value) or down.',
       },
     ],
   },
@@ -3099,27 +3810,27 @@ const signatures = {
     params: [
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the point.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the point.',
       },
       {
         label: '$iLeft',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the upper-left corner of the rectangle.',
       },
       {
         label: '$iTop',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the upper-left corner of the rectangle.',
       },
       {
         label: '$iRight',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the lower-right corner of the rectangle.',
       },
       {
         label: '$iBottom',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the lower-right corner of the rectangle.',
       },
     ],
   },
@@ -3130,11 +3841,13 @@ const signatures = {
     params: [
       {
         label: '$tRECT1',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure from which the function subtracts the rectangle specified by $tRECT2.',
       },
       {
         label: '$tRECT2',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that the function subtracts from the rectangle specified by $tRECT1.',
       },
     ],
   },
@@ -3144,11 +3857,11 @@ const signatures = {
     params: [
       {
         label: '$tRECT1',
-        documentation: 'Parameter description',
+        documentation: '$tagRECT structure that contains the first source rectangle.',
       },
       {
         label: '$tRECT2',
-        documentation: 'Parameter description',
+        documentation: '$tagRECT structure that contains the second source rectangle.',
       },
     ],
   },
@@ -3158,7 +3871,7 @@ const signatures = {
     params: [
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3173,8 +3886,22 @@ const signatures = {
       '_WinAPI_CreatePolygonRgn ( Const ByRef $aPoint [, $iStart = 0 [, $iEnd = -1 [, $iMode = 1]]] )',
     params: [
       {
-        label: 'Const ByRef $aPoint [, $iStart',
-        documentation: 'Parameter description',
+        label: 'Const ByRef $aPoint',
+        documentation:
+          'The 2D array ([x1, y1], [x2, y2], ... [xN, yN]) that contains the vertices of the polygon in logical units. The polygon is presumed closed.',
+      },
+      {
+        label: '$iStart',
+        documentation: '[optional] The index of array to start creating at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '[optional] The index of array to stop creating at.',
+      },
+      {
+        label: '$iMode',
+        documentation:
+          '[optional] The fill mode used to determine which pixels are in the region. This parameter can be one of the following values: $ALTERNATE (Default) $WINDING',
       },
     ],
   },
@@ -3184,7 +3911,7 @@ const signatures = {
     params: [
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3194,11 +3921,11 @@ const signatures = {
     params: [
       {
         label: '$hRgn1',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a region.',
       },
       {
         label: '$hRgn2',
-        documentation: 'Parameter description',
+        documentation: 'Handle to a region.',
       },
     ],
   },
@@ -3207,8 +3934,13 @@ const signatures = {
     label: '_WinAPI_ExtCreateRegion ( $tRGNDATA [, $tXFORM = 0] )',
     params: [
       {
-        label: '$tRGNDATA [, $tXFORM',
-        documentation: 'Parameter description',
+        label: '$tRGNDATA',
+        documentation: '$tagRGNDATA structure that contains the region data in logical units.',
+      },
+      {
+        label: '$tXFORM',
+        documentation:
+          '[optional] $tagXFORM structure that defines the transformation to be performed on the region.',
       },
     ],
   },
@@ -3218,15 +3950,16 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation:
+          "Handle to the region to be filled. The region's coordinates are presumed to be in logical units.",
       },
       {
         label: '$hBrush',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the brush to be used to fill the region.',
       },
     ],
   },
@@ -3236,23 +3969,24 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation:
+          "Handle to the region to be enclosed in a border. The region's coordinates are presumed to be in logical units.",
       },
       {
         label: '$hBrush',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the brush to be used to draw the border.',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation: 'The width, in logical units, of vertical brush strokes.',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation: 'The height, in logical units, of horizontal brush strokes.',
       },
     ],
   },
@@ -3262,7 +3996,7 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
     ],
   },
@@ -3272,11 +4006,12 @@ const signatures = {
     params: [
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the region.',
       },
       {
         label: 'ByRef $tRGNDATA',
-        documentation: 'Parameter description',
+        documentation:
+          'Returns a $tagRGNDATA structure that is created by this function, and contains the region data, in logical units.',
       },
     ],
   },
@@ -3286,11 +4021,12 @@ const signatures = {
     params: [
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the region.',
       },
       {
         label: 'ByRef $tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          'Returns a $tagRECT structure that is created by this function, and contains the bounding rectangle, in logical units.',
       },
     ],
   },
@@ -3300,11 +4036,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation:
+          "Handle to the region for which colors are inverted. The region's coordinates are presumed to be logical coordinates.",
       },
     ],
   },
@@ -3314,15 +4051,15 @@ const signatures = {
     params: [
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the region to be moved.',
       },
       {
         label: '$iXOffset',
-        documentation: 'Parameter description',
+        documentation: 'The number of logical units to move left or right.',
       },
       {
         label: '$iYOffset',
-        documentation: 'Parameter description',
+        documentation: 'The number of logical units to move up or down.',
       },
     ],
   },
@@ -3333,11 +4070,12 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation:
+          "Handle to the region to be filled. The region's coordinates are presumed to be logical coordinates.",
       },
     ],
   },
@@ -3347,15 +4085,15 @@ const signatures = {
     params: [
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the region to be examined.',
       },
       {
         label: '$iX',
-        documentation: 'Parameter description',
+        documentation: 'The x-coordinate of the point in logical units.',
       },
       {
         label: '$iY',
-        documentation: 'Parameter description',
+        documentation: 'The y-coordinate of the point in logical units.',
       },
     ],
   },
@@ -3366,11 +4104,12 @@ const signatures = {
     params: [
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the region.',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that contains the coordinates of the rectangle in logical units.',
       },
     ],
   },
@@ -3379,8 +4118,13 @@ const signatures = {
     label: '_WinAPI_SetPolyFillMode ( $hDC [, $iMode = 1] )',
     params: [
       {
-        label: '$hDC [, $iMode',
-        documentation: 'Parameter description',
+        label: '$hDC',
+        documentation: 'Handle to the device context.',
+      },
+      {
+        label: '$iMode',
+        documentation:
+          '[optional] The new fill mode. This parameter can be one of the following values. $ALTERNATE (Default) $WINDING',
       },
     ],
   },
@@ -3390,11 +4134,12 @@ const signatures = {
     params: [
       {
         label: '$hRgn',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the region.',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation:
+          '$tagRECT structure that contains the coordinates of the rectangular region in logical units.',
       },
     ],
   },
@@ -3404,11 +4149,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3419,11 +4164,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3433,11 +4178,20 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
-        label: 'Const ByRef $aPoint [, $iStart',
-        documentation: 'Parameter description',
+        label: 'Const ByRef $aPoint',
+        documentation:
+          'The 2D array ([x1, y1], [x2, y2], ... [xN, yN]) that contains the vertices of the polygon in logical units. The polygon is closed automatically by drawing a line from the last vertex to the first.',
+      },
+      {
+        label: '$iStart',
+        documentation: '[optional] The index of array to start creating at.',
+      },
+      {
+        label: '$iEnd',
+        documentation: '[optional] The index of array to stop creating at.',
       },
     ],
   },
@@ -3447,11 +4201,11 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: 'Pointer to a $tagRECT structure containing the rectangle coordinates',
       },
     ],
   },
@@ -3461,19 +4215,21 @@ const signatures = {
     params: [
       {
         label: '$hDC',
-        documentation: 'Parameter description',
+        documentation: 'Handle to the device context.',
       },
       {
         label: '$tRECT',
-        documentation: 'Parameter description',
+        documentation: '$tagRECT structure that contains the logical coordinates of the rectangle.',
       },
       {
         label: '$iWidth',
-        documentation: 'Parameter description',
+        documentation:
+          'The width, in logical coordinates, of the ellipse used to draw the rounded corners.',
       },
       {
         label: '$iHeight',
-        documentation: 'Parameter description',
+        documentation:
+          'The height, in logical coordinates, of the ellipse used to draw the rounded corners.',
       },
     ],
   },
