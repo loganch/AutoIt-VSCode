@@ -49,9 +49,15 @@
       </dict>
       <dict>
         <key>match</key>
-        <string>[a-zA-Z_]+[\w_]*(?=\()</string>
+        <string>(?<!\.)\b[a-zA-Z_]\w*(?=\()</string>
         <key>name</key>
         <string>entity.name.function.autoit</string>
+      </dict>
+      <dict>
+        <key>name</key>
+        <string>support.class.com.autoit</string>
+        <key>match</key>
+        <string>(?<=\.)\b[a-zA-Z_]\w*\b</string>
       </dict>
       <dict>
         <key>match</key>
