@@ -17,6 +17,7 @@ export default class MapParser {
     const mapDeclPattern = /^\s*(Local|Global|Dim|Static)\s+(\$[a-zA-Z_]\w*)\s*\[\s*\]/i;
 
     this.lines.forEach((line, index) => {
+      if (line.trim().startsWith(';')) return;
       const match = line.match(mapDeclPattern);
       if (match) {
         declarations.push({
@@ -46,6 +47,7 @@ export default class MapParser {
     const bracketPattern = new RegExp(`^\\s*${escapedName}\\[["']([^"']+)["']\\]\\s*=`, 'i');
 
     this.lines.forEach((line, index) => {
+      if (line.trim().startsWith(';')) return;
       // Check dot notation
       const dotMatch = line.match(dotPattern);
       if (dotMatch) {
@@ -144,7 +146,7 @@ export default class MapParser {
     let closestDistance = Infinity;
 
     for (const decl of declarations) {
-      if (decl.name !== mapName) continue;
+      if (decl.name.toLowerCase() !== mapName.toLowerCase()) continue;
       if (decl.line > targetLine) continue; // Must be before target
 
       // Check if declaration is in same scope
@@ -159,9 +161,9 @@ export default class MapParser {
             closestDistance = distance;
             closestDecl = decl;
           }
-        } else if (!declFunc && decl.scope === 'Global') {
+        } else if (!declFunc && decl.scope.toLowerCase() === 'global') {
           // Global declaration, but only use if no local found
-          if (closestDecl === null || closestDecl.scope !== 'Local') {
+          if (closestDecl === null || closestDecl.scope.toLowerCase() !== 'local') {
             const distance = targetLine - decl.line;
             if (distance < closestDistance) {
               closestDistance = distance;
@@ -198,7 +200,7 @@ export default class MapParser {
       if (currentFunc) {
         if (assignFunc && assignFunc.name === currentFunc.name) {
           validKeys.add(assignment.key);
-        } else if (!assignFunc && closestDecl.scope === 'Global') {
+        } else if (!assignFunc && closestDecl.scope.toLowerCase() === 'global') {
           validKeys.add(assignment.key);
         }
       } else {

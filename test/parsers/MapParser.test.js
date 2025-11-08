@@ -235,5 +235,54 @@ $mUser.age = 30`;
       expect(keys).toContain('name');
       expect(keys).not.toContain('age');
     });
+
+    it('should handle case-insensitive variable names', () => {
+      const source = `Local $mUser[]
+$mUser.name = "John"
+$MUSER.age = 30
+$muser.email = "test@example.com"
+Local $x = $MuSeR.`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysForMapAtLine('$mUser', 4);
+
+      expect(keys).toHaveLength(3);
+      expect(keys).toContain('name');
+      expect(keys).toContain('age');
+      expect(keys).toContain('email');
+    });
+
+    it('should ignore commented assignments', () => {
+      const source = `Local $mUser[]
+$mUser.name = "John"
+; $mUser.commented = "should not appear"
+;$mUser.alsoCommented = "ignored"
+$mUser.active = true
+Local $x = $mUser.`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysForMapAtLine('$mUser', 5);
+
+      expect(keys).toHaveLength(2);
+      expect(keys).toContain('name');
+      expect(keys).toContain('active');
+      expect(keys).not.toContain('commented');
+      expect(keys).not.toContain('alsoCommented');
+    });
+
+    it('should access global scope from function when no local shadowing', () => {
+      const source = `Global $mConfig[]
+$mConfig.apiKey = "global-key"
+$mConfig.baseUrl = "https://api.example.com"
+
+Func DoWork()
+    ; No local $mConfig declaration - should see global
+    Local $x = $mConfig.
+EndFunc`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysForMapAtLine('$mConfig', 6);
+
+      expect(keys).toHaveLength(2);
+      expect(keys).toContain('apiKey');
+      expect(keys).toContain('baseUrl');
+    });
   });
 });
