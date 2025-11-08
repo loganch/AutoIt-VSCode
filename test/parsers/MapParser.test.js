@@ -173,4 +173,67 @@ Local $x = 1`;
       expect(func).toBeNull();
     });
   });
+
+  describe('getKeysForMapAtLine', () => {
+    it('should return keys for Map at specific line', () => {
+      const source = `Local $mUser[]
+$mUser.name = "John"
+$mUser.age = 30
+Local $x = $mUser.`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysForMapAtLine('$mUser', 3);
+
+      expect(keys).toHaveLength(2);
+      expect(keys).toContain('name');
+      expect(keys).toContain('age');
+    });
+
+    it('should respect scope shadowing - closest wins', () => {
+      const source = `Global $mConfig[]
+$mConfig.apiKey = "global"
+
+Func DoWork()
+    Local $mConfig[]
+    $mConfig.tempData = "local"
+    Local $x = $mConfig.
+EndFunc`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysForMapAtLine('$mConfig', 6);
+
+      expect(keys).toHaveLength(1);
+      expect(keys).toContain('tempData');
+      expect(keys).not.toContain('apiKey');
+    });
+
+    it('should use global scope when outside functions', () => {
+      const source = `Global $mConfig[]
+$mConfig.apiKey = "global"
+
+Func DoWork()
+    Local $mConfig[]
+    $mConfig.tempData = "local"
+EndFunc
+
+Local $x = $mConfig.`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysForMapAtLine('$mConfig', 8);
+
+      expect(keys).toHaveLength(1);
+      expect(keys).toContain('apiKey');
+      expect(keys).not.toContain('tempData');
+    });
+
+    it('should only include assignments before the target line', () => {
+      const source = `Local $mUser[]
+$mUser.name = "John"
+Local $x = $mUser.
+$mUser.age = 30`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysForMapAtLine('$mUser', 2);
+
+      expect(keys).toHaveLength(1);
+      expect(keys).toContain('name');
+      expect(keys).not.toContain('age');
+    });
+  });
 });

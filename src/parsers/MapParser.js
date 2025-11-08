@@ -52,7 +52,7 @@ export default class MapParser {
         assignments.push({
           key: dotMatch[1],
           line: index,
-          notation: 'dot'
+          notation: 'dot',
         });
         return;
       }
@@ -63,7 +63,7 @@ export default class MapParser {
         assignments.push({
           key: bracketMatch[1],
           line: index,
-          notation: 'bracket'
+          notation: 'bracket',
         });
       }
     });
@@ -95,7 +95,7 @@ export default class MapParser {
           name: funcStart[1],
           startLine: index,
           endLine: -1,
-          parameters
+          parameters,
         };
         return;
       }
@@ -121,8 +121,93 @@ export default class MapParser {
       this.parseFunctionBoundaries();
     }
 
-    return this.functions.find(func =>
-      line >= func.startLine && line <= func.endLine
-    ) || null;
+    return this.functions.find(func => line >= func.startLine && line <= func.endLine) || null;
+  }
+
+  /**
+   * Get all keys for a Map variable at a specific line (scope-aware)
+   * @param {string} mapName - The Map variable name
+   * @param {number} targetLine - The line where completion is requested
+   * @returns {string[]} Array of key names
+   */
+  getKeysForMapAtLine(mapName, targetLine) {
+    // Ensure functions are parsed
+    if (this.functions.length === 0) {
+      this.parseFunctionBoundaries();
+    }
+
+    // Find the closest Map declaration to targetLine
+    const declarations = this.parseMapDeclarations();
+    const currentFunc = this.getFunctionAtLine(targetLine);
+
+    let closestDecl = null;
+    let closestDistance = Infinity;
+
+    for (const decl of declarations) {
+      if (decl.name !== mapName) continue;
+      if (decl.line > targetLine) continue; // Must be before target
+
+      // Check if declaration is in same scope
+      const declFunc = this.getFunctionAtLine(decl.line);
+
+      // If target is in a function, only consider declarations in same function or global
+      if (currentFunc) {
+        if (declFunc && declFunc.name === currentFunc.name) {
+          // Same function - local takes precedence
+          const distance = targetLine - decl.line;
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestDecl = decl;
+          }
+        } else if (!declFunc && decl.scope === 'Global') {
+          // Global declaration, but only use if no local found
+          if (closestDecl === null || closestDecl.scope !== 'Local') {
+            const distance = targetLine - decl.line;
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestDecl = decl;
+            }
+          }
+        }
+      } else {
+        // Target is outside functions, only consider global scope
+        if (!declFunc) {
+          const distance = targetLine - decl.line;
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestDecl = decl;
+          }
+        }
+      }
+    }
+
+    if (!closestDecl) {
+      return [];
+    }
+
+    // Get all assignments for this Map in the same scope, before targetLine
+    const assignments = this.parseKeyAssignments(mapName);
+    const validKeys = new Set();
+
+    for (const assignment of assignments) {
+      if (assignment.line >= targetLine) continue; // Must be before target
+
+      const assignFunc = this.getFunctionAtLine(assignment.line);
+
+      // Check if assignment is in same scope as the declaration we're using
+      if (currentFunc) {
+        if (assignFunc && assignFunc.name === currentFunc.name) {
+          validKeys.add(assignment.key);
+        } else if (!assignFunc && closestDecl.scope === 'Global') {
+          validKeys.add(assignment.key);
+        }
+      } else {
+        if (!assignFunc) {
+          validKeys.add(assignment.key);
+        }
+      }
+    }
+
+    return Array.from(validKeys);
   }
 }
