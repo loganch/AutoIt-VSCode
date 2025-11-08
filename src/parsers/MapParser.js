@@ -21,7 +21,7 @@ export default class MapParser {
         declarations.push({
           name: match[2],
           scope: match[1],
-          line: index
+          line: index,
         });
       }
     });

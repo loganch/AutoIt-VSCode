@@ -11,7 +11,7 @@ describe('MapParser', () => {
       expect(maps[0]).toMatchObject({
         name: '$mUser',
         scope: 'Local',
-        line: 0
+        line: 0,
       });
     });
 
@@ -24,7 +24,7 @@ describe('MapParser', () => {
       expect(maps[0]).toMatchObject({
         name: '$mConfig',
         scope: 'Global',
-        line: 0
+        line: 0,
       });
     });
 
