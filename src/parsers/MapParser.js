@@ -5,6 +5,7 @@ export default class MapParser {
   constructor(source) {
     this.source = source;
     this.lines = source.split('\n');
+    this.functions = []; // Add this
   }
 
   /**
@@ -68,5 +69,60 @@ export default class MapParser {
     });
 
     return assignments;
+  }
+
+  /**
+   * Parse function boundaries and parameters
+   * @returns {Array<{name: string, startLine: number, endLine: number, parameters: string[]}>}
+   */
+  parseFunctionBoundaries() {
+    this.functions = [];
+    const funcStartPattern = /^\s*Func\s+(\w+)\s*\((.*?)\)/i;
+    const funcEndPattern = /^\s*EndFunc/i;
+
+    let currentFunc = null;
+
+    this.lines.forEach((line, index) => {
+      const funcStart = line.match(funcStartPattern);
+      if (funcStart) {
+        // Parse parameters
+        const paramsStr = funcStart[2].trim();
+        const parameters = paramsStr
+          ? paramsStr.split(',').map(p => p.trim().split('=')[0].trim())
+          : [];
+
+        currentFunc = {
+          name: funcStart[1],
+          startLine: index,
+          endLine: -1,
+          parameters
+        };
+        return;
+      }
+
+      const funcEnd = line.match(funcEndPattern);
+      if (funcEnd && currentFunc) {
+        currentFunc.endLine = index;
+        this.functions.push(currentFunc);
+        currentFunc = null;
+      }
+    });
+
+    return this.functions;
+  }
+
+  /**
+   * Get the function containing a specific line
+   * @param {number} line - Line number
+   * @returns {object|null} Function object or null
+   */
+  getFunctionAtLine(line) {
+    if (this.functions.length === 0) {
+      this.parseFunctionBoundaries();
+    }
+
+    return this.functions.find(func =>
+      line >= func.startLine && line <= func.endLine
+    ) || null;
   }
 }

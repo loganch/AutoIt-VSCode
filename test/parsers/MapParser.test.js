@@ -106,4 +106,71 @@ $mOther.key = "value"`;
       expect(assignments[0].key).toBe('name');
     });
   });
+
+  describe('parseFunctionBoundaries', () => {
+    it('should detect function start and end', () => {
+      const source = `Func MyFunction()
+    Local $x = 1
+EndFunc`;
+      const parser = new MapParser(source);
+      const functions = parser.parseFunctionBoundaries();
+
+      expect(functions).toHaveLength(1);
+      expect(functions[0]).toMatchObject({
+        name: 'MyFunction',
+        startLine: 0,
+        endLine: 2,
+      });
+    });
+
+    it('should detect multiple functions', () => {
+      const source = `Func First()
+EndFunc
+
+Func Second()
+    Local $x = 1
+EndFunc`;
+      const parser = new MapParser(source);
+      const functions = parser.parseFunctionBoundaries();
+
+      expect(functions).toHaveLength(2);
+      expect(functions[0].name).toBe('First');
+      expect(functions[1].name).toBe('Second');
+    });
+
+    it('should detect function parameters', () => {
+      const source = `Func ProcessUser($mUser, $name)
+EndFunc`;
+      const parser = new MapParser(source);
+      const functions = parser.parseFunctionBoundaries();
+
+      expect(functions).toHaveLength(1);
+      expect(functions[0].parameters).toEqual(['$mUser', '$name']);
+    });
+  });
+
+  describe('getFunctionAtLine', () => {
+    it('should return function containing the line', () => {
+      const source = `Func MyFunction()
+    Local $x = 1
+EndFunc`;
+      const parser = new MapParser(source);
+      parser.parseFunctionBoundaries();
+      const func = parser.getFunctionAtLine(1);
+
+      expect(func).toBeDefined();
+      expect(func.name).toBe('MyFunction');
+    });
+
+    it('should return null for line outside functions', () => {
+      const source = `Func MyFunction()
+EndFunc
+Local $x = 1`;
+      const parser = new MapParser(source);
+      parser.parseFunctionBoundaries();
+      const func = parser.getFunctionAtLine(2);
+
+      expect(func).toBeNull();
+    });
+  });
 });
