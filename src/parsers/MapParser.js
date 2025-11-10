@@ -212,4 +212,79 @@ export default class MapParser {
 
     return Array.from(validKeys);
   }
+
+  /**
+   * Get keys added to a Map parameter within a function
+   * @param {string} functionName - Function name
+   * @param {string} parameterName - Parameter variable name
+   * @returns {Array<{key: string, line: number, addedInFunction: boolean}>}
+   */
+  getFunctionParameterKeys(functionName, parameterName) {
+    if (this.functions.length === 0) {
+      this.parseFunctionBoundaries();
+    }
+
+    const func = this.functions.find(f => f.name === functionName);
+    if (!func || !func.parameters.includes(parameterName)) {
+      return [];
+    }
+
+    const assignments = this.parseKeyAssignments(parameterName);
+    return assignments
+      .filter(a => a.line >= func.startLine && a.line <= func.endLine)
+      .map(a => ({
+        key: a.key,
+        line: a.line,
+        addedInFunction: true,
+      }));
+  }
+
+  /**
+   * Get keys added to a Map via function calls
+   * @param {string} mapName - The Map variable name
+   * @param {number} targetLine - The line where completion is requested
+   * @returns {Array<{key: string, addedInFunction: boolean}>}
+   */
+  getKeysFromFunctionCalls(mapName, targetLine) {
+    if (this.functions.length === 0) {
+      this.parseFunctionBoundaries();
+    }
+
+    const functionCallPattern = /^\s*(\w+)\s*\((.*?)\)/;
+    const keys = [];
+    const seenKeys = new Set();
+
+    this.lines.forEach((line, index) => {
+      if (index >= targetLine) return; // Only before target
+
+      const match = line.match(functionCallPattern);
+      if (!match) return;
+
+      const funcName = match[1];
+      const args = match[2].split(',').map(a => a.trim());
+
+      // Check if our Map is passed as an argument
+      const argIndex = args.indexOf(mapName);
+      if (argIndex === -1) return;
+
+      // Find the function definition
+      const func = this.functions.find(f => f.name === funcName);
+      if (!func || argIndex >= func.parameters.length) return;
+
+      const paramName = func.parameters[argIndex];
+      const paramKeys = this.getFunctionParameterKeys(funcName, paramName);
+
+      paramKeys.forEach(k => {
+        if (!seenKeys.has(k.key)) {
+          seenKeys.add(k.key);
+          keys.push({
+            key: k.key,
+            addedInFunction: true,
+          });
+        }
+      });
+    });
+
+    return keys;
+  }
 }

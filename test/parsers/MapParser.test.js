@@ -285,4 +285,103 @@ EndFunc`;
       expect(keys).toContain('baseUrl');
     });
   });
+
+  describe('getFunctionParameterKeys', () => {
+    it('should detect keys added to Map parameter in function', () => {
+      const source = `Func AddUserData($userMap)
+    $userMap.name = "test"
+    $userMap.id = 123
+EndFunc`;
+      const parser = new MapParser(source);
+      const keys = parser.getFunctionParameterKeys('AddUserData', '$userMap');
+
+      expect(keys).toHaveLength(2);
+      expect(keys).toContainEqual({
+        key: 'name',
+        line: 1,
+        addedInFunction: true,
+      });
+      expect(keys).toContainEqual({
+        key: 'id',
+        line: 2,
+        addedInFunction: true,
+      });
+    });
+
+    it('should return empty array for non-existent function', () => {
+      const source = `Func MyFunc()
+EndFunc`;
+      const parser = new MapParser(source);
+      const keys = parser.getFunctionParameterKeys('OtherFunc', '$map');
+
+      expect(keys).toHaveLength(0);
+    });
+
+    it('should only return keys for specified parameter', () => {
+      const source = `Func Process($mUser, $mData)
+    $mUser.name = "test"
+    $mData.value = 123
+EndFunc`;
+      const parser = new MapParser(source);
+      const keys = parser.getFunctionParameterKeys('Process', '$mUser');
+
+      expect(keys).toHaveLength(1);
+      expect(keys[0].key).toBe('name');
+    });
+  });
+
+  describe('getKeysFromFunctionCalls', () => {
+    it('should detect keys added when Map is passed to function', () => {
+      const source = `Func AddUserData($userMap)
+    $userMap.name = "test"
+    $userMap.id = 123
+EndFunc
+
+Local $mUser[]
+AddUserData($mUser)
+Local $x = $mUser.`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysFromFunctionCalls('$mUser', 7);
+
+      expect(keys).toHaveLength(2);
+      expect(keys[0].addedInFunction).toBe(true);
+      expect(keys.map(k => k.key)).toContain('name');
+      expect(keys.map(k => k.key)).toContain('id');
+    });
+
+    it('should only include function calls before target line', () => {
+      const source = `Func AddData($map)
+    $map.key1 = "value"
+EndFunc
+
+Local $mData[]
+Local $x = $mData.
+AddData($mData)`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysFromFunctionCalls('$mData', 5);
+
+      expect(keys).toHaveLength(0);
+    });
+
+    it('should handle multiple function calls', () => {
+      const source = `Func AddName($map)
+    $map.name = "test"
+EndFunc
+
+Func AddId($map)
+    $map.id = 123
+EndFunc
+
+Local $mUser[]
+AddName($mUser)
+AddId($mUser)
+Local $x = $mUser.`;
+      const parser = new MapParser(source);
+      const keys = parser.getKeysFromFunctionCalls('$mUser', 11);
+
+      expect(keys).toHaveLength(2);
+      expect(keys.map(k => k.key)).toContain('name');
+      expect(keys.map(k => k.key)).toContain('id');
+    });
+  });
 });
