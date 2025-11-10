@@ -5,16 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2025-11-10
 
 ### Added
 
+- COM object syntax highlighting for properties and methods using dot notation
+- Distinct token scopes for COM identifiers (`support.class.com.autoit`) to enable theme-specific styling
 - Contributors section to README.md with auto-updating contrib.rocks integration
 - Added missing AutoIt macros: `@exitMethod`, `@GUI_DropId`, and `@SW_ENABLE` to completions and hovers
+- AU3Check parameter parsing support with corresponding tests to improve syntax check behavior
+- Parameter validation and improved status messages in OutputChannelManager (#230)
+- WinNet API completions added to IntelliSense
 
 ### Fixed
 
+- Function pattern incorrectly matching COM object methods (e.g., `$obj.Method()` now correctly identified as COM, not function)
 - Incorrect documentation for `@GUI_CtrlId` macro (now correctly states "Last click GUI Control identifier" instead of "Drag GUI Control identifier")
+- Duplicate WinNet signature removed and WinAPI COM signatures added to signature/hover data
+- Incorrect CRLF constant definition corrected
+- Duplicate parameter documentation entries removed in signature help provider
+- Removed stray duplicate (misspelled) `Clibpoard` completion entry
+- Improved parameter checks in `runCheckProcess` for more reliable regex matching
 
 ### Changed
 
@@ -25,8 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- COM object syntax highlighting for properties and methods using dot notation
-- Distinct token scopes for COM identifiers (`support.class.com.autoit`) to enable theme-specific styling
 - File path validation to prevent path traversal attacks
 - Parameter safety warnings for `autoit.consoleParams` to detect potentially dangerous shell metacharacters
 - Workspace symbol performance optimizations with batch processing to prevent UI freezing on large projects
@@ -41,7 +50,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Function pattern incorrectly matching COM object methods (e.g., `$obj.Method()` now correctly identified as COM, not function)
 - Command injection risk in registry update functionality by replacing `exec` with `execFile` for safer argument handling
 - Multiple global output panels opening for AutoIt on startup
 - Memory leak in completion provider where include cache grew indefinitely across document switches
@@ -419,6 +427,7 @@ The IntelliSense release!
 - Added the ability to generate a debug MsgBox for a highlighted variable or macro with Ctrl+Shift+D.
 - Added icon, banner color and description for marketplace.
 
+[1.3.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.0.14...v1.1.0
 [1.0.14]: https://github.com/loganch/AutoIt-VSCode/compare/v1.0.13...v1.0.14

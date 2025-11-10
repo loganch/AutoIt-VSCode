@@ -117,16 +117,16 @@ COM objects are highlighted with a special token scope (`support.class.com.autoi
 
 This extension works on **Windows, macOS, and Linux**, with the following considerations:
 
-| Feature | Windows | macOS/Linux |
-|---------|---------|-------------|
-| Syntax Highlighting | ✓ | ✓ |
-| IntelliSense | ✓ | ✓ |
-| Symbol Navigation | ✓ | ✓ |
-| Go to Definition | ✓ | ✓ |
-| **Run Scripts** | ✓ | **Windows only** |
-| **Diagnostics (Au3Check)** | ✓ | **Windows only** |
-| **Code Formatting (Tidy)** | ✓ | **Windows only** |
-| **Compile/Build** | ✓ | **Windows only** |
+| Feature                    | Windows | macOS/Linux      |
+| -------------------------- | ------- | ---------------- |
+| Syntax Highlighting        | ✓       | ✓                |
+| IntelliSense               | ✓       | ✓                |
+| Symbol Navigation          | ✓       | ✓                |
+| Go to Definition           | ✓       | ✓                |
+| **Run Scripts**            | ✓       | **Windows only** |
+| **Diagnostics (Au3Check)** | ✓       | **Windows only** |
+| **Code Formatting (Tidy)** | ✓       | **Windows only** |
+| **Compile/Build**          | ✓       | **Windows only** |
 
 > **Note:** AutoIt itself is a Windows automation language. While the extension provides language support on all platforms, script execution and AutoIt tools require a Windows environment.
 
@@ -140,53 +140,53 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 
 ![AutoIt Settings](img/docs/AutoItConfiguration.png)
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `autoit.aiPath` | Path to AutoIt3.exe | `C:\Program Files (x86)\AutoIt3\AutoIt3.exe` |
-| `autoit.includePaths` | Additional include folder paths | `[]` |
-| `autoit.enableDiagnostics` | Enable Au3Check diagnostics | `true` |
-| `autoit.multiOutput` | Separate output panel per script | `true` |
+| Setting                    | Description                      | Default                                      |
+| -------------------------- | -------------------------------- | -------------------------------------------- |
+| `autoit.aiPath`            | Path to AutoIt3.exe              | `C:\Program Files (x86)\AutoIt3\AutoIt3.exe` |
+| `autoit.includePaths`      | Additional include folder paths  | `[]`                                         |
+| `autoit.enableDiagnostics` | Enable Au3Check diagnostics      | `true`                                       |
+| `autoit.multiOutput`       | Separate output panel per script | `true`                                       |
 
 ### All Configuration Options
 
 <details>
 <summary>Click to expand full configuration table</summary>
 
-| Config | Description | Default |
-|--------|-------------|---------|
-| `autoit.aiPath` | Full path to AutoIt3.exe | `C:\Program Files (x86)\AutoIt3\AutoIt3.exe` |
-| `autoit.wrapperPath` | Full or relative path to AutoIt3Wrapper.au3. Leave blank for default relative to aiPath. | `""` |
-| `autoit.checkPath` | Full or relative path to Au3Check.exe. Leave blank for default relative to aiPath. | `""` |
-| `autoit.helpPath` | Full or relative path to AutoIt3Help.exe. Leave blank for default relative to aiPath. | `""` |
-| `autoit.infoPath` | Full or relative path to Au3Info.exe. Leave blank for default relative to aiPath. | `""` |
-| `autoit.kodaPath` | Full or relative path to Koda FormDesigner (FD.exe). Leave blank for default relative to aiPath. | `""` |
-| `autoit.includePaths` | Additional include folder paths for IntelliSense | `[]` |
-| `autoit.smartHelp` | Define prefixes, paths & sources for custom UDF help files | `{ "__yourUdfFuncPrefix__": { "chmPath": "", "udfPath": [""] } }` |
-| **Symbol Navigation** | | |
-| `autoit.showVariablesInGoToSymbol` | Show variables in symbol search (Ctrl+Shift+O) | `true` |
-| `autoit.showRegionsInGoToSymbol` | Show regions in symbol search (Ctrl+Shift+O) | `true` |
-| `autoit.workspaceSymbolMaxFiles` | Max files to process for workspace symbol search | `500` |
-| `autoit.workspaceSymbolBatchSize` | Files per batch when building symbol index | `10` |
-| `autoit.symbolMaxLines` | Max lines to process for symbols in a single file | `50000` |
-| **Diagnostics** | | |
-| `autoit.enableDiagnostics` | Provide Au3Check diagnostics on open/save | `true` |
-| **Script Execution** | | |
-| `autoit.consoleParams` | Parameters passed to console on Run Script | `""` |
-| `autoit.terminateRunningOnClose` | Terminate script when file is closed | `true` |
-| **Output Panels** | | |
-| `autoit.multiOutput` | Separate output panel for each script | `true` |
-| `autoit.multiOutputReuseOutput` | Reuse output panel for the same file | `false` |
-| `autoit.multiOutputMaxFinished` | Output panels to keep after script finishes | `2` |
-| `autoit.multiOutputFinishedTimeout` | Seconds until finished output panels are discarded (0 = indefinitely) | `0` |
-| `autoit.clearOutput` | Clear output before each run (when multiOutput is disabled or multiOutputReuseOutput is enabled) | `true` |
-| `autoit.multiOutputShowProcessId` | Show process ID in AutoIt output | `"Single"` |
-| `autoit.outputCodePage` | System code page for output encoding (if text appears garbled) | `""` |
-| `autoit.outputShowTime` | Show timestamp for each output line | `"None"` |
-| `autoit.outputMaxHistoryLines` | Number of output lines to keep | `5000` |
-| **IntelliSense** | | |
-| `autoit.enableParenTriggerForFunctions` | Use `(` to select function completion, add parens, and trigger signature help. Requires reload. | `true` |
-| **Code Authoring** | | |
-| `autoit.UDFCreator` | Author name for Insert Function Header command | `"Your Name"` |
+| Config                                  | Description                                                                                      | Default                                                           |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `autoit.aiPath`                         | Full path to AutoIt3.exe                                                                         | `C:\Program Files (x86)\AutoIt3\AutoIt3.exe`                      |
+| `autoit.wrapperPath`                    | Full or relative path to AutoIt3Wrapper.au3. Leave blank for default relative to aiPath.         | `""`                                                              |
+| `autoit.checkPath`                      | Full or relative path to Au3Check.exe. Leave blank for default relative to aiPath.               | `""`                                                              |
+| `autoit.helpPath`                       | Full or relative path to AutoIt3Help.exe. Leave blank for default relative to aiPath.            | `""`                                                              |
+| `autoit.infoPath`                       | Full or relative path to Au3Info.exe. Leave blank for default relative to aiPath.                | `""`                                                              |
+| `autoit.kodaPath`                       | Full or relative path to Koda FormDesigner (FD.exe). Leave blank for default relative to aiPath. | `""`                                                              |
+| `autoit.includePaths`                   | Additional include folder paths for IntelliSense                                                 | `[]`                                                              |
+| `autoit.smartHelp`                      | Define prefixes, paths & sources for custom UDF help files                                       | `{ "__yourUdfFuncPrefix__": { "chmPath": "", "udfPath": [""] } }` |
+| **Symbol Navigation**                   |                                                                                                  |                                                                   |
+| `autoit.showVariablesInGoToSymbol`      | Show variables in symbol search (Ctrl+Shift+O)                                                   | `true`                                                            |
+| `autoit.showRegionsInGoToSymbol`        | Show regions in symbol search (Ctrl+Shift+O)                                                     | `true`                                                            |
+| `autoit.workspaceSymbolMaxFiles`        | Max files to process for workspace symbol search                                                 | `500`                                                             |
+| `autoit.workspaceSymbolBatchSize`       | Files per batch when building symbol index                                                       | `10`                                                              |
+| `autoit.symbolMaxLines`                 | Max lines to process for symbols in a single file                                                | `50000`                                                           |
+| **Diagnostics**                         |                                                                                                  |                                                                   |
+| `autoit.enableDiagnostics`              | Provide Au3Check diagnostics on open/save                                                        | `true`                                                            |
+| **Script Execution**                    |                                                                                                  |                                                                   |
+| `autoit.consoleParams`                  | Parameters passed to console on Run Script                                                       | `""`                                                              |
+| `autoit.terminateRunningOnClose`        | Terminate script when file is closed                                                             | `true`                                                            |
+| **Output Panels**                       |                                                                                                  |                                                                   |
+| `autoit.multiOutput`                    | Separate output panel for each script                                                            | `true`                                                            |
+| `autoit.multiOutputReuseOutput`         | Reuse output panel for the same file                                                             | `false`                                                           |
+| `autoit.multiOutputMaxFinished`         | Output panels to keep after script finishes                                                      | `2`                                                               |
+| `autoit.multiOutputFinishedTimeout`     | Seconds until finished output panels are discarded (0 = indefinitely)                            | `0`                                                               |
+| `autoit.clearOutput`                    | Clear output before each run (when multiOutput is disabled or multiOutputReuseOutput is enabled) | `true`                                                            |
+| `autoit.multiOutputShowProcessId`       | Show process ID in AutoIt output                                                                 | `"Single"`                                                        |
+| `autoit.outputCodePage`                 | System code page for output encoding (if text appears garbled)                                   | `""`                                                              |
+| `autoit.outputShowTime`                 | Show timestamp for each output line                                                              | `"None"`                                                          |
+| `autoit.outputMaxHistoryLines`          | Number of output lines to keep                                                                   | `5000`                                                            |
+| **IntelliSense**                        |                                                                                                  |                                                                   |
+| `autoit.enableParenTriggerForFunctions` | Use `(` to select function completion, add parens, and trigger signature help. Requires reload.  | `true`                                                            |
+| **Code Authoring**                      |                                                                                                  |                                                                   |
+| `autoit.UDFCreator`                     | Author name for Insert Function Header command                                                   | `"Your Name"`                                                     |
 
 </details>
 
@@ -196,44 +196,44 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 
 ### Script Execution & Building
 
-| Shortcut | Command |
-|----------|---------|
-| `F5` | Run Script |
-| `Ctrl+F5` | AutoIt Check (Syntax Check) |
-| `F7` | Build Script (AutoIt3Wrapper) |
-| `Ctrl+F7` | Compile Script |
-| `Shift+F8` | Set Command Line Parameters |
-| `Ctrl+Pause/Break` | Kill Running Script |
+| Shortcut           | Command                       |
+| ------------------ | ----------------------------- |
+| `F5`               | Run Script                    |
+| `Ctrl+F5`          | AutoIt Check (Syntax Check)   |
+| `F7`               | Build Script (AutoIt3Wrapper) |
+| `Ctrl+F7`          | Compile Script                |
+| `Shift+F8`         | Set Command Line Parameters   |
+| `Ctrl+Pause/Break` | Kill Running Script           |
 
 ### Debugging
 
-| Shortcut | Command |
-|----------|---------|
-| `Ctrl+Shift+D` | Debug to MsgBox |
-| `Alt+D` | Debug to Console |
-| `Ctrl+Alt+z` | Debug Remove Lines |
+| Shortcut       | Command            |
+| -------------- | ------------------ |
+| `Ctrl+Shift+D` | Debug to MsgBox    |
+| `Alt+D`        | Debug to Console   |
+| `Ctrl+Alt+z`   | Debug Remove Lines |
 
 ### Navigation & Help
 
-| Shortcut | Command |
-|----------|---------|
-| `F12` | Go to Definition |
-| `Alt+F12` | Peek Definition |
+| Shortcut       | Command              |
+| -------------- | -------------------- |
+| `F12`          | Go to Definition     |
+| `Alt+F12`      | Peek Definition      |
 | `Ctrl+Shift+O` | Go to Symbol in File |
-| `Ctrl+F1` | Open AutoIt Help |
-| `Alt+I` | Open Include File |
+| `Ctrl+F1`      | Open AutoIt Help     |
+| `Alt+I`        | Open Include File    |
 
 ### Tools
 
-| Shortcut | Command |
-|----------|---------|
-| `Ctrl+F6` | Launch Au3Info |
-| `Alt+M` | Launch Koda Form Designer |
+| Shortcut  | Command                   |
+| --------- | ------------------------- |
+| `Ctrl+F6` | Launch Au3Info            |
+| `Alt+M`   | Launch Koda Form Designer |
 
 ### Code Editing
 
-| Shortcut | Command |
-|----------|---------|
+| Shortcut     | Command           |
+| ------------ | ----------------- |
 | `Ctrl+Alt+H` | Insert UDF Header |
 
 ---
