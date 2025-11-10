@@ -181,11 +181,11 @@ $mUser.name = "John"
 $mUser.age = 30
 Local $x = $mUser.`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysForMapAtLine('$mUser', 3);
+      const result = parser.getKeysForMapAtLine('$mUser', 3);
 
-      expect(keys).toHaveLength(2);
-      expect(keys).toContain('name');
-      expect(keys).toContain('age');
+      expect(result.directKeys).toHaveLength(2);
+      expect(result.directKeys).toContain('name');
+      expect(result.directKeys).toContain('age');
     });
 
     it('should respect scope shadowing - closest wins', () => {
@@ -198,11 +198,11 @@ Func DoWork()
     Local $x = $mConfig.
 EndFunc`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysForMapAtLine('$mConfig', 6);
+      const result = parser.getKeysForMapAtLine('$mConfig', 6);
 
-      expect(keys).toHaveLength(1);
-      expect(keys).toContain('tempData');
-      expect(keys).not.toContain('apiKey');
+      expect(result.directKeys).toHaveLength(1);
+      expect(result.directKeys).toContain('tempData');
+      expect(result.directKeys).not.toContain('apiKey');
     });
 
     it('should use global scope when outside functions', () => {
@@ -216,11 +216,11 @@ EndFunc
 
 Local $x = $mConfig.`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysForMapAtLine('$mConfig', 8);
+      const result = parser.getKeysForMapAtLine('$mConfig', 8);
 
-      expect(keys).toHaveLength(1);
-      expect(keys).toContain('apiKey');
-      expect(keys).not.toContain('tempData');
+      expect(result.directKeys).toHaveLength(1);
+      expect(result.directKeys).toContain('apiKey');
+      expect(result.directKeys).not.toContain('tempData');
     });
 
     it('should only include assignments before the target line', () => {
@@ -229,11 +229,11 @@ $mUser.name = "John"
 Local $x = $mUser.
 $mUser.age = 30`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysForMapAtLine('$mUser', 2);
+      const result = parser.getKeysForMapAtLine('$mUser', 2);
 
-      expect(keys).toHaveLength(1);
-      expect(keys).toContain('name');
-      expect(keys).not.toContain('age');
+      expect(result.directKeys).toHaveLength(1);
+      expect(result.directKeys).toContain('name');
+      expect(result.directKeys).not.toContain('age');
     });
 
     it('should handle case-insensitive variable names', () => {
@@ -243,12 +243,12 @@ $MUSER.age = 30
 $muser.email = "test@example.com"
 Local $x = $MuSeR.`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysForMapAtLine('$mUser', 4);
+      const result = parser.getKeysForMapAtLine('$mUser', 4);
 
-      expect(keys).toHaveLength(3);
-      expect(keys).toContain('name');
-      expect(keys).toContain('age');
-      expect(keys).toContain('email');
+      expect(result.directKeys).toHaveLength(3);
+      expect(result.directKeys).toContain('name');
+      expect(result.directKeys).toContain('age');
+      expect(result.directKeys).toContain('email');
     });
 
     it('should ignore commented assignments', () => {
@@ -259,13 +259,13 @@ $mUser.name = "John"
 $mUser.active = true
 Local $x = $mUser.`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysForMapAtLine('$mUser', 5);
+      const result = parser.getKeysForMapAtLine('$mUser', 5);
 
-      expect(keys).toHaveLength(2);
-      expect(keys).toContain('name');
-      expect(keys).toContain('active');
-      expect(keys).not.toContain('commented');
-      expect(keys).not.toContain('alsoCommented');
+      expect(result.directKeys).toHaveLength(2);
+      expect(result.directKeys).toContain('name');
+      expect(result.directKeys).toContain('active');
+      expect(result.directKeys).not.toContain('commented');
+      expect(result.directKeys).not.toContain('alsoCommented');
     });
 
     it('should access global scope from function when no local shadowing', () => {
@@ -278,11 +278,31 @@ Func DoWork()
     Local $x = $mConfig.
 EndFunc`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysForMapAtLine('$mConfig', 6);
+      const result = parser.getKeysForMapAtLine('$mConfig', 6);
 
-      expect(keys).toHaveLength(2);
-      expect(keys).toContain('apiKey');
-      expect(keys).toContain('baseUrl');
+      expect(result.directKeys).toHaveLength(2);
+      expect(result.directKeys).toContain('apiKey');
+      expect(result.directKeys).toContain('baseUrl');
+    });
+
+    it('should include keys added via function calls', () => {
+      const source = `Func AddUserData($userMap)
+    $userMap.name = "test"
+    $userMap.id = 123
+EndFunc
+
+Local $mUser[]
+$mUser.email = "direct"
+AddUserData($mUser)
+Local $x = $mUser.`;
+      const parser = new MapParser(source);
+      const result = parser.getKeysForMapAtLine('$mUser', 8);
+
+      // Should return object with direct and function keys
+      expect(result.directKeys).toContain('email');
+      expect(result.functionKeys.map(k => k.key)).toContain('name');
+      expect(result.functionKeys.map(k => k.key)).toContain('id');
+      expect(result.functionKeys[0].addedInFunction).toBe(true);
     });
   });
 

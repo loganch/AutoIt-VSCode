@@ -130,9 +130,10 @@ export default class MapParser {
    * Get all keys for a Map variable at a specific line (scope-aware)
    * @param {string} mapName - The Map variable name
    * @param {number} targetLine - The line where completion is requested
-   * @returns {string[]} Array of key names
+   * @param {boolean} includeFunctionKeys - Include keys added by function calls
+   * @returns {object} Object with directKeys array and functionKeys array
    */
-  getKeysForMapAtLine(mapName, targetLine) {
+  getKeysForMapAtLine(mapName, targetLine, includeFunctionKeys = true) {
     // Ensure functions are parsed
     if (this.functions.length === 0) {
       this.parseFunctionBoundaries();
@@ -184,7 +185,7 @@ export default class MapParser {
     }
 
     if (!closestDecl) {
-      return [];
+      return { directKeys: [], functionKeys: [] };
     }
 
     // Get all assignments for this Map in the same scope, before targetLine
@@ -210,7 +211,10 @@ export default class MapParser {
       }
     }
 
-    return Array.from(validKeys);
+    const directKeys = Array.from(validKeys);
+    const functionKeys = includeFunctionKeys ? this.getKeysFromFunctionCalls(mapName, targetLine) : [];
+
+    return { directKeys, functionKeys };
   }
 
   /**
