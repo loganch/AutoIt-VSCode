@@ -111,6 +111,31 @@ Comprehensive syntax highlighting for AutoIt code, including:
 
 COM objects are highlighted with a special token scope (`support.class.com.autoit`), allowing themes to style them distinctly from regular functions.
 
+### Map Variable Intelligence
+
+The extension provides intelligent IntelliSense for AutoIt Map variables:
+
+- **Smart key completion**: Type `$mUser.` to see available keys
+- **Scope-aware**: Respects Local/Global scope and function boundaries
+- **Cross-file tracking**: Follows `#include` directives to merge Map definitions
+- **Function parameter tracking**: Detects keys added when Maps are passed to functions
+
+```autoit
+Local $mUser[]
+$mUser.name = "John"
+$mUser.age = 30
+
+; Type $mUser. and see: name, age
+```
+
+Configure in settings:
+
+- `autoit.maps.enableIntelligence` - Enable/disable Map completions (default: true)
+- `autoit.maps.includeDepth` - Max include depth for cross-file tracking (default: 3)
+- `autoit.maps.showFunctionKeys` - Show keys added by functions (default: true)
+
+See [Map Support Documentation](docs/map-support.md) for details.
+
 ---
 
 ## Platform Support
