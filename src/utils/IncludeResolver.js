@@ -1,3 +1,6 @@
+import path from 'path';
+import fs from 'fs';
+
 /**
  * Resolves AutoIt #include directives to file paths
  */
@@ -38,5 +41,37 @@ export default class IncludeResolver {
     });
 
     return includes;
+  }
+
+  /**
+   * Resolve include directive to absolute file path
+   * @param {object} include - Include object from parseIncludes
+   * @param {string} currentFile - Path to current file
+   * @returns {string|null} Resolved absolute path or null if not found
+   */
+  resolveIncludePath(include, currentFile) {
+    if (include.type === 'relative') {
+      // Resolve relative to current file's directory
+      const currentDir = path.dirname(currentFile);
+      const absolutePath = path.resolve(currentDir, include.path);
+
+      if (fs.existsSync(absolutePath)) {
+        return absolutePath;
+      }
+      return null;
+    }
+
+    if (include.type === 'library') {
+      // Try each AutoIt include path
+      for (const includePath of this.autoitIncludePaths) {
+        const absolutePath = path.join(includePath, include.path);
+        if (fs.existsSync(absolutePath)) {
+          return absolutePath;
+        }
+      }
+      return null;
+    }
+
+    return null;
   }
 }
