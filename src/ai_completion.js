@@ -215,15 +215,39 @@ const getMapKeyCompletions = async (document, position, mapName) => {
   }
 
   const mapTrackingService = MapTrackingService.getInstance();
+
+  // Check if mapTrackingService is non-null before using it
+  if (!mapTrackingService) {
+    console.warn('MapTrackingService instance is null');
+    return [];
+  }
+
   const filePath = document.uri.fsPath;
   const { line } = position;
 
-  const result = await mapTrackingService.getKeysForMapWithIncludes(filePath, mapName, line);
+  let result;
+  try {
+    result = await mapTrackingService.getKeysForMapWithIncludes(filePath, mapName, line);
+  } catch (error) {
+    // Log the error and return empty array on failure
+    console.error(`Error getting map keys for ${mapName}:`, error);
+    return [];
+  }
+
+  // Guard that result is an object
+  if (!result || typeof result !== 'object') {
+    console.warn('Invalid result from getKeysForMapWithIncludes:', result);
+    return [];
+  }
+
+  // Guard that directKeys and functionKeys are arrays, treat as empty if missing or invalid
+  const directKeys = Array.isArray(result.directKeys) ? result.directKeys : [];
+  const functionKeys = Array.isArray(result.functionKeys) ? result.functionKeys : [];
 
   const mapCompletions = [];
 
   // Add direct keys (high confidence)
-  result.directKeys.forEach(key => {
+  directKeys.forEach(key => {
     const item = new CompletionItem(key, CompletionItemKind.Property);
     item.detail = `${mapName} property`;
     item.sortText = `0_${key}`; // Sort direct keys first
@@ -233,8 +257,8 @@ const getMapKeyCompletions = async (document, position, mapName) => {
   // Add function-added keys (medium confidence)
   if (showFunctionKeys) {
     const seenFunctionKeys = new Set();
-    result.functionKeys.forEach(keyObj => {
-      if (!seenFunctionKeys.has(keyObj.key)) {
+    functionKeys.forEach(keyObj => {
+      if (keyObj && keyObj.key && !seenFunctionKeys.has(keyObj.key)) {
         seenFunctionKeys.add(keyObj.key);
         const item = new CompletionItem(keyObj.key, CompletionItemKind.Field);
         item.detail = `${mapName} property (added in function)`;
