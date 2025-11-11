@@ -11,6 +11,7 @@ import {
   variablePattern,
 } from './util';
 import DEFAULT_UDFS from './constants';
+import MapTrackingService from './services/MapTrackingService.js';
 
 // Per-document cache for include completions
 const includeCache = new Map(); // Map<documentUri, { files: string[], completions: CompletionItem[] }>
@@ -197,6 +198,55 @@ const getLocalFunctionCompletions = text => {
   return functions;
 };
 
+/**
+ * Get completions for Map variable keys
+ * @param {import('vscode').TextDocument} document
+ * @param {import('vscode').Position} position
+ * @param {string} mapName - The Map variable name (e.g., '$mUser')
+ * @returns {import('vscode').CompletionItem[]}
+ */
+const getMapKeyCompletions = (document, position, mapName) => {
+  const config = workspace.getConfiguration('autoit.maps');
+  const enableIntelligence = config.get('enableIntelligence', true);
+  const showFunctionKeys = config.get('showFunctionKeys', true);
+
+  if (!enableIntelligence) {
+    return [];
+  }
+
+  const mapTrackingService = MapTrackingService.getInstance();
+  const filePath = document.uri.fsPath;
+  const line = position.line;
+
+  const result = mapTrackingService.getKeysForMapWithIncludes(filePath, mapName, line);
+
+  const completions = [];
+
+  // Add direct keys (high confidence)
+  result.directKeys.forEach(key => {
+    const item = new CompletionItem(key, CompletionItemKind.Property);
+    item.detail = `${mapName} property`;
+    item.sortText = `0_${key}`; // Sort direct keys first
+    completions.push(item);
+  });
+
+  // Add function-added keys (medium confidence)
+  if (showFunctionKeys) {
+    const seenFunctionKeys = new Set();
+    result.functionKeys.forEach(keyObj => {
+      if (!seenFunctionKeys.has(keyObj.key)) {
+        seenFunctionKeys.add(keyObj.key);
+        const item = new CompletionItem(keyObj.key, CompletionItemKind.Field);
+        item.detail = `${mapName} property (added in function)`;
+        item.sortText = `1_${keyObj.key}`; // Sort after direct keys
+        completions.push(item);
+      }
+    });
+  }
+
+  return completions;
+};
+
 const provideCompletionItems = (document, position) => {
   // Gather the functions created by the user
 
@@ -213,6 +263,15 @@ const provideCompletionItems = (document, position) => {
   const line = document.lineAt(position.line);
   const firstChar = line.text.charAt(line.firstNonWhitespaceCharacterIndex);
   if (firstChar === ';' || _functionPattern.test(line.text)) return null;
+
+  // Check if we're completing Map keys (e.g., $mUser.)
+  const linePrefix = line.text.slice(0, position.character);
+  const mapKeyPattern = /(\$[a-zA-Z_]\w*)\.\s*$/;
+  const mapMatch = linePrefix.match(mapKeyPattern);
+
+  if (mapMatch) {
+    return getMapKeyCompletions(document, position, mapMatch[1]);
+  }
 
   const variableCompletions = getVariableCompletions(text, prefix);
   const functionCompletions = getLocalFunctionCompletions(text);
