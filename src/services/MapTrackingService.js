@@ -129,9 +129,9 @@ class MapTrackingService {
    * @param {string} filePath - Absolute file path
    * @param {string} mapName - Map variable name
    * @param {number} line - Line number
-   * @returns {object} Object with directKeys and functionKeys arrays
+   * @returns {Promise<object>} Promise resolving to object with directKeys and functionKeys arrays
    */
-  getKeysForMapWithIncludes(filePath, mapName, line) {
+  async getKeysForMapWithIncludes(filePath, mapName, line) {
     // Get keys from current file
     const currentKeys = this.getKeysForMap(filePath, mapName, line);
 
@@ -144,12 +144,16 @@ class MapTrackingService {
       // Parse included file if not already cached
       if (!this.fileParsers.has(includedFile)) {
         try {
-          if (fs.existsSync(includedFile)) {
-            const source = fs.readFileSync(includedFile, 'utf8');
-            this.updateFile(includedFile, source);
-          }
+          // Check if file exists using async access
+          await fs.promises.access(includedFile, fs.constants.F_OK);
+          const source = await fs.promises.readFile(includedFile, 'utf8');
+          this.updateFile(includedFile, source);
         } catch (error) {
-          // Gracefully handle read errors
+          // Log read errors instead of silently continuing
+          console.warn(
+            `[MapTrackingService] Failed to read included file ${includedFile}:`,
+            error.message,
+          );
           continue;
         }
       }

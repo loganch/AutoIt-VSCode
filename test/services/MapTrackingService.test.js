@@ -82,8 +82,8 @@ $mUser.age = 30`,
       jest.clearAllMocks();
     });
 
-    it('should merge keys from included files', () => {
-      // Setup mocks
+    it('should merge keys from included files', async () => {
+      // Setup mocks for both sync (IncludeResolver) and async (MapTrackingService) APIs
       fs.existsSync = jest.fn().mockReturnValue(true);
       fs.readFileSync = jest.fn(filePath => {
         // Normalize paths for comparison (handle Windows/Unix differences)
@@ -106,6 +106,22 @@ $mApp.name = "MyApp"`;
         return '';
       });
 
+      fs.promises = {
+        access: jest.fn().mockResolvedValue(undefined),
+        readFile: jest.fn(filePath => {
+          // Normalize paths for comparison (handle Windows/Unix differences)
+          const normalizedPath = filePath.replace(/\\/g, '/');
+          if (
+            normalizedPath.endsWith('/workspace/config.au3') ||
+            normalizedPath === '/workspace/config.au3'
+          ) {
+            return Promise.resolve(`Global $mApp[]
+$mApp.name = "MyApp"`);
+          }
+          return Promise.resolve('');
+        }),
+      };
+
       const mainSource = `#include "config.au3"
 Local $mApp[]
 $mApp.version = "1.0"`;
@@ -114,14 +130,33 @@ $mApp.version = "1.0"`;
       service.clear();
       service.updateFile('/workspace/main.au3', mainSource);
 
-      const keys = service.getKeysForMapWithIncludes('/workspace/main.au3', '$mApp', 3);
+      const keys = await service.getKeysForMapWithIncludes('/workspace/main.au3', '$mApp', 3);
 
       expect(keys.directKeys).toContain('version');
       expect(keys.directKeys).toContain('name'); // From included file
     });
 
-    it('should handle missing included files gracefully', () => {
-      fs.existsSync = jest.fn().mockReturnValue(false);
+    it('should handle missing included files gracefully', async () => {
+      // Setup mocks for sync API (IncludeResolver)
+      fs.existsSync = jest.fn().mockReturnValue(true);
+      fs.readFileSync = jest.fn(filePath => {
+        const normalizedPath = filePath.replace(/\\/g, '/');
+        if (
+          normalizedPath.endsWith('/workspace/test.au3') ||
+          normalizedPath === '/workspace/test.au3'
+        ) {
+          return `#include "missing.au3"
+Local $mData[]
+$mData.key = "value"`;
+        }
+        return '';
+      });
+
+      // Setup mocks for promises API - simulate file not found error
+      fs.promises = {
+        access: jest.fn().mockRejectedValue(new Error('ENOENT: no such file or directory')),
+        readFile: jest.fn().mockRejectedValue(new Error('ENOENT: no such file or directory')),
+      };
 
       const source = `#include "missing.au3"
 Local $mData[]
@@ -131,10 +166,18 @@ $mData.key = "value"`;
       service.clear();
       service.updateFile('/workspace/test.au3', source);
 
-      const keys = service.getKeysForMapWithIncludes('/workspace/test.au3', '$mData', 3);
+      // Clear any previous console warnings
+      consoleWarnSpy.mockClear();
+
+      const keys = await service.getKeysForMapWithIncludes('/workspace/test.au3', '$mData', 3);
 
       // Should still get keys from current file
       expect(keys.directKeys).toContain('key');
+      // Should have logged warning about missing file
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('[MapTrackingService] Failed to read included file'),
+        expect.any(String),
+      );
     });
   });
 

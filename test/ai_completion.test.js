@@ -298,11 +298,11 @@ describe('ai_completion cache behavior', () => {
     }
   });
 
-  test('returns correct completion types', () => {
+  test('returns correct completion types', async () => {
     const doc = new MockTextDocument(DOC1_CONTENT, DOC1_PATH);
     const position = new MockPosition(4, 1); // Position at start of variable line
 
-    const completions = provideCompletionItems(doc, position);
+    const completions = await provideCompletionItems(doc, position);
 
     expect(Array.isArray(completions)).toBe(true);
     expect(completions.length).toBeGreaterThan(0);
@@ -320,19 +320,19 @@ describe('ai_completion cache behavior', () => {
     expect(includedFuncs.length).toBeGreaterThanOrEqual(0);
   });
 
-  test('does not provide completions in comments', () => {
+  test('does not provide completions in comments', async () => {
     const commentDoc = new MockTextDocument('; This is a comment\nFunc Test()\nEndFunc', DOC1_PATH);
     const position = new MockPosition(0, 5); // Inside comment
 
-    const completions = provideCompletionItems(commentDoc, position);
+    const completions = await provideCompletionItems(commentDoc, position);
     expect(completions).toBeNull();
   });
 
-  test('does not provide completions in function declarations', () => {
+  test('does not provide completions in function declarations', async () => {
     const doc = new MockTextDocument('Func MyFunction($param)\nEndFunc', DOC1_PATH);
     const position = new MockPosition(0, 10); // Inside Func line
 
-    const completions = provideCompletionItems(doc, position);
+    const completions = await provideCompletionItems(doc, position);
     expect(completions).toBeNull();
   });
 });

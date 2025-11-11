@@ -203,9 +203,9 @@ const getLocalFunctionCompletions = text => {
  * @param {import('vscode').TextDocument} document
  * @param {import('vscode').Position} position
  * @param {string} mapName - The Map variable name (e.g., '$mUser')
- * @returns {import('vscode').CompletionItem[]}
+ * @returns {Promise<import('vscode').CompletionItem[]>}
  */
-const getMapKeyCompletions = (document, position, mapName) => {
+const getMapKeyCompletions = async (document, position, mapName) => {
   const config = workspace.getConfiguration('autoit.maps');
   const enableIntelligence = config.get('enableIntelligence', true);
   const showFunctionKeys = config.get('showFunctionKeys', true);
@@ -218,7 +218,7 @@ const getMapKeyCompletions = (document, position, mapName) => {
   const filePath = document.uri.fsPath;
   const { line } = position;
 
-  const result = mapTrackingService.getKeysForMapWithIncludes(filePath, mapName, line);
+  const result = await mapTrackingService.getKeysForMapWithIncludes(filePath, mapName, line);
 
   const mapCompletions = [];
 
@@ -247,7 +247,7 @@ const getMapKeyCompletions = (document, position, mapName) => {
   return mapCompletions;
 };
 
-const provideCompletionItems = (document, position) => {
+const provideCompletionItems = async (document, position) => {
   // Gather the functions created by the user
 
   const text = document.getText();
@@ -270,7 +270,9 @@ const provideCompletionItems = (document, position) => {
   const mapMatch = linePrefix.match(mapKeyPattern);
 
   if (mapMatch) {
-    return getMapKeyCompletions(document, position, mapMatch[1]);
+    // Await the async Map key completions
+    const mapCompletions = await getMapKeyCompletions(document, position, mapMatch[1]);
+    return mapCompletions;
   }
 
   const variableCompletions = getVariableCompletions(text, prefix);
