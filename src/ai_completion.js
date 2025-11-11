@@ -216,18 +216,18 @@ const getMapKeyCompletions = (document, position, mapName) => {
 
   const mapTrackingService = MapTrackingService.getInstance();
   const filePath = document.uri.fsPath;
-  const line = position.line;
+  const { line } = position;
 
   const result = mapTrackingService.getKeysForMapWithIncludes(filePath, mapName, line);
 
-  const completions = [];
+  const mapCompletions = [];
 
   // Add direct keys (high confidence)
   result.directKeys.forEach(key => {
     const item = new CompletionItem(key, CompletionItemKind.Property);
     item.detail = `${mapName} property`;
     item.sortText = `0_${key}`; // Sort direct keys first
-    completions.push(item);
+    mapCompletions.push(item);
   });
 
   // Add function-added keys (medium confidence)
@@ -239,12 +239,12 @@ const getMapKeyCompletions = (document, position, mapName) => {
         const item = new CompletionItem(keyObj.key, CompletionItemKind.Field);
         item.detail = `${mapName} property (added in function)`;
         item.sortText = `1_${keyObj.key}`; // Sort after direct keys
-        completions.push(item);
+        mapCompletions.push(item);
       }
     });
   }
 
-  return completions;
+  return mapCompletions;
 };
 
 const provideCompletionItems = (document, position) => {

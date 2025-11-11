@@ -5,10 +5,19 @@ jest.mock('fs');
 
 describe('MapTrackingService', () => {
   let service;
+  let consoleWarnSpy;
 
   beforeEach(() => {
+    // Reset singleton instance before each test
+    MapTrackingService.resetInstance();
+    // Set up spy before getInstance to catch any warnings
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     service = MapTrackingService.getInstance();
     service.clear(); // Clear state between tests
+  });
+
+  afterEach(() => {
+    consoleWarnSpy.mockRestore();
   });
 
   describe('singleton pattern', () => {
@@ -79,12 +88,18 @@ $mUser.age = 30`,
       fs.readFileSync = jest.fn(filePath => {
         // Normalize paths for comparison (handle Windows/Unix differences)
         const normalizedPath = filePath.replace(/\\/g, '/');
-        if (normalizedPath.endsWith('/workspace/main.au3') || normalizedPath === '/workspace/main.au3') {
+        if (
+          normalizedPath.endsWith('/workspace/main.au3') ||
+          normalizedPath === '/workspace/main.au3'
+        ) {
           return `#include "config.au3"
 Local $mApp[]
 $mApp.version = "1.0"`;
         }
-        if (normalizedPath.endsWith('/workspace/config.au3') || normalizedPath === '/workspace/config.au3') {
+        if (
+          normalizedPath.endsWith('/workspace/config.au3') ||
+          normalizedPath === '/workspace/config.au3'
+        ) {
           return `Global $mApp[]
 $mApp.name = "MyApp"`;
         }
@@ -120,6 +135,80 @@ $mData.key = "value"`;
 
       // Should still get keys from current file
       expect(keys.directKeys).toContain('key');
+    });
+  });
+
+  describe('updateConfiguration', () => {
+    it('should update workspace root and include paths', () => {
+      const initialService = MapTrackingService.getInstance('/workspace1', ['path1'], 3);
+
+      initialService.updateConfiguration('/workspace2', ['path2', 'path3'], 5);
+
+      expect(initialService.workspaceRoot).toBe('/workspace2');
+      expect(initialService.includeResolver.autoitIncludePaths).toEqual(['path2', 'path3']);
+      expect(initialService.includeResolver.maxDepth).toBe(5);
+    });
+
+    it('should clear cached parsers when configuration changes', () => {
+      service.updateFile('/workspace/test.au3', 'Local $mData[]');
+      expect(service.fileParsers.size).toBe(1);
+
+      service.updateConfiguration('/new-workspace', [], 3);
+
+      expect(service.fileParsers.size).toBe(0);
+    });
+  });
+
+  describe('parameter validation', () => {
+    beforeEach(() => {
+      // Clear any warnings from the global beforeEach
+      consoleWarnSpy.mockClear();
+    });
+
+    it('should warn when getInstance is called with different parameters', () => {
+      // Reset and start fresh for this test
+      MapTrackingService.resetInstance();
+      MapTrackingService.getInstance('/workspace1', ['path1'], 3);
+      MapTrackingService.getInstance('/workspace2', ['path2'], 5);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'getInstance called with different parameters than initial instance',
+        ),
+      );
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Use updateConfiguration()'),
+      );
+    });
+
+    it('should not warn when getInstance is called with same parameters', () => {
+      // Reset and start fresh for this test
+      MapTrackingService.resetInstance();
+      MapTrackingService.getInstance('/workspace', ['path'], 3);
+      MapTrackingService.getInstance('/workspace', ['path'], 3);
+
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not warn when getInstance is called with default values matching initial instance', () => {
+      // Initialize with default values
+      MapTrackingService.resetInstance();
+      MapTrackingService.getInstance('', [], 3);
+      // Call again with explicit defaults
+      MapTrackingService.getInstance('', [], 3);
+
+      expect(consoleWarnSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resetInstance', () => {
+    it('should allow creating a new instance after reset', () => {
+      const instance1 = MapTrackingService.getInstance('/workspace1', [], 3);
+      MapTrackingService.resetInstance();
+      const instance2 = MapTrackingService.getInstance('/workspace2', [], 5);
+
+      expect(instance1).not.toBe(instance2);
+      expect(instance2.workspaceRoot).toBe('/workspace2');
     });
   });
 });

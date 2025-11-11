@@ -243,6 +243,27 @@ export const activate = ctx => {
     }
   });
 
+  // Handle configuration changes
+  ctx.subscriptions.push(
+    workspace.onDidChangeConfiguration(event => {
+      if (
+        event.affectsConfiguration('autoit.includePaths') ||
+        event.affectsConfiguration('autoit.maps.includeDepth')
+      ) {
+        const updatedWorkspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+        const updatedConfig = workspace.getConfiguration('autoit');
+        const updatedIncludePaths = updatedConfig.get('includePaths', []);
+        const updatedMaxDepth = updatedConfig.get('maps.includeDepth', 3);
+
+        mapTrackingService.updateConfiguration(
+          updatedWorkspaceRoot,
+          updatedIncludePaths,
+          updatedMaxDepth,
+        );
+      }
+    }),
+  );
+
   if (process.platform === 'win32') {
     const diagnosticCollection = languages.createDiagnosticCollection('autoit');
     ctx.subscriptions.push(diagnosticCollection);

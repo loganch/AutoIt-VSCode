@@ -6,6 +6,11 @@ import fs from 'fs';
  * Singleton service for tracking Map variables across workspace
  */
 class MapTrackingService {
+  /**
+   * @type {MapTrackingService | null}
+   */
+  static instance = null;
+
   constructor(workspaceRoot = '', autoitIncludePaths = [], maxIncludeDepth = 3) {
     if (MapTrackingService.instance) {
       return MapTrackingService.instance;
@@ -19,7 +24,12 @@ class MapTrackingService {
 
   /**
    * Get singleton instance
+   * @param {string} workspaceRoot - Only used on first call, ignored on subsequent calls unless updateConfiguration() is called
+   * @param {string[]} autoitIncludePaths - Only used on first call, ignored on subsequent calls unless updateConfiguration() is called
+   * @param {number} maxIncludeDepth - Only used on first call, ignored on subsequent calls unless updateConfiguration() is called
    * @returns {MapTrackingService}
+   * @note Parameters are only used during initial instantiation. To update configuration
+   *       after initialization, use updateConfiguration() method.
    */
   static getInstance(workspaceRoot, autoitIncludePaths, maxIncludeDepth) {
     if (!MapTrackingService.instance) {
@@ -28,8 +38,49 @@ class MapTrackingService {
         autoitIncludePaths,
         maxIncludeDepth,
       );
+    } else if (
+      workspaceRoot !== undefined ||
+      autoitIncludePaths !== undefined ||
+      maxIncludeDepth !== undefined
+    ) {
+      // Warn if parameters provided don't match stored config
+      const { instance } = MapTrackingService;
+      const hasChanges =
+        (workspaceRoot !== undefined && workspaceRoot !== instance.workspaceRoot) ||
+        (autoitIncludePaths !== undefined &&
+          JSON.stringify(autoitIncludePaths) !==
+            JSON.stringify(instance.includeResolver.autoitIncludePaths)) ||
+        (maxIncludeDepth !== undefined && maxIncludeDepth !== instance.includeResolver.maxDepth);
+
+      if (hasChanges) {
+        console.warn(
+          '[MapTrackingService] getInstance called with different parameters than initial instance. ' +
+            'Use updateConfiguration() to modify singleton settings.',
+        );
+      }
     }
     return MapTrackingService.instance;
+  }
+
+  /**
+   * Update configuration for the singleton instance
+   * @param {string} workspaceRoot - New workspace root directory
+   * @param {string[]} autoitIncludePaths - New AutoIt include paths
+   * @param {number} maxIncludeDepth - New maximum include depth
+   */
+  updateConfiguration(workspaceRoot, autoitIncludePaths, maxIncludeDepth) {
+    this.workspaceRoot = workspaceRoot;
+    this.includeResolver = new IncludeResolver(workspaceRoot, autoitIncludePaths, maxIncludeDepth);
+    // Clear cached parsers to force re-parsing with new include paths
+    this.fileParsers.clear();
+  }
+
+  /**
+   * Reset singleton instance (for testing)
+   * @internal
+   */
+  static resetInstance() {
+    MapTrackingService.instance = null;
   }
 
   /**
