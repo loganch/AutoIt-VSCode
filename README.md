@@ -212,6 +212,10 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 | `autoit.enableParenTriggerForFunctions` | Use `(` to select function completion, add parens, and trigger signature help. Requires reload.  | `true`                                                            |
 | **Code Authoring**                      |                                                                                                  |                                                                   |
 | `autoit.UDFCreator`                     | Author name for Insert Function Header command                                                   | `"Your Name"`                                                     |
+| **Map Intelligence**                    |                                                                                                  |                                                                   |
+| `autoit.maps.enableIntelligence`        | Enable/disable Map completions                                                                   | `true`                                                            |
+| `autoit.maps.includeDepth`              | Max include depth for cross-file tracking                                                        | `3`                                                               |
+| `autoit.maps.showFunctionKeys`          | Show keys added by functions                                                                     | `true`                                                            |
 
 </details>
 
