@@ -176,7 +176,7 @@ export default class MapParser {
         // Target is outside functions, only consider global scope
         if (!declFunc) {
           const distance = targetLine - decl.line;
-          if (distance < closestDistance) {
+          if (distance <= closestDistance) {
             closestDistance = distance;
             closestDecl = decl;
           }
