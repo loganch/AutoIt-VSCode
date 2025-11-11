@@ -130,4 +130,82 @@ describe('IncludeResolver', () => {
       expect(path.normalize(resolved)).toBe(path.normalize(expectedPath));
     });
   });
+
+  describe('resolveAllIncludes', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should resolve all includes recursively', () => {
+      const resolver = new IncludeResolver('/workspace');
+
+      // Mock file system
+      fs.existsSync = jest.fn().mockReturnValue(true);
+      fs.readFileSync = jest.fn(filePath => {
+        const basename = path.basename(filePath);
+        if (basename === 'main.au3') {
+          return '#include "config.au3"';
+        }
+        if (basename === 'config.au3') {
+          return '#include "constants.au3"';
+        }
+        return '';
+      });
+
+      const resolved = resolver.resolveAllIncludes('/workspace/main.au3');
+      const basenames = resolved.map(p => path.basename(p));
+
+      expect(basenames).toContain('config.au3');
+      expect(basenames).toContain('constants.au3');
+      expect(basenames).not.toContain('main.au3'); // Don't include self
+    });
+
+    it('should detect and prevent circular includes', () => {
+      const resolver = new IncludeResolver('/workspace');
+
+      fs.existsSync = jest.fn().mockReturnValue(true);
+      fs.readFileSync = jest.fn(filePath => {
+        const basename = path.basename(filePath);
+        if (basename === 'a.au3') {
+          return '#include "b.au3"';
+        }
+        if (basename === 'b.au3') {
+          return '#include "a.au3"'; // Circular!
+        }
+        return '';
+      });
+
+      const resolved = resolver.resolveAllIncludes('/workspace/a.au3');
+      const basenames = resolved.map(p => path.basename(p));
+
+      // Should include both but not infinite loop
+      expect(basenames).toContain('b.au3');
+      expect(basenames).toHaveLength(1); // Only b.au3, not a.au3 again
+    });
+
+    it('should respect max depth limit', () => {
+      const resolver = new IncludeResolver('/workspace', [], 2);
+
+      fs.existsSync = jest.fn().mockReturnValue(true);
+      fs.readFileSync = jest.fn(filePath => {
+        const basename = path.basename(filePath);
+        if (basename === 'level1.au3') {
+          return '#include "level2.au3"';
+        }
+        if (basename === 'level2.au3') {
+          return '#include "level3.au3"';
+        }
+        if (basename === 'level3.au3') {
+          return '#include "level4.au3"';
+        }
+        return '';
+      });
+
+      const resolved = resolver.resolveAllIncludes('/workspace/level1.au3');
+      const basenames = resolved.map(p => path.basename(p));
+
+      expect(basenames).toContain('level2.au3');
+      expect(basenames).not.toContain('level3.au3'); // Beyond depth limit
+    });
+  });
 });

@@ -5,9 +5,10 @@ import fs from 'fs';
  * Resolves AutoIt #include directives to file paths
  */
 export default class IncludeResolver {
-  constructor(workspaceRoot, autoitIncludePaths = []) {
+  constructor(workspaceRoot, autoitIncludePaths = [], maxDepth = 3) {
     this.workspaceRoot = workspaceRoot;
     this.autoitIncludePaths = autoitIncludePaths;
+    this.maxDepth = maxDepth;
   }
 
   /**
@@ -73,5 +74,55 @@ export default class IncludeResolver {
     }
 
     return null;
+  }
+
+  /**
+   * Resolve all includes recursively with circular detection
+   * @param {string} filePath - Starting file path
+   * @param {Set} visited - Set of already visited files (for circular detection)
+   * @param {number} depth - Current recursion depth
+   * @returns {string[]} Array of resolved file paths
+   */
+  resolveAllIncludes(filePath, visited = new Set(), depth = 0) {
+    // Resolve to absolute path for consistent comparison
+    const absolutePath = path.resolve(filePath);
+
+    if (visited.has(absolutePath)) {
+      return []; // Circular include detected
+    }
+
+    visited.add(absolutePath);
+    const resolvedFiles = [];
+
+    try {
+      if (!fs.existsSync(filePath)) {
+        return [];
+      }
+
+      const source = fs.readFileSync(filePath, 'utf8');
+      const includes = this.parseIncludes(source, filePath);
+
+      for (const include of includes) {
+        const resolved = this.resolveIncludePath(include, filePath);
+        if (resolved) {
+          const absoluteResolved = path.resolve(resolved);
+          if (!visited.has(absoluteResolved)) {
+            // Check depth limit before adding
+            if (depth + 1 < this.maxDepth) {
+              resolvedFiles.push(resolved);
+
+              // Recursively resolve includes in the included file
+              const nested = this.resolveAllIncludes(resolved, visited, depth + 1);
+              resolvedFiles.push(...nested);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      // Gracefully handle file read errors
+      console.warn(`Failed to resolve includes for ${filePath}:`, error.message);
+    }
+
+    return resolvedFiles;
   }
 }
