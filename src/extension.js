@@ -14,6 +14,7 @@ import { registerCommands } from './registerCommands';
 import { formatterProvider } from './ai_formatter';
 import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
 import conf from './ai_config';
+import MapTrackingService from './services/MapTrackingService.js';
 
 const { config } = conf;
 
@@ -171,6 +172,76 @@ export const activate = ctx => {
   ctx.subscriptions.push(languages.setLanguageConfiguration('autoit', languageConfiguration));
 
   registerCommands(ctx);
+
+  // Initialize MapTrackingService
+  const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+  const autoitConfig = workspace.getConfiguration('autoit');
+  const autoitIncludePaths = autoitConfig.get('includePaths', []);
+  const maxIncludeDepth = autoitConfig.get('maps.includeDepth', 3);
+
+  const mapTrackingService = MapTrackingService.getInstance(
+    workspaceRoot,
+    autoitIncludePaths,
+    maxIncludeDepth,
+  );
+
+  // Debounce timer for file changes
+  let updateTimer = null;
+  const DEBOUNCE_DELAY = 300; // ms
+
+  // Track document changes with debouncing
+  const onDocumentChange = document => {
+    if (document.languageId !== 'autoit') return;
+
+    clearTimeout(updateTimer);
+    updateTimer = setTimeout(() => {
+      mapTrackingService.updateFile(document.uri.fsPath, document.getText());
+    }, DEBOUNCE_DELAY);
+  };
+
+  // Handle document open
+  ctx.subscriptions.push(
+    workspace.onDidOpenTextDocument(document => {
+      if (document.languageId === 'autoit') {
+        mapTrackingService.updateFile(document.uri.fsPath, document.getText());
+      }
+    }),
+  );
+
+  // Handle document change (debounced)
+  ctx.subscriptions.push(
+    workspace.onDidChangeTextDocument(event => {
+      onDocumentChange(event.document);
+    }),
+  );
+
+  // Handle document save (immediate update)
+  ctx.subscriptions.push(
+    workspace.onDidSaveTextDocument(document => {
+      if (document.languageId === 'autoit') {
+        clearTimeout(updateTimer); // Cancel debounce
+        mapTrackingService.updateFile(document.uri.fsPath, document.getText());
+      }
+    }),
+  );
+
+  // Handle document close
+  ctx.subscriptions.push(
+    workspace.onDidCloseTextDocument(document => {
+      if (document.languageId === 'autoit') {
+        clearTimeout(updateTimer);
+        // Note: We keep the file in cache for includes
+        // mapTrackingService.removeFile(document.uri.fsPath);
+      }
+    }),
+  );
+
+  // Parse all open AutoIt documents
+  workspace.textDocuments.forEach(document => {
+    if (document.languageId === 'autoit') {
+      mapTrackingService.updateFile(document.uri.fsPath, document.getText());
+    }
+  });
 
   if (process.platform === 'win32') {
     const diagnosticCollection = languages.createDiagnosticCollection('autoit');

@@ -540,6 +540,21 @@
           "minimum": 1,
           "maximum": 100,
           "description": "Number of files to process in each batch when building workspace symbol index. Lower values reduce UI freezing but take longer to complete."
+        },
+        "autoit.maps.enableIntelligence": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable intelligent Map key completions"
+        },
+        "autoit.maps.includeDepth": {
+          "type": "number",
+          "default": 3,
+          "description": "Maximum depth for resolving #include files when tracking Map keys"
+        },
+        "autoit.maps.showFunctionKeys": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show keys added by function parameters (marked with lower confidence)"
         }
       }
     },
