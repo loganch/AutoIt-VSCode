@@ -126,8 +126,6 @@ $mApp.name = "MyApp"`);
 Local $mApp[]
 $mApp.version = "1.0"`;
 
-      service = MapTrackingService.getInstance('/workspace', []);
-      service.clear();
       service.updateFile('/workspace/main.au3', mainSource);
 
       const keys = await service.getKeysForMapWithIncludes('/workspace/main.au3', '$mApp', 3);
@@ -162,8 +160,6 @@ $mData.key = "value"`;
 Local $mData[]
 $mData.key = "value"`;
 
-      service = MapTrackingService.getInstance('/workspace', []);
-      service.clear();
       service.updateFile('/workspace/test.au3', source);
 
       // Clear any previous console warnings
