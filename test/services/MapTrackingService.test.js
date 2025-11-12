@@ -130,6 +130,10 @@ $mApp.version = "1.0"`;
 
       const keys = await service.getKeysForMapWithIncludes('/workspace/main.au3', '$mApp', 3);
 
+      // Verify that the mocks were called during include processing
+      expect(fs.existsSync).toHaveBeenCalled();
+      expect(fs.readFileSync).toHaveBeenCalledWith(expect.stringMatching(/config\.au3$/), 'utf8');
+
       expect(keys.directKeys).toContain('version');
       expect(keys.directKeys).toContain('name'); // From included file
     });
