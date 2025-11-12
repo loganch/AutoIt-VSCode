@@ -74,7 +74,7 @@ describe('IncludeResolver', () => {
       // Check that resolved path ends with correct structure
       expect(resolved).toBeTruthy();
       expect(path.basename(resolved)).toBe('config.au3');
-      expect(resolved.replace(/\\/g, '/')).toMatch(/\/workspace\/src\/config\.au3$/);
+      expect(path.normalize(resolved)).toBe(path.normalize('c:/workspace/src/config.au3'));
     });
 
     it('should resolve relative path with ../', () => {
@@ -89,7 +89,7 @@ describe('IncludeResolver', () => {
       // Check that resolved path ends with correct structure
       expect(resolved).toBeTruthy();
       expect(path.basename(resolved)).toBe('utils.au3');
-      expect(resolved.replace(/\\/g, '/')).toMatch(/\/workspace\/lib\/utils\.au3$/);
+      expect(path.normalize(resolved)).toBe(path.normalize('c:/workspace/lib/utils.au3'));
     });
 
     it('should resolve library include from AutoIt paths', () => {
