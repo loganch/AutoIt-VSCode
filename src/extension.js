@@ -18,6 +18,10 @@ import MapTrackingService from './services/MapTrackingService.js';
 
 const { config } = conf;
 
+// Debounce timers for file changes (Map<string, NodeJS.Timeout>)
+const updateTimers = new Map();
+const DEBOUNCE_DELAY = 300; // ms
+
 /**
  * Runs the check process for the given document and returns the console output.
  * @param {import('vscode').TextDocument} document - The document to run the AU3Check process on.
@@ -185,18 +189,24 @@ export const activate = ctx => {
     maxIncludeDepth,
   );
 
-  // Debounce timer for file changes
-  let updateTimer = null;
-  const DEBOUNCE_DELAY = 300; // ms
-
   // Track document changes with debouncing
   const onDocumentChange = document => {
     if (document.languageId !== 'autoit') return;
 
-    clearTimeout(updateTimer);
-    updateTimer = setTimeout(() => {
-      mapTrackingService.updateFile(document.uri.fsPath, document.getText());
+    const filePath = document.uri.fsPath;
+
+    // Clear existing timer for this specific document
+    if (updateTimers.has(filePath)) {
+      clearTimeout(updateTimers.get(filePath));
+    }
+
+    // Set new timer for this document
+    const timer = setTimeout(() => {
+      mapTrackingService.updateFile(filePath, document.getText());
+      updateTimers.delete(filePath); // Clean up after execution
     }, DEBOUNCE_DELAY);
+
+    updateTimers.set(filePath, timer);
   };
 
   // Handle document open
@@ -219,8 +229,15 @@ export const activate = ctx => {
   ctx.subscriptions.push(
     workspace.onDidSaveTextDocument(document => {
       if (document.languageId === 'autoit') {
-        clearTimeout(updateTimer); // Cancel debounce
-        mapTrackingService.updateFile(document.uri.fsPath, document.getText());
+        const filePath = document.uri.fsPath;
+
+        // Cancel debounce for this specific document
+        if (updateTimers.has(filePath)) {
+          clearTimeout(updateTimers.get(filePath));
+          updateTimers.delete(filePath);
+        }
+
+        mapTrackingService.updateFile(filePath, document.getText());
       }
     }),
   );
@@ -229,9 +246,16 @@ export const activate = ctx => {
   ctx.subscriptions.push(
     workspace.onDidCloseTextDocument(document => {
       if (document.languageId === 'autoit') {
-        clearTimeout(updateTimer);
+        const filePath = document.uri.fsPath;
+
+        // Cancel and clean up timer for this specific document
+        if (updateTimers.has(filePath)) {
+          clearTimeout(updateTimers.get(filePath));
+          updateTimers.delete(filePath);
+        }
+
         // Note: We keep the file in cache for includes
-        // mapTrackingService.removeFile(document.uri.fsPath);
+        // mapTrackingService.removeFile(filePath);
       }
     }),
   );
@@ -319,6 +343,8 @@ export const activate = ctx => {
   console.log('AutoIt is now active!');
 };
 
-// this method is called when your extension is deactivated
-// eslint-disable-next-line prettier/prettier
-export function deactivate() { }
+export function deactivate() {
+  // Clear all pending debounce timers
+  updateTimers.forEach(timer => clearTimeout(timer));
+  updateTimers.clear();
+}
