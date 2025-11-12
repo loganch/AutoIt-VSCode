@@ -549,6 +549,8 @@
         "autoit.maps.includeDepth": {
           "type": "number",
           "default": 3,
+          "minimum": 0,
+          "maximum": 50,
           "description": "Maximum depth for resolving #include files when tracking Map keys"
         },
         "autoit.maps.showFunctionKeys": {
