@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Map variable IntelliSense** - Intelligent key completions when accessing AutoIt Map variables
+  - Shows available keys when typing a Map variable name (e.g., typing `$map` shows known keys)
+  - Tracks Map keys across your workspace and included files
+  - Works with both direct assignments (`$map["key"] = value`) and declarations with initial keys
+  - Configuration options to tune behavior:
+    - `autoit.maps.enableIntelligence` - Enable/disable Map intelligence (default: true)
+    - `autoit.maps.includeDepth` - Maximum depth for resolving #include files (default: 3, range: 0-10)
+    - `autoit.maps.showFunctionKeys` - Show Map keys assigned in functions (default: true)
+  - See [docs/map-support.md](docs/map-support.md) for performance tuning recommendations
+
+### Changed
+
+- Enhanced README documentation with Map intelligence feature details
+
 ## [1.3.0] - 2025-11-10
 
 ### Added
