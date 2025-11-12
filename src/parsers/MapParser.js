@@ -158,7 +158,7 @@ export default class MapParser {
         if (declFunc && declFunc.name === currentFunc.name) {
           // Same function - local takes precedence
           const distance = targetLine - decl.line;
-          if (distance < closestDistance) {
+          if (distance <= closestDistance) {
             closestDistance = distance;
             closestDecl = decl;
           }
@@ -166,7 +166,7 @@ export default class MapParser {
           // Global declaration, but only use if no local found
           if (closestDecl === null || closestDecl.scope.toLowerCase() !== 'local') {
             const distance = targetLine - decl.line;
-            if (distance < closestDistance) {
+            if (distance <= closestDistance) {
               closestDistance = distance;
               closestDecl = decl;
             }
@@ -212,7 +212,9 @@ export default class MapParser {
     }
 
     const directKeys = Array.from(validKeys);
-    const functionKeys = includeFunctionKeys ? this.getKeysFromFunctionCalls(mapName, targetLine) : [];
+    const functionKeys = includeFunctionKeys
+      ? this.getKeysFromFunctionCalls(mapName, targetLine)
+      : [];
 
     return { directKeys, functionKeys };
   }
