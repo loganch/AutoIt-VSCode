@@ -205,7 +205,8 @@ describe('IncludeResolver', () => {
       const basenames = resolved.map(p => path.basename(p));
 
       expect(basenames).toContain('level2.au3');
-      expect(basenames).not.toContain('level3.au3'); // Beyond depth limit
+      expect(basenames).toContain('level3.au3'); // maxDepth=2 allows 2 levels
+      expect(basenames).not.toContain('level4.au3'); // Beyond depth limit
     });
   });
 });

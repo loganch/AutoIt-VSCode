@@ -108,7 +108,7 @@ export default class IncludeResolver {
           const absoluteResolved = path.resolve(resolved);
           if (!visited.has(absoluteResolved)) {
             // Check depth limit before adding
-            if (depth + 1 < this.maxDepth) {
+            if (depth < this.maxDepth) {
               resolvedFiles.push(resolved);
 
               // Recursively resolve includes in the included file
