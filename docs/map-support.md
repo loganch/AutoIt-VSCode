@@ -111,7 +111,17 @@ Show keys that are added when Maps are passed to function parameters. These are 
 
 ### Recommendations
 
-When tuning these settings, consider the trade-offs between feature completeness and editor performance. For large repositories or remote workspaces (WSL, SSH), reducing `autoit.maps.includeDepth` to 1-2 can significantly improve responsiveness by limiting the number of files parsed during include resolution. On very large projects or in CI environments where IntelliSense isn't critical, consider disabling `autoit.maps.enableIntelligence` entirely to minimize resource usage. The `autoit.maps.showFunctionKeys` setting should generally remain enabled for more accurate completions, but can be disabled if you prefer fewer low-confidence suggestions in your completion list. When changing defaults, monitor editor memory usage and response time, and adjust iteratively based on your specific workspace characteristics—what works well for a small local project may need tuning for a large multi-file codebase.
+When tuning these settings, consider the trade-offs between feature completeness and editor performance:
+
+• **includeDepth**: For large repositories or remote workspaces (WSL, SSH), reduce to 1–2 to improve responsiveness by limiting parsed files during include resolution.
+
+• **enableIntelligence**: In very large projects or CI environments where IntelliSense isn't critical, consider disabling to minimize resource usage.
+
+• **showFunctionKeys**: Keep enabled for more accurate completions, but can be disabled if you prefer fewer low-confidence suggestions.
+
+• **Monitoring**: Watch editor memory usage and response time, then adjust settings iteratively based on your workspace characteristics.
+
+What works well for a small local project may need tuning for large multi-file codebases.
 
 ## How It Works
 
