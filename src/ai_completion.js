@@ -10,7 +10,7 @@ import {
   setRegExpFlags,
   variablePattern,
 } from './util';
-import DEFAULT_UDFS from './constants';
+import { DEFAULT_UDFS } from './constants';
 import MapTrackingService from './services/MapTrackingService.js';
 
 // Per-document cache for include completions

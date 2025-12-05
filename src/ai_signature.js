@@ -16,7 +16,7 @@ import {
   libraryIncludePattern,
 } from './util';
 import defaultSigs from './signatures';
-import DEFAULT_UDFS from './constants';
+import { DEFAULT_UDFS } from './constants';
 
 let currentIncludeFiles = [];
 let includes = {};
