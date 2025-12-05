@@ -18,10 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - `autoit.maps.includeDepth` - Maximum depth for resolving #include files (default: 3, range: 0-10)
     - `autoit.maps.showFunctionKeys` - Show Map keys assigned in functions (default: true)
   - See [docs/map-support.md](docs/map-support.md) for performance tuning recommendations
+- Ignore AutoIt Tidy backup files from diagnostics
 
 ### Changed
 
 - Enhanced README documentation with Map intelligence feature details
+
+### Refactored
+
+- Extract and enhance formatter constants into constants.js file
 
 ## [1.3.0] - 2025-11-10
 
