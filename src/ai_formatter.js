@@ -4,15 +4,7 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
 import conf from './ai_config';
-
-// Constants for configuration and file operations
-const FORMATTER_CONSTANTS = {
-  TEMP_FILE_PREFIX: 'temp_format_',
-  BACKUP_DIR_NAME: 'Backup',
-  BACKUP_SUFFIX: '_old1.au3',
-  TIDY_TIMEOUT_MS: 10000, // Increased timeout for better reliability
-  FILE_EXTENSION: '.au3',
-};
+import { FORMATTER } from './constants';
 
 /**
  * AutoIt document formatter provider that integrates with AutoIt3Wrapper Tidy
@@ -45,7 +37,7 @@ const AutoItFormatterProvider = {
     }
 
     const tempFile = generateTempFilePath(workspaceFolder);
-    const backupDir = path.join(workspaceFolder, FORMATTER_CONSTANTS.BACKUP_DIR_NAME);
+    const backupDir = path.join(workspaceFolder, FORMATTER.BACKUP_DIR_NAME);
 
     console.log(`[AutoIt Formatter] Workspace: ${workspaceFolder}`);
     console.log(`[AutoIt Formatter] Temp file: ${tempFile}`);
@@ -157,9 +149,9 @@ async function runTidy(filePath) {
       if (!hasExited && !tidyProcess.killed) {
         hasExited = true;
         tidyProcess.kill('SIGTERM'); // Use SIGTERM for graceful shutdown
-        reject(new Error(`Tidy process timed out after ${FORMATTER_CONSTANTS.TIDY_TIMEOUT_MS}ms`));
+        reject(new Error(`Tidy process timed out after ${FORMATTER.TIDY_TIMEOUT_MS}ms`));
       }
-    }, FORMATTER_CONSTANTS.TIDY_TIMEOUT_MS);
+    }, FORMATTER.TIDY_TIMEOUT_MS);
 
     // Capture stdout and stderr
     tidyProcess.stdout.on('data', data => {
@@ -221,7 +213,7 @@ async function runTidy(filePath) {
 function generateTempFilePath(workspaceFolder) {
   const timestamp = Date.now();
   const randomSuffix = Math.random().toString(36).substring(2, 8);
-  const fileName = `${FORMATTER_CONSTANTS.TEMP_FILE_PREFIX}${timestamp}_${randomSuffix}${FORMATTER_CONSTANTS.FILE_EXTENSION}`;
+  const fileName = `${FORMATTER.TEMP_FILE_PREFIX}${timestamp}_${randomSuffix}${FORMATTER.FILE_EXTENSION}`;
   return path.join(workspaceFolder, fileName);
 }
 
@@ -258,7 +250,7 @@ async function cleanupFiles(tempFile, backupDir) {
   // Clean up backup file if it exists
   const backupFile = path.join(
     backupDir,
-    path.basename(tempFile, FORMATTER_CONSTANTS.FILE_EXTENSION) + FORMATTER_CONSTANTS.BACKUP_SUFFIX,
+    path.basename(tempFile, FORMATTER.FILE_EXTENSION) + FORMATTER.BACKUP_FILE_SUFFIX,
   );
   cleanupPromises.push(
     safeDeleteFile(backupFile).catch(error =>

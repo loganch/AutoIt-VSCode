@@ -140,4 +140,16 @@ const DEFAULT_UDFS = [
   'WordConstants',
 ];
 
-export default DEFAULT_UDFS;
+/**
+ * Formatter constants for AutoIt Tidy and backup operations
+ */
+const FORMATTER = {
+  TEMP_FILE_PREFIX: 'temp_format_',
+  BACKUP_DIR_NAME: 'BackUp',
+  BACKUP_FILE_SUFFIX: '_old1.au3',
+  BACKUP_FILE_SUFFIX_PATTERN: /_old\d*\.au3$/i,
+  TIDY_TIMEOUT_MS: 10000, // Increased timeout for better reliability
+  FILE_EXTENSION: '.au3',
+};
+
+export { DEFAULT_UDFS, FORMATTER };
