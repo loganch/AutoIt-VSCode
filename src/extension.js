@@ -1,7 +1,8 @@
 import { languages, window, workspace } from 'vscode';
-import { dirname } from 'path';
+import { basename, dirname, sep } from 'path';
 import { existsSync } from 'fs';
 import { execFile } from 'child_process';
+import { FORMATTER } from './constants';
 import languageConfiguration from './languageConfiguration';
 import hoverFeature from './ai_hover';
 import completionFeature from './ai_completion';
@@ -132,6 +133,28 @@ const validateFormatterPaths = () => {
 };
 
 /**
+ * Checks if a document should be ignored by diagnostics (AutoIt Tidy backup files)
+ * @param {import('vscode').TextDocument} document - Document to check
+ * @returns {boolean} True if document should be ignored
+ */
+const shouldIgnoreDiagnostics = document => {
+  const filePath = document.uri.fsPath;
+  const fileName = basename(filePath);
+
+  // Ignore files in "BackUp" folder
+  if (filePath.includes(sep + FORMATTER.BACKUP_DIR_NAME + sep)) {
+    return true;
+  }
+
+  // Ignore *_old*.au3 files
+  if (FORMATTER.BACKUP_FILE_SUFFIX_PATTERN.test(fileName)) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
  * Checks the AutoIt code in the given document and updates the diagnostic collection.
  * @param {import('vscode').TextDocument} document - The document to check.
  * @param {import('vscode').DiagnosticCollection} diagnosticCollection - The diagnostic collection to update.
@@ -143,6 +166,12 @@ const checkAutoItCode = async (document, diagnosticCollection) => {
   }
 
   if (document.languageId !== 'autoit') return;
+
+  // Ignore backup files from AutoIt Tidy
+  if (shouldIgnoreDiagnostics(document)) {
+    diagnosticCollection.delete(document.uri);
+    return;
+  }
 
   const { checkPath } = config;
   if (!validateCheckPath(checkPath)) return;
