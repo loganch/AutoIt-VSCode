@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.4.0] - 2026-02-12
 
 ### Added
 
@@ -37,6 +37,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced README documentation with Map intelligence feature details
 - Enhanced variable parsing with support for comma-separated declarations (e.g., `Global $a, $b, $c`) and improved string handling for AutoIt's double-character escaping
 - Extracted formatter constants into constants.js file
+- **Syntax Highlighting Improvements**
+  - Migrated syntax definition from XML to JSON format (`autoit.tmLanguage.json`) for better maintainability and IDE support
+  - Enhanced function pattern matching to distinguish function declarations from function calls with dedicated scopes
+  - Consolidated all 98+ AutoIt macros into dedicated pattern repository for improved consistency
+  - Improved numeric constant parsing with better hexadecimal, decimal, and scientific notation matching
+  - Refined operator patterns for comparison, assignment, arithmetic, and concatenation with proper precedence
+  - Fixed multi-line string handling by refining string end patterns
+  - Enhanced preprocessor directive matching (`#include`, `#pragma`, `#region`, etc.) for better accuracy
+  - Improved comment block pattern matching (`#comments-start`/`#cs` directives)
+  - Reorganized send-key patterns into 13 categorized groups (browser keys, media keys, navigation, numpad, lock, editing, system keys) for granular theme customization
 
 ## [1.3.0] - 2025-11-10
 
@@ -460,6 +470,7 @@ The IntelliSense release!
 - Added the ability to generate a debug MsgBox for a highlighted variable or macro with Ctrl+Shift+D.
 - Added icon, banner color and description for marketplace.
 
+[1.4.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.0.14...v1.1.0
