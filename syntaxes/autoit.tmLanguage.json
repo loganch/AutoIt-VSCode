@@ -82,26 +82,26 @@
           "name": "punctuation.definition.string.end.import.autoit"
         }
       },
-      "match": "^\\s*#(?i:include)\\s+(([\"'<])[^\\r\\n]*?([\"'>]))",
+      "match": "^\\s*#(?i:include)\\s*(([\"'<])[^\\r\\n]*?([\"'>]))",
       "name": "keyword.control.import.autoit"
     },
     {
-      "captures": {
-        "1": {
-          "name": "string.parameter.directives.autoit"
-        }
-      },
-      "match": "^\\s*#\\b(?i:include-once|notrayicon|onautoitstartregister|requireadmin|endregion|forcedef|forceref|ignorefunc|pragma|region)\\b([^;\\r\\n]*)",
-      "name": "keyword.control.directives.autoit"
-    },
-    {
-      "name": "keyword.control.directives.autoit",
-      "match": "^\\s*(#)(AutoIt3Wrapper_\\w+|Au3Stripper_\\w+|Tidy_(Parameters|On|Off|ILC_Pos))\\b",
-      "captures": {
-        "1": {
-          "name": "meta.preprocessor.autoit"
-        }
-      }
+      "name": "string.parameter.directives.autoit",
+      "match": "^\\s*(#\\b(?i:include-once|notrayicon|onautoitstartregister|requireadmin|endregion|forcedef|forceref|ignorefunc|pragma|region|AutoIt3Wrapper_\\w+|Au3Stripper_\\w+|Tidy_(?:Parameters|On|Off|ILC_Pos)))\\b([^;\\r\\n]*)",
+         "captures": {
+          "1": {
+            "patterns": [
+              {
+                "name": "meta.preprocessor.autoit",
+                "match": "(#(?i:forcedef|forceref|ignorefunc|pragma|AutoIt3Wrapper_\\w+|Au3Stripper_\\w+|Tidy_(?:Parameters|On|Off|ILC_Pos)|endregion|region))"
+              },
+              {
+                "name": "keyword.control.directives.autoit",
+                "match": "(#(?i:include-once|notrayicon|requireadmin|onautoitstartregister))"
+              }
+            ]
+          }
+         }
     },
     {
       "begin": "(?i:^\\s*#c(?:omments\\-start|s))\\b.*$",

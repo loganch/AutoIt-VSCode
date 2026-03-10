@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.0] - 2026-02-12
 
+### Fixed
+
+- Includes without trailing space now colorize correctly.
+
+### Changed
+
+- Separated some preprocesors to be colored closer to Scite.
+  - Token scope (`keyword.control.directives.autoit`) now is used for `Include-Once`, `NoTrayIcon`, `RequireAdmin` and `OnAutoItStartRegister`
+  - Token scope (`meta.preprocessor.autoit`) is used for all others.
+
+## [1.4.0] - 2026-02-13
+
 ### Added
 
 - **Map variable IntelliSense** - Intelligent key completions when accessing AutoIt Map variables
