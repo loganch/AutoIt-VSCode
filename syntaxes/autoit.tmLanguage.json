@@ -26,11 +26,24 @@
           "name": "storage.type.autoit"
         }
       },
-      "end": "(?<=\\))|$",
+      "end": "(?<=\\))",
       "patterns": [
         {
           "match": "\\b[a-zA-Z_]\\w*(?=\\s*\\()",
           "name": "entity.name.function.definition.autoit"
+        },
+        {
+          "match": "\\b(?i:byref)\\b",
+          "name": "storage.modifier.autoit"
+        },
+        {
+          "match": "(\\$)[a-zA-Z_]\\w*",
+          "name": "variable.parameter.autoit",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.variable.parameter.autoit"
+            }
+          }
         }
       ]
     },
