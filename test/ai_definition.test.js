@@ -163,6 +163,9 @@ jest.mock(
       languages: {
         registerDefinitionProvider: jest.fn(() => ({ dispose: jest.fn() })),
       },
+      workspace: {
+        onDidChangeTextDocument: jest.fn(),
+      },
       window: {
         showErrorMessage: jest.fn(),
         showInformationMessage: jest.fn(),
@@ -369,7 +372,7 @@ jest.mock('../src/util', () => {
 const util = jest.mocked(require('../src/util')); // get the mock instance with proper typing
 
 // Import the module under test
-const { AutoItDefinitionProvider } = require('../src/ai_definition.js');
+const { AutoItDefinitionProvider, definitionCache } = require('../src/ai_definition.js');
 const definitionProvider = AutoItDefinitionProvider;
 
 function makeDoc(text = MAIN_CONTENT, filePath = MAIN_PATH) {
@@ -538,6 +541,7 @@ function createUtilMocks(options = {}) {
 describe('ai_definition: basic functionality', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
 
     // Clear all global test state
     Object.keys(global).forEach(key => {
@@ -607,6 +611,7 @@ describe('ai_definition: basic functionality', () => {
 describe('ai_definition: edge cases', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
 
     // Clear all global test state
     Object.keys(global).forEach(key => {
@@ -674,6 +679,7 @@ describe('ai_definition: edge cases', () => {
 describe('ai_definition: error handling', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
 
     // Clear all global test state
     Object.keys(global).forEach(key => {
@@ -760,6 +766,7 @@ describe('ai_definition: error handling', () => {
 describe('ai_definition: performance and caching', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
 
     // Clear all global test state
     Object.keys(global).forEach(key => {
@@ -865,6 +872,7 @@ describe('ai_definition: null results when symbol not found', () => {
 describe('ai_definition: advanced circular dependency handling', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
     mockState.reset();
     mockState.clearCache();
     global.getIncludeTextCallCounts = mockState.callCounts;
@@ -937,6 +945,7 @@ describe('ai_definition: advanced circular dependency handling', () => {
 describe('ai_definition: malformed include statement handling', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
     mockState.reset();
     mockState.clearCache();
     global.getIncludeTextCallCounts = mockState.callCounts;
@@ -1004,6 +1013,7 @@ describe('ai_definition: malformed include statement handling', () => {
 describe('ai_definition: environment-specific path handling', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
     mockState.reset();
     mockState.clearCache();
     global.getIncludeTextCallCounts = mockState.callCounts;
@@ -1111,6 +1121,7 @@ describe('ai_definition: environment-specific path handling', () => {
 describe('ai_definition: performance and timeout boundaries', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    definitionCache.clear();
     mockState.reset();
     mockState.clearCache();
     global.getIncludeTextCallCounts = mockState.callCounts;

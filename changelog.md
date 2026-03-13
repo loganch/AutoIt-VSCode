@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Prevented signature provider crashes caused by malformed parameter/function names by escaping dynamic regex fragments in `src/util.js` (`parameterDoc`, `headerRegex`).
 - Made signature parsing fail-safe in `src/util.js` so parameter/header documentation extraction returns safe defaults instead of throwing.
 - Escaped dynamic smart-help query text in `src/commands/ToolCommands.js` before regex construction in `launchHelp` to avoid invalid regular expression errors.
+- **Go to Definition (F12) performance regression** introduced in v1.4.0 — three improvements that together restore lookup speed to parity with v1.1.0/v1.2.0:
+  - Replaced the variable-definition regex in `src/ai_definition.js` with a simpler pattern that eliminates nested lazy quantifiers and a dead-weight optional tail, reducing per-line matching from O(k²) to O(n). Comma-separated declarations (e.g. `Global $a, $b, $c`) continue to resolve correctly.
+  - Added a 5-second stat grace period to `getIncludeText` in `src/util.js` so the synchronous `fs.statSync` call that checked cache freshness is skipped on rapid repeated lookups, eliminating ~30+ redundant syscalls per F12 press on typical projects.
+  - Added a per-document definition result cache in `src/ai_definition.js` (keyed on document URI + symbol name) so repeated F12 on the same symbol with no intervening edit returns immediately. The cache entry is evicted the moment the document is edited.
 
 ## [1.4.0] - 2026-02-12
 

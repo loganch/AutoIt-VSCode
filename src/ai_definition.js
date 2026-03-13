@@ -1,4 +1,4 @@
-import { Location, Position, Range, Uri, languages, window } from 'vscode';
+import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE, getIncludePath, getIncludeScripts, getIncludeText } from './util';
 
 // Constants for better maintainability
@@ -8,11 +8,19 @@ const FUNCTION_KEYWORD = 'Func';
 const VOLATILE_KEYWORD = 'volatile';
 
 // Regex patterns
+//
+// VARIABLE_PATTERN_TEMPLATE - simple, O(n) per line:
+//   ^[ \t]*                                    leading whitespace
+//   (?:(?:{keywords})[ \t]+(?:.*,[ \t]*)?)?   optional declaration keyword;
+//                                              when present, greedily skips
+//                                              any leading comma-separated
+//                                              siblings with one backtrack pass
+//   ({escaped})\b                              the actual target variable
+//
+// The old template used a lazy outer *? loop (nested quantifiers) plus a
+// fully-optional tail that never affected match position — O(k²) per line.
 const VARIABLE_PATTERN_TEMPLATE =
-  '^[ \\t]*(?:(?:{keywords})[ \\t]+)?' +
-  '(?:(?:\\$[A-Za-z_][A-Za-z0-9_]*\\s*(?:=\\s*[^,\\r\\n]+)?\\s*,\\s*)*?)' +
-  '({escaped})\\b' +
-  '(?:[^\\n]*?(?:,\\s*[^\\n]*?)?)(?:\\s*_\\s*\\r?\\n[\\s\\S]*?)?';
+  '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b';
 
 const FUNCTION_PATTERN_A_TEMPLATE =
   '^[ \\t]*{funcKeyword}[ \\t]+(?:{volatile}[ \\t]+)?({escaped})[ \\t]*\\(';
@@ -135,6 +143,12 @@ const AutoItDefinitionProvider = {
       const lookupText = document.getText(lookupRange);
       if (typeof lookupText !== 'string' || lookupText.trim().length === 0) return null;
 
+      // Return cached result when available (cache is invalidated on every document edit)
+      const cacheKey = `${document.uri.toString()}::${lookupText}`;
+      if (definitionCache.has(cacheKey)) {
+        return definitionCache.get(cacheKey);
+      }
+
       const documentText = document.getText();
       if (typeof documentText !== 'string' || documentText.length === 0) return null;
 
@@ -154,7 +168,9 @@ const AutoItDefinitionProvider = {
         const absoluteIndex = match.index + symbolOffsetInMatch;
         const pos = document.positionAt(absoluteIndex);
         const range = new Range(pos, pos);
-        return new Location(document.uri, range);
+        const locationResult = new Location(document.uri, range);
+        definitionCache.set(cacheKey, locationResult);
+        return locationResult;
       }
 
       // Search include files
@@ -168,9 +184,12 @@ const AutoItDefinitionProvider = {
         const { scriptPath, found } = includeResult;
         const pos = new Position(found.line, found.character);
         const range = new Range(pos, pos);
-        return new Location(Uri.file(scriptPath), range);
+        const includeLocation = new Location(Uri.file(scriptPath), range);
+        definitionCache.set(cacheKey, includeLocation);
+        return includeLocation;
       }
 
+      definitionCache.set(cacheKey, null);
       return null;
     } catch (err) {
       // Provide user-friendly error messages while categorizing errors internally
@@ -338,7 +357,26 @@ const AutoItDefinitionProvider = {
   },
 };
 
+// ---------------------------------------------------------------------------
+// Definition result cache
+// Key:   `${document.uri.toString()}::${lookupText}`
+// Value: Location | null
+// Entries are evicted the moment the document is edited, so results never go
+// stale.  The cache only pays off for repeated F12 on the same symbol without
+// any intervening edit (common during code navigation).
+// ---------------------------------------------------------------------------
+const definitionCache = new Map();
+
+workspace.onDidChangeTextDocument(event => {
+  const prefix = event.document.uri.toString() + '::';
+  for (const key of definitionCache.keys()) {
+    if (key.startsWith(prefix)) {
+      definitionCache.delete(key);
+    }
+  }
+});
+
 const defProvider = languages.registerDefinitionProvider(AUTOIT_MODE, AutoItDefinitionProvider);
 
 export default defProvider;
-export { AutoItDefinitionProvider };
+export { AutoItDefinitionProvider, definitionCache };

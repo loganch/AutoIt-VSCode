@@ -169,9 +169,17 @@ const isValidDocument = document => {
 /**
  * Module-level cache for include file contents
  * Key: normalized absolute path
- * Value: { mtimeMs: number, content: string }
+ * Value: { mtimeMs: number, content: string, statCheckedAt: number }
  */
 const includeCache = new Map();
+
+/**
+ * Grace period (ms) during which a cached include file is returned without an
+ * fs.statSync call. Avoids 30+ synchronous stat syscalls per F12 on Windows
+ * when nothing has changed on disk.  After the window lapses the mtime is
+ * re-verified and the entry refreshed if the file was modified.
+ */
+const STAT_GRACE_MS = 5_000;
 
 /**
  * Safely check if file exists with proper error handling
@@ -259,22 +267,30 @@ const getIncludeText = filePath => {
   const ext = path.extname(normalized).toLowerCase();
   if (ext !== '.au3') return '';
 
-  // Check file stats for caching
+  // Return cached content immediately when within the grace period — skips
+  // the synchronous fs.statSync call that would otherwise fire on every F12.
+  const now = Date.now();
+  const cached = includeCache.get(normalized);
+  if (cached && now - cached.statCheckedAt < STAT_GRACE_MS) {
+    return cached.content;
+  }
+
+  // Grace period lapsed (or no entry yet) — stat the file to check freshness.
   const stat = safeFileStat(normalized);
   if (!stat) return '';
 
   const mtimeMs = stat.mtimeMs || 0;
 
-  // Check cache first
-  const cached = includeCache.get(normalized);
+  // Still fresh: update the timestamp so the grace period resets.
   if (cached?.mtimeMs === mtimeMs) {
+    cached.statCheckedAt = now;
     return cached.content;
   }
 
-  // Read file and cache result
+  // File changed (or not cached yet): read and store.
   const content = safeReadFile(normalized);
   if (content) {
-    includeCache.set(normalized, { mtimeMs, content });
+    includeCache.set(normalized, { mtimeMs, content, statCheckedAt: now });
   }
 
   return content;
