@@ -101,7 +101,10 @@ function packageForOpenVSX() {
 
     console.log(`\n✅ Successfully created: ${vsixName}`);
     console.log(`\n📤 To publish to OpenVSX, run:`);
-    console.log(`   npx ovsx publish ${vsixName} -p <YOUR_ACCESS_TOKEN>\n`);
+    console.log(`   npx ovsx publish ${vsixName}`);
+    console.log(
+      '   (Authenticate with OpenVSX using your preferred secure method before publishing.)\n',
+    );
   } catch (error) {
     console.error('\n❌ Error during packaging:', error.message);
     process.exitCode = 1;

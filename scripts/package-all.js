@@ -153,7 +153,10 @@ function packageAll() {
     console.log(`   VS Code Marketplace:`);
     console.log(`   $ npx @vscode/vsce publish\n`);
     console.log(`   OpenVSX:`);
-    console.log(`   $ npx ovsx publish ${openvsxVsixName} -p <YOUR_ACCESS_TOKEN>\n`);
+    console.log(`   $ npx ovsx publish ${openvsxVsixName}`);
+    console.log(
+      '   (Authenticate with OpenVSX using your preferred secure method before publishing.)\n',
+    );
     console.log('═══════════════════════════════════════════════════════════\n');
   } catch (error) {
     console.error('\n❌ Error during packaging:', error.message);
