@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Variable completions not appearing on startup** — `ai_completion.js` was calling `VariableTrackingService.getInstance()` at module load time (before extension activation), which created the singleton with an empty workspace root. The subsequent activation call with the real workspace root triggered a spurious warning and left the service misconfigured. The call is now deferred until completion is actually requested, by which point activation has already initialized the singleton correctly. Additionally, the scope-aware path now falls back to the regex-based approach when the parser returns an empty result (e.g. file not yet indexed, or no explicitly-declared variables), restoring completions for files that use plain `$var = value` assignments.
+
 - Prevented signature provider crashes caused by malformed parameter/function names by escaping dynamic regex fragments in `src/util.js` (`parameterDoc`, `headerRegex`).
 - Made signature parsing fail-safe in `src/util.js` so parameter/header documentation extraction returns safe defaults instead of throwing.
 - Escaped dynamic smart-help query text in `src/commands/ToolCommands.js` before regex construction in `launchHelp` to avoid invalid regular expression errors.

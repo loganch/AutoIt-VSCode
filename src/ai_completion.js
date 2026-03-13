@@ -14,9 +14,6 @@ import { DEFAULT_UDFS } from './constants';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
 
-// Get singleton instance of VariableTrackingService at module level
-const variableTracker = VariableTrackingService.getInstance();
-
 // Per-document cache for include completions
 const includeCache = new Map(); // Map<documentUri, { files: string[], completions: CompletionItem[] }>
 const MAX_CACHE_SIZE = 50; // LRU cache limit
@@ -356,6 +353,7 @@ const provideCompletionItems = async (document, position) => {
 
   if (prefix === '$') {
     // Try scope-aware approach first
+    const variableTracker = VariableTrackingService.getInstance();
     if (!variableTracker) {
       console.warn(
         '[ai_completion] VariableTrackingService instance is null; using regex fallback',
@@ -365,7 +363,13 @@ const provideCompletionItems = async (document, position) => {
       try {
         const filePath = document.uri.fsPath;
         const variables = await variableTracker.getVariablesWithIncludes(filePath, position.line);
-        variableCompletions = createVariableCompletions(variables);
+        if (variables.length > 0) {
+          variableCompletions = createVariableCompletions(variables);
+        } else {
+          // Fall back to regex when scope-aware returns nothing (file not yet parsed,
+          // or file has no explicitly-declared variables)
+          variableCompletions = getVariableCompletions(text, prefix);
+        }
       } catch (error) {
         console.warn(
           '[ai_completion] Scope-aware variables failed, using regex fallback:',
