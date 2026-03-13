@@ -31,6 +31,17 @@ const AI_CONSTANTS = [
 
 const AUTOIT_MODE = { language: 'autoit', scheme: 'file' };
 
+/**
+ * Escapes special regex metacharacters in a dynamic string so it can be used
+ * safely as a literal inside RegExp constructors.
+ * @param {any} value - Value to escape
+ * @returns {string} Escaped regex-safe string
+ */
+const escapeRegexLiteral = value => {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 // ============================================================================
 // CACHED REGEX PATTERNS (Performance Optimization)
 // ============================================================================
@@ -50,13 +61,26 @@ const REGEX_PATTERNS = Object.freeze({
   hasAngleBrackets: /^<.+>$/,
   hasQuotes: /^".+"$/,
   windowsDriveLetter: /^[A-Z]:[\\/]/,
-  parameterDoc: paramEntry =>
-    new RegExp(`;\\s*(?:Parameters\\s*\\.+:)?\\s*(?:\\${paramEntry})\\s+-\\s(?<documentation>.+)`),
-  headerRegex: functionName =>
-    new RegExp(
-      `;\\s*Name\\s*\\.+:\\s+${functionName}\\s*[\r\n]` +
+  parameterDoc: paramEntry => {
+    const normalizedParam =
+      typeof paramEntry === 'string' ? paramEntry.trim().replace(/^\$/, '') : '';
+    const escapedParam = escapeRegexLiteral(normalizedParam);
+
+    if (!escapedParam) return /$^/;
+
+    return new RegExp(
+      `;\\s*(?:Parameters\\s*\\.+:)?\\s*(?:\\$${escapedParam})\\s+-\\s(?<documentation>.+)`,
+    );
+  },
+  headerRegex: functionName => {
+    const escapedFunctionName = escapeRegexLiteral(functionName);
+    if (!escapedFunctionName) return /$^/;
+
+    return new RegExp(
+      `;\\s*Name\\s*\\.+:\\s+${escapedFunctionName}\\s*[\r\n]` +
         ';\\s+Description\\s*\\.+:\\s+(?<description>.+)[\r\n]',
-    ),
+    );
+  },
 });
 
 // ============================================================================
@@ -629,11 +653,17 @@ const extractParamDocumentation = (text, paramEntry, headerIndex) => {
     return '';
   }
 
-  const headerSubstring = text.substring(headerIndex);
-  const paramRegex = REGEX_PATTERNS.parameterDoc(paramEntry);
+  return safeExecute(
+    () => {
+      const headerSubstring = text.substring(headerIndex);
+      const paramRegex = REGEX_PATTERNS.parameterDoc(paramEntry);
 
-  const match = paramRegex.exec(headerSubstring);
-  return match?.groups?.documentation || '';
+      const match = paramRegex.exec(headerSubstring);
+      return match?.groups?.documentation || '';
+    },
+    '',
+    'extractParamDocumentation',
+  );
 };
 
 /**
@@ -699,11 +729,22 @@ const buildFunctionSignature = (functionMatch, fileText, fileName) => {
     return { functionName: '', functionObject: {} };
   }
 
-  const headerRegex = REGEX_PATTERNS.headerRegex(functionName);
-  const headerMatch = fileText.match(headerRegex);
-  const description = headerMatch?.groups?.description || '';
+  let description = '';
+  let functionIndex = -1;
+
+  safeExecute(
+    () => {
+      const headerRegex = REGEX_PATTERNS.headerRegex(functionName);
+      const headerMatch = fileText.match(headerRegex);
+      description = headerMatch?.groups?.description || '';
+      functionIndex = headerMatch?.index ?? -1;
+      return null;
+    },
+    null,
+    'buildFunctionSignature header parsing',
+  );
+
   const functionDocumentation = `${description ? `${description}\r` : ''}Included from ${fileName || 'unknown'}`;
-  const functionIndex = headerMatch?.index ?? -1;
 
   return {
     functionName,

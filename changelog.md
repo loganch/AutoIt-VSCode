@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Regression tests for regex safety in signature parsing (`test/utils/utilSignatureRegexSafety.test.js`) covering malformed parameter/function tokens.
+- Command tests for smart-help behavior and malformed query handling in `launchHelp` (`test/commands/ToolCommands.test.js`).
+
+### Fixed
+
+- Prevented signature provider crashes caused by malformed parameter/function names by escaping dynamic regex fragments in `src/util.js` (`parameterDoc`, `headerRegex`).
+- Made signature parsing fail-safe in `src/util.js` so parameter/header documentation extraction returns safe defaults instead of throwing.
+- Escaped dynamic smart-help query text in `src/commands/ToolCommands.js` before regex construction in `launchHelp` to avoid invalid regular expression errors.
+
 ## [1.4.0] - 2026-02-12
 
 ### Fixed
@@ -482,6 +495,7 @@ The IntelliSense release!
 - Added the ability to generate a debug MsgBox for a highlighted variable or macro with Ctrl+Shift+D.
 - Added icon, banner color and description for marketplace.
 
+[Unreleased]: https://github.com/loganch/AutoIt-VSCode/compare/v1.4.0...HEAD
 [1.4.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.1.0...v1.2.0

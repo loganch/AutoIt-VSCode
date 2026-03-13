@@ -15,6 +15,15 @@ const STATUS_MSG_TIMEOUT_MS = 1500;
 const { config } = conf;
 
 /**
+ * Escapes regex metacharacters so dynamic input can be matched literally.
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeRegexLiteral(value) {
+  return typeof value === 'string' ? value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
+}
+
+/**
  * Get the file name of the active document in the editor.
  *
  * Note that `window.activeTextEditor.document.fileName` is not available in some situations
@@ -212,7 +221,8 @@ function launchHelp() {
       return;
     }
 
-    const regex = new RegExp(`\\bFunc\\s+${query}\\s*\\(`, 'g');
+    const escapedQuery = escapeRegexLiteral(query);
+    const regex = new RegExp(`\\bFunc\\s+${escapedQuery}\\s*\\(`, 'g');
     const udfPaths = paths.udfPath;
 
     for (let j = 0; j < udfPaths.length; j += 1) {
