@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
 /**
  * Quick Flaky Test Check Script
@@ -8,17 +7,21 @@
 
 const { execSync } = require('child_process');
 
+const DEFAULT_RUNS = 3;
+const DEFAULT_TIMEOUT_MS = 15000;
+const EXTRA_JEST_TIMEOUT_MS = 2000;
+
 class QuickFlakyCheck {
   constructor() {
-    this.runs = 3; // Quick check with only 3 runs
-    this.timeout = 15000; // Shorter timeout for quick checks
+    this.runs = DEFAULT_RUNS;
+    this.timeout = DEFAULT_TIMEOUT_MS;
   }
 
   log(message) {
     console.log(`[QuickFlaky] ${message}`);
   }
 
-  async runQuickCheck() {
+  runQuickCheck() {
     this.log('Running quick flaky test check...');
 
     const results = [];
@@ -28,7 +31,7 @@ class QuickFlakyCheck {
         const startTime = Date.now();
         execSync(`npx jest --testTimeout=${this.timeout} --runInBand --silent --no-coverage`, {
           encoding: 'utf8',
-          timeout: this.timeout + 2000,
+          timeout: this.timeout + EXTRA_JEST_TIMEOUT_MS,
         });
         const endTime = Date.now();
 

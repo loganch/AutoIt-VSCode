@@ -19,8 +19,7 @@ const VOLATILE_KEYWORD = 'volatile';
 //
 // The old template used a lazy outer *? loop (nested quantifiers) plus a
 // fully-optional tail that never affected match position — O(k²) per line.
-const VARIABLE_PATTERN_TEMPLATE =
-  '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b';
+const VARIABLE_PATTERN_TEMPLATE = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b';
 
 const FUNCTION_PATTERN_A_TEMPLATE =
   '^[ \\t]*{funcKeyword}[ \\t]+(?:{volatile}[ \\t]+)?({escaped})[ \\t]*\\(';

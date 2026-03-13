@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
 /**
  * Flaky Test Detection Script
@@ -9,11 +8,28 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 
+const DEFAULT_RUNS = 10;
+const DEFAULT_TIMEOUT_MS = 30000;
+const DEFAULT_OUTPUT_FILE = 'flaky-test-results.json';
+const EXTRA_JEST_TIMEOUT_MS = 5000;
+const BYTES_PER_KILOBYTE = 1024;
+const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE * BYTES_PER_KILOBYTE;
+const MAX_JEST_OUTPUT_MB = 5;
+const ITERATION_DELAY_MS = 1000;
+const PERCENT_SCALE = 100;
+const HIGH_VARIANCE_RATIO_THRESHOLD = 0.5;
+const MIN_MEMORY_SAMPLES = 3;
+const MEMORY_LEAK_TREND_RATIO = 0.7;
+const SUMMARY_LINE_WIDTH = 60;
+const ARG_STEP = 2;
+const PARSE_INT_RADIX = 10;
+const CLI_ARGS_START_INDEX = 2;
+
 class FlakyTestDetector {
   constructor(options = {}) {
-    this.runs = options.runs || 10;
-    this.timeout = options.timeout || 30000;
-    this.outputFile = options.outputFile || 'flaky-test-results.json';
+    this.runs = options.runs || DEFAULT_RUNS;
+    this.timeout = options.timeout || DEFAULT_TIMEOUT_MS;
+    this.outputFile = options.outputFile || DEFAULT_OUTPUT_FILE;
     this.testPattern = options.testPattern || '';
     this.results = [];
     this.flakyTests = [];
@@ -24,7 +40,7 @@ class FlakyTestDetector {
     console.log(`[${timestamp}] ${message}`);
   }
 
-  async runTestIteration(iteration) {
+  runTestIteration(iteration) {
     this.log(`Running flaky test detection iteration ${iteration}/${this.runs}`);
 
     const startTime = Date.now();
@@ -39,8 +55,8 @@ class FlakyTestDetector {
 
       execSync(command, {
         encoding: 'utf8',
-        timeout: this.timeout + 5000,
-        maxBuffer: 1024 * 1024 * 5, // 5MB buffer
+        timeout: this.timeout + EXTRA_JEST_TIMEOUT_MS,
+        maxBuffer: BYTES_PER_MEGABYTE * MAX_JEST_OUTPUT_MB,
       });
 
       const endTime = Date.now();
@@ -92,7 +108,7 @@ class FlakyTestDetector {
 
       // Short delay between iterations
       if (i < this.runs) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, ITERATION_DELAY_MS));
       }
     }
 
@@ -102,7 +118,7 @@ class FlakyTestDetector {
   analyzeFlakyBehavior() {
     const passedIterations = this.results.filter(r => r.status === 'PASSED').length;
     const failedIterations = this.results.filter(r => r.status === 'FAILED').length;
-    const successRate = (passedIterations / this.runs) * 100;
+    const successRate = (passedIterations / this.runs) * PERCENT_SCALE;
 
     const executionTimes = this.results.filter(r => r.executionTime).map(r => r.executionTime);
 
@@ -116,8 +132,9 @@ class FlakyTestDetector {
     const executionTimeVariance = maxExecutionTime - minExecutionTime;
 
     // Detect flaky behavior patterns
-    const isFlaky = successRate > 0 && successRate < 100;
-    const hasHighVariance = executionTimeVariance > avgExecutionTime * 0.5; // >50% variance
+    const isFlaky = successRate > 0 && successRate < PERCENT_SCALE;
+    const hasHighVariance =
+      executionTimeVariance > avgExecutionTime * HIGH_VARIANCE_RATIO_THRESHOLD;
     const hasMemoryLeaks = this.detectMemoryLeaks();
 
     const analysis = {
@@ -140,7 +157,7 @@ class FlakyTestDetector {
     };
 
     // Save results
-    fs.writeFileSync(this.outputFile, JSON.stringify(analysis, null, 2));
+    fs.writeFileSync(this.outputFile, JSON.stringify(analysis, null, ARG_STEP));
 
     this.printAnalysis(analysis);
 
@@ -152,7 +169,7 @@ class FlakyTestDetector {
       .filter(r => r.memoryUsage && r.memoryUsage.heapUsed)
       .map(r => r.memoryUsage.heapUsed);
 
-    if (memoryUsages.length < 3) return false;
+    if (memoryUsages.length < MIN_MEMORY_SAMPLES) return false;
 
     // Check for consistently increasing memory usage
     let increasingTrend = 0;
@@ -163,7 +180,7 @@ class FlakyTestDetector {
     }
 
     // If more than 70% of iterations show increasing memory, suspect a leak
-    return increasingTrend / (memoryUsages.length - 1) > 0.7;
+    return increasingTrend / (memoryUsages.length - 1) > MEMORY_LEAK_TREND_RATIO;
   }
 
   generateRecommendations(isFlaky, hasHighVariance, hasMemoryLeaks) {
@@ -201,9 +218,9 @@ class FlakyTestDetector {
   }
 
   printAnalysis(analysis) {
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(SUMMARY_LINE_WIDTH));
     console.log('🔍 FLAKY TEST DETECTION ANALYSIS');
-    console.log('='.repeat(60));
+    console.log('='.repeat(SUMMARY_LINE_WIDTH));
     console.log(`Total iterations: ${analysis.totalIterations}`);
     console.log(`Passed: ${analysis.passedIterations} ✅`);
     console.log(
@@ -222,7 +239,7 @@ class FlakyTestDetector {
       analysis.recommendations.forEach(rec => console.log(rec));
     }
 
-    console.log('='.repeat(60));
+    console.log('='.repeat(SUMMARY_LINE_WIDTH));
 
     if (analysis.isFlaky) {
       console.log('\n⚠️ FLAKY TESTS DETECTED');
@@ -237,20 +254,20 @@ class FlakyTestDetector {
 
 // CLI execution
 if (require.main === module) {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(CLI_ARGS_START_INDEX);
   const options = {};
 
   // Parse command line arguments
-  for (let i = 0; i < args.length; i += 2) {
+  for (let i = 0; i < args.length; i += ARG_STEP) {
     const flag = args[i];
     const value = args[i + 1];
 
     switch (flag) {
       case '--runs':
-        options.runs = parseInt(value, 10);
+        options.runs = parseInt(value, PARSE_INT_RADIX);
         break;
       case '--timeout':
-        options.timeout = parseInt(value, 10);
+        options.timeout = parseInt(value, PARSE_INT_RADIX);
         break;
       case '--output':
         options.outputFile = value;

@@ -1,7 +1,7 @@
 const grammar = require('../../syntaxes/autoit.tmLanguage.json');
 
 function getFunctionRule() {
-  return grammar.patterns.find((pattern) => pattern.name === 'meta.function.autoit');
+  return grammar.patterns.find(pattern => pattern.name === 'meta.function.autoit');
 }
 
 function toJsRegex(onigurumaPattern, { global = false, multiline = false } = {}) {
@@ -63,13 +63,13 @@ describe('AutoIt grammar function declaration parameter scopes', () => {
     expect(functionRule).toBeDefined();
 
     const parameterPattern = functionRule.patterns.find(
-      (pattern) => pattern.name === 'variable.parameter.autoit'
+      pattern => pattern.name === 'variable.parameter.autoit',
     );
 
     expect(parameterPattern).toBeDefined();
     expect(parameterPattern.match).toBe('(\\$)[a-zA-Z_]\\w*');
     expect(parameterPattern.captures?.['1']?.name).toBe(
-      'punctuation.definition.variable.parameter.autoit'
+      'punctuation.definition.variable.parameter.autoit',
     );
   });
 
@@ -81,14 +81,14 @@ describe('AutoIt grammar function declaration parameter scopes', () => {
   test('single-line declarations capture all parameter variables', () => {
     const functionRule = getFunctionRule();
     const parameterPattern = functionRule.patterns.find(
-      (pattern) => pattern.name === 'variable.parameter.autoit'
+      pattern => pattern.name === 'variable.parameter.autoit',
     );
 
     const source = 'Func Example($first, ByRef $second = 42)\nEndFunc';
     const declarationSegment = extractFunctionDeclarationSegment(source, functionRule);
 
     const parameterRegex = toJsRegex(parameterPattern.match, { global: true });
-    const matches = [...declarationSegment.matchAll(parameterRegex)].map((match) => match[0]);
+    const matches = [...declarationSegment.matchAll(parameterRegex)].map(match => match[0]);
 
     expect(matches).toEqual(['$first', '$second']);
   });
@@ -96,19 +96,19 @@ describe('AutoIt grammar function declaration parameter scopes', () => {
   test('multiline declarations capture parameter variables across continued lines', () => {
     const functionRule = getFunctionRule();
     const parameterPattern = functionRule.patterns.find(
-      (pattern) => pattern.name === 'variable.parameter.autoit'
+      pattern => pattern.name === 'variable.parameter.autoit',
     );
 
     const source = [
       'Func Example($first, _',
       '    ByRef $second = 42, _',
       '    $third = "x")',
-      'EndFunc'
+      'EndFunc',
     ].join('\n');
 
     const declarationSegment = extractFunctionDeclarationSegment(source, functionRule);
     const parameterRegex = toJsRegex(parameterPattern.match, { global: true });
-    const matches = [...declarationSegment.matchAll(parameterRegex)].map((match) => match[0]);
+    const matches = [...declarationSegment.matchAll(parameterRegex)].map(match => match[0]);
 
     expect(matches).toEqual(['$first', '$second', '$third']);
   });

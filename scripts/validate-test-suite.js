@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
 /**
  * Test Suite Validation Script
@@ -9,11 +8,27 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 
+const DEFAULT_RUNS = 5;
+const DEFAULT_TIMEOUT_MS = 45000;
+const DEFAULT_OUTPUT_FILE = 'validation-results.json';
+const EXTRA_JEST_TIMEOUT_MS = 5000;
+const BYTES_PER_KILOBYTE = 1024;
+const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE * BYTES_PER_KILOBYTE;
+const MAX_JEST_OUTPUT_MB = 10;
+const RUN_DELAY_MS = 2000;
+const PASS_RATE_REQUIRED = 100;
+const PERFORMANCE_THRESHOLD_MS = 30000;
+const SUMMARY_LINE_WIDTH = 60;
+const ARG_STEP = 2;
+const PARSE_INT_RADIX = 10;
+const DECIMAL_PLACES = 2;
+const CLI_ARGS_START_INDEX = 2;
+
 class TestSuiteValidator {
   constructor(options = {}) {
-    this.runs = options.runs || 5;
-    this.timeout = options.timeout || 45000;
-    this.outputFile = options.outputFile || 'validation-results.json';
+    this.runs = options.runs || DEFAULT_RUNS;
+    this.timeout = options.timeout || DEFAULT_TIMEOUT_MS;
+    this.outputFile = options.outputFile || DEFAULT_OUTPUT_FILE;
     this.results = [];
     this.startTime = Date.now();
   }
@@ -23,7 +38,7 @@ class TestSuiteValidator {
     console.log(`[${timestamp}] ${message}`);
   }
 
-  async runSingleTest(runNumber) {
+  runSingleTest(runNumber) {
     this.log(`Starting test run ${runNumber}/${this.runs}`);
 
     const runStartTime = Date.now();
@@ -34,8 +49,8 @@ class TestSuiteValidator {
         `npx jest --testTimeout=${this.timeout} --runInBand --verbose --no-coverage`,
         {
           encoding: 'utf8',
-          timeout: this.timeout + 5000,
-          maxBuffer: 1024 * 1024 * 10, // 10MB buffer
+          timeout: this.timeout + EXTRA_JEST_TIMEOUT_MS,
+          maxBuffer: BYTES_PER_MEGABYTE * MAX_JEST_OUTPUT_MB,
         },
       );
 
@@ -93,7 +108,7 @@ class TestSuiteValidator {
       // Add delay between runs to prevent resource conflicts
       if (i < this.runs) {
         this.log('⏳ Waiting 2 seconds before next run...');
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, RUN_DELAY_MS));
       }
     }
 
@@ -104,7 +119,7 @@ class TestSuiteValidator {
     const totalTime = Date.now() - this.startTime;
     const passedRuns = this.results.filter(r => r.status === 'PASSED').length;
     const failedRuns = this.results.filter(r => r.status === 'FAILED').length;
-    const passRate = (passedRuns / this.runs) * 100;
+    const passRate = (passedRuns / this.runs) * PASS_RATE_REQUIRED;
 
     const executionTimes = this.results.filter(r => r.executionTime).map(r => r.executionTime);
 
@@ -135,13 +150,13 @@ class TestSuiteValidator {
       minExecutionTime,
       maxExecutionTime,
       averageMemoryDelta: Math.round(avgMemoryDelta),
-      isReliable: passRate >= 100, // All tests must pass for reliability
-      isPerformant: avgExecutionTime < 30000, // Average under 30 seconds
+      isReliable: passRate >= PASS_RATE_REQUIRED,
+      isPerformant: avgExecutionTime < PERFORMANCE_THRESHOLD_MS,
       results: this.results,
     };
 
     // Save results to file
-    fs.writeFileSync(this.outputFile, JSON.stringify(summary, null, 2));
+    fs.writeFileSync(this.outputFile, JSON.stringify(summary, null, ARG_STEP));
 
     this.printSummary(summary);
 
@@ -149,9 +164,9 @@ class TestSuiteValidator {
   }
 
   printSummary(summary) {
-    console.log('\n' + '='.repeat(60));
+    console.log('\n' + '='.repeat(SUMMARY_LINE_WIDTH));
     console.log('📊 TEST SUITE VALIDATION SUMMARY');
-    console.log('='.repeat(60));
+    console.log('='.repeat(SUMMARY_LINE_WIDTH));
     console.log(`Total runs: ${summary.totalRuns}`);
     console.log(`Passed: ${summary.passedRuns} ✅`);
     console.log(`Failed: ${summary.failedRuns} ${summary.failedRuns > 0 ? '❌' : '✅'}`);
@@ -161,10 +176,12 @@ class TestSuiteValidator {
     console.log(`Average execution time: ${summary.averageExecutionTime}ms`);
     console.log(`Min execution time: ${summary.minExecutionTime}ms`);
     console.log(`Max execution time: ${summary.maxExecutionTime}ms`);
-    console.log(`Average memory delta: ${(summary.averageMemoryDelta / 1024 / 1024).toFixed(2)}MB`);
+    console.log(
+      `Average memory delta: ${(summary.averageMemoryDelta / BYTES_PER_KILOBYTE / BYTES_PER_KILOBYTE).toFixed(DECIMAL_PLACES)}MB`,
+    );
     console.log(`Total validation time: ${summary.totalExecutionTime}ms`);
     console.log(`Results saved to: ${this.outputFile}`);
-    console.log('='.repeat(60));
+    console.log('='.repeat(SUMMARY_LINE_WIDTH));
 
     if (!summary.isReliable) {
       console.log('\n❌ TEST SUITE IS NOT RELIABLE');
@@ -183,20 +200,20 @@ class TestSuiteValidator {
 
 // CLI execution
 if (require.main === module) {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(CLI_ARGS_START_INDEX);
   const options = {};
 
   // Parse command line arguments
-  for (let i = 0; i < args.length; i += 2) {
+  for (let i = 0; i < args.length; i += ARG_STEP) {
     const flag = args[i];
     const value = args[i + 1];
 
     switch (flag) {
       case '--runs':
-        options.runs = parseInt(value);
+        options.runs = parseInt(value, PARSE_INT_RADIX);
         break;
       case '--timeout':
-        options.timeout = parseInt(value);
+        options.timeout = parseInt(value, PARSE_INT_RADIX);
         break;
       case '--output':
         options.outputFile = value;
