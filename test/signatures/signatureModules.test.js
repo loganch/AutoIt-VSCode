@@ -1,0 +1,88 @@
+jest.mock('vscode', () => ({
+  CompletionItemKind: {
+    Function: 'function',
+    Constant: 'constant',
+  },
+  MarkdownString: class MarkdownString {
+    constructor(value = '') {
+      this.value = value;
+    }
+
+    appendCodeblock(code, language) {
+      this.codeblock = { code, language };
+      return this;
+    }
+  },
+  window: {
+    showErrorMessage: jest.fn(),
+  },
+  workspace: {
+    getConfiguration: jest.fn(() => ({
+      get: jest.fn(() => false),
+    })),
+    onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
+  },
+}));
+
+jest.mock('../../src/ai_config', () => ({
+  __esModule: true,
+  default: {
+    findFilepath: jest.fn(() => ''),
+  },
+}));
+
+const signatureModules = [
+  require('../../src/signatures/udf_guictrlavi.js'),
+  require('../../src/signatures/udf_sendmessage.js'),
+  require('../../src/signatures/udf_clipboard.js'),
+  require('../../src/signatures/udf_eventlog.js'),
+  require('../../src/signatures/udf_misc.js'),
+  require('../../src/signatures/WinAPIEx/WinAPIDiag.js'),
+  require('../../src/signatures/WinAPIEx/WinAPICom.js'),
+  require('../../src/signatures/udf_guictrltoolbar.js'),
+  require('../../src/signatures/udf_guictrlstatusbar.js'),
+  require('../../src/signatures/udf_guictrlmonthcal.js'),
+  require('../../src/signatures/udf_guiimagelist.js'),
+  require('../../src/signatures/udf_guiscrollbars.js'),
+  require('../../src/signatures/udf_color.js'),
+  require('../../src/signatures/udf_inet.js'),
+  require('../../src/signatures/udf_security.js'),
+  require('../../src/signatures/udf_guictrlrebar.js'),
+  require('../../src/signatures/udf_guitooltip.js'),
+  require('../../src/signatures/udf_process.js'),
+  require('../../src/signatures/udf_guictrlheader.js'),
+  require('../../src/signatures/udf_guictrlipaddress.js'),
+  require('../../src/signatures/udf_string.js'),
+  require('../../src/signatures/udf_timers.js'),
+  require('../../src/signatures/udf_math.js'),
+  require('../../src/signatures/udf_sound.js'),
+  require('../../src/signatures/udf_ie.js'),
+  require('../../src/signatures/udf_guictrlcomboboxex.js'),
+  require('../../src/signatures/WinAPIEx/WinAPIMisc.js'),
+  require('../../src/signatures/WinAPIEx/WinAPIDlg.js'),
+];
+
+describe('signature modules', () => {
+  test.each(signatureModules)('exports signatures, hovers, and completions', moduleExports => {
+    const { completions, default: signatures, hovers } = moduleExports;
+    const [firstSignatureName] = Object.keys(signatures);
+
+    expect(firstSignatureName).toEqual(expect.any(String));
+    expect(signatures[firstSignatureName]).toEqual(
+      expect.objectContaining({
+        documentation: expect.any(String),
+        label: expect.any(String),
+      }),
+    );
+    expect(hovers[firstSignatureName]).toBeDefined();
+    expect(Array.isArray(completions)).toBe(true);
+    expect(completions.length).toBeGreaterThan(0);
+    expect(completions[0]).toEqual(
+      expect.objectContaining({
+        detail: expect.stringContaining('#include'),
+        kind: 'function',
+        label: expect.any(String),
+      }),
+    );
+  });
+});
