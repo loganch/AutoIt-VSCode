@@ -69,15 +69,13 @@ class QuickFlakyCheck {
 // CLI execution
 if (require.main === module) {
   const checker = new QuickFlakyCheck();
-  checker
-    .runQuickCheck()
-    .then(success => {
-      process.exit(success ? 0 : 1);
-    })
-    .catch(error => {
-      console.error('Quick flaky check failed:', error);
-      process.exit(1);
-    });
+  try {
+    const success = checker.runQuickCheck();
+    process.exit(success ? 0 : 1);
+  } catch (error) {
+    console.error('Quick flaky check failed:', error);
+    process.exit(1);
+  }
 }
 
 module.exports = { QuickFlakyCheck };

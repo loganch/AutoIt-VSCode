@@ -10,13 +10,10 @@
  * 4. Restores original package.json
  */
 
-import { readFileSync, writeFileSync, copyFileSync, unlinkSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
+const { readFileSync, writeFileSync, copyFileSync, unlinkSync } = require('fs');
+const { join } = require('path');
+const { execSync } = require('child_process');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 const rootDir = join(__dirname, '..');
 const packageJsonPath = join(rootDir, 'package.json');
 const backupPath = join(rootDir, 'package.json.backup');
@@ -169,5 +166,17 @@ function packageAll() {
   }
 }
 
-// Run the script
-packageAll();
+if (require.main === module) {
+  packageAll();
+}
+
+module.exports = {
+  rootDir,
+  packageJsonPath,
+  backupPath,
+  readPackageJson,
+  writePackageJson,
+  restorePackageJson,
+  packageExtension,
+  packageAll,
+};
