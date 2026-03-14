@@ -9,6 +9,9 @@ const path = require('path');
 const DOC1_PATH = path.join(process.cwd(), 'test', 'fixtures', 'doc1.au3');
 const DOC2_PATH = path.join(process.cwd(), 'test', 'fixtures', 'doc2.au3');
 const INCLUDE_PATH = path.join(process.cwd(), 'test', 'fixtures', 'include.au3');
+const VARIABLE_LINE_INDEX = 4;
+const COMMENT_CHAR_INDEX = 5;
+const FUNCTION_DECLARATION_CHAR_INDEX = 10;
 
 // Mock document contents
 const DOC1_CONTENT = [
@@ -26,8 +29,6 @@ const DOC2_CONTENT = [
   'EndFunc',
   'Local $var2 = 2',
 ].join('\n');
-
-const INCLUDE_CONTENT = ['Func IncludedFunc($x)', '  Return $x', 'EndFunc'].join('\n');
 
 // Mock VSCode classes
 class MockUri {
@@ -90,20 +91,6 @@ class MockTextDocument {
     return undefined;
   }
 }
-
-// Mock workspace with proper return values
-const mockGetConfig = jest.fn(() => false);
-const mockWorkspace = {
-  getConfiguration: jest.fn(() => ({
-    get: mockGetConfig,
-  })),
-  onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
-  onDidCloseTextDocument: jest.fn(() => ({ dispose: jest.fn() })),
-};
-
-const mockLanguages = {
-  registerCompletionItemProvider: jest.fn(() => ({ dispose: jest.fn() })),
-};
 
 const mockCompletionItemKind = {
   Function: 3,
@@ -174,7 +161,7 @@ const mockFindFilepath = jest.fn(file => {
   return null;
 });
 
-const mockGetIncludeData = jest.fn((file, doc) => {
+const mockGetIncludeData = jest.fn((file, _doc) => {
   if (file === 'include.au3' || file === INCLUDE_PATH) {
     return { IncludedFunc: {} };
   }
@@ -197,22 +184,23 @@ jest.mock('../src/constants', () => []);
 
 describe('ai_completion cache behavior', () => {
   let provideCompletionItems;
-  let vscode;
+  let languages;
+  let workspace;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
 
     // Get vscode mock
-    vscode = require('vscode');
+    ({ languages, workspace } = require('vscode'));
 
     // Re-import to get fresh module state
-    const completionModule = require('../src/ai_completion');
+    require('../src/ai_completion');
 
     // Extract the provider function
-    const registerCall = vscode.languages.registerCompletionItemProvider.mock.calls[0];
-    if (registerCall && registerCall[1]) {
-      provideCompletionItems = registerCall[1].provideCompletionItems;
+    const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
+    if (provider) {
+      ({ provideCompletionItems } = provider);
     }
   });
 
@@ -279,7 +267,7 @@ describe('ai_completion cache behavior', () => {
 
   test('cleans up cache on document close', () => {
     // Get the onDidCloseTextDocument listener
-    const closeListener = vscode.workspace.onDidCloseTextDocument.mock.calls[0]?.[0];
+    const closeListener = workspace.onDidCloseTextDocument.mock.calls[0]?.[0];
 
     if (closeListener) {
       const doc = new MockTextDocument(DOC1_CONTENT, DOC1_PATH, 'autoit');
@@ -300,7 +288,7 @@ describe('ai_completion cache behavior', () => {
 
   test('returns correct completion types', async () => {
     const doc = new MockTextDocument(DOC1_CONTENT, DOC1_PATH);
-    const position = new MockPosition(4, 1); // Position at start of variable line
+    const position = new MockPosition(VARIABLE_LINE_INDEX, 1); // Position at start of variable line
 
     const completions = await provideCompletionItems(doc, position);
 
@@ -322,7 +310,7 @@ describe('ai_completion cache behavior', () => {
 
   test('does not provide completions in comments', async () => {
     const commentDoc = new MockTextDocument('; This is a comment\nFunc Test()\nEndFunc', DOC1_PATH);
-    const position = new MockPosition(0, 5); // Inside comment
+    const position = new MockPosition(0, COMMENT_CHAR_INDEX); // Inside comment
 
     const completions = await provideCompletionItems(commentDoc, position);
     expect(completions).toBeNull();
@@ -330,7 +318,7 @@ describe('ai_completion cache behavior', () => {
 
   test('does not provide completions in function declarations', async () => {
     const doc = new MockTextDocument('Func MyFunction($param)\nEndFunc', DOC1_PATH);
-    const position = new MockPosition(0, 10); // Inside Func line
+    const position = new MockPosition(0, FUNCTION_DECLARATION_CHAR_INDEX); // Inside Func line
 
     const completions = await provideCompletionItems(doc, position);
     expect(completions).toBeNull();
@@ -339,23 +327,23 @@ describe('ai_completion cache behavior', () => {
 
 describe('arraysMatch utility', () => {
   let provideCompletionItems;
-  let vscode;
+  let languages;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
 
     // Get vscode mock
-    vscode = require('vscode');
+    ({ languages } = require('vscode'));
 
     // Access internal function through module
-    const completionModule = require('../src/ai_completion');
+    require('../src/ai_completion');
     // Note: arraysMatch is not exported, so we test it indirectly through cache behavior
 
     // Extract the provider function
-    const registerCall = vscode.languages.registerCompletionItemProvider.mock.calls[0];
-    if (registerCall && registerCall[1]) {
-      provideCompletionItems = registerCall[1].provideCompletionItems;
+    const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
+    if (provider) {
+      ({ provideCompletionItems } = provider);
     }
   });
 
@@ -366,8 +354,6 @@ describe('arraysMatch utility', () => {
 
     // First doc
     provideCompletionItems(doc1, position);
-    const firstCount = mockGetIncludeData.mock.calls.length;
-
     mockGetIncludeData.mockClear();
 
     // Same doc structure, should use cache

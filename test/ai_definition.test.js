@@ -13,6 +13,16 @@ const HELPER_PATH = path.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
 const MISSING_PATH = path.join(process.cwd(), 'test', 'fixtures', 'missing.au3');
 const LIB_ARRAY_PATH = path.join(process.cwd(), 'lib', 'Array.au3'); // fake normalized lib include
 
+const LARGE_INCLUDE_COUNT = 1000;
+const LARGE_INCLUDE_TARGET_INDEX = 500;
+const LARGE_INCLUDE_LOOKUP_MAX_MS = 3000;
+const LARGE_INCLUDE_TEST_TIMEOUT_MS = 10_000;
+const HUGE_FUNCTION_COUNT = 10_000;
+const HUGE_FUNCTION_TARGET_INDEX = 5000;
+const HUGE_FUNCTION_LOOKUP_MAX_MS = 2000;
+const HUGE_FUNCTION_TEST_TIMEOUT_MS = 15_000;
+const CACHE_LOOKUP_TOLERANCE_MS = 5;
+
 const MAIN_CONTENT = [
   '#include "helper.au3"',
   '#include <Array.au3>', // note: our parser will not use <> literally; util mocks return data for lib include
@@ -1133,7 +1143,7 @@ describe('ai_definition: performance and timeout boundaries', () => {
     const largeContent = {};
 
     // Create 1000 fake includes
-    for (let i = 0; i < 1000; i++) {
+    for (let i = 0; i < LARGE_INCLUDE_COUNT; i++) {
       const fakePath = path.join(process.cwd(), 'fake', `file${i}.au3`);
       largeIncludeList.push(fakePath);
       largeContent[normalizeP(fakePath)] = `; Fake file ${i}\n`;
@@ -1142,7 +1152,7 @@ describe('ai_definition: performance and timeout boundaries', () => {
     // Put the target file in the middle
     const targetPath = path.join(process.cwd(), 'target.au3');
     const targetContent = 'Func TargetFunc()\n  Return "found"\nEndFunc\n';
-    largeIncludeList[500] = targetPath;
+    largeIncludeList[LARGE_INCLUDE_TARGET_INDEX] = targetPath;
     largeContent[normalizeP(targetPath)] = targetContent;
 
     const mocks = createUtilMocks({
@@ -1161,17 +1171,18 @@ describe('ai_definition: performance and timeout boundaries', () => {
 
     expect(res).toBeTruthy();
     expect(res.uri.fsPath).toBe(normalizeP(targetPath));
-    expect(endTime - startTime).toBeLessThan(3000); // Should complete within 3 seconds
-  }, 10000); // 10-second test timeout
+    expect(endTime - startTime).toBeLessThan(LARGE_INCLUDE_LOOKUP_MAX_MS); // Should complete within 3 seconds
+  }, LARGE_INCLUDE_TEST_TIMEOUT_MS); // 10-second test timeout
 
   test('handles extremely long file content efficiently', () => {
     const hugeFunctionList = [];
-    for (let i = 0; i < 10000; i++) {
+    for (let i = 0; i < HUGE_FUNCTION_COUNT; i++) {
       hugeFunctionList.push(`Func HugeFunc${i}()\n  Return ${i}\nEndFunc\n`);
     }
 
     // Add target function in the middle
-    hugeFunctionList[5000] = 'Func TargetHugeFunc()\n  Return "target"\nEndFunc\n';
+    hugeFunctionList[HUGE_FUNCTION_TARGET_INDEX] =
+      'Func TargetHugeFunc()\n  Return "target"\nEndFunc\n';
 
     const hugeContent = hugeFunctionList.join('\n');
     const hugePath = path.join(process.cwd(), 'huge.au3');
@@ -1193,8 +1204,8 @@ describe('ai_definition: performance and timeout boundaries', () => {
     const endTime = Date.now();
 
     expect(res).toBeTruthy();
-    expect(endTime - startTime).toBeLessThan(2000); // Should complete within 2 seconds
-  }, 15000); // 15-second test timeout
+    expect(endTime - startTime).toBeLessThan(HUGE_FUNCTION_LOOKUP_MAX_MS); // Should complete within 2 seconds
+  }, HUGE_FUNCTION_TEST_TIMEOUT_MS); // 15-second test timeout
 
   test('performance regression test - caching improves repeated lookups', () => {
     const mocks = createUtilMocks({
@@ -1229,6 +1240,6 @@ describe('ai_definition: performance and timeout boundaries', () => {
     expect(res1.uri.fsPath).toBe(res2.uri.fsPath);
 
     // Second lookup should be faster or equal (caching benefit)
-    expect(secondLookupTime).toBeLessThanOrEqual(firstLookupTime + 5); // Allow 5ms tolerance
+    expect(secondLookupTime).toBeLessThanOrEqual(firstLookupTime + CACHE_LOOKUP_TOLERANCE_MS); // Allow 5ms tolerance
   });
 });

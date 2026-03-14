@@ -30,6 +30,7 @@ const AI_CONSTANTS = [
 ];
 
 const AUTOIT_MODE = { language: 'autoit', scheme: 'file' };
+const MIN_FUNCTION_MATCH_PARTS = 4;
 
 /**
  * Escapes special regex metacharacters in a dynamic string so it can be used
@@ -734,7 +735,11 @@ const getParams = (paramText, text, headerIndex) => {
  * @returns {Object} Object with functionName (string) and functionObject (signature data with label, documentation, params)
  */
 const buildFunctionSignature = (functionMatch, fileText, fileName) => {
-  if (!functionMatch || !Array.isArray(functionMatch) || functionMatch.length < 4) {
+  if (
+    !functionMatch ||
+    !Array.isArray(functionMatch) ||
+    functionMatch.length < MIN_FUNCTION_MATCH_PARTS
+  ) {
     handleError('buildFunctionSignature', 'Invalid function match', false, { functionMatch });
     return { functionName: '', functionObject: {} };
   }

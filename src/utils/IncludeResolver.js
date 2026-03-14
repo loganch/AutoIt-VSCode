@@ -1,11 +1,13 @@
 import path from 'path';
 import fs from 'fs';
 
+const DEFAULT_MAX_INCLUDE_DEPTH = 3;
+
 /**
  * Resolves AutoIt #include directives to file paths
  */
 export default class IncludeResolver {
-  constructor(workspaceRoot, autoitIncludePaths = [], maxDepth = 3) {
+  constructor(workspaceRoot, autoitIncludePaths = [], maxDepth = DEFAULT_MAX_INCLUDE_DEPTH) {
     this.workspaceRoot = workspaceRoot;
     this.autoitIncludePaths = autoitIncludePaths;
     this.maxDepth = maxDepth;
