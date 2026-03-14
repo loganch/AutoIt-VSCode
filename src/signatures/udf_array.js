@@ -1,12 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import {
-  br,
-  defaultZero,
-  valueFirstHeader as header,
-  opt,
-  signatureToCompletion,
-  signatureToHover,
-} from '../util';
+import { br, defaultZero, opt, signatureToCompletion, signatureToHover } from '../util';
 
 const include = '(Requires: `#include <Array.au3>`)';
 

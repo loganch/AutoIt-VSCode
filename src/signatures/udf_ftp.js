@@ -1,11 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import {
-  br,
-  valueFirstHeader as header,
-  opt,
-  signatureToCompletion,
-  signatureToHover,
-} from '../util';
+import { signatureToCompletion, signatureToHover } from '../util';
 
 const include = '(Requires: `#include <FTPEx.au3>`)';
 
