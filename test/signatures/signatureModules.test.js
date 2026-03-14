@@ -53,6 +53,7 @@ jest.mock('../../src/ai_config', () => ({
 }));
 
 const signatureModules = [
+  require('../../src/signatures/functions.js'),
   require('../../src/signatures/udf_guictrlavi.js'),
   require('../../src/signatures/udf_sendmessage.js'),
   require('../../src/signatures/udf_clipboard.js'),
