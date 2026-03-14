@@ -76,6 +76,13 @@ const signatureModules = [
   require('../../src/signatures/udf_guictrllistview.js'),
   require('../../src/signatures/WinAPIEx/WinAPIGdi.js'),
   require('../../src/signatures/WinAPIEx/WinAPISys.js'),
+  require('../../src/signatures/udf_winapi.js'),
+  require('../../src/signatures/udf_winnet.js'),
+  require('../../src/signatures/WinAPIEx/WinAPILocale.js'),
+  require('../../src/signatures/udf_memory.js'),
+  require('../../src/signatures/udf_guictrldtp.js'),
+  require('../../src/signatures/WinAPIEx/WinAPIProc.js'),
+  require('../../src/signatures/udf_guictrllistbox.js'),
 ];
 
 describe('signature modules', () => {
