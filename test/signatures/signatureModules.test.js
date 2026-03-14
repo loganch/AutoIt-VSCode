@@ -2,6 +2,7 @@ jest.mock('vscode', () => ({
   CompletionItemKind: {
     Function: 'function',
     Constant: 'constant',
+    Keyword: 'keyword',
   },
   MarkdownString: class MarkdownString {
     constructor(value = '') {
@@ -10,6 +11,26 @@ jest.mock('vscode', () => ({
 
     appendCodeblock(code, language) {
       this.codeblock = { code, language };
+      return this;
+    }
+  },
+  SnippetString: class SnippetString {
+    constructor(value = '') {
+      this.value = value;
+    }
+
+    appendText(text) {
+      this.value += text;
+      return this;
+    }
+
+    appendPlaceholder(text) {
+      this.value += text;
+      return this;
+    }
+
+    appendChoice(choices) {
+      this.value += choices.join('|');
       return this;
     }
   },
@@ -83,6 +104,10 @@ const signatureModules = [
   require('../../src/signatures/udf_guictrldtp.js'),
   require('../../src/signatures/WinAPIEx/WinAPIProc.js'),
   require('../../src/signatures/udf_guictrllistbox.js'),
+  require('../../src/signatures/keywords.js'),
+  require('../../src/signatures/udf_guictrltreeview.js'),
+  require('../../src/signatures/udf_excel.js'),
+  require('../../src/signatures/WinAPIEx/WinAPIFiles.js'),
 ];
 
 describe('signature modules', () => {
@@ -104,8 +129,8 @@ describe('signature modules', () => {
       expect(completions.length).toBeGreaterThan(0);
       expect(completions[0]).toEqual(
         expect.objectContaining({
-          detail: expect.stringContaining('#include'),
-          kind: 'function',
+          detail: expect.any(String),
+          kind: expect.any(String),
           label: expect.any(String),
         }),
       );
