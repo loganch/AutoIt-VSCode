@@ -108,6 +108,12 @@ const signatureModules = [
   require('../../src/signatures/udf_guictrltreeview.js'),
   require('../../src/signatures/udf_excel.js'),
   require('../../src/signatures/WinAPIEx/WinAPIFiles.js'),
+  require('../../src/signatures/udf_netshare.js'),
+  require('../../src/signatures/udf_guictrlslider.js'),
+  require('../../src/signatures/udf_namedpipes.js'),
+  require('../../src/signatures/udf_guictrlcombobox.js'),
+  require('../../src/signatures/udf_crypt.js'),
+  require('../../src/signatures/udf_file.js'),
 ];
 
 describe('signature modules', () => {
