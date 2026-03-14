@@ -2,6 +2,8 @@ import { window } from 'vscode';
 import { performance } from 'node:perf_hooks';
 
 let lastHide = 0;
+const MESSAGE_BURST_COUNT = 4;
+const MESSAGE_COOLDOWN_MS = 900;
 // accepts new option parameter in second argument: timeout
 const initMessage = type => {
   const timers = {};
@@ -26,7 +28,7 @@ const initMessage = type => {
       // https://github.com/microsoft/vscode/issues/153693
       for (
         let i = 0;
-        i < 4;
+        i < MESSAGE_BURST_COUNT;
         i += 1 // showing rapidly 4 messages hides the message...an exploit?
       )
         window[type].apply(window[type], args);
@@ -36,7 +38,7 @@ const initMessage = type => {
     };
     timers[message] = timeout !== undefined && setTimeout(callback, timeout);
     // vscode doesn't display new message if previous message was forcibly hidden less then 1 sec ago
-    const messageTimeout = 900 - (performance.now() - lastHide);
+    const messageTimeout = MESSAGE_COOLDOWN_MS - (performance.now() - lastHide);
     return {
       get isHidden() {
         return isHidden;

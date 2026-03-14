@@ -20,6 +20,7 @@ import { DEFAULT_UDFS } from './constants';
 
 let currentIncludeFiles = [];
 let includes = {};
+const FUNCTION_NAME_PART_INDEX_FROM_END = 2;
 
 /**
  * Reduces a partial line of code to the current Function for parsing
@@ -52,7 +53,8 @@ function getCurrentFunction(code) {
     return null;
   }
 
-  const functionCallPart = functionCallParts[functionCallParts.length - 2].match(/(.*)\b(\w+)/);
+  const currentFunctionPartIndex = functionCallParts.length - FUNCTION_NAME_PART_INDEX_FROM_END;
+  const functionCallPart = functionCallParts[currentFunctionPartIndex].match(/(.*)\b(\w+)/);
   if (functionCallPart) {
     return functionCallPart[2];
   }

@@ -306,19 +306,22 @@ const AutoItDefinitionProvider = {
         if (!m || typeof m.index !== 'number') {
           continue;
         }
+        const [fullMatch, firstGroup, secondGroup] = m;
 
         // Determine the capture for the symbol name
         let capture = null;
         if (lookupText && lookupText.startsWith('$')) {
-          capture = m[1] || null;
-        } else {
+          capture = firstGroup || null;
+        } else if (firstGroup) {
           // function name capture may be in group 1 (pattern A) or 2 (pattern B)
-          capture = m[1] || m[2] || null;
+          capture = firstGroup;
+        } else if (secondGroup) {
+          capture = secondGroup;
         }
 
         const symbol = capture || lookupText || '';
-        const idx = capture ? m.index + m[0].indexOf(capture) : m.index;
-        const length = capture ? capture.length : m[0] ? m[0].length : 0;
+        const idx = capture ? m.index + fullMatch.indexOf(capture) : m.index;
+        const length = capture?.length ?? fullMatch?.length ?? 0;
 
         // Compute line and character
         const prefix = scriptContent.slice(0, idx);

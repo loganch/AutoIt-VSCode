@@ -85,6 +85,7 @@ let listenerId = 0;
 let aiPath = { path: '', dir: '', file: '', isRelative: false };
 let bNoEvents;
 const isWinOS = process.platform === 'win32';
+const MESSAGE_HIDE_DELAY_MS = 1000;
 let showErrors = false;
 
 /**
@@ -225,7 +226,7 @@ function fixPath(value, data) {
 function showError(sPath, data, msgSuffix) {
   if (!msgSuffix) return;
 
-  const timeout = data.message && !data.message.isHidden ? 1000 : 0;
+  const timeout = data.message && !data.message.isHidden ? MESSAGE_HIDE_DELAY_MS : 0;
   if (timeout) {
     data.message.hide();
     delete data.message;

@@ -6,6 +6,10 @@ import path from 'path';
 import conf from './ai_config';
 import { FORMATTER } from './constants';
 
+const RANDOM_SUFFIX_START_INDEX = 2;
+const RANDOM_SUFFIX_END_INDEX = 8;
+const BASE_36_RADIX = 36;
+
 /**
  * AutoIt document formatter provider that integrates with AutoIt3Wrapper Tidy
  * Handles formatting of AutoIt (.au3) files using the external Tidy tool
@@ -99,7 +103,7 @@ export const formatterProvider = languages.registerDocumentFormattingEditProvide
  * @returns {Promise<void>} Resolves when formatting completes successfully
  * @throws {Error} If Tidy process fails or times out
  */
-async function runTidy(filePath) {
+function runTidy(filePath) {
   return new Promise((resolve, reject) => {
     console.log(`[AutoIt Formatter] Starting Tidy process for: ${filePath}`);
 
@@ -212,7 +216,9 @@ async function runTidy(filePath) {
  */
 function generateTempFilePath(workspaceFolder) {
   const timestamp = Date.now();
-  const randomSuffix = Math.random().toString(36).substring(2, 8);
+  const randomSuffix = Math.random()
+    .toString(BASE_36_RADIX)
+    .substring(RANDOM_SUFFIX_START_INDEX, RANDOM_SUFFIX_END_INDEX);
   const fileName = `${FORMATTER.TEMP_FILE_PREFIX}${timestamp}_${randomSuffix}${FORMATTER.FILE_EXTENSION}`;
   return path.join(workspaceFolder, fileName);
 }

@@ -7,6 +7,8 @@ const symbolsCache = new Map();
 // Debouncing state for search requests
 let searchDebounceTimer = null;
 const SEARCH_DEBOUNCE_MS = 300;
+const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
+const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
 
 /**
  * Recursively extract key symbols from nested structure
@@ -163,8 +165,8 @@ async function processBatch(files, batchSize, token) {
 async function getWorkspaceSymbols(token) {
   try {
     const config = workspace.getConfiguration('autoit');
-    const maxFiles = config.get('workspaceSymbolMaxFiles', 500);
-    const batchSize = config.get('workspaceSymbolBatchSize', 10);
+    const maxFiles = config.get('workspaceSymbolMaxFiles', DEFAULT_MAX_WORKSPACE_SYMBOL_FILES);
+    const batchSize = config.get('workspaceSymbolBatchSize', DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE);
 
     const workspaceScripts = await workspace.findFiles('**/*.{au3,a3x}');
 
