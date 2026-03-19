@@ -4,6 +4,7 @@
  */
 
 const { execSync } = require('child_process');
+const CLI_ARGS_START_INDEX = 2;
 
 /**
  * Debug utility class for test isolation and execution
@@ -256,7 +257,7 @@ module.exports = { TestDebugger };
 // CLI usage when run directly
 if (require.main === module) {
   const testDebugger = new TestDebugger();
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(CLI_ARGS_START_INDEX);
 
   if (args.length === 0) {
     console.log('🔬 AutoIt VSCode Test Debugger');
