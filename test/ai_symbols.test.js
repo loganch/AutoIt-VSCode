@@ -5,6 +5,11 @@
 
 const path = require('path');
 
+const SYMBOL_MAX_LINES = 50000;
+const DEFAULT_MAP_INCLUDE_DEPTH = 3;
+const EXPECTED_MAP_KEY_COUNT = 2;
+const EXPECTED_MULTIPLE_MAP_COUNT = 3;
+
 // Mock VSCode classes
 class MockUri {
   constructor(fsPath) {
@@ -164,9 +169,9 @@ const mockVSCode = {
   workspace: {
     getConfiguration: jest.fn(() => ({
       get: jest.fn((key, defaultValue) => {
-        if (key === 'symbolMaxLines') return 50000;
+        if (key === 'symbolMaxLines') return SYMBOL_MAX_LINES;
         if (key === 'includePaths') return [];
-        if (key === 'maps.includeDepth') return 3;
+        if (key === 'maps.includeDepth') return DEFAULT_MAP_INCLUDE_DEPTH;
         if (key === 'maps.enableIntelligence') return true;
         if (key === 'enableIntelligence') return true;
         return defaultValue;
@@ -206,9 +211,9 @@ describe('Map Symbol Generation', () => {
     originalGetConfiguration = mockVSCode.workspace.getConfiguration;
     mockVSCode.workspace.getConfiguration = jest.fn(() => ({
       get: jest.fn((key, defaultValue) => {
-        if (key === 'symbolMaxLines') return 50000;
+        if (key === 'symbolMaxLines') return SYMBOL_MAX_LINES;
         if (key === 'includePaths') return [];
-        if (key === 'maps.includeDepth') return 3;
+        if (key === 'maps.includeDepth') return DEFAULT_MAP_INCLUDE_DEPTH;
         if (key === 'maps.enableIntelligence') return true;
         if (key === 'enableIntelligence') return true;
         return defaultValue;
@@ -234,7 +239,7 @@ $mUser.age = 30`;
       const mapSymbol = symbols.find(s => s.kind === SymbolKind.Variable && s.detail === 'Map');
       expect(mapSymbol).toBeDefined();
       expect(mapSymbol.name).toBe('$mUser');
-      expect(mapSymbol.children).toHaveLength(2);
+      expect(mapSymbol.children).toHaveLength(EXPECTED_MAP_KEY_COUNT);
 
       const keyNames = mapSymbol.children.map(c => c.name);
       expect(keyNames).toContain('"name"');
@@ -282,7 +287,7 @@ $mUser["email"] = "alice@example.com"`;
 
       const mapSymbol = symbols.find(s => s.name === '$mUser');
       expect(mapSymbol).toBeDefined();
-      expect(mapSymbol.children).toHaveLength(2);
+      expect(mapSymbol.children).toHaveLength(EXPECTED_MAP_KEY_COUNT);
 
       const keyNames = mapSymbol.children.map(c => c.name);
       expect(keyNames).toContain('"username"');
@@ -316,7 +321,7 @@ $mData["quoted"] = "value"`;
 
       const mapSymbol = symbols.find(s => s.name === '$mData');
       expect(mapSymbol).toBeDefined();
-      expect(mapSymbol.children).toHaveLength(3);
+      expect(mapSymbol.children).toHaveLength(DEFAULT_MAP_INCLUDE_DEPTH);
 
       const keyNames = mapSymbol.children.map(c => c.name);
       expect(keyNames).toContain('"static"');
@@ -354,7 +359,7 @@ $mData.value = 123`;
       const symbols = await provideDocumentSymbols(doc);
 
       const mapSymbols = symbols.filter(s => s.kind === SymbolKind.Variable && s.detail === 'Map');
-      expect(mapSymbols).toHaveLength(3);
+      expect(mapSymbols).toHaveLength(EXPECTED_MULTIPLE_MAP_COUNT);
 
       const mapNames = mapSymbols.map(m => m.name);
       expect(mapNames).toContain('$mUser');
@@ -432,7 +437,7 @@ $mData.key = "value"`;
       mockVSCode.workspace.getConfiguration = jest.fn(() => ({
         get: jest.fn((key, defaultValue) => {
           if (key === 'enableIntelligence') return false;
-          if (key === 'symbolMaxLines') return 50000;
+          if (key === 'symbolMaxLines') return SYMBOL_MAX_LINES;
           return defaultValue;
         }),
       }));

@@ -36,7 +36,8 @@ describe('TestSuiteValidator', () => {
 
   it('captures successful test run result', () => {
     const validator = new TestSuiteValidator({ timeout: 100 });
-    jest.spyOn(process, 'memoryUsage')
+    jest
+      .spyOn(process, 'memoryUsage')
       .mockReturnValueOnce({ heapUsed: 100, heapTotal: 200, external: 50, rss: 1000 })
       .mockReturnValueOnce({ heapUsed: 150, heapTotal: 260, external: 60, rss: 1200 });
     jest.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(1300);
@@ -60,7 +61,9 @@ describe('TestSuiteValidator', () => {
 
   it('captures failed test run result', () => {
     const validator = new TestSuiteValidator({ timeout: 120 });
-    jest.spyOn(process, 'memoryUsage').mockReturnValue({ heapUsed: 0, heapTotal: 0, external: 0, rss: 0 });
+    jest
+      .spyOn(process, 'memoryUsage')
+      .mockReturnValue({ heapUsed: 0, heapTotal: 0, external: 0, rss: 0 });
     jest.spyOn(Date, 'now').mockReturnValueOnce(500).mockReturnValueOnce(850);
 
     const error = new Error('failed run');
@@ -76,7 +79,12 @@ describe('TestSuiteValidator', () => {
     expect(result.status).toBe('FAILED');
     expect(result.executionTime).toBe(350);
     expect(result.error).toEqual(
-      expect.objectContaining({ message: 'failed run', stdout: 'stdout', stderr: 'stderr', code: 1 }),
+      expect.objectContaining({
+        message: 'failed run',
+        stdout: 'stdout',
+        stderr: 'stderr',
+        code: 1,
+      }),
     );
   });
 

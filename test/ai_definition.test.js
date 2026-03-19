@@ -22,6 +22,18 @@ const HUGE_FUNCTION_TARGET_INDEX = 5000;
 const HUGE_FUNCTION_LOOKUP_MAX_MS = 2000;
 const HUGE_FUNCTION_TEST_TIMEOUT_MS = 15_000;
 const CACHE_LOOKUP_TOLERANCE_MS = 5;
+const NORMAL_FUNC_DECLARATION_LINE = 10;
+const NORMAL_FUNC_DECLARATION_COLUMN = 5;
+const VARIABLE_DECLARATION_LINE_A = 2;
+const VARIABLE_DECLARATION_LINE_B = 3;
+const VARIABLE_DECLARATION_LINES = [VARIABLE_DECLARATION_LINE_A, VARIABLE_DECLARATION_LINE_B];
+const GLOBAL_DECLARATION_LINE = 4;
+const NESTED_INCLUDE_FAKE_FILE_COUNT = 200;
+const NESTED_INCLUDE_HELPER_INSERT_INDEX = 150;
+const CACHE_CALL_COUNT_MAX = 2;
+const CIRCULAR_INCLUDE_FILE_COUNT = 10;
+const CIRCULAR_INCLUDE_REPEAT_FACTOR = 3;
+const CIRCULAR_LOOKUP_MAX_MS = 5000;
 
 const MAIN_CONTENT = [
   '#include "helper.au3"',
@@ -200,16 +212,16 @@ const mockState = {
     this.cachedMocks = new WeakMap();
   },
 
-  getCachedContent(path) {
-    return this.cache.get(path);
+  getCachedContent(cacheKey) {
+    return this.cache.get(cacheKey);
   },
 
-  setCachedContent(path, content) {
-    this.cache.set(path, content);
+  setCachedContent(cacheKey, content) {
+    this.cache.set(cacheKey, content);
   },
 
-  hasCachedContent(path) {
-    return this.cache.has(path);
+  hasCachedContent(cacheKey) {
+    return this.cache.has(cacheKey);
   },
 };
 
@@ -218,10 +230,10 @@ const normalizeP = p => path.normalize(p);
 // Mock fs used by util.js (only statSync, readFileSync as per instructions)
 jest.mock('fs', () => {
   // Define paths and content locally within the mock to avoid Jest scoping issues
-  const path = require('path');
-  const mockMainPath = path.join(process.cwd(), 'test', 'fixtures', 'main.au3');
-  const mockHelperPath = path.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
-  const mockLibArrayPath = path.join(process.cwd(), 'lib', 'Array.au3');
+  const pathModule = require('path');
+  const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
+  const mockHelperPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
+  const mockLibArrayPath = pathModule.join(process.cwd(), 'lib', 'Array.au3');
 
   // Define content constants locally
   const mockMainContent = [
@@ -265,11 +277,11 @@ jest.mock('fs', () => {
   return {
     statSync: jest.fn(p => {
       // make MAIN, HELPER, LIB exist, missing throws
-      const n = path.normalize(p);
+      const n = pathModule.normalize(p);
       if (
-        n === path.normalize(mockMainPath) ||
-        n === path.normalize(mockHelperPath) ||
-        n === path.normalize(mockLibArrayPath)
+        n === pathModule.normalize(mockMainPath) ||
+        n === pathModule.normalize(mockHelperPath) ||
+        n === pathModule.normalize(mockLibArrayPath)
       ) {
         return { isFile: () => true };
       }
@@ -280,10 +292,10 @@ jest.mock('fs', () => {
       throw err;
     }),
     readFileSync: jest.fn((p, _enc) => {
-      const n = path.normalize(p);
-      if (n === path.normalize(mockMainPath)) return mockMainContent;
-      if (n === path.normalize(mockHelperPath)) return mockHelperContent;
-      if (n === path.normalize(mockLibArrayPath)) {
+      const n = pathModule.normalize(p);
+      if (n === pathModule.normalize(mockMainPath)) return mockMainContent;
+      if (n === pathModule.normalize(mockHelperPath)) return mockHelperContent;
+      if (n === pathModule.normalize(mockLibArrayPath)) {
         // simulate unreadable include in some tests via flag
         if (global.__UNREADABLE_LIB__) {
           const e = new Error('EACCES: permission denied');
@@ -305,11 +317,11 @@ jest.mock('fs', () => {
 // Prepare a mutable util mock; we override implementations per test
 jest.mock('../src/util', () => {
   // Define paths and content locally within the mock to avoid Jest scoping issues
-  const path = require('path');
-  const mockMainPath = path.join(process.cwd(), 'test', 'fixtures', 'main.au3');
-  const mockHelperPath = path.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
-  const mockMissingPath = path.join(process.cwd(), 'test', 'fixtures', 'missing.au3');
-  const mockLibArrayPath = path.join(process.cwd(), 'lib', 'Array.au3');
+  const pathModule = require('path');
+  const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
+  const mockHelperPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
+  const mockMissingPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'missing.au3');
+  const mockLibArrayPath = pathModule.join(process.cwd(), 'lib', 'Array.au3');
 
   // Define content constants locally
   const mockMainContent = [
@@ -356,11 +368,11 @@ jest.mock('../src/util', () => {
   const mod = {
     getIncludeScripts: jest.fn(() => []),
     getIncludeText: jest.fn(p => {
-      const n = path.normalize(p);
+      const n = pathModule.normalize(p);
       global.getIncludeTextCallCounts[n] = (global.getIncludeTextCallCounts[n] || 0) + 1;
-      if (n === path.normalize(mockHelperPath)) return mockHelperContent;
-      if (n === path.normalize(mockLibArrayPath)) return mockLibArrayContent;
-      if (n === path.normalize(mockMainPath)) return mockMainContent;
+      if (n === pathModule.normalize(mockHelperPath)) return mockHelperContent;
+      if (n === pathModule.normalize(mockLibArrayPath)) return mockLibArrayContent;
+      if (n === pathModule.normalize(mockMainPath)) return mockMainContent;
       return ''; // simulate missing
     }),
     getIncludePath: jest.fn((base, inc) => {
@@ -371,9 +383,9 @@ jest.mock('../src/util', () => {
         if (name.toLowerCase() === 'helper.au3') return mockHelperPath;
         if (name.toLowerCase() === 'missing.au3') return mockMissingPath;
       }
-      return path.join(path.dirname(base), inc.replace(/["<>]/g, ''));
+      return pathModule.join(pathModule.dirname(base), inc.replace(/["<>]/g, ''));
     }),
-    normalizePath: jest.fn(p => path.normalize(p)),
+    normalizePath: jest.fn(p => pathModule.normalize(p)),
     AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
   };
   return mod;
@@ -582,8 +594,8 @@ describe('ai_definition: basic functionality', () => {
     expect(res).toBeTruthy();
     expect(res.uri.fsPath).toBe(normalizeP(MAIN_PATH));
     // Expect range to cover function name at its declaration line 10 (0-based 10)
-    expect(res.range.start.line).toBe(10);
-    expect(res.range.start.character).toBe(5); // "Func " is 5 chars
+    expect(res.range.start.line).toBe(NORMAL_FUNC_DECLARATION_LINE);
+    expect(res.range.start.character).toBe(NORMAL_FUNC_DECLARATION_COLUMN); // "Func " is 5 chars
   });
 
   test('finds variable definitions in the same file ($a, $c, $Mixed_Name123)', () => {
@@ -596,10 +608,10 @@ describe('ai_definition: basic functionality', () => {
       // ranges should point to the declaration lines (Local/Global lines)
       if (variable === '$a' || variable === '$c') {
         // Local on line 2-3 with continuation; both should resolve within those lines
-        expect([2, 3]).toContain(res.range.start.line);
+        expect(VARIABLE_DECLARATION_LINES).toContain(res.range.start.line);
       } else {
         // Global on line 4
-        expect(res.range.start.line).toBe(4);
+        expect(res.range.start.line).toBe(GLOBAL_DECLARATION_LINE);
       }
     }
   });
@@ -794,8 +806,13 @@ describe('ai_definition: performance and caching', () => {
   test('deeply nested includes list; finds first match quickly and returns', () => {
     // simulate a long list where HELPER_PATH appears late, followed by many others
     const many = [];
-    for (let i = 0; i < 200; i++) many.push(path.join(process.cwd(), 'fake', `file${i}.au3`));
-    const list = [...many.slice(0, 150), HELPER_PATH, ...many.slice(150)]; // HELPER at index 150
+    for (let i = 0; i < NESTED_INCLUDE_FAKE_FILE_COUNT; i++)
+      many.push(path.join(process.cwd(), 'fake', `file${i}.au3`));
+    const list = [
+      ...many.slice(0, NESTED_INCLUDE_HELPER_INSERT_INDEX),
+      HELPER_PATH,
+      ...many.slice(NESTED_INCLUDE_HELPER_INSERT_INDEX),
+    ]; // HELPER at index 150
 
     const mocks = createUtilMocks({
       includeScripts: list,
@@ -843,7 +860,7 @@ describe('ai_definition: performance and caching', () => {
     // implementation could avoid repeated calls. Since we cannot assert internal cache,
     // validate calls do not explode: they should be small (e.g., 1-2).
     const cnt = mockState.callCounts[normalizeP(HELPER_PATH)] || 0;
-    expect(cnt).toBeLessThanOrEqual(2);
+    expect(cnt).toBeLessThanOrEqual(CACHE_CALL_COUNT_MAX);
   });
 });
 
@@ -923,16 +940,16 @@ describe('ai_definition: advanced circular dependency handling', () => {
     const deepContent = {};
 
     // Create 10 files that include each other in a circular pattern
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < CIRCULAR_INCLUDE_FILE_COUNT; i++) {
       const fileName = path.join(process.cwd(), 'test', 'fixtures', `deep${i}.au3`);
-      const nextFile = `deep${(i + 1) % 10}.au3`;
+      const nextFile = `deep${(i + 1) % CIRCULAR_INCLUDE_FILE_COUNT}.au3`;
       deepFiles.push(fileName);
       deepContent[normalizeP(fileName)] =
         `#include "${nextFile}"\nFunc DeepFunc${i}()\n  Return ${i}\nEndFunc\n`;
     }
 
     const mocks = createUtilMocks({
-      includeScripts: [...deepFiles, ...deepFiles, ...deepFiles], // triple circular
+      includeScripts: Array(CIRCULAR_INCLUDE_REPEAT_FACTOR).fill(deepFiles).flat(), // triple circular
       includeContent: deepContent,
     });
 
@@ -947,7 +964,7 @@ describe('ai_definition: advanced circular dependency handling', () => {
     const res = definitionProvider.provideDefinition(doc, pos);
     const endTime = Date.now();
 
-    expect(endTime - startTime).toBeLessThan(5000); // Should complete within 5 seconds
+    expect(endTime - startTime).toBeLessThan(CIRCULAR_LOOKUP_MAX_MS); // Should complete within 5 seconds
     expect(res).toBeTruthy();
   });
 });
@@ -1138,74 +1155,82 @@ describe('ai_definition: performance and timeout boundaries', () => {
     global.__UNREADABLE_LIB__ = false;
   });
 
-  test('handles extremely large include lists efficiently', () => {
-    const largeIncludeList = [];
-    const largeContent = {};
+  test(
+    'handles extremely large include lists efficiently',
+    () => {
+      const largeIncludeList = [];
+      const largeContent = {};
 
-    // Create 1000 fake includes
-    for (let i = 0; i < LARGE_INCLUDE_COUNT; i++) {
-      const fakePath = path.join(process.cwd(), 'fake', `file${i}.au3`);
-      largeIncludeList.push(fakePath);
-      largeContent[normalizeP(fakePath)] = `; Fake file ${i}\n`;
-    }
+      // Create 1000 fake includes
+      for (let i = 0; i < LARGE_INCLUDE_COUNT; i++) {
+        const fakePath = path.join(process.cwd(), 'fake', `file${i}.au3`);
+        largeIncludeList.push(fakePath);
+        largeContent[normalizeP(fakePath)] = `; Fake file ${i}\n`;
+      }
 
-    // Put the target file in the middle
-    const targetPath = path.join(process.cwd(), 'target.au3');
-    const targetContent = 'Func TargetFunc()\n  Return "found"\nEndFunc\n';
-    largeIncludeList[LARGE_INCLUDE_TARGET_INDEX] = targetPath;
-    largeContent[normalizeP(targetPath)] = targetContent;
+      // Put the target file in the middle
+      const targetPath = path.join(process.cwd(), 'target.au3');
+      const targetContent = 'Func TargetFunc()\n  Return "found"\nEndFunc\n';
+      largeIncludeList[LARGE_INCLUDE_TARGET_INDEX] = targetPath;
+      largeContent[normalizeP(targetPath)] = targetContent;
 
-    const mocks = createUtilMocks({
-      includeScripts: largeIncludeList,
-      includeContent: largeContent,
-    });
+      const mocks = createUtilMocks({
+        includeScripts: largeIncludeList,
+        includeContent: largeContent,
+      });
 
-    util.getIncludeScripts.mockImplementation(mocks.getIncludeScripts);
-    util.getIncludeText.mockImplementation(mocks.getIncludeText);
+      util.getIncludeScripts.mockImplementation(mocks.getIncludeScripts);
+      util.getIncludeText.mockImplementation(mocks.getIncludeText);
 
-    const doc = new MockTextDocument('Local $test = TargetFunc()', MAIN_PATH);
-    const startTime = Date.now();
-    const pos = posAtFirst(doc, 'TargetFunc');
-    const res = definitionProvider.provideDefinition(doc, pos);
-    const endTime = Date.now();
+      const doc = new MockTextDocument('Local $test = TargetFunc()', MAIN_PATH);
+      const startTime = Date.now();
+      const pos = posAtFirst(doc, 'TargetFunc');
+      const res = definitionProvider.provideDefinition(doc, pos);
+      const endTime = Date.now();
 
-    expect(res).toBeTruthy();
-    expect(res.uri.fsPath).toBe(normalizeP(targetPath));
-    expect(endTime - startTime).toBeLessThan(LARGE_INCLUDE_LOOKUP_MAX_MS); // Should complete within 3 seconds
-  }, LARGE_INCLUDE_TEST_TIMEOUT_MS); // 10-second test timeout
+      expect(res).toBeTruthy();
+      expect(res.uri.fsPath).toBe(normalizeP(targetPath));
+      expect(endTime - startTime).toBeLessThan(LARGE_INCLUDE_LOOKUP_MAX_MS); // Should complete within 3 seconds
+    },
+    LARGE_INCLUDE_TEST_TIMEOUT_MS,
+  ); // 10-second test timeout
 
-  test('handles extremely long file content efficiently', () => {
-    const hugeFunctionList = [];
-    for (let i = 0; i < HUGE_FUNCTION_COUNT; i++) {
-      hugeFunctionList.push(`Func HugeFunc${i}()\n  Return ${i}\nEndFunc\n`);
-    }
+  test(
+    'handles extremely long file content efficiently',
+    () => {
+      const hugeFunctionList = [];
+      for (let i = 0; i < HUGE_FUNCTION_COUNT; i++) {
+        hugeFunctionList.push(`Func HugeFunc${i}()\n  Return ${i}\nEndFunc\n`);
+      }
 
-    // Add target function in the middle
-    hugeFunctionList[HUGE_FUNCTION_TARGET_INDEX] =
-      'Func TargetHugeFunc()\n  Return "target"\nEndFunc\n';
+      // Add target function in the middle
+      hugeFunctionList[HUGE_FUNCTION_TARGET_INDEX] =
+        'Func TargetHugeFunc()\n  Return "target"\nEndFunc\n';
 
-    const hugeContent = hugeFunctionList.join('\n');
-    const hugePath = path.join(process.cwd(), 'huge.au3');
+      const hugeContent = hugeFunctionList.join('\n');
+      const hugePath = path.join(process.cwd(), 'huge.au3');
 
-    const mocks = createUtilMocks({
-      includeScripts: [hugePath],
-      includeContent: {
-        [normalizeP(hugePath)]: hugeContent,
-      },
-    });
+      const mocks = createUtilMocks({
+        includeScripts: [hugePath],
+        includeContent: {
+          [normalizeP(hugePath)]: hugeContent,
+        },
+      });
 
-    util.getIncludeScripts.mockImplementation(mocks.getIncludeScripts);
-    util.getIncludeText.mockImplementation(mocks.getIncludeText);
+      util.getIncludeScripts.mockImplementation(mocks.getIncludeScripts);
+      util.getIncludeText.mockImplementation(mocks.getIncludeText);
 
-    const doc = new MockTextDocument('Local $test = TargetHugeFunc()', MAIN_PATH);
-    const startTime = Date.now();
-    const pos = posAtFirst(doc, 'TargetHugeFunc');
-    const res = definitionProvider.provideDefinition(doc, pos);
-    const endTime = Date.now();
+      const doc = new MockTextDocument('Local $test = TargetHugeFunc()', MAIN_PATH);
+      const startTime = Date.now();
+      const pos = posAtFirst(doc, 'TargetHugeFunc');
+      const res = definitionProvider.provideDefinition(doc, pos);
+      const endTime = Date.now();
 
-    expect(res).toBeTruthy();
-    expect(endTime - startTime).toBeLessThan(HUGE_FUNCTION_LOOKUP_MAX_MS); // Should complete within 2 seconds
-  }, HUGE_FUNCTION_TEST_TIMEOUT_MS); // 15-second test timeout
+      expect(res).toBeTruthy();
+      expect(endTime - startTime).toBeLessThan(HUGE_FUNCTION_LOOKUP_MAX_MS); // Should complete within 2 seconds
+    },
+    HUGE_FUNCTION_TEST_TIMEOUT_MS,
+  ); // 15-second test timeout
 
   test('performance regression test - caching improves repeated lookups', () => {
     const mocks = createUtilMocks({

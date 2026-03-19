@@ -6,6 +6,9 @@
  * either export the function or refactor it into a testable module.
  */
 
+const EXPECTED_WARNING_PARAM_COUNT = 2;
+const EXPECTED_WARNING_PARAM_COUNT_WITH_EXTRA = 3;
+
 describe('AU3Check Parameter Parsing - Expected Behavior', () => {
   describe('Directive Format', () => {
     test('should recognize the #AutoIt3Wrapper_AU3Check_Parameters directive', () => {
@@ -31,7 +34,7 @@ describe('AU3Check Parameter Parsing - Expected Behavior', () => {
         matches.push({ flag: match[1], value: match[2] });
       }
 
-      expect(matches).toHaveLength(3);
+      expect(matches).toHaveLength(EXPECTED_WARNING_PARAM_COUNT_WITH_EXTRA);
       expect(matches[0]).toEqual({ flag: '-w-', value: '3' });
       expect(matches[1]).toEqual({ flag: '-w', value: '5' });
       expect(matches[2]).toEqual({ flag: '-w-', value: '7' });
@@ -47,7 +50,7 @@ describe('AU3Check Parameter Parsing - Expected Behavior', () => {
         matches.push({ flag: match[1], value: match[2] });
       }
 
-      expect(matches).toHaveLength(2);
+      expect(matches).toHaveLength(EXPECTED_WARNING_PARAM_COUNT);
       expect(matches[0]).toEqual({ flag: '-w-', value: '3' });
       expect(matches[1]).toEqual({ flag: '-w', value: '5' });
     });
@@ -108,7 +111,7 @@ MsgBox(0, "Test", "Hello")
       const matches = [...scriptContent.matchAll(regex)];
       const lastMatch = matches[matches.length - 1];
 
-      expect(matches).toHaveLength(2);
+      expect(matches).toHaveLength(EXPECTED_WARNING_PARAM_COUNT);
       expect(lastMatch[1]).toBe('-w 5');
     });
   });
@@ -145,7 +148,7 @@ MsgBox(0, "Test", "Hello")
       }
 
       // Should still extract the valid params before the comment
-      expect(params).toHaveLength(2);
+      expect(params).toHaveLength(EXPECTED_WARNING_PARAM_COUNT);
     });
 
     test('should accept any warning number from directive (Au3Check will validate)', () => {
@@ -236,7 +239,7 @@ describe('Mixed Parameter Types', () => {
     while ((warnMatch = warnRegex.exec(paramString)) !== null) {
       warnMatches.push({ flag: warnMatch[1], value: warnMatch[2] });
     }
-    expect(warnMatches).toHaveLength(2);
+    expect(warnMatches).toHaveLength(EXPECTED_WARNING_PARAM_COUNT);
   });
 
   test('should handle parameters in any order', () => {
@@ -248,7 +251,7 @@ describe('Mixed Parameter Types', () => {
 
     const warnRegex = /(-w-?)\s+([0-9]+)/g;
     const warnMatches = [...paramString.matchAll(warnRegex)];
-    expect(warnMatches.length).toBe(2);
+    expect(warnMatches.length).toBe(EXPECTED_WARNING_PARAM_COUNT);
   });
 });
 

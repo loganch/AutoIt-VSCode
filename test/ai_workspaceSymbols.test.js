@@ -3,6 +3,25 @@
  * Tests for workspace symbol provider
  */
 
+// Named constants for magic numbers in tests
+const SYMBOL_MAX_LINES = 50000;
+const TOTAL_FILES_COUNT = 1000;
+const MAX_FILES_LIMIT = 500;
+const BATCH_SIZE_TEN = 10;
+const FILES_UNEVEN_COUNT = 47;
+const BATCHES_EXPECTED_COUNT = 5;
+const LAST_BATCH_UNEVEN_SIZE = 7;
+const LARGE_FILES_COUNT = 100;
+const PROCESSED_COUNT_TWO_BATCHES = 20;
+const MAP_INITIAL_SIZE = 2;
+const MAP_UPDATED_SIZE = 2;
+const MAP_ENTRY_UPDATE_COUNT = 3;
+const CACHE_INITIAL_COUNT = 2;
+const CACHE_SIZE_THREE = 3;
+const SYMBOLS_QUERY_COUNT = 2;
+const FILES_COUNT_SIMPLE = 50;
+const BATCHES_EXPECTED_SIMPLE = 5;
+
 const mockRegisterWorkspaceSymbolProvider = jest.fn(() => ({ dispose: jest.fn() }));
 const mockCreateFileSystemWatcher = jest.fn(() => ({
   onDidChange: jest.fn(),
@@ -63,7 +82,7 @@ jest.mock('vscode', () => ({
   },
   workspace: {
     getConfiguration: jest.fn(() => ({
-      get: jest.fn(() => 50000),
+      get: jest.fn(() => SYMBOL_MAX_LINES),
     })),
     findFiles: (...args) => mockFindFiles(...args),
     openTextDocument: (...args) => mockOpenTextDocument(...args),
@@ -130,8 +149,8 @@ describe('ai_workspaceSymbols module', () => {
 describe('Workspace Symbols Performance', () => {
   describe('Batch Processing Logic', () => {
     it('should process files in batches', () => {
-      const files = Array.from({ length: 50 }, (_, i) => ({ id: i }));
-      const batchSize = 10;
+      const files = Array.from({ length: FILES_COUNT_SIMPLE }, (_, i) => ({ id: i }));
+      const batchSize = BATCH_SIZE_TEN;
       const batches = [];
 
       // Simulate batch processing
@@ -140,25 +159,25 @@ describe('Workspace Symbols Performance', () => {
         batches.push(batch);
       }
 
-      expect(batches.length).toBe(5);
-      expect(batches[0].length).toBe(10);
-      expect(batches[4].length).toBe(10);
+      expect(batches.length).toBe(BATCHES_EXPECTED_SIMPLE);
+      expect(batches[0].length).toBe(BATCH_SIZE_TEN);
+      expect(batches[BATCHES_EXPECTED_SIMPLE - 1].length).toBe(BATCH_SIZE_TEN);
     });
 
     it('should respect maxFiles limit', () => {
-      const allFiles = Array.from({ length: 1000 }, (_, i) => ({ id: i }));
-      const maxFiles = 500;
+      const allFiles = Array.from({ length: TOTAL_FILES_COUNT }, (_, i) => ({ id: i }));
+      const maxFiles = MAX_FILES_LIMIT;
 
       // Simulate limiting files
       const filesToProcess = allFiles.slice(0, maxFiles);
 
-      expect(allFiles.length).toBe(1000);
-      expect(filesToProcess.length).toBe(500);
+      expect(allFiles.length).toBe(TOTAL_FILES_COUNT);
+      expect(filesToProcess.length).toBe(MAX_FILES_LIMIT);
     });
 
     it('should handle uneven batch sizes', () => {
-      const files = Array.from({ length: 47 }, (_, i) => ({ id: i }));
-      const batchSize = 10;
+      const files = Array.from({ length: FILES_UNEVEN_COUNT }, (_, i) => ({ id: i }));
+      const batchSize = BATCH_SIZE_TEN;
       const batches = [];
 
       for (let i = 0; i < files.length; i += batchSize) {
@@ -166,8 +185,8 @@ describe('Workspace Symbols Performance', () => {
         batches.push(batch);
       }
 
-      expect(batches.length).toBe(5);
-      expect(batches[4].length).toBe(7); // Last batch is smaller
+      expect(batches.length).toBe(BATCHES_EXPECTED_COUNT);
+      expect(batches[BATCHES_EXPECTED_COUNT - 1].length).toBe(LAST_BATCH_UNEVEN_SIZE); // Last batch is smaller
     });
   });
 
@@ -177,8 +196,8 @@ describe('Workspace Symbols Performance', () => {
         isCancellationRequested: false,
       };
 
-      const files = Array.from({ length: 100 }, (_, i) => ({ id: i }));
-      const batchSize = 10;
+      const files = Array.from({ length: LARGE_FILES_COUNT }, (_, i) => ({ id: i }));
+      const batchSize = BATCH_SIZE_TEN;
       const processed = [];
 
       // Simulate cancellation after 2 batches
@@ -196,7 +215,7 @@ describe('Workspace Symbols Performance', () => {
         }
       }
 
-      expect(processed.length).toBe(20); // Only 2 batches processed
+      expect(processed.length).toBe(PROCESSED_COUNT_TWO_BATCHES); // Only 2 batches processed
     });
   });
 
@@ -208,13 +227,13 @@ describe('Workspace Symbols Performance', () => {
       cache.set('file1', ['symbol1', 'symbol2']);
       cache.set('file2', ['symbol3']);
 
-      expect(cache.size).toBe(2);
+      expect(cache.size).toBe(MAP_INITIAL_SIZE);
 
       // Update single entry
       cache.set('file1', ['symbol1', 'symbol2', 'symbol4']);
 
-      expect(cache.size).toBe(2);
-      expect(cache.get('file1').length).toBe(3);
+      expect(cache.size).toBe(MAP_UPDATED_SIZE);
+      expect(cache.get('file1').length).toBe(MAP_ENTRY_UPDATE_COUNT);
     });
 
     it('should remove individual files from cache', () => {
@@ -224,12 +243,12 @@ describe('Workspace Symbols Performance', () => {
       cache.set('file2', ['symbol2']);
       cache.set('file3', ['symbol3']);
 
-      expect(cache.size).toBe(3);
+      expect(cache.size).toBe(CACHE_SIZE_THREE);
 
       // Remove single file
       cache.delete('file2');
 
-      expect(cache.size).toBe(2);
+      expect(cache.size).toBe(CACHE_INITIAL_COUNT);
       expect(cache.has('file2')).toBe(false);
     });
   });
@@ -239,13 +258,13 @@ describe('Workspace Symbols Performance', () => {
       const symbols = [
         { name: 'TestFunc', kind: 1 },
         { name: 'HelperFunc', kind: 1 },
-        { name: 'TestVariable', kind: 2 },
+        { name: 'TestVariable', kind: SYMBOLS_QUERY_COUNT },
       ];
 
       const query = 'test';
       const filtered = symbols.filter(s => s.name.toLowerCase().includes(query));
 
-      expect(filtered).toHaveLength(2);
+      expect(filtered).toHaveLength(SYMBOLS_QUERY_COUNT);
       expect(filtered[0].name).toBe('TestFunc');
       expect(filtered[1].name).toBe('TestVariable');
     });
@@ -256,7 +275,7 @@ describe('Workspace Symbols Performance', () => {
       const query = 'my';
       const filtered = symbols.filter(s => s.name.toLowerCase().includes(query.toLowerCase()));
 
-      expect(filtered).toHaveLength(2);
+      expect(filtered).toHaveLength(SYMBOLS_QUERY_COUNT);
     });
   });
 });

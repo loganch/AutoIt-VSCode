@@ -37,7 +37,8 @@ describe('FlakyTestDetector', () => {
 
   it('records a passed iteration when jest command succeeds', () => {
     const detector = new FlakyTestDetector({ runs: 1, timeout: 50 });
-    jest.spyOn(process, 'memoryUsage')
+    jest
+      .spyOn(process, 'memoryUsage')
       .mockReturnValueOnce({ heapUsed: 100, rss: 1000 })
       .mockReturnValueOnce({ heapUsed: 220, rss: 1500 });
     jest.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(1150);
