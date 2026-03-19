@@ -6,6 +6,9 @@ import IncludeResolver from '../../src/utils/IncludeResolver.js';
 const norm = p =>
   process.platform === 'win32' ? path.normalize(p).toLowerCase() : path.normalize(p);
 
+const INCLUDE_COUNT_THREE = 3;
+const MAX_DEPTH_TWO = 2;
+
 // Mock fs at the top of the file
 jest.mock('fs');
 
@@ -44,7 +47,7 @@ describe('IncludeResolver', () => {
       const resolver = new IncludeResolver('/workspace');
       const includes = resolver.parseIncludes(source, '/workspace/src/main.au3');
 
-      expect(includes).toHaveLength(3);
+      expect(includes).toHaveLength(INCLUDE_COUNT_THREE);
       expect(includes[0].type).toBe('relative');
       expect(includes[1].type).toBe('library');
       expect(includes[2].type).toBe('relative');
@@ -190,7 +193,7 @@ describe('IncludeResolver', () => {
     });
 
     it('should respect max depth limit', () => {
-      const resolver = new IncludeResolver('/workspace', [], 2);
+      const resolver = new IncludeResolver('/workspace', [], MAX_DEPTH_TWO);
 
       fs.existsSync = jest.fn().mockReturnValue(true);
       fs.readFileSync = jest.fn(filePath => {
