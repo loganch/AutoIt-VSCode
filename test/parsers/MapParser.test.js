@@ -1,5 +1,16 @@
 import MapParser from '../../src/parsers/MapParser.js';
 
+const EXPECTED_COUNT_TWO = 2;
+const EXPECTED_COUNT_THREE = 3;
+const TARGET_LINE_TWO = 2;
+const TARGET_LINE_THREE = 3;
+const TARGET_LINE_FOUR = 4;
+const TARGET_LINE_FIVE = 5;
+const TARGET_LINE_SIX = 6;
+const TARGET_LINE_SEVEN = 7;
+const TARGET_LINE_EIGHT = 8;
+const TARGET_LINE_ELEVEN = 11;
+
 describe('MapParser', () => {
   describe('parseMapDeclarations', () => {
     it('should detect Local Map declaration', () => {
@@ -35,7 +46,7 @@ Dim $mSettings[]`;
       const parser = new MapParser(source);
       const maps = parser.parseMapDeclarations();
 
-      expect(maps).toHaveLength(3);
+      expect(maps).toHaveLength(EXPECTED_COUNT_THREE);
       expect(maps[0].name).toBe('$mUser');
       expect(maps[1].name).toBe('$mData');
       expect(maps[2].name).toBe('$mSettings');
@@ -50,7 +61,7 @@ $mUser.age = 30`;
       const parser = new MapParser(source);
       const assignments = parser.parseKeyAssignments('$mUser');
 
-      expect(assignments).toHaveLength(2);
+      expect(assignments).toHaveLength(EXPECTED_COUNT_TWO);
       expect(assignments).toContainEqual({
         key: 'name',
         line: 1,
@@ -72,7 +83,7 @@ $mUser['phone'] = "555-1234"`;
       const parser = new MapParser(source);
       const assignments = parser.parseKeyAssignments('$mUser');
 
-      expect(assignments).toHaveLength(2);
+      expect(assignments).toHaveLength(EXPECTED_COUNT_TWO);
       expect(assignments).toContainEqual({
         key: 'email',
         line: 1,
@@ -94,7 +105,7 @@ $mData["prop2"] = 123`;
       const parser = new MapParser(source);
       const assignments = parser.parseKeyAssignments('$mData');
 
-      expect(assignments).toHaveLength(2);
+      expect(assignments).toHaveLength(EXPECTED_COUNT_TWO);
       expect(assignments[0].key).toBe('prop1');
       expect(assignments[1].key).toBe('prop2');
     });
@@ -137,7 +148,7 @@ EndFunc`;
       const parser = new MapParser(source);
       const functions = parser.parseFunctionBoundaries();
 
-      expect(functions).toHaveLength(2);
+      expect(functions).toHaveLength(EXPECTED_COUNT_TWO);
       expect(functions[0].name).toBe('First');
       expect(functions[1].name).toBe('Second');
     });
@@ -172,7 +183,7 @@ EndFunc
 Local $x = 1`;
       const parser = new MapParser(source);
       parser.parseFunctionBoundaries();
-      const func = parser.getFunctionAtLine(2);
+      const func = parser.getFunctionAtLine(TARGET_LINE_TWO);
 
       expect(func).toBeNull();
     });
@@ -185,9 +196,9 @@ $mUser.name = "John"
 $mUser.age = 30
 Local $x = $mUser.`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mUser', 3);
+      const result = parser.getKeysForMapAtLine('$mUser', TARGET_LINE_THREE);
 
-      expect(result.directKeys).toHaveLength(2);
+      expect(result.directKeys).toHaveLength(EXPECTED_COUNT_TWO);
       expect(result.directKeys).toContain('name');
       expect(result.directKeys).toContain('age');
     });
@@ -202,7 +213,7 @@ Func DoWork()
     Local $x = $mConfig.
 EndFunc`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mConfig', 6);
+      const result = parser.getKeysForMapAtLine('$mConfig', TARGET_LINE_SIX);
 
       expect(result.directKeys).toHaveLength(1);
       expect(result.directKeys).toContain('tempData');
@@ -220,7 +231,7 @@ EndFunc
 
 Local $x = $mConfig.`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mConfig', 8);
+      const result = parser.getKeysForMapAtLine('$mConfig', TARGET_LINE_EIGHT);
 
       expect(result.directKeys).toHaveLength(1);
       expect(result.directKeys).toContain('apiKey');
@@ -233,7 +244,7 @@ $mUser.name = "John"
 Local $x = $mUser.
 $mUser.age = 30`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mUser', 2);
+      const result = parser.getKeysForMapAtLine('$mUser', TARGET_LINE_TWO);
 
       expect(result.directKeys).toHaveLength(1);
       expect(result.directKeys).toContain('name');
@@ -247,9 +258,9 @@ $MUSER.age = 30
 $muser.email = "test@example.com"
 Local $x = $MuSeR.`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mUser', 4);
+      const result = parser.getKeysForMapAtLine('$mUser', TARGET_LINE_FOUR);
 
-      expect(result.directKeys).toHaveLength(3);
+      expect(result.directKeys).toHaveLength(EXPECTED_COUNT_THREE);
       expect(result.directKeys).toContain('name');
       expect(result.directKeys).toContain('age');
       expect(result.directKeys).toContain('email');
@@ -263,9 +274,9 @@ $mUser.name = "John"
 $mUser.active = true
 Local $x = $mUser.`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mUser', 5);
+      const result = parser.getKeysForMapAtLine('$mUser', TARGET_LINE_FIVE);
 
-      expect(result.directKeys).toHaveLength(2);
+      expect(result.directKeys).toHaveLength(EXPECTED_COUNT_TWO);
       expect(result.directKeys).toContain('name');
       expect(result.directKeys).toContain('active');
       expect(result.directKeys).not.toContain('commented');
@@ -282,9 +293,9 @@ Func DoWork()
     Local $x = $mConfig.
 EndFunc`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mConfig', 6);
+      const result = parser.getKeysForMapAtLine('$mConfig', TARGET_LINE_SIX);
 
-      expect(result.directKeys).toHaveLength(2);
+      expect(result.directKeys).toHaveLength(EXPECTED_COUNT_TWO);
       expect(result.directKeys).toContain('apiKey');
       expect(result.directKeys).toContain('baseUrl');
     });
@@ -300,7 +311,7 @@ $mUser.email = "direct"
 AddUserData($mUser)
 Local $x = $mUser.`;
       const parser = new MapParser(source);
-      const result = parser.getKeysForMapAtLine('$mUser', 8);
+      const result = parser.getKeysForMapAtLine('$mUser', TARGET_LINE_EIGHT);
 
       // Should return object with direct and function keys
       expect(result.directKeys).toContain('email');
@@ -319,7 +330,7 @@ EndFunc`;
       const parser = new MapParser(source);
       const keys = parser.getFunctionParameterKeys('AddUserData', '$userMap');
 
-      expect(keys).toHaveLength(2);
+      expect(keys).toHaveLength(EXPECTED_COUNT_TWO);
       expect(keys).toContainEqual({
         key: 'name',
         line: 1,
@@ -365,9 +376,9 @@ Local $mUser[]
 AddUserData($mUser)
 Local $x = $mUser.`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysFromFunctionCalls('$mUser', 7);
+      const keys = parser.getKeysFromFunctionCalls('$mUser', TARGET_LINE_SEVEN);
 
-      expect(keys).toHaveLength(2);
+      expect(keys).toHaveLength(EXPECTED_COUNT_TWO);
       expect(keys[0].addedInFunction).toBe(true);
       expect(keys.map(k => k.key)).toContain('name');
       expect(keys.map(k => k.key)).toContain('id');
@@ -382,7 +393,7 @@ Local $mData[]
 Local $x = $mData.
 AddData($mData)`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysFromFunctionCalls('$mData', 5);
+      const keys = parser.getKeysFromFunctionCalls('$mData', TARGET_LINE_FIVE);
 
       expect(keys).toHaveLength(0);
     });
@@ -401,9 +412,9 @@ AddName($mUser)
 AddId($mUser)
 Local $x = $mUser.`;
       const parser = new MapParser(source);
-      const keys = parser.getKeysFromFunctionCalls('$mUser', 11);
+      const keys = parser.getKeysFromFunctionCalls('$mUser', TARGET_LINE_ELEVEN);
 
-      expect(keys).toHaveLength(2);
+      expect(keys).toHaveLength(EXPECTED_COUNT_TWO);
       expect(keys.map(k => k.key)).toContain('name');
       expect(keys.map(k => k.key)).toContain('id');
     });
