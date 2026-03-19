@@ -60,7 +60,6 @@ describe('pathValidation', () => {
 
     it('should reject non-string paths', () => {
       // @ts-ignore
-      // eslint-disable-next-line no-magic-numbers
       expect(validateFilePath(123).valid).toBe(false);
       // @ts-ignore
       expect(validateFilePath({}).valid).toBe(false);
