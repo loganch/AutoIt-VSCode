@@ -3,6 +3,10 @@ import fs from 'fs';
 
 jest.mock('fs');
 
+const TARGET_LINE_TWO = 2;
+const INCLUDE_DEPTH_THREE = 3;
+const INCLUDE_DEPTH_FIVE = 5;
+
 describe('MapTrackingService', () => {
   let service;
   let consoleWarnSpy;
@@ -35,7 +39,7 @@ describe('MapTrackingService', () => {
 $mUser.name = "John"`;
 
       service.updateFile('/workspace/test.au3', source);
-      const keys = service.getKeysForMap('/workspace/test.au3', '$mUser', 2);
+      const keys = service.getKeysForMap('/workspace/test.au3', '$mUser', TARGET_LINE_TWO);
 
       expect(keys.directKeys).toContain('name');
     });
@@ -48,7 +52,7 @@ $mUser.name = "John"`;
 $mUser.age = 30`,
       );
 
-      const keys = service.getKeysForMap('/workspace/test.au3', '$mUser', 2);
+      const keys = service.getKeysForMap('/workspace/test.au3', '$mUser', TARGET_LINE_TWO);
       expect(keys.directKeys).toContain('age');
     });
   });
@@ -128,7 +132,11 @@ $mApp.version = "1.0"`;
 
       service.updateFile('/workspace/main.au3', mainSource);
 
-      const keys = await service.getKeysForMapWithIncludes('/workspace/main.au3', '$mApp', 3);
+      const keys = await service.getKeysForMapWithIncludes(
+        '/workspace/main.au3',
+        '$mApp',
+        INCLUDE_DEPTH_THREE,
+      );
 
       // Verify that the mocks were called during include processing
       expect(fs.existsSync).toHaveBeenCalled();
@@ -169,7 +177,11 @@ $mData.key = "value"`;
       // Clear any previous console warnings
       consoleWarnSpy.mockClear();
 
-      const keys = await service.getKeysForMapWithIncludes('/workspace/test.au3', '$mData', 3);
+      const keys = await service.getKeysForMapWithIncludes(
+        '/workspace/test.au3',
+        '$mData',
+        INCLUDE_DEPTH_THREE,
+      );
 
       // Should still get keys from current file
       expect(keys.directKeys).toContain('key');
@@ -183,20 +195,24 @@ $mData.key = "value"`;
 
   describe('updateConfiguration', () => {
     it('should update workspace root and include paths', () => {
-      const initialService = MapTrackingService.getInstance('/workspace1', ['path1'], 3);
+      const initialService = MapTrackingService.getInstance(
+        '/workspace1',
+        ['path1'],
+        INCLUDE_DEPTH_THREE,
+      );
 
-      initialService.updateConfiguration('/workspace2', ['path2', 'path3'], 5);
+      initialService.updateConfiguration('/workspace2', ['path2', 'path3'], INCLUDE_DEPTH_FIVE);
 
       expect(initialService.workspaceRoot).toBe('/workspace2');
       expect(initialService.includeResolver.autoitIncludePaths).toEqual(['path2', 'path3']);
-      expect(initialService.includeResolver.maxDepth).toBe(5);
+      expect(initialService.includeResolver.maxDepth).toBe(INCLUDE_DEPTH_FIVE);
     });
 
     it('should clear cached parsers when configuration changes', () => {
       service.updateFile('/workspace/test.au3', 'Local $mData[]');
       expect(service.fileParsers.size).toBe(1);
 
-      service.updateConfiguration('/new-workspace', [], 3);
+      service.updateConfiguration('/new-workspace', [], INCLUDE_DEPTH_THREE);
 
       expect(service.fileParsers.size).toBe(0);
     });
@@ -211,8 +227,8 @@ $mData.key = "value"`;
     it('should warn when getInstance is called with different parameters', () => {
       // Reset and start fresh for this test
       MapTrackingService.resetInstance();
-      MapTrackingService.getInstance('/workspace1', ['path1'], 3);
-      MapTrackingService.getInstance('/workspace2', ['path2'], 5);
+      MapTrackingService.getInstance('/workspace1', ['path1'], INCLUDE_DEPTH_THREE);
+      MapTrackingService.getInstance('/workspace2', ['path2'], INCLUDE_DEPTH_FIVE);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining(
@@ -227,8 +243,8 @@ $mData.key = "value"`;
     it('should not warn when getInstance is called with same parameters', () => {
       // Reset and start fresh for this test
       MapTrackingService.resetInstance();
-      MapTrackingService.getInstance('/workspace', ['path'], 3);
-      MapTrackingService.getInstance('/workspace', ['path'], 3);
+      MapTrackingService.getInstance('/workspace', ['path'], INCLUDE_DEPTH_THREE);
+      MapTrackingService.getInstance('/workspace', ['path'], INCLUDE_DEPTH_THREE);
 
       expect(consoleWarnSpy).not.toHaveBeenCalled();
     });
@@ -236,9 +252,9 @@ $mData.key = "value"`;
     it('should not warn when getInstance is called with default values matching initial instance', () => {
       // Initialize with default values
       MapTrackingService.resetInstance();
-      MapTrackingService.getInstance('', [], 3);
+      MapTrackingService.getInstance('', [], INCLUDE_DEPTH_THREE);
       // Call again with explicit defaults
-      MapTrackingService.getInstance('', [], 3);
+      MapTrackingService.getInstance('', [], INCLUDE_DEPTH_THREE);
 
       expect(consoleWarnSpy).not.toHaveBeenCalled();
     });
@@ -246,9 +262,9 @@ $mData.key = "value"`;
 
   describe('resetInstance', () => {
     it('should allow creating a new instance after reset', () => {
-      const instance1 = MapTrackingService.getInstance('/workspace1', [], 3);
+      const instance1 = MapTrackingService.getInstance('/workspace1', [], INCLUDE_DEPTH_THREE);
       MapTrackingService.resetInstance();
-      const instance2 = MapTrackingService.getInstance('/workspace2', [], 5);
+      const instance2 = MapTrackingService.getInstance('/workspace2', [], INCLUDE_DEPTH_FIVE);
 
       expect(instance1).not.toBe(instance2);
       expect(instance2.workspaceRoot).toBe('/workspace2');
