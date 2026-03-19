@@ -1,32 +1,8 @@
 import MapParser from '../parsers/MapParser.js';
 import IncludeResolver from '../utils/IncludeResolver.js';
+import debounce from '../utils/debounce.js';
 import fs from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../constants.js';
-
-/**
- * Debounce helper
- * @param {Function} func - Function to debounce
- * @param {number} wait - Debounce delay in ms
- * @returns {Function} Debounced function
- */
-function debounce(func, wait) {
-  let timeout;
-  const debouncedFunction = function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-
-  // Add cancel method
-  debouncedFunction.cancel = () => {
-    clearTimeout(timeout);
-  };
-
-  return debouncedFunction;
-}
 
 /**
  * Singleton service for tracking Map variables across workspace

@@ -5,33 +5,9 @@
 
 import VariableParser from '../parsers/VariableParser.js';
 import IncludeResolver from '../utils/IncludeResolver.js';
+import debounce from '../utils/debounce.js';
 import fs from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../constants.js';
-
-/**
- * Debounce helper function
- * @param {Function} func - Function to debounce
- * @param {number} wait - Debounce delay in ms
- * @returns {Function} Debounced function with cancel method
- */
-function debounce(func, wait) {
-  let timeout;
-  const debouncedFunction = function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-
-  // Add cancel method
-  debouncedFunction.cancel = () => {
-    clearTimeout(timeout);
-  };
-
-  return debouncedFunction;
-}
 
 /**
  * Singleton service for tracking variable declarations across workspace
