@@ -5,7 +5,7 @@
 
 import VariableParser from '../parsers/VariableParser.js';
 import IncludeResolver from '../utils/IncludeResolver.js';
-import debounce from '../utils/debounce.js';
+import updateFileDebounced from './debouncedFileUpdate.js';
 import fs from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../constants.js';
 
@@ -129,22 +129,7 @@ class VariableTrackingService {
    * @param {string} source - File source code
    */
   updateFileDebounced(filePath, source) {
-    // Get or create debounced parser for this file
-    if (!this.debouncedParseByFile.has(filePath)) {
-      this.debouncedParseByFile.set(
-        filePath,
-        debounce((path, src) => {
-          this._parseFile(path, src);
-        }, this.parseDebounceMs),
-      );
-    }
-
-    // Store pending parse data
-    this.pendingParses.set(filePath, { source, timestamp: Date.now() });
-
-    // Trigger debounced parse
-    const debouncedParse = this.debouncedParseByFile.get(filePath);
-    debouncedParse(filePath, source);
+    updateFileDebounced(this, filePath, source);
   }
 
   /**
