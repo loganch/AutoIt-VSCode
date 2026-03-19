@@ -62,8 +62,9 @@ try {
       cConfig.update('tokenColorCustomizations', dataNew, true);
     }
   }
-} catch {
-  /* swallow to avoid impacting activation */
+} catch (error) {
+  // Log only to console to keep activation resilient without hiding diagnostics.
+  console.debug('[autoit] Failed to update tokenColorCustomizations defaults.', error);
 }
 
 const conf = {
@@ -118,7 +119,7 @@ function detectAutoItPaths() {
         if (match && match[1]) {
           potentialPaths.unshift(match[1].trim());
         }
-      } catch {
+      } catch (error) {
         // Try 32-bit registry view
         try {
           const regResult32 = execSync(
@@ -129,12 +130,23 @@ function detectAutoItPaths() {
           if (match32 && match32[1]) {
             potentialPaths.unshift(match32[1].trim());
           }
-        } catch {
-          // Registry queries failed, use default paths
+        } catch (error32) {
+          // Registry queries failed in both views, keep using default paths.
+          console.debug(
+            '[autoit] Registry InstallDir lookup failed; using default install paths.',
+            {
+              error,
+              error32,
+            },
+          );
         }
       }
-    } catch {
-      // execSync not available or failed, use default paths
+    } catch (error) {
+      // execSync unavailable/blocked; continue with default paths.
+      console.debug(
+        '[autoit] Unable to run registry query command; using default install paths.',
+        error,
+      );
     }
   }
 

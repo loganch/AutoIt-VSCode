@@ -150,8 +150,10 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
         writable: true,
         configurable: true,
       });
-    } catch {
-      // no-op if assignment fails for any reason
+    } catch (error) {
+      // Fallback assignment keeps owner tracking best-effort if defineProperty is restricted.
+      diagnosticToAdd._ownerUri = documentURI.toString();
+      console.debug('[AutoIt][diagnostics] Falling back to direct owner assignment.', error);
     }
 
     // Use scriptPath by default to correctly attribute diagnostics to included files.
@@ -184,8 +186,8 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
     // Track the file URI we set diagnostics for, to enable safe future cleanup.
     try {
       trackDiagnosticFile(file);
-    } catch {
-      /* empty */
+    } catch (error) {
+      console.debug('[AutoIt][diagnostics] Failed to track diagnostic file URI.', error);
     }
     collection.set(Uri.file(file), diagnosticArray);
   });
@@ -218,8 +220,8 @@ const trackDiagnosticFile = filePath => {
   try {
     const uri = Uri.file(filePath).toString();
     trackedDiagnosticFileUris.add(uri);
-  } catch {
-    // ignore tracking errors
+  } catch (error) {
+    console.debug('[AutoIt][diagnostics] Failed to register tracked diagnostic URI.', error);
   }
 };
 
@@ -257,8 +259,8 @@ const filterDiagnosticsOnUriByOwner = (collection, uri, owner) => {
           console.debug(msg);
         }
       }
-    } catch {
-      // swallow any logging errors
+    } catch (loggingError) {
+      console.debug('[AutoIt][diagnostics] Failed to emit cleanup debug log.', loggingError);
     }
   }
 };
@@ -291,8 +293,11 @@ export const clearDiagnosticsOwnedBy = (collection, ownerUri) => {
           console.debug(msg);
         }
       }
-    } catch {
-      // swallow any logging errors
+    } catch (loggingError) {
+      console.debug(
+        '[AutoIt][diagnostics] Failed to emit open-docs cleanup debug log.',
+        loggingError,
+      );
     }
   }
 
@@ -319,8 +324,11 @@ export const clearDiagnosticsOwnedBy = (collection, ownerUri) => {
           console.debug(msg);
         }
       }
-    } catch {
-      // swallow any logging errors
+    } catch (loggingError) {
+      console.debug(
+        '[AutoIt][diagnostics] Failed to emit tracked-URIs cleanup debug log.',
+        loggingError,
+      );
     }
   }
 };

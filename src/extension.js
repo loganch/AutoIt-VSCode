@@ -395,8 +395,11 @@ export const activate = ctx => {
           if (dbg) {
             console.debug(msg);
           }
-        } catch {
-          // swallow any logging errors
+        } catch (loggingError) {
+          console.debug(
+            '[AutoIt][extension] Failed to emit debug log for clearDiagnosticsOwnedBy error.',
+            loggingError,
+          );
         }
       }
       // Then remove any remaining diagnostics specifically for the closed document
@@ -411,8 +414,11 @@ export const activate = ctx => {
           if (dbg) {
             console.debug(msg);
           }
-        } catch {
-          // swallow any logging errors
+        } catch (loggingError) {
+          console.debug(
+            '[AutoIt][extension] Failed to emit debug log for diagnosticCollection.delete error.',
+            loggingError,
+          );
         }
       }
     });
