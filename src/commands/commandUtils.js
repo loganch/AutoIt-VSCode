@@ -1,6 +1,24 @@
 import * as vscode from 'vscode';
 
 /**
+ * Get the file name of the active document in the editor.
+ *
+ * Note that `window.activeTextEditor.document.fileName` is not available in some situations.
+ *
+ * @returns {string} The file name of the active document, or an empty string if unavailable.
+ */
+export function getActiveDocumentFileName() {
+  if (!vscode.window.activeTextEditor) {
+    return '';
+  }
+  const { document } = vscode.window.activeTextEditor;
+  if (!document || !document.fileName) {
+    return '';
+  }
+  return document.fileName;
+}
+
+/**
  * Searches for matches of a regular expression pattern in the active text editor's document
  * and replaces them with a replacement string.
  * @param {RegExp} regex - The regular expression pattern to search for.

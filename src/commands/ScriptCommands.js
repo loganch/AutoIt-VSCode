@@ -5,6 +5,7 @@ import OutputChannelManager from '../services/OutputChannelManager';
 import HotkeyManager from '../services/HotkeyManager';
 import conf from '../ai_config';
 import { showErrorMessage, showInformationMessage, showWarningMessage } from '../ai_showMessage';
+import { getActiveDocumentFileName } from './commandUtils';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';
 
@@ -16,25 +17,6 @@ const { config } = conf;
 const STATUS_BAR_MESSAGE_TIMEOUT = 1500; // milliseconds
 const SCRIPT_STOP_INFO_TIMEOUT = 10000; // milliseconds
 const PATH_PARTS_TO_SHOW = 2; // number of path parts to show in error messages
-
-/**
- * Get the file name of the active document in the editor.
- *
- * Note that `window.activeTextEditor.document.fileName` is not available in some situations
- * (like when `runScript()` is executed in the settings tab).
- *
- * @returns {string} The file name of the active document, or an empty string if it's not available.
- */
-function getActiveDocumentFileName() {
-  if (!window.activeTextEditor) {
-    return '';
-  }
-  const { document } = window.activeTextEditor;
-  if (!document || !document.fileName) {
-    return '';
-  }
-  return document.fileName;
-}
 
 // Instantiate services
 // Create singleton global channel using cached factory method

@@ -1,4 +1,5 @@
 import { globalOutputChannel } from './ScriptCommands.js';
+import { getActiveDocumentFileName } from './commandUtils';
 const { window } = require('vscode');
 const fs = require('fs');
 const { spawn } = require('child_process');
@@ -21,25 +22,6 @@ const { config } = conf;
  */
 function escapeRegexLiteral(value) {
   return typeof value === 'string' ? value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
-}
-
-/**
- * Get the file name of the active document in the editor.
- *
- * Note that `window.activeTextEditor.document.fileName` is not available in some situations
- * (like when `runScript()` is executed in the settings tab).
- *
- * @returns {string} The file name of the active document, or an empty string if it's not available.
- */
-function getActiveDocumentFileName() {
-  if (!window.activeTextEditor) {
-    return '';
-  }
-  const { document } = window.activeTextEditor;
-  if (!document || !document.fileName) {
-    return '';
-  }
-  return document.fileName;
 }
 
 // Instantiate services
