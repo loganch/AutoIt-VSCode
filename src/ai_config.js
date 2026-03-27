@@ -90,11 +90,47 @@ const MESSAGE_HIDE_DELAY_MS = 1000;
 let showErrors = false;
 
 /**
- * Attempts to auto-detect AutoIt installation paths on Windows.
- * Returns an array of candidate install directories that contain AutoIt3.exe.
- * Non-Windows platforms receive an empty array.
- * @returns {string[]} Array of potential AutoIt installation paths
+ * Resolves VS Code variables in a path string.
+ * Supports: ${workspaceFolder}, ${workspaceFolderBasename}, ${cwd}, ${home}
+ * @param {string} inputPath - path string that may contain VS Code variables
+ * @returns {string} path with variables resolved
  */
+function resolveVariables(inputPath) {
+  if (!inputPath || typeof inputPath !== 'string') {
+    return inputPath;
+  }
+
+  let result = inputPath;
+
+  // Resolve ${workspaceFolder} - use first workspace folder or empty string
+  if (result.includes('${workspaceFolder}')) {
+    const { workspaceFolders } = workspace;
+    const wsFolder =
+      workspaceFolders && workspaceFolders.length > 0 ? workspaceFolders[0].uri.fsPath : '';
+    result = result.replace(/\$\{workspaceFolder\}/g, wsFolder);
+  }
+
+  // Resolve ${workspaceFolderBasename}
+  if (result.includes('${workspaceFolderBasename}')) {
+    const { workspaceFolders } = workspace;
+    const wsFolderBasename =
+      workspaceFolders && workspaceFolders.length > 0 ? workspaceFolders[0].name : '';
+    result = result.replace(/\$\{workspaceFolderBasename\}/g, wsFolderBasename);
+  }
+
+  // Resolve ${cwd} - current working directory
+  if (result.includes('${cwd}')) {
+    result = result.replace(/\$\{cwd\}/g, process.cwd());
+  }
+
+  // Resolve ${home} - user's home directory
+  if (result.includes('${home}')) {
+    result = result.replace(/\$\{home\}/g, process.env.HOME || process.env.USERPROFILE || '');
+  }
+
+  return result;
+}
+
 function detectAutoItPaths() {
   if (!isWinOS) return [];
 
@@ -294,7 +330,9 @@ function verifyPath(sPath, data, msgSuffix) {
  * @returns {Promise<string|undefined>} resolves to sPath on success, undefined on failure
  */
 function updateFullPath(_path, data, msgSuffix) {
-  if (_path !== '') data.fullPath = fixPath(_path, data);
+  // Resolve VS Code variables before processing the path
+  const resolvedPath = resolveVariables(_path);
+  if (resolvedPath !== '') data.fullPath = fixPath(resolvedPath, data);
 
   if (data.fullPath === undefined) data.fullPath = '';
 
@@ -497,8 +535,12 @@ function updateIncludePaths() {
       updateFullPath(sPath, conf.defaultPaths.includePaths[j], `includePaths[${j}]`);
     }
 
-    // Update the registry key (silent on success, only surface errors)
-    const includePathsString = includePaths.join(';');
+    // Update the registry key with resolved paths (silent on success, only surface errors)
+    const resolvedIncludePaths = includePaths.map(p => {
+      const trimmed = (typeof p === 'string' ? p : '').trim();
+      return resolveVariables(trimmed || 'Include');
+    });
+    const includePathsString = resolvedIncludePaths.join(';');
     execFile(
       'reg',
       [
