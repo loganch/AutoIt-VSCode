@@ -7,22 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- Regression tests for regex safety in signature parsing (`test/utils/utilSignatureRegexSafety.test.js`) covering malformed parameter/function tokens.
-- Command tests for smart-help behavior and malformed query handling in `launchHelp` (`test/commands/ToolCommands.test.js`).
-
 ### Fixed
 
-- **Variable completions not appearing on startup** — `ai_completion.js` was calling `VariableTrackingService.getInstance()` at module load time (before extension activation), which created the singleton with an empty workspace root. The subsequent activation call with the real workspace root triggered a spurious warning and left the service misconfigured. The call is now deferred until completion is actually requested, by which point activation has already initialized the singleton correctly. Additionally, the scope-aware path now falls back to the regex-based approach when the parser returns an empty result (e.g. file not yet indexed, or no explicitly-declared variables), restoring completions for files that use plain `$var = value` assignments.
-
-- Prevented signature provider crashes caused by malformed parameter/function names by escaping dynamic regex fragments in `src/util.js` (`parameterDoc`, `headerRegex`).
-- Made signature parsing fail-safe in `src/util.js` so parameter/header documentation extraction returns safe defaults instead of throwing.
-- Escaped dynamic smart-help query text in `src/commands/ToolCommands.js` before regex construction in `launchHelp` to avoid invalid regular expression errors.
-- **Go to Definition (F12) performance regression** introduced in v1.4.0 — three improvements that together restore lookup speed to parity with v1.1.0/v1.2.0:
-  - Replaced the variable-definition regex in `src/ai_definition.js` with a simpler pattern that eliminates nested lazy quantifiers and a dead-weight optional tail, reducing per-line matching from O(k²) to O(n). Comma-separated declarations (e.g. `Global $a, $b, $c`) continue to resolve correctly.
-  - Added a 5-second stat grace period to `getIncludeText` in `src/util.js` so the synchronous `fs.statSync` call that checked cache freshness is skipped on rapid repeated lookups, eliminating ~30+ redundant syscalls per F12 press on typical projects.
-  - Added a per-document definition result cache in `src/ai_definition.js` (keyed on document URI + symbol name) so repeated F12 on the same symbol with no intervening edit returns immediately. The cache entry is evicted the moment the document is edited.
+- **Variable completions not appearing on startup**: completions now initialize correctly during extension activation. The scope-aware path also falls back to regex-based completion when the parser returns empty results.
+- **Signature provider crashes on malformed input**: dynamic regex fragments are now escaped in parameter and header documentation extraction, preventing crashes from malformed parameter or function names.
+- **Signature parsing errors**: parameter and header documentation extraction now returns safe defaults instead of throwing on unexpected input.
+- **Smart-help errors with special characters**: query text is now escaped before regex construction, preventing invalid regular expression errors.
+- **Go to Definition (F12) performance regression**: introduced in v1.4.0 — three improvements that together restore lookup speed to parity with v1.1.0/v1.2.0
+  - Simplified the variable-definition regex to eliminate backtracking on large files
+  - Added a stat grace period to skip redundant filesystem checks on rapid repeated lookups
+  - Added a per-document definition cache that is evicted on edit
 
 ## [1.4.0] - 2026-02-12
 
