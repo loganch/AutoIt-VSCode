@@ -49,14 +49,14 @@ const escapeRegexLiteral = value => {
 
 // Cached regex patterns to avoid recreation
 const REGEX_PATTERNS = Object.freeze({
-  includePattern: /^#include\s"(.+)"/gm,
-  relativeInclude: /^\s*#include\s"(.+)"/gm,
-  libraryInclude: /^\s*#include\s<(.+)>/gm,
+  includePattern: /^#include\s"([^"]+)"/gm,
+  relativeInclude: /^\s*#include\s"([^"]+)"/gm,
+  libraryInclude: /^\s*#include\s<([^>]+)>/gm,
   libraryIncludePattern: /^#include\s+<([\w.]+\.au3)>/gm,
   functionPattern: /^[\t ]*(?:volatile[\t ]+)?Func[\t ]+(\w+)[\t ]*\(/i,
   functionDefinitionRegex: /^[\t ]*(?:volatile[\t ]+)?Func[\t ]+((\w+)[\t ]*\((.*)\))/gim,
   variablePattern: /(?:["'].*?["'])|(?:;.*)|(\$\w+)/g,
-  regionPattern: /^[\t ]{0,}#region\s[- ]{0,}(.+)/i,
+  regionPattern: /^[\t ]*#region\s[- ]*(.+)/i,
   commentBlockStart: /^\s*#(cs|comments-start)/,
   commentBlockEnd: /^\s*#(ce|comments-end)/,
   hasAngleBrackets: /^<.+>$/,
@@ -77,9 +77,11 @@ const REGEX_PATTERNS = Object.freeze({
     const escapedFunctionName = escapeRegexLiteral(functionName);
     if (!escapedFunctionName) return /$^/;
 
+    // Allow Description to be on same line as Name OR on the next line
     return new RegExp(
-      `;\\s*Name\\s*\\.+:\\s+${escapedFunctionName}\\s*[\r\n]` +
-        ';\\s+Description\\s*\\.+:\\s+(?<description>.+)[\r\n]',
+      `;\\s*Name\\s*\\.+:\\s+${escapedFunctionName}\\s*` +
+        `(?:\\r\\n?\\n?\\s*;\\s+Description\\s*\\.+:\\s+(?<description>.+))?` +
+        `(?:\\r\\n|\\n|$)`,
     );
   },
 });
