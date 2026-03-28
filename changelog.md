@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **VS Code variable support in path settings**: settings that accept file paths (e.g. `autoit.aiPath`) now resolve VS Code variables such as `${workspaceFolder}` and `${userHome}` (#240) (29d494b)
+
 ### Fixed
 
 - **Variable completions not appearing on startup**: completions now initialize correctly during extension activation. The scope-aware path also falls back to regex-based completion when the parser returns empty results.
@@ -17,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Simplified the variable-definition regex to eliminate backtracking on large files
   - Added a stat grace period to skip redundant filesystem checks on rapid repeated lookups
   - Added a per-document definition cache that is evicted on edit
+- **Function declaration parameter scopes**: TextMate grammar now keeps the declaration scope active through the closing parenthesis and assigns a dedicated `variable.parameter.autoit` scope to parameters (965c5f6)
+- **Error handling in diagnostics and AI config**: improved debug logging and error recovery in `diagnosticUtils`, `ai_config`, and `extension` activation paths (0d52962)
+
+### Changed
+
+- Improved regex patterns for `#include` directive resolution and function description matching in the utility module (640699a)
+
+### Removed
+
+- Removed deprecated `mainFunctions.js` static AutoIt function completions file (1,645 lines); dynamic completions take over fully (fe8e176)
+- Removed deprecated `udf_WinAPITheme.js` completions file (b5f2b6a)
 
 ## [1.4.0] - 2026-02-12
 
