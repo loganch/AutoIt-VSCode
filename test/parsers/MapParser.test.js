@@ -162,6 +162,20 @@ EndFunc`;
       expect(functions).toHaveLength(1);
       expect(functions[0].parameters).toEqual(['$mUser', '$name']);
     });
+
+    it('should parse parameters when default string contains closing parenthesis', () => {
+      const source = `Func _File_ListNewestToArray($sgName = ")*'", $flag = Default)
+    Local $boDummy
+EndFunc`;
+      const parser = new MapParser(source);
+      const functions = parser.parseFunctionBoundaries();
+
+      expect(functions).toHaveLength(1);
+      expect(functions[0].name).toBe('_File_ListNewestToArray');
+      expect(functions[0].startLine).toBe(0);
+      expect(functions[0].endLine).toBe(2);
+      expect(functions[0].parameters).toEqual(['$sgName', '$flag']);
+    });
   });
 
   describe('getFunctionAtLine', () => {

@@ -31,7 +31,7 @@ jest.mock('../../src/ai_config', () => ({
   },
 }));
 
-const { buildFunctionSignature, patterns } = require('../../src/util');
+const { buildFunctionSignature, getParams, patterns } = require('../../src/util');
 
 describe('util signature regex safety', () => {
   test('buildFunctionSignature does not throw for malformed parameter token', () => {
@@ -69,5 +69,13 @@ describe('util signature regex safety', () => {
   test('parameterDoc escapes regex metacharacters in parameter names', () => {
     expect(() => patterns.parameterDoc('UBOUND_ROWS) -1))')).not.toThrow();
     expect(() => patterns.parameterDoc('param.*+?^${}()|[]\\')).not.toThrow();
+  });
+
+  test('getParams handles nested defaults with commas and closing parenthesis', () => {
+    const params = getParams('$name = StringFormat(")%s", "x"), ByRef $flag = Default', '', -1);
+
+    expect(params).toHaveProperty('$name');
+    expect(params).toHaveProperty('$flag');
+    expect(Object.keys(params)).toHaveLength(2);
   });
 });

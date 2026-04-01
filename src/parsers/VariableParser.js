@@ -4,6 +4,10 @@
  */
 
 import VariablePatterns from '../utils/VariablePatterns.js';
+import {
+  parseFunctionDeclarationLine,
+  parseParameterNames,
+} from '../utils/functionSignatureParsing.js';
 
 class VariableParser {
   constructor(source, filePath = '') {
@@ -22,26 +26,18 @@ class VariableParser {
    */
   parseFunctionBoundaries() {
     this.functions = [];
-    const funcStartPattern = /^\s*(?:Volatile\s+)?Func\s+(\w+)\s*\((.*?)\)/i;
     const funcEndPattern = /^\s*EndFunc/i;
 
     let currentFunc = null;
 
     this.lines.forEach((line, index) => {
-      const funcStart = line.match(funcStartPattern);
-      if (funcStart) {
+      const funcDeclaration = parseFunctionDeclarationLine(line);
+      if (funcDeclaration) {
         // Parse parameters from function signature
-        const paramsStr = funcStart[2].trim();
-        const parameters = paramsStr
-          ? paramsStr.split(',').map(p => {
-              const param = p.trim().split('=')[0].trim();
-              // Parameters should start with $
-              return param.startsWith('$') ? param : '$' + param;
-            })
-          : [];
+        const parameters = parseParameterNames(funcDeclaration.paramsText, true);
 
         currentFunc = {
-          name: funcStart[1],
+          name: funcDeclaration.functionName,
           startLine: index,
           endLine: -1,
           parameters,
@@ -192,31 +188,22 @@ class VariableParser {
    * @private
    */
   parseFunctionParameters(line, lineIndex) {
-    const funcMatch = line.match(/^\s*(?:Volatile\s+)?Func\s+(\w+)\s*\((.*?)\)/i);
-
-    if (!funcMatch) {
+    const funcDeclaration = parseFunctionDeclarationLine(line);
+    if (!funcDeclaration) {
       return;
     }
 
-    const functionName = funcMatch[1];
-    const paramsStr = funcMatch[2].trim();
+    const { functionName, paramsText: paramsStr, paramsStartIndex } = funcDeclaration;
 
     if (!paramsStr) {
       return; // No parameters
     }
 
     // Parse parameter list
-    const parameters = paramsStr
-      .split(',')
-      .map(p => {
-        const param = p.trim().split('=')[0].trim();
-        return param.startsWith('$') ? param : '$' + param;
-      })
-      .filter(p => p.length > 0);
+    const parameters = parseParameterNames(paramsStr, true);
 
     // Find opening parenthesis to search from there
-    const parenIndex = line.indexOf('(');
-    let searchFrom = parenIndex >= 0 ? parenIndex : 0;
+    let searchFrom = paramsStartIndex;
 
     // Add each parameter as a variable
     parameters.forEach(param => {

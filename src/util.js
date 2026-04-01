@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { CompletionItemKind, MarkdownString, window, workspace } from 'vscode';
 import aiConfig from './ai_config';
+import { splitTopLevel } from './utils/functionSignatureParsing';
 
 // ============================================================================
 // CONSTANTS AND CONFIGURATION
@@ -702,14 +703,12 @@ const getParams = (paramText, text, headerIndex) => {
     return params;
   }
 
-  const paramList = paramText
-    .split(',')
+  const paramList = splitTopLevel(paramText, ',')
     .map(param => param.trim())
     .filter(param => param.length > 0);
 
   paramList.forEach(param => {
-    const paramEntry = param
-      .split('=')[0]
+    const paramEntry = splitTopLevel(param, '=')[0]
       .trim()
       .replace(/^ByRef\s*/, '');
 

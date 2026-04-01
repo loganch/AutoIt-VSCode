@@ -19,16 +19,78 @@ function toJsRegex(onigurumaPattern, { global = false, multiline = false } = {})
   return new RegExp(source, flags);
 }
 
+function findDeclarationClosingParen(source, startIndex) {
+  const openParenIndex = source.indexOf('(', startIndex);
+  if (openParenIndex === -1) return -1;
+
+  let depth = 0;
+  let inDoubleQuote = false;
+  let inSingleQuote = false;
+
+  for (let index = openParenIndex + 1; index < source.length; index += 1) {
+    const char = source[index];
+    const nextChar = source[index + 1];
+
+    if (inDoubleQuote) {
+      if (char === '"' && nextChar === '"') {
+        index += 1;
+        continue;
+      }
+
+      if (char === '"') {
+        inDoubleQuote = false;
+      }
+      continue;
+    }
+
+    if (inSingleQuote) {
+      if (char === "'" && nextChar === "'") {
+        index += 1;
+        continue;
+      }
+
+      if (char === "'") {
+        inSingleQuote = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inDoubleQuote = true;
+      continue;
+    }
+
+    if (char === "'") {
+      inSingleQuote = true;
+      continue;
+    }
+
+    if (char === '(') {
+      depth += 1;
+      continue;
+    }
+
+    if (char === ')') {
+      if (depth === 0) {
+        return index;
+      }
+      depth -= 1;
+    }
+  }
+
+  return -1;
+}
+
 function getDeclarationEndIndex(source, startIndex, endPattern) {
   // We intentionally model both forms so this test suite catches regressions
   // if the declaration scope accidentally reverts to line-end behavior.
   if (endPattern === '(?<=\\))') {
-    const closeParen = source.indexOf(')', startIndex);
+    const closeParen = findDeclarationClosingParen(source, startIndex);
     return closeParen === -1 ? -1 : closeParen + 1;
   }
 
   if (endPattern === '(?<=\\))|$') {
-    const closeParen = source.indexOf(')', startIndex);
+    const closeParen = findDeclarationClosingParen(source, startIndex);
     const eol = source.indexOf('\n', startIndex);
     const lineEnd = eol === -1 ? source.length : eol;
 
@@ -78,6 +140,20 @@ describe('AutoIt grammar function declaration parameter scopes', () => {
     expect(functionRule.end).toBe('(?<=\\))');
   });
 
+  test('parses quoted strings inside function declarations', () => {
+    const functionRule = getFunctionRule();
+
+    const hasDoubleQuotedPattern = functionRule.patterns.some(
+      pattern => pattern.name === 'string.quoted.double.autoit',
+    );
+    const hasSingleQuotedPattern = functionRule.patterns.some(
+      pattern => pattern.name === 'string.quoted.single.autoit',
+    );
+
+    expect(hasDoubleQuotedPattern).toBe(true);
+    expect(hasSingleQuotedPattern).toBe(true);
+  });
+
   test('single-line declarations capture all parameter variables', () => {
     const functionRule = getFunctionRule();
     const parameterPattern = functionRule.patterns.find(
@@ -111,5 +187,20 @@ describe('AutoIt grammar function declaration parameter scopes', () => {
     const matches = [...declarationSegment.matchAll(parameterRegex)].map(match => match[0]);
 
     expect(matches).toEqual(['$first', '$second', '$third']);
+  });
+
+  test('declaration with closing parenthesis in quoted default does not truncate parameters', () => {
+    const functionRule = getFunctionRule();
+    const parameterPattern = functionRule.patterns.find(
+      pattern => pattern.name === 'variable.parameter.autoit',
+    );
+
+    const source = 'Func _File_ListNewestToArray($sgName = ")*\'", $flag = Default)\nEndFunc';
+    const declarationSegment = extractFunctionDeclarationSegment(source, functionRule);
+
+    const parameterRegex = toJsRegex(parameterPattern.match, { global: true });
+    const matches = [...declarationSegment.matchAll(parameterRegex)].map(match => match[0]);
+
+    expect(matches).toEqual(['$sgName', '$flag']);
   });
 });

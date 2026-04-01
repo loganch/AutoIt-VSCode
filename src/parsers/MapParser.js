@@ -1,6 +1,12 @@
 /**
  * Parses AutoIt source code to extract Map variable information
  */
+import {
+  parseFunctionDeclarationLine,
+  parseParameterNames,
+  splitTopLevel,
+} from '../utils/functionSignatureParsing.js';
+
 export default class MapParser {
   constructor(source) {
     this.source = source;
@@ -117,22 +123,18 @@ export default class MapParser {
    */
   parseFunctionBoundaries() {
     this.functions = [];
-    const funcStartPattern = /^\s*Func\s+(\w+)\s*\((.*?)\)/i;
     const funcEndPattern = /^\s*EndFunc/i;
 
     let currentFunc = null;
 
     this.lines.forEach((line, index) => {
-      const funcStart = line.match(funcStartPattern);
-      if (funcStart) {
+      const funcDeclaration = parseFunctionDeclarationLine(line);
+      if (funcDeclaration) {
         // Parse parameters
-        const paramsStr = funcStart[2].trim();
-        const parameters = paramsStr
-          ? paramsStr.split(',').map(p => p.trim().split('=')[0].trim())
-          : [];
+        const parameters = parseParameterNames(funcDeclaration.paramsText);
 
         currentFunc = {
-          name: funcStart[1],
+          name: funcDeclaration.functionName,
           startLine: index,
           endLine: -1,
           parameters,
@@ -305,7 +307,7 @@ export default class MapParser {
       if (!match) return;
 
       const funcName = match[1];
-      const args = match[2].split(',').map(a => a.trim());
+      const args = splitTopLevel(match[2], ',').map(a => a.trim());
 
       // Check if our Map is passed as an argument
       const argIndex = args.indexOf(mapName);

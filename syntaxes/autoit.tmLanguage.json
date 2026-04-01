@@ -21,6 +21,7 @@
     {
       "name": "meta.function.autoit",
       "begin": "\\b(?i:func)\\b",
+      "applyEndPatternLast": true,
       "beginCaptures": {
         "0": {
           "name": "storage.type.autoit"
@@ -28,6 +29,60 @@
       },
       "end": "(?<=\\))",
       "patterns": [
+        {
+          "begin": "(\")",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.begin.autoit"
+            }
+          },
+          "end": "(\")(?!\")",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.end.autoit"
+            }
+          },
+          "name": "string.quoted.double.autoit",
+          "patterns": [
+            {
+              "match": "\"\"",
+              "name": "constant.character.escape.autoit"
+            },
+            {
+              "include": "#send-keys"
+            },
+            {
+              "include": "#restrict-newlines"
+            }
+          ]
+        },
+        {
+          "begin": "(')",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.begin.autoit"
+            }
+          },
+          "end": "(')(?!')",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.definition.string.end.autoit"
+            }
+          },
+          "name": "string.quoted.single.autoit",
+          "patterns": [
+            {
+              "match": "''",
+              "name": "constant.character.escape.autoit"
+            },
+            {
+              "include": "#send-keys"
+            },
+            {
+              "include": "#restrict-newlines"
+            }
+          ]
+        },
         {
           "match": "\\b[a-zA-Z_]\\w*(?=\\s*\\()",
           "name": "entity.name.function.definition.autoit"

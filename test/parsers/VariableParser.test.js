@@ -71,6 +71,17 @@ describe('VariableParser', () => {
       expect(params[0].name).toBe('$p1');
       expect(params[1].name).toBe('$p2');
     });
+
+    it('should parse all parameters when default string contains closing parenthesis', () => {
+      const source = 'Func _File_ListNewestToArray($sgName = ")*\'", $flag = Default)\nEndFunc';
+      const parser = new VariableParser(source);
+      const variables = parser.parseVariableDeclarations();
+
+      const params = variables.filter(v => v.type === 'parameter');
+      expect(params).toHaveLength(EXPECTED_COUNT_TWO);
+      expect(params[0].name).toBe('$sgName');
+      expect(params[1].name).toBe('$flag');
+    });
   });
 
   describe('Column position accuracy', () => {
