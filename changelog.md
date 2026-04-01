@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added a per-document definition cache that is evicted on edit
 - **Function declaration parameter scopes**: TextMate grammar now keeps the declaration scope active through the closing parenthesis and assigns a dedicated `variable.parameter.autoit` scope to parameters (965c5f6)
 - **Error handling in diagnostics and AI config**: improved debug logging and error recovery in `diagnosticUtils`, `ai_config`, and `extension` activation paths (0d52962)
+- **Function parameter parsing with quoted parentheses**: parser and TextMate grammar now correctly handle `)` characters inside quoted strings in function default parameter values (#243) (40c727f)
 
 ### Changed
 
