@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-04-07
+
 ### Added
 
 - **VS Code variable support in path settings**: settings that accept file paths (e.g. `autoit.aiPath`) now resolve VS Code variables such as `${workspaceFolder}` and `${userHome}` (#240) (29d494b)
 
 ### Fixed
 
+- Includes without trailing space now colorize correctly.
 - **Variable completions not appearing on startup**: completions now initialize correctly during extension activation. The scope-aware path also falls back to regex-based completion when the parser returns empty results.
 - **Signature provider crashes on malformed input**: dynamic regex fragments are now escaped in parameter and header documentation extraction, preventing crashes from malformed parameter or function names.
 - **Signature parsing errors**: parameter and header documentation extraction now returns safe defaults instead of throwing on unexpected input.
@@ -27,6 +30,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Separated some preprocesors to be colored closer to Scite.
+  - Token scope (`keyword.control.directives.autoit`) now is used for `Include-Once`, `NoTrayIcon`, `RequireAdmin` and `OnAutoItStartRegister`
+  - Token scope (`meta.preprocessor.autoit`) is used for all others.
 - Improved regex patterns for `#include` directive resolution and function description matching in the utility module (640699a)
 
 ### Removed
@@ -35,18 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed deprecated `udf_WinAPITheme.js` completions file (b5f2b6a)
 
 ## [1.4.0] - 2026-02-12
-
-### Fixed
-
-- Includes without trailing space now colorize correctly.
-
-### Changed
-
-- Separated some preprocesors to be colored closer to Scite.
-  - Token scope (`keyword.control.directives.autoit`) now is used for `Include-Once`, `NoTrayIcon`, `RequireAdmin` and `OnAutoItStartRegister`
-  - Token scope (`meta.preprocessor.autoit`) is used for all others.
-
-## [1.4.0] - 2026-02-13
 
 ### Added
 
