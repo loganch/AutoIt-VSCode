@@ -8,3 +8,6 @@ node_modules
 .prettierrc.json
 .cache
 **/*.map
+.kilo/**
+.jest-cache/**
+package.json.backup
