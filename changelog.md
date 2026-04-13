@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed changelog comparison link for version 1.5.0 release (9cfd868)
+
+### Changed
+
+- Added `.kilo`, `.jest-cache`, and `package.json.backup` to ignore files (#244) (79f7ae9)
+
 ## [1.5.0] - 2026-04-07
 
 ### Added
