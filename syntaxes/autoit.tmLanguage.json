@@ -115,6 +115,14 @@
         {
           "match": "[\\[\\]()]",
           "name": "punctuation.bracket.autoit"
+        },
+        {
+          "match": "\\.|,",
+          "name": "punctuation.commadot.autoit"
+        },
+        {
+          "match": "&",
+          "name": "keyword.operator.concatenation.autoit"
         }
       ]
     },
