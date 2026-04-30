@@ -111,6 +111,10 @@
         {
           "match": "(?:\\+=|-=|\\*=|/=|&=|=)",
           "name": "keyword.operator.assignment.autoit"
+        },
+        {
+          "match": "[\\[\\]()]",
+          "name": "punctuation.bracket.autoit"
         }
       ]
     },
