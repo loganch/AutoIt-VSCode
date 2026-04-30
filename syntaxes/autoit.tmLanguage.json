@@ -123,6 +123,10 @@
         {
           "match": "&",
           "name": "keyword.operator.concatenation.autoit"
+        },
+        {
+          "match": "\\b(?i:not|and|or)\\b",
+          "name": "keyword.operator.logical.autoit"
         }
       ]
     },
