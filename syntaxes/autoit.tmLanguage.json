@@ -99,6 +99,10 @@
               "name": "punctuation.definition.variable.parameter.autoit"
             }
           }
+        },
+        {
+          "name": "constant.language.autoit",
+          "match": "\\b(?i:true|false|null|default)\\b"
         }
       ]
     },
