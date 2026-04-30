@@ -107,6 +107,10 @@
         {
           "match": "\\b0[xX][0-9A-Fa-f]+\\b|(?<!\\w)(?:(\\d+\\.\\d+)|(\\d+\\.)|(\\d+)|(\\.\\d+))(?:[eE][-+]?\\d+)?(?!\\w)",
           "name": "constant.numeric.autoit"
+        },
+        {
+          "match": "(?:\\+=|-=|\\*=|/=|&=|=)",
+          "name": "keyword.operator.assignment.autoit"
         }
       ]
     },
