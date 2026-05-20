@@ -8,7 +8,11 @@ const hoverFeature = languages.registerHoverProvider(AUTOIT_MODE, {
 
     const word = wordRange ? document.getText(wordRange).toLowerCase() : '';
 
-    if (word in hovers) {
+    const line = document.lineAt(position.line);
+    const firstChar = line.text.charAt(line.firstNonWhitespaceCharacterIndex);
+    
+    // Only provide a hover if line isn't a comment line.
+    if ((word in hovers) && (firstChar !== ";")) {
       return new Hover(hovers[word]);
     }
 
