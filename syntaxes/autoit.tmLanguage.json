@@ -260,6 +260,14 @@
       "name": "keyword.operator.logical.autoit"
     },
     {
+      "match": "\\?",
+      "name": "keyword.operator.conditional.question-mark.autoit"
+    },
+    {
+      "match": ":",
+      "name": "keyword.operator.conditional.colon.autoit"
+    },
+    {
       "match": "[\\[\\]()]",
       "name": "punctuation.bracket.autoit"
     },
