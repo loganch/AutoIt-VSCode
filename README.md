@@ -1,9 +1,10 @@
 # AutoIt for Visual Studio Code
 
-[![Version](https://img.shields.io/visual-studio-marketplace/v/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
-[![Rating](https://img.shields.io/visual-studio-marketplace/r/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
-[![GitHub Stars](https://img.shields.io/github/stars/loganch/AutoIt-VSCode?style=social)](https://github.com/loganch/AutoIt-VSCode)
+[![Version](https://badgen.net/vs-marketplace/v/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![Installs](https://badgen.net/vs-marketplace/i/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![Downloads](https://badgen.net/vs-marketplace/d/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![Rating](https://badgen.net/vs-marketplace/rating/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![GitHub Repo Stars](https://img.shields.io/github/stars/loganch/AutoIt-VSCode)](https://github.com/loganch/AutoIt-VSCode)
 
 A comprehensive AutoIt language extension for Visual Studio Code, providing syntax highlighting, IntelliSense, diagnostics, and integrated script execution.
 
