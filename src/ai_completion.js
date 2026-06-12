@@ -140,11 +140,14 @@ const getLibraryFunctions = (libraryIncludes, doc) => {
     return libraryIncludes
       .flatMap(file => {
         const fullPath = findFilepath(file);
-        return fullPath && typeof fullPath === 'string'
-          ? Object.keys(getIncludeData(fullPath, doc)).map(newFunc => {
-              return { file, newFunc };
-            })
-          : [];
+        if (!fullPath || typeof fullPath !== 'string') {
+          return [];
+        }
+        const includeData = getIncludeData(fullPath, doc);
+        if (!includeData) {
+          return [];
+        }
+        return Object.keys(includeData).map(newFunc => ({ file, newFunc }));
       })
       .map(({ file, newFunc }) => {
         return createNewCompletionItem(
@@ -155,7 +158,6 @@ const getLibraryFunctions = (libraryIncludes, doc) => {
       });
   });
 };
-
 /**
  * Collects the filenames of library includes, filtering out
  * ones that are already default AutoIt UDFs
