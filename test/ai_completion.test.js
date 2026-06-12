@@ -9,6 +9,7 @@ const path = require('path');
 const DOC1_PATH = path.join(process.cwd(), 'test', 'fixtures', 'doc1.au3');
 const DOC2_PATH = path.join(process.cwd(), 'test', 'fixtures', 'doc2.au3');
 const INCLUDE_PATH = path.join(process.cwd(), 'test', 'fixtures', 'include.au3');
+const LIBRARY_PATH = path.join(process.cwd(), 'test', 'fixtures', 'MyLib.au3');
 const VARIABLE_LINE_INDEX = 4;
 const COMMENT_CHAR_INDEX = 5;
 const FUNCTION_DECLARATION_CHAR_INDEX = 10;
@@ -156,17 +157,28 @@ jest.mock('vscode', () => {
 });
 
 // Mock util functions
-const mockFindFilepath = jest.fn(file => {
-  if (file === 'include.au3') return INCLUDE_PATH;
-  return null;
-});
+// NOTE: jest config sets resetMocks: true, which wipes implementations before
+// each test — implementations are (re)applied via applyMockImplementations()
+const mockFindFilepath = jest.fn();
+const mockGetIncludeData = jest.fn();
 
-const mockGetIncludeData = jest.fn((file, _doc) => {
-  if (file === 'include.au3' || file === INCLUDE_PATH) {
-    return { IncludedFunc: {} };
-  }
-  return null;
-});
+const applyMockImplementations = () => {
+  mockFindFilepath.mockImplementation(file => {
+    if (file === 'include.au3') return INCLUDE_PATH;
+    if (file === 'MyLib.au3') return LIBRARY_PATH;
+    return null;
+  });
+
+  mockGetIncludeData.mockImplementation(file => {
+    if (file === 'include.au3' || file === INCLUDE_PATH) {
+      return { IncludedFunc: {} };
+    }
+    if (file === LIBRARY_PATH) {
+      return { LibraryFunc: {} };
+    }
+    return null;
+  });
+};
 
 jest.mock('../src/util', () => ({
   AUTOIT_MODE: { language: 'autoit' },
@@ -180,7 +192,7 @@ jest.mock('../src/util', () => ({
 }));
 
 jest.mock('../src/completions', () => []);
-jest.mock('../src/constants', () => []);
+jest.mock('../src/constants', () => ({ DEFAULT_UDFS: [] }));
 
 describe('ai_completion cache behavior', () => {
   let provideCompletionItems;
@@ -190,6 +202,7 @@ describe('ai_completion cache behavior', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    applyMockImplementations();
 
     // Get vscode mock
     ({ languages, workspace } = require('vscode'));
@@ -286,6 +299,58 @@ describe('ai_completion cache behavior', () => {
     }
   });
 
+  test('caches library include completions per document', async () => {
+    const doc = new MockTextDocument('#include <MyLib.au3>\nLocal $a = 1', DOC1_PATH);
+    const position = new MockPosition(1, 0);
+
+    // First call should parse the library include
+    await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, doc);
+
+    // Second call with same document should use cache
+    mockGetIncludeData.mockClear();
+    const completions = await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).not.toHaveBeenCalled();
+
+    // Cached completions still returned
+    const libraryFuncs = completions.filter(c => c.label === 'LibraryFunc');
+    expect(libraryFuncs.length).toBe(1);
+  });
+
+  test('invalidates library cache when library includes change', async () => {
+    const doc = new MockTextDocument('#include <MyLib.au3>\nLocal $a = 1', DOC1_PATH);
+    const position = new MockPosition(1, 0);
+
+    await provideCompletionItems(doc, position);
+    mockGetIncludeData.mockClear();
+
+    // Same library includes: cache hit
+    await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).not.toHaveBeenCalled();
+
+    // Different library includes: rebuild
+    const modifiedDoc = new MockTextDocument('#include <OtherLib.au3>\nLocal $a = 1', DOC1_PATH);
+    await provideCompletionItems(modifiedDoc, position);
+    expect(mockFindFilepath).toHaveBeenCalledWith('OtherLib.au3');
+  });
+
+  test('cleans up library cache on document close', async () => {
+    const closeListener = workspace.onDidCloseTextDocument.mock.calls[0]?.[0];
+    expect(closeListener).toBeDefined();
+
+    const doc = new MockTextDocument('#include <MyLib.au3>\nLocal $a = 1', DOC1_PATH, 'autoit');
+    const position = new MockPosition(1, 0);
+
+    await provideCompletionItems(doc, position);
+    mockGetIncludeData.mockClear();
+
+    closeListener(doc);
+
+    // Next call should rebuild (cache was cleared)
+    await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, doc);
+  });
+
   test('returns correct completion types', async () => {
     const doc = new MockTextDocument(DOC1_CONTENT, DOC1_PATH);
     const position = new MockPosition(VARIABLE_LINE_INDEX, 1); // Position at start of variable line
@@ -332,6 +397,7 @@ describe('arraysMatch utility', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    applyMockImplementations();
 
     // Get vscode mock
     ({ languages } = require('vscode'));

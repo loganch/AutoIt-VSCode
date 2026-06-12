@@ -56,8 +56,8 @@ jest.mock('../../src/ai_config', () => ({
 const resolveDefault = moduleExports => moduleExports.default ?? moduleExports;
 
 describe('general completion modules', () => {
-  test('mainFunctions exports function completions', () => {
-    const items = resolveDefault(require('../../src/completions/mainFunctions.js'));
+  test('main function signatures export function completions', () => {
+    const items = require('../../src/signatures/functions.js').completions;
 
     expect(Array.isArray(items)).toBe(true);
     expect(items.length).toBeGreaterThan(0);
@@ -69,8 +69,8 @@ describe('general completion modules', () => {
     );
   });
 
-  test('udf_WinAPITheme exports function completions', () => {
-    const items = resolveDefault(require('../../src/completions/udf_WinAPITheme.js'));
+  test('WinAPITheme signatures export function completions', () => {
+    const items = require('../../src/signatures/WinAPIEx/WinAPITheme.js').completions;
 
     expect(Array.isArray(items)).toBe(true);
     expect(items.length).toBeGreaterThan(0);
