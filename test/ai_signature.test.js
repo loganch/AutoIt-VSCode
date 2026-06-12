@@ -1,7 +1,13 @@
+/** @type {jest.Mock} */
 const mockRegisterHoverProvider = jest.fn(() => ({ dispose: jest.fn() }));
+/** @type {jest.Mock} */
 const mockRegisterSignatureHelpProvider = jest.fn(() => ({ dispose: jest.fn() }));
+/** @type {jest.Mock} */
 const mockFindFilepath = jest.fn(() => false);
+/** @type {jest.Mock} */
 const mockGetIncludeData = jest.fn(() => ({}));
+/** @type {jest.Mock} */
+const mockBuildFunctionSignature = jest.fn();
 
 class MockMarkdownString {
   constructor(value) {
@@ -43,17 +49,17 @@ jest.mock('vscode', () => ({
   SignatureHelp: MockSignatureHelp,
   SignatureInformation: MockSignatureInformation,
   languages: {
-    registerHoverProvider: (...args) => mockRegisterHoverProvider(...args),
-    registerSignatureHelpProvider: (...args) => mockRegisterSignatureHelpProvider(...args),
+    registerHoverProvider: mockRegisterHoverProvider,
+    registerSignatureHelpProvider: mockRegisterSignatureHelpProvider,
   },
 }));
 
 jest.mock('../src/util', () => ({
   AUTOIT_MODE: { language: 'autoit' },
-  buildFunctionSignature: jest.fn(),
-  findFilepath: (...args) => mockFindFilepath(...args),
+  buildFunctionSignature: mockBuildFunctionSignature,
+  findFilepath: mockFindFilepath,
   functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/gim,
-  getIncludeData: (...args) => mockGetIncludeData(...args),
+  getIncludeData: mockGetIncludeData,
   includePattern: /#include\s+"([^"]+)"/gim,
   libraryIncludePattern: /#include\s+<([^>]+)>/gim,
 }));
@@ -80,6 +86,10 @@ describe('ai_signature', () => {
   let signatureModule;
   let signatureProvider;
   let hoverProvider;
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   beforeAll(() => {
     signatureModule = require('../src/ai_signature');
@@ -136,6 +146,7 @@ describe('ai_signature', () => {
 
   describe('signature caching', () => {
     const position = { line: 0, character: 0 };
+    const expectedReparseCalls = 2;
 
     const createDoc = ({ uri, version, text, word }) => ({
       uri: { toString: () => uri },
@@ -153,8 +164,7 @@ describe('ai_signature', () => {
     });
 
     const mockLocalFunctionParsing = () => {
-      const util = require('../src/util');
-      util.buildFunctionSignature.mockImplementation(match => ({
+      mockBuildFunctionSignature.mockImplementation(match => ({
         functionName: match[2],
         functionObject: {
           label: `${match[2]}()`,
@@ -162,7 +172,7 @@ describe('ai_signature', () => {
           params: {},
         },
       }));
-      return util.buildFunctionSignature;
+      return mockBuildFunctionSignature;
     };
 
     test('parses library includes once for repeated hovers on an unchanged document', () => {
@@ -197,7 +207,7 @@ describe('ai_signature', () => {
     });
 
     test('re-parses local functions when the document version changes', () => {
-      mockLocalFunctionParsing();
+      const buildFunctionSignature = mockLocalFunctionParsing();
       const uri = 'file:///caching-version-bump.au3';
 
       const docV1 = createDoc({
@@ -207,6 +217,9 @@ describe('ai_signature', () => {
         word: 'FirstFunc',
       });
       expect(hoverProvider.provideHover(docV1, position)).not.toBeNull();
+      expect(buildFunctionSignature).toHaveBeenCalledTimes(1);
+
+      buildFunctionSignature.mockClear();
 
       const docV2 = createDoc({
         uri,
@@ -215,6 +228,7 @@ describe('ai_signature', () => {
         word: 'SecondFunc',
       });
       expect(hoverProvider.provideHover(docV2, position)).not.toBeNull();
+      expect(buildFunctionSignature).toHaveBeenCalledTimes(expectedReparseCalls);
     });
 
     test('reuses include data across version changes when the include list is unchanged', () => {
