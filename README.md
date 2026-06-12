@@ -175,6 +175,8 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 
 ### All Configuration Options
 
+<!-- markdownlint-disable MD033 -->
+
 <details>
 <summary>Click to expand full configuration table</summary>
 
@@ -217,6 +219,8 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 | `autoit.maps.enableIntelligence`        | Enable/disable Map completions                                                                   | `true`                                                            |
 | `autoit.maps.includeDepth`              | Max include depth for cross-file tracking                                                        | `3`                                                               |
 | `autoit.maps.showFunctionKeys`          | Show keys added by functions                                                                     | `true`                                                            |
+
+<!-- markdownlint-enable MD033 -->
 
 </details>
 
@@ -327,9 +331,7 @@ Please follow the existing code style and include tests for new features.
 
 ## Contributors
 
-<a href="https://github.com/loganch/autoit-vscode/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=loganch/autoit-vscode" />
-</a>
+[![Contributors](https://contrib.rocks/image?repo=loganch/autoit-vscode)](https://github.com/loganch/autoit-vscode/graphs/contributors)
 
 Made with [contrib.rocks](https://contrib.rocks).
 
