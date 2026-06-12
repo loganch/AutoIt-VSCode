@@ -7,12 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Ternary operator scopes**: syntax highlighting now recognizes ternary operator tokens for improved colorization (#251)
+
 ### Fixed
 
+- **Hover description regex**: corrected line-ending pattern in the function-description RegExp so hover docs display correctly on both CRLF and LF files (#248) (c96895c)
 - Fixed changelog comparison link for version 1.5.0 release (9cfd868)
 
 ### Changed
 
+- **Function declaration colorations**: TextMate grammar now colorizes additional token types inside function declarations: keywords/booleans, numbers, assignments, brackets, commas/dots/concatenation operators, and logical operators (#246) (042f18d–e786c7d)
 - Added `.kilo`, `.jest-cache`, and `package.json.backup` to ignore files (#244) (79f7ae9)
 
 ## [1.5.0] - 2026-04-07
