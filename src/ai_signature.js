@@ -18,8 +18,7 @@ import {
 import defaultSigs from './signatures';
 import { DEFAULT_UDFS } from './constants';
 
-let currentIncludeFiles = [];
-let includes = {};
+const documentSignatureCache = new Map();
 const FUNCTION_NAME_PART_INDEX_FROM_END = 2;
 
 /**
@@ -87,13 +86,6 @@ function getCallInfo(doc, pos) {
   };
 }
 
-function arraysMatch(arr1, arr2) {
-  if (arr1.length === arr2.length && arr1.some(v => arr2.indexOf(v) <= 0)) {
-    return true;
-  }
-  return false;
-}
-
 /**
  * Retrieves the includes from the given text.
  *
@@ -127,33 +119,26 @@ function getLibraryIncludesFromText(text) {
 }
 
 /**
- * Retrieves the includes and library includes from the given document.
- * Determines whether includes should be re-parsed or not.
+ * Parses the signatures of all functions provided by the given includes.
  *
- * @param {Object} doc - The document to search for includes.
- * @returns {Object} An object containing the includes found in the document.
+ * @param {string[]} includesCheck - Include scripts referenced with `#include "..."`.
+ * @param {string[]} libraryIncludes - Include file names referenced with `#include <...>`.
+ * @param {import("vscode").TextDocument} doc - The document the includes belong to.
+ * @returns {Object} An object containing the signatures found in the included files.
  */
-function getIncludedFunctionSignatures(doc) {
-  const text = doc.getText();
-  const includesCheck = getIncludesFromText(text);
-  const libraryIncludes = getLibraryIncludesFromText(text);
+function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, doc) {
+  const includes = {};
 
-  if (!arraysMatch(includesCheck, currentIncludeFiles)) {
-    includes = {};
-    includesCheck.forEach(script => {
-      const newIncludes = getIncludeData(script, doc);
-      Object.assign(includes, newIncludes);
-    });
-    currentIncludeFiles = includesCheck;
-  }
+  includesCheck.forEach(script => {
+    Object.assign(includes, getIncludeData(script, doc));
+  });
 
-  libraryIncludes.forEach(pattern => {
-    const filename = pattern[1].replace('.au3', '');
-    if (DEFAULT_UDFS.indexOf(filename) === -1) {
-      const fullPath = findFilepath(pattern[1]);
+  libraryIncludes.forEach(fileName => {
+    if (DEFAULT_UDFS.indexOf(fileName.replace('.au3', '')) === -1) {
+      const fullPath = findFilepath(fileName);
+      const safeFullPath = typeof fullPath === 'string' ? fullPath : '';
       if (fullPath) {
-        const newData = getIncludeData(fullPath, doc);
-        Object.assign(includes, newData);
+        Object.assign(includes, getIncludeData(safeFullPath, doc));
       }
     }
   });
@@ -162,22 +147,64 @@ function getIncludedFunctionSignatures(doc) {
 }
 
 /**
- * Returns an object of AutoIt functions found within the current AutoIt script
- * @param {import("vscode").TextDocument} doc The TextDocument object representing the AutoIt script
+ * Returns an object of AutoIt functions found within the given AutoIt script text
+ * @param {string} text The full text of the AutoIt script
+ * @param {string} fileName The name of the file the text belongs to
  * @returns {Object} Object containing SignatureInformation objects
  */
-function getLocalFunctionSignatures(doc) {
-  const text = doc.getText();
+function parseLocalFunctionSignatures(text, fileName) {
   const functions = {};
 
+  functionDefinitionRegex.lastIndex = 0;
   let functionMatch = functionDefinitionRegex.exec(text);
   while (functionMatch) {
-    const functionData = buildFunctionSignature(functionMatch, text, doc.fileName);
+    const functionData = buildFunctionSignature(functionMatch, text, fileName);
     functions[functionData.functionName] = functionData.functionObject;
     functionMatch = functionDefinitionRegex.exec(text);
   }
 
   return functions;
+}
+
+/**
+ * Retrieves all function signatures (included and local) available to the given document.
+ * Results are cached per document and reused while the document version is unchanged.
+ * On edits, include data is reused as long as the document's include list is unchanged,
+ * so only local functions are re-parsed.
+ *
+ * @param {import("vscode").TextDocument} doc - The document to collect signatures for.
+ * @returns {Object} An object containing all signatures available to the document.
+ */
+function getDocumentSignatures(doc) {
+  const cacheKey = doc.uri ? doc.uri.toString() : doc.fileName;
+  const cached = documentSignatureCache.get(cacheKey);
+  if (cached && cached.version === doc.version) {
+    return cached.signatures;
+  }
+
+  const text = doc.getText();
+  const includesCheck = getIncludesFromText(text);
+  const libraryIncludes = getLibraryIncludesFromText(text).map(pattern => pattern[1]);
+  const includeKey = JSON.stringify([includesCheck, libraryIncludes]);
+
+  const includes =
+    cached && cached.includeKey === includeKey
+      ? cached.includes
+      : parseIncludedFunctionSignatures(includesCheck, libraryIncludes, doc);
+
+  const signatures = {
+    ...includes,
+    ...parseLocalFunctionSignatures(text, doc.fileName),
+  };
+
+  documentSignatureCache.set(cacheKey, {
+    version: doc.version,
+    includeKey,
+    includes,
+    signatures,
+  });
+
+  return signatures;
 }
 
 /**
@@ -212,12 +239,7 @@ export const signatureHoverProvider = languages.registerHoverProvider(AUTOIT_MOD
     if (!hoveredPosition) return null;
     const hoveredWord = document.getText(hoveredPosition);
 
-    const allSignatures = {
-      ...getIncludedFunctionSignatures(document),
-      ...getLocalFunctionSignatures(document),
-    };
-
-    const matchedSignature = allSignatures[hoveredWord];
+    const matchedSignature = getDocumentSignatures(document)[hoveredWord];
 
     if (!matchedSignature || !matchedSignature.label) return null;
 
@@ -243,8 +265,7 @@ export default languages.registerSignatureHelpProvider(
 
       const allSignatures = {
         ...defaultSigs,
-        ...getIncludedFunctionSignatures(document),
-        ...getLocalFunctionSignatures(document),
+        ...getDocumentSignatures(document),
       };
 
       const matchedSignature = allSignatures[caller.func];

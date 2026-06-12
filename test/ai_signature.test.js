@@ -133,4 +133,137 @@ describe('ai_signature', () => {
     const result = hoverProvider.provideHover(document, { line: 0, character: 0 });
     expect(result).toBeNull();
   });
+
+  describe('signature caching', () => {
+    const position = { line: 0, character: 0 };
+
+    const createDoc = ({ uri, version, text, word }) => ({
+      uri: { toString: () => uri },
+      version,
+      fileName: uri,
+      getText: jest.fn(range => (range === undefined ? text : word)),
+      getWordRangeAtPosition: jest.fn(() => ({ start: 0, end: word.length })),
+      lineAt: jest.fn(() => ({ text: '' })),
+    });
+
+    const libSignature = name => ({
+      label: `${name}()`,
+      documentation: `${name} docs\rIncluded from MyLib.au3`,
+      params: {},
+    });
+
+    const mockLocalFunctionParsing = () => {
+      const util = require('../src/util');
+      util.buildFunctionSignature.mockImplementation(match => ({
+        functionName: match[2],
+        functionObject: {
+          label: `${match[2]}()`,
+          documentation: `${match[2]} docs\rLocal function`,
+          params: {},
+        },
+      }));
+      return util.buildFunctionSignature;
+    };
+
+    test('parses library includes once for repeated hovers on an unchanged document', () => {
+      mockFindFilepath.mockImplementation(() => '/lib/MyLib.au3');
+      mockGetIncludeData.mockImplementation(() => ({ LibFunc: libSignature('LibFunc') }));
+
+      const doc = createDoc({
+        uri: 'file:///caching-repeated-hover.au3',
+        version: 1,
+        text: '#include <MyLib.au3>\n',
+        word: 'LibFunc',
+      });
+
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(mockGetIncludeData).toHaveBeenCalledTimes(1);
+    });
+
+    test('parses local functions once for repeated hovers on an unchanged document', () => {
+      const buildFunctionSignature = mockLocalFunctionParsing();
+
+      const doc = createDoc({
+        uri: 'file:///caching-local-functions.au3',
+        version: 1,
+        text: 'Func MyLocal($a)\nEndFunc\n',
+        word: 'MyLocal',
+      });
+
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(buildFunctionSignature).toHaveBeenCalledTimes(1);
+    });
+
+    test('re-parses local functions when the document version changes', () => {
+      mockLocalFunctionParsing();
+      const uri = 'file:///caching-version-bump.au3';
+
+      const docV1 = createDoc({
+        uri,
+        version: 1,
+        text: 'Func FirstFunc()\nEndFunc\n',
+        word: 'FirstFunc',
+      });
+      expect(hoverProvider.provideHover(docV1, position)).not.toBeNull();
+
+      const docV2 = createDoc({
+        uri,
+        version: 2,
+        text: 'Func FirstFunc()\nEndFunc\nFunc SecondFunc()\nEndFunc\n',
+        word: 'SecondFunc',
+      });
+      expect(hoverProvider.provideHover(docV2, position)).not.toBeNull();
+    });
+
+    test('reuses include data across version changes when the include list is unchanged', () => {
+      mockFindFilepath.mockImplementation(() => '/lib/MyLib.au3');
+      mockGetIncludeData.mockImplementation(() => ({ LibFunc: libSignature('LibFunc') }));
+      const uri = 'file:///caching-stable-includes.au3';
+
+      const docV1 = createDoc({
+        uri,
+        version: 1,
+        text: '#include <MyLib.au3>\n',
+        word: 'LibFunc',
+      });
+      expect(hoverProvider.provideHover(docV1, position)).not.toBeNull();
+
+      const docV2 = createDoc({
+        uri,
+        version: 2,
+        text: '#include <MyLib.au3>\n; a new comment\n',
+        word: 'LibFunc',
+      });
+      expect(hoverProvider.provideHover(docV2, position)).not.toBeNull();
+      expect(mockGetIncludeData).toHaveBeenCalledTimes(1);
+    });
+
+    test('re-parses includes when the include list changes', () => {
+      mockFindFilepath.mockImplementation(fileName => `/lib/${fileName}`);
+      mockGetIncludeData.mockImplementation(fullPath =>
+        fullPath.includes('OtherLib')
+          ? { OtherFunc: libSignature('OtherFunc') }
+          : { LibFunc: libSignature('LibFunc') },
+      );
+      const uri = 'file:///caching-changed-includes.au3';
+
+      const docV1 = createDoc({
+        uri,
+        version: 1,
+        text: '#include <MyLib.au3>\n',
+        word: 'LibFunc',
+      });
+      expect(hoverProvider.provideHover(docV1, position)).not.toBeNull();
+
+      const docV2 = createDoc({
+        uri,
+        version: 2,
+        text: '#include <MyLib.au3>\n#include <OtherLib.au3>\n',
+        word: 'OtherFunc',
+      });
+      expect(hoverProvider.provideHover(docV2, position)).not.toBeNull();
+    });
+  });
 });
