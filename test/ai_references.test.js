@@ -630,6 +630,24 @@ describe('provideReferences - edge cases', () => {
     expect(vscode.workspace.findFiles).not.toHaveBeenCalled();
   });
 
+  // Cursor on the In token in "For $x In $array" (chars 0-3 "For ", 4-6 "$x ",
+  // so "In" begins at char 7).
+  const FOR_IN_CURSOR_CHAR = 7;
+
+  test('cursor on In keyword returns [] without a workspace scan', async () => {
+    const doc = new MockTextDocument('For $x In $array\nNext\n', MAIN_PATH);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, FOR_IN_CURSOR_CHAR),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: false },
+    );
+    expect(locs).toEqual([]);
+    // For the RIGHT reason: In is a recognized keyword, rejected before any scan,
+    // so the For-In loop never triggers a workspace search.
+    expect(vscode.workspace.findFiles).not.toHaveBeenCalled();
+  });
+
   test('skips files that fail to open', async () => {
     const OK = path.join(process.cwd(), 'test', 'fixtures', 'ok.au3');
     const BAD = path.join(process.cwd(), 'test', 'fixtures', 'bad.au3');

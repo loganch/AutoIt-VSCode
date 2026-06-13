@@ -13,6 +13,7 @@ const WORD_PATTERN = /\$?[A-Za-z_][A-Za-z0-9_]*/;
 // reference, so getSymbolAtPosition rejects it (lowercased: matching is
 // case-insensitive). Variables always start with `$`, so keywords are
 // function-shaped names only.
+// Keep in sync with src/signatures/keywords.js (the authoritative keyword list).
 const AUTOIT_KEYWORDS = new Set(
   [
     'If',
@@ -23,6 +24,7 @@ const AUTOIT_KEYWORDS = new Set(
     'While',
     'WEnd',
     'For',
+    'In',
     'To',
     'Step',
     'Next',
