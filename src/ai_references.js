@@ -8,6 +8,39 @@ function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Remove the comment tail of a line (a `;` not inside a string).
+function stripLineComment(line) {
+  let inSingle = false;
+  let inDouble = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"' && !inSingle) inDouble = !inDouble;
+    else if (ch === "'" && !inDouble) inSingle = !inSingle;
+    else if (ch === ';' && !inSingle && !inDouble) return line.slice(0, i);
+  }
+  return line;
+}
+
+// Build a boolean mask of columns that fall inside a quoted string.
+function stringMask(line) {
+  const mask = new Array(line.length).fill(false);
+  let inSingle = false;
+  let inDouble = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"' && !inSingle) {
+      inDouble = !inDouble;
+      mask[i] = true;
+    } else if (ch === "'" && !inDouble) {
+      inSingle = !inSingle;
+      mask[i] = true;
+    } else {
+      mask[i] = inSingle || inDouble;
+    }
+  }
+  return mask;
+}
+
 const AutoItReferenceProvider = {
   // Later tasks add awaited file scanning; the async signature is intentional.
   // eslint-disable-next-line no-unused-vars, require-await
@@ -31,6 +64,37 @@ const AutoItReferenceProvider = {
     // For functions, both sides use \b.
     const pattern = isVariable ? `${escaped}\\b` : `\\b${escaped}\\b`;
     return new RegExp(pattern, 'gi');
+  },
+
+  scanText(text, regex) {
+    const results = [];
+    const lines = text.split(/\r?\n/);
+    let inBlockComment = false;
+    for (let line = 0; line < lines.length; line++) {
+      const raw = lines[line];
+      if (/^\s*#(?:ce|comments-end)\b/i.test(raw)) {
+        inBlockComment = false;
+        continue;
+      }
+      if (/^\s*#(?:cs|comments-start)\b/i.test(raw)) {
+        inBlockComment = true;
+        continue;
+      }
+      if (inBlockComment) continue;
+
+      const code = stripLineComment(raw);
+      if (!code) continue;
+      const mask = stringMask(code);
+
+      regex.lastIndex = 0;
+      let m;
+      while ((m = regex.exec(code)) !== null) {
+        if (m.index === regex.lastIndex) regex.lastIndex++; // guard zero-width
+        if (mask[m.index]) continue; // inside a string
+        results.push({ line, character: m.index, length: m[0].length });
+      }
+    }
+    return results;
   },
 };
 

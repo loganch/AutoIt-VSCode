@@ -191,6 +191,15 @@ const CURSOR_ON_WHITESPACE = 1; // on a whitespace-only line
 // Expected match index of the second hit ($foo) in '$Foo = $foo + $FooBar'.
 const SECOND_VAR_MATCH_INDEX = 7;
 
+// Expected hit for 'DoWork' on the indented second line 'x = 1\n   DoWork()'.
+const INDENTED_HIT_LINE = 1;
+const INDENTED_HIT_CHARACTER = 3;
+const DOWORK_LENGTH = 6;
+
+// Expected surviving-match line numbers for the scanText filtering tests.
+const LINE_AFTER_COMMENT = 2; // third line, after a `;` comment line
+const LINE_AFTER_BLOCK = 4; // fifth line, after a #cs/#ce block
+
 describe('AutoItReferenceProvider', () => {
   test('returns empty array when cursor is not on a word', async () => {
     const doc = new MockTextDocument('Func Foo()\nEndFunc\n', MAIN_PATH);
@@ -245,5 +254,39 @@ describe('match regex', () => {
     const text = 'Work() + DoWork() + Working';
     const hits = [...text.matchAll(re)].map(m => m.index);
     expect(hits).toEqual([0]); // only the standalone Work
+  });
+});
+
+describe('scanText filtering', () => {
+  const find = (text, name, isVar) =>
+    AutoItReferenceProvider.scanText(
+      text,
+      AutoItReferenceProvider.buildMatchRegex(name, isVar),
+    ).map(m => m.line);
+
+  test('excludes matches in line comments', () => {
+    const text = 'DoWork()\n; DoWork() here is a comment\nDoWork()';
+    expect(find(text, 'DoWork', false)).toEqual([0, LINE_AFTER_COMMENT]);
+  });
+
+  test('excludes matches inside #cs/#ce blocks', () => {
+    const text = 'DoWork()\n#cs\nDoWork()\n#ce\nDoWork()';
+    expect(find(text, 'DoWork', false)).toEqual([0, LINE_AFTER_BLOCK]);
+  });
+
+  test('excludes matches inside double-quoted strings', () => {
+    const text = 'DoWork()\nMsgBox(0, "title", "call DoWork() now")';
+    expect(find(text, 'DoWork', false)).toEqual([0]);
+  });
+
+  test('returns line and character for each match', () => {
+    const text = 'x = 1\n   DoWork()';
+    const hits = AutoItReferenceProvider.scanText(
+      text,
+      AutoItReferenceProvider.buildMatchRegex('DoWork', false),
+    );
+    expect(hits).toEqual([
+      { line: INDENTED_HIT_LINE, character: INDENTED_HIT_CHARACTER, length: DOWORK_LENGTH },
+    ]);
   });
 });
