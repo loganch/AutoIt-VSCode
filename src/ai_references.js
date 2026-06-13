@@ -1,5 +1,6 @@
-import { languages } from 'vscode';
+import { languages, SymbolKind } from 'vscode';
 import { AUTOIT_MODE } from './util';
+import { provideDocumentSymbols } from './ai_symbols';
 
 // AutoIt is case-insensitive. Word chars: letters, digits, underscore (and $ prefix for vars).
 const WORD_PATTERN = /\$?[A-Za-z_][A-Za-z0-9_]*/;
@@ -95,6 +96,56 @@ const AutoItReferenceProvider = {
       }
     }
     return results;
+  },
+
+  async classifyScope(document, position, name) {
+    let symbols = [];
+    try {
+      symbols = (await provideDocumentSymbols(document)) || [];
+    } catch {
+      return { kind: 'global' };
+    }
+
+    // Find the innermost Function symbol whose range contains the position.
+    const enclosing = this.findEnclosingFunction(symbols, position);
+    if (!enclosing) return { kind: 'global' };
+
+    // Is `name` declared Local/Static/Dim or a parameter within this function body?
+    const range = enclosing.range || enclosing.location?.range;
+    const bodyText = document.getText(range);
+    if (this.isLocalDeclaredInBody(bodyText, name)) {
+      return { kind: 'local', range };
+    }
+    return { kind: 'global' };
+  },
+
+  findEnclosingFunction(symbols, position, found = null) {
+    const contains = (r, p) =>
+      (r.start.line < p.line || (r.start.line === p.line && r.start.character <= p.character)) &&
+      (r.end.line > p.line || (r.end.line === p.line && r.end.character >= p.character));
+    let result = found;
+    for (const s of symbols) {
+      const { kind } = s;
+      const range = s.range || s.location?.range;
+      if (!range) continue;
+      if (kind === SymbolKind.Function && contains(range, position)) {
+        result = s;
+      }
+      if (s.children && s.children.length) {
+        result = this.findEnclosingFunction(s.children, position, result);
+      }
+    }
+    return result;
+  },
+
+  isLocalDeclaredInBody(bodyText, name) {
+    const escaped = escapeRegex(name);
+    // Local/Static/Dim declaration (possibly in a comma list): keyword ... $name
+    const declRe = new RegExp(`\\b(?:Local|Static|Dim)\\b[^\\n]*?${escaped}\\b`, 'i');
+    if (declRe.test(bodyText)) return true;
+    // Parameter in the Func signature: Func Name(... $name ...)
+    const sigRe = new RegExp(`^\\s*(?:volatile\\s+)?Func\\b[^\\n(]*\\([^)]*${escaped}\\b`, 'i');
+    return sigRe.test(bodyText);
   },
 };
 

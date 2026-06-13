@@ -143,7 +143,14 @@ jest.mock(
     workspace: {
       onDidChangeTextDocument: jest.fn(),
       onDidChangeConfiguration: jest.fn(),
-      getConfiguration: jest.fn(() => ({ get: (key, def) => def })),
+      getConfiguration: jest.fn(() => ({
+        get: (key, def) => {
+          // Disable Map intelligence so provideDocumentSymbols returns plain
+          // SymbolInformation deterministically under the mock.
+          if (key === 'enableIntelligence') return false;
+          return def;
+        },
+      })),
       findFiles: jest.fn(() => Promise.resolve([])),
       openTextDocument: jest.fn(),
       createFileSystemWatcher: jest.fn(() => ({
@@ -174,12 +181,47 @@ jest.mock(
   { virtual: true },
 );
 
-// Mock util to provide AUTOIT_MODE without triggering the heavy ai_config load chain.
+// Mock util to provide the surface ai_symbols needs (used by classifyScope ->
+// provideDocumentSymbols) without triggering the heavy ai_config load chain.
+// Values mirror src/util.js so document-symbol parsing behaves identically.
 jest.mock('../src/util', () => ({
   AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
+  AI_CONSTANTS: [
+    '$MB_ICONERROR',
+    '$MB_ICONINFORMATION',
+    '$MB_YESNO',
+    '$MB_TASKMODAL',
+    '$IDYES',
+    '$IDNO',
+  ],
+  functionPattern: /^[\t ]*(?:volatile[\t ]+)?Func[\t ]+(\w+)[\t ]*\(/i,
+  variablePattern: /(?:["'].*?["'])|(?:;.*)|(\$\w+)/g,
+  regionPattern: /^[\t ]*#region\s[- ]*(.+)/i,
+  isSkippableLine: line => {
+    if (!line || line.isEmptyOrWhitespace) return true;
+    const firstChar = line.text.charAt(line.firstNonWhitespaceCharacterIndex);
+    if (firstChar === ';') return true;
+    if (firstChar === '#') {
+      return (
+        !/^\s*#(cs|comments-start)/.test(line.text) && !/^\s*#(ce|comments-end)/.test(line.text)
+      );
+    }
+    return false;
+  },
 }));
 
+const vscode = require('vscode');
 const { AutoItReferenceProvider } = require('../src/ai_references');
+
+// Jest is configured with clearMocks/restoreMocks, which strips the factory
+// implementations from mock functions before every test. Re-install the
+// getConfiguration implementation so ai_symbols (invoked by classifyScope) can
+// read settings and Map intelligence stays disabled for determinism.
+beforeEach(() => {
+  vscode.workspace.getConfiguration.mockImplementation(() => ({
+    get: (key, def) => (key === 'enableIntelligence' ? false : def),
+  }));
+});
 
 const CONTEXT_WITH_DECL = { includeDeclaration: true };
 
@@ -199,6 +241,29 @@ const DOWORK_LENGTH = 6;
 // Expected surviving-match line numbers for the scanText filtering tests.
 const LINE_AFTER_COMMENT = 2; // third line, after a `;` comment line
 const LINE_AFTER_BLOCK = 4; // fifth line, after a #cs/#ce block
+
+// Scope-classification fixture and cursor coordinates.
+const SCOPE_SRC = [
+  'Global $g = 0', //                0
+  'Func Alpha($p)', //              1  ($p is a parameter -> Local to Alpha)
+  '    Local $x = 1', //            2  ($x is Local to Alpha)
+  '    $g = $x + $p', //            3
+  'EndFunc', //                     4
+  'Func Beta()', //                 5
+  '    $x = 99', //                 6  (auto-global $x usage in another func)
+  'EndFunc', //                     7
+].join('\n');
+
+const ALPHA_FUNC_START_LINE = 1; // Func Alpha
+const ALPHA_FUNC_END_LINE = 4; // EndFunc
+const SCOPE_X_DECL_LINE = 2; // Local $x = 1
+const SCOPE_X_DECL_CHAR = 11; // cursor on $x in the declaration
+const SCOPE_P_USE_LINE = 3; // $g = $x + $p
+const SCOPE_P_USE_CHAR = 14; // cursor on $p usage
+const SCOPE_G_DECL_LINE = 0; // Global $g = 0
+const SCOPE_G_DECL_CHAR = 8; // cursor on $g
+const SCOPE_X_IN_BETA_LINE = 6; // $x = 99 inside Beta
+const SCOPE_X_IN_BETA_CHAR = 4; // cursor on $x
 
 describe('AutoItReferenceProvider', () => {
   test('returns empty array when cursor is not on a word', async () => {
@@ -288,5 +353,50 @@ describe('scanText filtering', () => {
     expect(hits).toEqual([
       { line: INDENTED_HIT_LINE, character: INDENTED_HIT_CHARACTER, length: DOWORK_LENGTH },
     ]);
+  });
+});
+
+describe('scope classification', () => {
+  test('Local-declared variable is scoped to its function', async () => {
+    const doc = new MockTextDocument(SCOPE_SRC, MAIN_PATH);
+    const scope = await AutoItReferenceProvider.classifyScope(
+      doc,
+      new MockPosition(SCOPE_X_DECL_LINE, SCOPE_X_DECL_CHAR),
+      '$x',
+    );
+    expect(scope.kind).toBe('local');
+    expect(scope.range.start.line).toBe(ALPHA_FUNC_START_LINE);
+    expect(scope.range.end.line).toBe(ALPHA_FUNC_END_LINE);
+  });
+
+  test('parameter is scoped to its function', async () => {
+    const doc = new MockTextDocument(SCOPE_SRC, MAIN_PATH);
+    const scope = await AutoItReferenceProvider.classifyScope(
+      doc,
+      new MockPosition(SCOPE_P_USE_LINE, SCOPE_P_USE_CHAR),
+      '$p',
+    );
+    expect(scope.kind).toBe('local');
+    expect(scope.range.start.line).toBe(ALPHA_FUNC_START_LINE);
+  });
+
+  test('Global variable is workspace-wide', async () => {
+    const doc = new MockTextDocument(SCOPE_SRC, MAIN_PATH);
+    const scope = await AutoItReferenceProvider.classifyScope(
+      doc,
+      new MockPosition(SCOPE_G_DECL_LINE, SCOPE_G_DECL_CHAR),
+      '$g',
+    );
+    expect(scope.kind).toBe('global');
+  });
+
+  test('variable used inside a function but never Local-declared there is global', async () => {
+    const doc = new MockTextDocument(SCOPE_SRC, MAIN_PATH);
+    const scope = await AutoItReferenceProvider.classifyScope(
+      doc,
+      new MockPosition(SCOPE_X_IN_BETA_LINE, SCOPE_X_IN_BETA_CHAR),
+      '$x',
+    );
+    expect(scope.kind).toBe('global'); // not Local in Beta -> treated as global/auto-global
   });
 });
