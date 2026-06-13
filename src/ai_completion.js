@@ -1,5 +1,7 @@
 import { CompletionItem, CompletionItemKind, Range, languages, workspace } from 'vscode';
-import completions from './completions';
+
+// Deferred until first completion so the ~70 completion modules don't load at activation.
+let completions = null;
 import {
   AUTOIT_MODE,
   functionPattern as _functionPattern,
@@ -427,6 +429,12 @@ const provideCompletionItems = async (document, position) => {
 
   const libraryIncludes = getLibraryIncludes(text);
   const libraryCompletions = getLibraryFunctions(libraryIncludes, document);
+
+  if (!completions) {
+    // eslint-disable-next-line global-require
+    const mod = require('./completions');
+    completions = Array.isArray(mod) ? mod : mod.default;
+  }
 
   return [
     ...completions,
