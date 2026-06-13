@@ -183,7 +183,15 @@ jest.mock(
 
 // Mock util to provide the surface ai_symbols needs (used by classifyScope ->
 // provideDocumentSymbols) without triggering the heavy ai_config load chain.
-// Values mirror src/util.js so document-symbol parsing behaves identically.
+//
+// NOTE: These values are deliberately hand-copied and MUST be kept in sync with
+// src/util.js. jest.requireActual('../src/util') was attempted to avoid this
+// duplication, but loading the real module evaluates ai_config at import time,
+// whose getPaths()/verifyPath() calls workspace.fs.stat (undefined under this
+// vscode mock) and throws "Cannot read properties of undefined (reading
+// 'stat')". Since even a partial requireActual pulls in those side effects, the
+// manual mock is retained. If any of these patterns/constants change in
+// src/util.js, update them here too.
 jest.mock('../src/util', () => ({
   AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
   AI_CONSTANTS: [
@@ -264,6 +272,28 @@ const SCOPE_G_DECL_LINE = 0; // Global $g = 0
 const SCOPE_G_DECL_CHAR = 8; // cursor on $g
 const SCOPE_X_IN_BETA_LINE = 6; // $x = 99 inside Beta
 const SCOPE_X_IN_BETA_CHAR = 4; // cursor on $x
+
+// Decoy fixtures: a comment / string mentioning `Local $name` must NOT cause a
+// workspace-global variable to be misclassified as function-local.
+const COMMENT_DECOY_SRC = [
+  'Global $g = 0', //              0
+  'Func F()', //                  1
+  '    ; Local $g here', //       2  decoy comment, not a real declaration
+  '    $g = 1', //                3  usage of the global
+  'EndFunc', //                   4
+].join('\n');
+
+const STRING_DECOY_SRC = [
+  'Global $s = 0', //             0
+  'Func G()', //                 1
+  '    $msg = "Local $s"', //    2  decoy inside a string literal
+  '    $s = 2', //               3  usage of the global
+  'EndFunc', //                  4
+].join('\n');
+
+const DECOY_USE_LINE = 3; // line where the global is actually used
+const COMMENT_DECOY_USE_CHAR = 4; // cursor on $g in "$g = 1"
+const STRING_DECOY_USE_CHAR = 4; // cursor on $s in "$s = 2"
 
 describe('AutoItReferenceProvider', () => {
   test('returns empty array when cursor is not on a word', async () => {
@@ -398,5 +428,25 @@ describe('scope classification', () => {
       '$x',
     );
     expect(scope.kind).toBe('global'); // not Local in Beta -> treated as global/auto-global
+  });
+
+  test('comment decoy "; Local $g" does not misclassify a global as local', async () => {
+    const doc = new MockTextDocument(COMMENT_DECOY_SRC, MAIN_PATH);
+    const scope = await AutoItReferenceProvider.classifyScope(
+      doc,
+      new MockPosition(DECOY_USE_LINE, COMMENT_DECOY_USE_CHAR),
+      '$g',
+    );
+    expect(scope.kind).toBe('global');
+  });
+
+  test('string decoy "Local $s" does not misclassify a global as local', async () => {
+    const doc = new MockTextDocument(STRING_DECOY_SRC, MAIN_PATH);
+    const scope = await AutoItReferenceProvider.classifyScope(
+      doc,
+      new MockPosition(DECOY_USE_LINE, STRING_DECOY_USE_CHAR),
+      '$s',
+    );
+    expect(scope.kind).toBe('global');
   });
 });

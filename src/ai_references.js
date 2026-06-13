@@ -42,6 +42,16 @@ function stringMask(line) {
   return mask;
 }
 
+// Replace quoted-string characters on a line with spaces so they can't match
+// code patterns (e.g. a decoy `"Local $x"` literal).
+function blankStrings(line) {
+  const mask = stringMask(line);
+  return line
+    .split('')
+    .map((ch, i) => (mask[i] ? ' ' : ch))
+    .join('');
+}
+
 const AutoItReferenceProvider = {
   // Later tasks add awaited file scanning; the async signature is intentional.
   // eslint-disable-next-line no-unused-vars, require-await
@@ -120,6 +130,8 @@ const AutoItReferenceProvider = {
   },
 
   findEnclosingFunction(symbols, position, found = null) {
+    // AutoIt has no nested functions; the children recursion is defensive
+    // (children are Map keys/region groupings, not functions).
     const contains = (r, p) =>
       (r.start.line < p.line || (r.start.line === p.line && r.start.character <= p.character)) &&
       (r.end.line > p.line || (r.end.line === p.line && r.end.character >= p.character));
@@ -140,12 +152,20 @@ const AutoItReferenceProvider = {
 
   isLocalDeclaredInBody(bodyText, name) {
     const escaped = escapeRegex(name);
-    // Local/Static/Dim declaration (possibly in a comma list): keyword ... $name
+    // Strip line comments and blank out string contents per line so decoys like
+    // `; Local $x` or `"Local $x"` cannot falsely match and misclassify a global.
+    const codeOnly = bodyText
+      .split(/\r?\n/)
+      .map(l => blankStrings(stripLineComment(l)))
+      .join('\n');
+    // Local/Static/Dim declaration (possibly in a comma list): keyword ... $name.
+    // Line-continuation (`_`) split declarations are intentionally not handled:
+    // missing a local declaration only widens the (global) search, the safe direction.
     const declRe = new RegExp(`\\b(?:Local|Static|Dim)\\b[^\\n]*?${escaped}\\b`, 'i');
-    if (declRe.test(bodyText)) return true;
+    if (declRe.test(codeOnly)) return true;
     // Parameter in the Func signature: Func Name(... $name ...)
     const sigRe = new RegExp(`^\\s*(?:volatile\\s+)?Func\\b[^\\n(]*\\([^)]*${escaped}\\b`, 'i');
-    return sigRe.test(bodyText);
+    return sigRe.test(codeOnly);
   },
 };
 
