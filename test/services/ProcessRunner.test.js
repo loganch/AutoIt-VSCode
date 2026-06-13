@@ -16,6 +16,10 @@ const { decode } = require('iconv-lite');
 const { validateFilePath, validateExecutablePath } = require('../../src/utils/pathValidation');
 const ProcessRunner = require('../../src/services/ProcessRunner');
 
+const FIRST_PROCESS_ID = 1;
+const SECOND_EXIT_CODE = 2;
+const SIMULATED_PROCESS_PID = 999;
+
 function createChannel() {
   return {
     append: jest.fn(),
@@ -91,7 +95,9 @@ describe('ProcessRunner', () => {
 
     expect(runner._formatExitMessage(1, '', info)).toContain('->Exit code 1');
     expect(runner._formatExitMessage(0, '', info)).toContain('>Exit code 0');
-    expect(runner._formatExitMessage(2, 'bad', info)).toContain('!>Exit code 2 (bad)');
+    expect(runner._formatExitMessage(SECOND_EXIT_CODE, 'bad', info)).toContain(
+      `!>Exit code ${SECOND_EXIT_CODE} (bad)`,
+    );
   });
 
   it('clears global output when multiOutput is disabled and clearOutput is enabled', () => {
@@ -109,14 +115,14 @@ describe('ProcessRunner', () => {
     const channel = createChannel();
     runner._displayProcessCommand(
       channel,
-      1,
+      FIRST_PROCESS_ID,
       'C:\\AutoIt\\AutoIt3.exe',
       ['script.au3', '/in', 'input file.txt'],
-      999,
+      SIMULATED_PROCESS_PID,
     );
     expect(channel.appendLine).toHaveBeenCalledWith(
       expect.stringContaining(
-        '"C:\\AutoIt\\AutoIt3.exe" "script.au3" /in "input file.txt" [PID 999]',
+        `"C:\\AutoIt\\AutoIt3.exe" "script.au3" /in "input file.txt" [PID ${SIMULATED_PROCESS_PID}]`,
       ),
     );
   });

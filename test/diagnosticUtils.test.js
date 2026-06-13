@@ -46,6 +46,9 @@ const {
   updateDiagnostics,
 } = require('../src/diagnosticUtils');
 
+const THIRD_LINE_ZERO_BASED = 2;
+const FOURTH_CHARACTER_ZERO_BASED = 3;
+
 describe('diagnosticUtils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -60,10 +63,10 @@ describe('diagnosticUtils', () => {
 
   test('createDiagnosticRange parses values and converts to zero-based range', () => {
     const range = createDiagnosticRange('3', '4');
-    expect(range.start.line).toBe(2);
-    expect(range.start.character).toBe(3);
-    expect(range.end.line).toBe(2);
-    expect(range.end.character).toBe(3);
+    expect(range.start.line).toBe(THIRD_LINE_ZERO_BASED);
+    expect(range.start.character).toBe(FOURTH_CHARACTER_ZERO_BASED);
+    expect(range.end.line).toBe(THIRD_LINE_ZERO_BASED);
+    expect(range.end.character).toBe(FOURTH_CHARACTER_ZERO_BASED);
   });
 
   test('updateDiagnostics appends diagnostics for same script path', () => {

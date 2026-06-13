@@ -51,14 +51,17 @@ jest.mock('../../src/ai_config', () => ({
 
 import hovers from '../../src/hovers';
 
+const MINIMUM_HOVER_ENTRIES = 100;
+const KEY_SAMPLE_SIZE = 20;
+
 describe('hovers/index', () => {
   it('exports a lowercase-keyed hover map', () => {
     expect(hovers).toBeDefined();
     expect(typeof hovers).toBe('object');
 
     const keys = Object.keys(hovers);
-    expect(keys.length).toBeGreaterThan(100);
-    keys.slice(0, 20).forEach(key => {
+    expect(keys.length).toBeGreaterThan(MINIMUM_HOVER_ENTRIES);
+    keys.slice(0, KEY_SAMPLE_SIZE).forEach(key => {
       expect(key).toBe(key.toLowerCase());
     });
   });

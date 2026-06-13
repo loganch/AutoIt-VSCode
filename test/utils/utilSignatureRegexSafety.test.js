@@ -33,6 +33,8 @@ jest.mock('../../src/ai_config', () => ({
 
 const { buildFunctionSignature, getParams, patterns } = require('../../src/util');
 
+const EXPECTED_PARAMETER_COUNT = 2;
+
 describe('util signature regex safety', () => {
   test('buildFunctionSignature does not throw for malformed parameter token', () => {
     const fileText = [
@@ -76,6 +78,6 @@ describe('util signature regex safety', () => {
 
     expect(params).toHaveProperty('$name');
     expect(params).toHaveProperty('$flag');
-    expect(Object.keys(params)).toHaveLength(2);
+    expect(Object.keys(params)).toHaveLength(EXPECTED_PARAMETER_COUNT);
   });
 });

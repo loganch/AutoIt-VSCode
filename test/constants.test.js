@@ -5,6 +5,8 @@ import {
   FORMATTER,
 } from '../src/constants';
 
+const MINIMUM_DEFAULT_UDFS = 50;
+
 describe('constants', () => {
   describe('DEFAULT_UDFS', () => {
     it('is an array', () => {
@@ -20,7 +22,7 @@ describe('constants', () => {
     });
 
     it('has more than 50 entries', () => {
-      expect(DEFAULT_UDFS.length).toBeGreaterThan(50);
+      expect(DEFAULT_UDFS.length).toBeGreaterThan(MINIMUM_DEFAULT_UDFS);
     });
 
     it('contains only strings', () => {

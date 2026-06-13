@@ -55,6 +55,8 @@ jest.mock('../../src/ai_config', () => ({
 
 const resolveDefault = moduleExports => moduleExports.default ?? moduleExports;
 
+const MINIMUM_COMPLETION_ITEMS = 100;
+
 describe('general completion modules', () => {
   test('main function signatures export function completions', () => {
     const items = require('../../src/signatures/functions.js').completions;
@@ -104,7 +106,7 @@ describe('general completion modules', () => {
     const items = resolveDefault(require('../../src/completions/index.js'));
 
     expect(Array.isArray(items)).toBe(true);
-    expect(items.length).toBeGreaterThan(100);
+    expect(items.length).toBeGreaterThan(MINIMUM_COMPLETION_ITEMS);
 
     const labels = items.map(item => item.label);
     expect(labels).toContain('#AutoIt3Wrapper_testing');

@@ -431,7 +431,6 @@ const provideCompletionItems = async (document, position) => {
   const libraryCompletions = getLibraryFunctions(libraryIncludes, document);
 
   if (!completions) {
-    // eslint-disable-next-line global-require
     const mod = require('./completions');
     completions = Array.isArray(mod) ? mod : mod.default;
   }

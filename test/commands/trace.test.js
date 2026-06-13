@@ -9,13 +9,15 @@ jest.mock('../../src/commands/commandUtils', () => jest.fn());
 import traceRemove from '../../src/commands/trace';
 import searchAndReplace from '../../src/commands/commandUtils';
 
+const REMOVED_TRACE_LINE_COUNT = 4;
+
 describe('traceRemove', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('shows success message when trace lines are removed', async () => {
-    searchAndReplace.mockResolvedValueOnce(4);
+    searchAndReplace.mockResolvedValueOnce(REMOVED_TRACE_LINE_COUNT);
 
     await traceRemove();
 

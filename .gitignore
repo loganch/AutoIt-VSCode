@@ -7,3 +7,6 @@ dist/
 .qodo
 .jest-cache
 .kilo
+
+# Claude Code local files (plans, settings)
+.claude/

@@ -17,6 +17,8 @@ jest.mock('vscode', () => ({
 
 const searchAndReplace = require('../../src/commands/commandUtils.js').default;
 
+const MATCH_COUNT_TWO = 2;
+
 function makeEditor(text) {
   const replace = jest.fn();
   const document = {
@@ -67,7 +69,7 @@ describe('searchAndReplace', () => {
 
     const result = await searchAndReplace(/foo/g, 'baz');
 
-    expect(result).toBe(2);
+    expect(result).toBe(MATCH_COUNT_TWO);
     expect(replace).toHaveBeenCalledTimes(1);
     const [, replacedText] = replace.mock.calls[0];
     expect(replacedText).toBe('baz bar baz');

@@ -11,6 +11,8 @@ jest.mock('../../src/command_constants', () => ({
 
 const OutputChannelManager = require('../../src/services/OutputChannelManager');
 
+const PROCESS_OUTPUT_CHANNEL_ID = 1234;
+
 function makeChannel(overrides = {}) {
   return {
     append: jest.fn(),
@@ -85,9 +87,16 @@ describe('OutputChannelManager', () => {
   it('creates process output channels with id in the name', () => {
     const { window } = require('vscode');
 
-    OutputChannelManager.createProcessOutputChannel(1234, 'demo.au3', 'autoit');
+    OutputChannelManager.createProcessOutputChannel(
+      PROCESS_OUTPUT_CHANNEL_ID,
+      'demo.au3',
+      'autoit',
+    );
 
-    expect(window.createOutputChannel).toHaveBeenCalledWith('AutoIt #1234 (demo.au3)', 'autoit');
+    expect(window.createOutputChannel).toHaveBeenCalledWith(
+      `AutoIt #${PROCESS_OUTPUT_CHANNEL_ID} (demo.au3)`,
+      'autoit',
+    );
   });
 
   it('creates a proxy output channel with callable methods', () => {

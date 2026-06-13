@@ -10,6 +10,7 @@ const TARGET_LINE_SIX = 6;
 const TARGET_LINE_SEVEN = 7;
 const TARGET_LINE_EIGHT = 8;
 const TARGET_LINE_ELEVEN = 11;
+const SINGLE_EXPECTED_MATCH = 1;
 
 describe('MapParser', () => {
   describe('parseMapDeclarations', () => {
@@ -117,7 +118,7 @@ $mOther.key = "value"`;
       const parser = new MapParser(source);
       const assignments = parser.parseKeyAssignments('$mUser');
 
-      expect(assignments).toHaveLength(1);
+      expect(assignments).toHaveLength(SINGLE_EXPECTED_MATCH);
       expect(assignments[0].key).toBe('name');
     });
   });
@@ -173,7 +174,7 @@ EndFunc`;
       expect(functions).toHaveLength(1);
       expect(functions[0].name).toBe('_File_ListNewestToArray');
       expect(functions[0].startLine).toBe(0);
-      expect(functions[0].endLine).toBe(2);
+      expect(functions[0].endLine).toBe(TARGET_LINE_TWO);
       expect(functions[0].parameters).toEqual(['$sgName', '$flag']);
     });
   });

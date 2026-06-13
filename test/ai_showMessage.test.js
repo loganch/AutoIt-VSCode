@@ -6,6 +6,8 @@ jest.mock('vscode', () => ({
   },
 }));
 
+const MESSAGE_TIMEOUT_MS = 10;
+
 describe('ai_showMessage', () => {
   beforeEach(() => {
     jest.resetModules();
@@ -40,9 +42,9 @@ describe('ai_showMessage', () => {
 
   it('supports timeout option and hides message after the timeout', () => {
     const mod = require('../src/ai_showMessage');
-    const handle = mod.showErrorMessage('Boom', { timeout: 10 });
+    const handle = mod.showErrorMessage('Boom', { timeout: MESSAGE_TIMEOUT_MS });
 
-    jest.advanceTimersByTime(10);
+    jest.advanceTimersByTime(MESSAGE_TIMEOUT_MS);
 
     expect(handle.isHidden).toBe(true);
   });

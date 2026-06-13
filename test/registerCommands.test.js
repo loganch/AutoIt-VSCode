@@ -21,6 +21,8 @@ jest.mock('../src/commandsList', () => ({
 
 const { registerCommands } = require('../src/registerCommands');
 
+const REGISTERED_COMMAND_COUNT = 2;
+
 describe('registerCommands', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -32,7 +34,7 @@ describe('registerCommands', () => {
     registerCommands(ctx);
 
     // commandA and commandB exist in ai_commands mock → should register
-    expect(mockRegisterCommand).toHaveBeenCalledTimes(2);
+    expect(mockRegisterCommand).toHaveBeenCalledTimes(REGISTERED_COMMAND_COUNT);
     expect(mockRegisterCommand).toHaveBeenCalledWith('autoit.commandA', expect.any(Function));
     expect(mockRegisterCommand).toHaveBeenCalledWith('autoit.commandB', expect.any(Function));
   });
@@ -52,6 +54,6 @@ describe('registerCommands', () => {
 
     registerCommands(ctx);
 
-    expect(mockPush).toHaveBeenCalledTimes(2);
+    expect(mockPush).toHaveBeenCalledTimes(REGISTERED_COMMAND_COUNT);
   });
 });

@@ -51,6 +51,8 @@ jest.mock('../../src/ai_config', () => ({
 
 import signatures from '../../src/signatures';
 
+const MINIMUM_SIGNATURE_COUNT = 200;
+
 describe('signatures/index', () => {
   it('exports a merged signatures object', () => {
     expect(signatures).toBeDefined();
@@ -69,6 +71,6 @@ describe('signatures/index', () => {
   });
 
   it('contains many entries from merged modules', () => {
-    expect(Object.keys(signatures).length).toBeGreaterThan(200);
+    expect(Object.keys(signatures).length).toBeGreaterThan(MINIMUM_SIGNATURE_COUNT);
   });
 });

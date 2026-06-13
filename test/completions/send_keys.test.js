@@ -36,13 +36,15 @@ jest.mock('../../src/util', () => ({
 
 import entries from '../../src/completions/send_keys';
 
+const MINIMUM_SEND_KEY_ENTRIES = 20;
+
 describe('send_keys completions', () => {
   it('exports an array', () => {
     expect(Array.isArray(entries)).toBe(true);
   });
 
   it('contains many completion entries', () => {
-    expect(entries.length).toBeGreaterThan(20);
+    expect(entries.length).toBeGreaterThan(MINIMUM_SEND_KEY_ENTRIES);
   });
 
   it('marks entries as constants with Send() Command detail', () => {

@@ -16,6 +16,11 @@
 // babel plugin allows referencing it from the hoisted jest.mock factory below.
 const mockHandlers = {};
 
+const INITIAL_DOC_VERSION = 1;
+const UPDATED_DOC_VERSION = 2;
+const SINGLE_RUN_COUNT = 1;
+const DOUBLE_RUN_COUNT = 2;
+
 // Mutable config object returned via the mocked ai_config module.
 const mockConfig = {
   enableDiagnostics: true,
@@ -155,62 +160,62 @@ describe('extension diagnostics version cache', () => {
   });
 
   test('skips Au3Check on tab switch when document version is unchanged', async () => {
-    const doc = makeDoc(1);
+    const doc = makeDoc(INITIAL_DOC_VERSION);
 
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledTimes(SINGLE_RUN_COUNT);
 
     // Same document, same version, switched back to — should hit the cache.
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledTimes(SINGLE_RUN_COUNT);
   });
 
   test('re-runs Au3Check when a new document version is seen', async () => {
-    await switchToEditor(makeDoc(1));
-    expect(execFile).toHaveBeenCalledTimes(1);
+    await switchToEditor(makeDoc(INITIAL_DOC_VERSION));
+    expect(execFile).toHaveBeenCalledTimes(SINGLE_RUN_COUNT);
 
     // Edited document (version bumped) — cache miss, must re-run.
-    await switchToEditor(makeDoc(2));
-    expect(execFile).toHaveBeenCalledTimes(2);
+    await switchToEditor(makeDoc(UPDATED_DOC_VERSION));
+    expect(execFile).toHaveBeenCalledTimes(DOUBLE_RUN_COUNT);
   });
 
   test('includePaths change invalidates cache and re-runs for an unchanged version', async () => {
-    const doc = makeDoc(1);
+    const doc = makeDoc(INITIAL_DOC_VERSION);
 
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledTimes(SINGLE_RUN_COUNT);
 
     // Unrelated config change must NOT invalidate the cache.
     mockHandlers.config({ affectsConfiguration: () => false });
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledTimes(SINGLE_RUN_COUNT);
 
     // includePaths feeds Au3Check (-I args), so its change must force a re-run
     // even though document.version is unchanged.
     mockHandlers.config({ affectsConfiguration: key => key === 'autoit.includePaths' });
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(2);
+    expect(execFile).toHaveBeenCalledTimes(DOUBLE_RUN_COUNT);
   });
 
   test('checkPath change invalidates cache and re-runs for an unchanged version', async () => {
-    const doc = makeDoc(1);
+    const doc = makeDoc(INITIAL_DOC_VERSION);
 
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledTimes(SINGLE_RUN_COUNT);
 
     mockHandlers.config({ affectsConfiguration: key => key === 'autoit.checkPath' });
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(2);
+    expect(execFile).toHaveBeenCalledTimes(DOUBLE_RUN_COUNT);
   });
 
   test('enableDiagnostics change invalidates cache and re-runs for an unchanged version', async () => {
-    const doc = makeDoc(1);
+    const doc = makeDoc(INITIAL_DOC_VERSION);
 
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(execFile).toHaveBeenCalledTimes(SINGLE_RUN_COUNT);
 
     mockHandlers.config({ affectsConfiguration: key => key === 'autoit.enableDiagnostics' });
     await switchToEditor(doc);
-    expect(execFile).toHaveBeenCalledTimes(2);
+    expect(execFile).toHaveBeenCalledTimes(DOUBLE_RUN_COUNT);
   });
 });

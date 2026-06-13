@@ -1,6 +1,9 @@
 const path = require('path');
 const { execFileSync } = require('child_process');
 
+const MINIMUM_CONFIG_ENTRIES = 3;
+const EXPECTED_ECMA_VERSION = 2024;
+
 describe('eslint.config.mjs', () => {
   let summary;
 
@@ -40,11 +43,11 @@ describe('eslint.config.mjs', () => {
 
   it('exports a flat config array', () => {
     expect(summary.isArray).toBe(true);
-    expect(summary.length).toBeGreaterThanOrEqual(3);
+    expect(summary.length).toBeGreaterThanOrEqual(MINIMUM_CONFIG_ENTRIES);
   });
 
   it('contains the primary JavaScript ruleset entry', () => {
-    expect(summary.ecmaVersion).toBe(2024);
+    expect(summary.ecmaVersion).toBe(EXPECTED_ECMA_VERSION);
     expect(summary.sourceType).toBe('module');
     expect(summary.eqeqeqRule).toEqual(['error', 'always']);
     expect(summary.noUnusedVarsRule).toEqual(['error', { argsIgnorePattern: '^_' }]);

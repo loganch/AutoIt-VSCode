@@ -7,7 +7,6 @@ let hovers = null;
 const hoverFeature = languages.registerHoverProvider(AUTOIT_MODE, {
   provideHover(document, position) {
     if (!hovers) {
-      // eslint-disable-next-line global-require
       hovers = require('./hovers').default;
     }
 
