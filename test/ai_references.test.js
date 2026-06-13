@@ -196,3 +196,38 @@ describe('AutoItReferenceProvider', () => {
     expect(result).toHaveLength(0);
   });
 });
+
+describe('symbol extraction', () => {
+  test('extracts a $variable token at the cursor', () => {
+    const doc = new MockTextDocument('Local $myVar = 1\n', MAIN_PATH);
+    const info = AutoItReferenceProvider.getSymbolAtPosition(doc, new MockPosition(0, 8));
+    expect(info).toEqual({ name: '$myVar', isVariable: true });
+  });
+
+  test('extracts a function-name token at the cursor', () => {
+    const doc = new MockTextDocument('Func DoWork()\nEndFunc\n', MAIN_PATH);
+    const info = AutoItReferenceProvider.getSymbolAtPosition(doc, new MockPosition(0, 7));
+    expect(info).toEqual({ name: 'DoWork', isVariable: false });
+  });
+
+  test('returns null on whitespace', () => {
+    const doc = new MockTextDocument('   \n', MAIN_PATH);
+    expect(AutoItReferenceProvider.getSymbolAtPosition(doc, new MockPosition(0, 1))).toBeNull();
+  });
+});
+
+describe('match regex', () => {
+  test('variable regex is case-insensitive and word-bounded', () => {
+    const re = AutoItReferenceProvider.buildMatchRegex('$Foo', true);
+    const text = '$Foo = $foo + $FooBar';
+    const hits = [...text.matchAll(re)].map(m => m.index);
+    expect(hits).toEqual([0, 7]); // matches $Foo and $foo, NOT $FooBar
+  });
+
+  test('function regex does not match substrings', () => {
+    const re = AutoItReferenceProvider.buildMatchRegex('Work', false);
+    const text = 'Work() + DoWork() + Working';
+    const hits = [...text.matchAll(re)].map(m => m.index);
+    expect(hits).toEqual([0]); // only the standalone Work
+  });
+});
