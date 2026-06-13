@@ -320,6 +320,35 @@ const DECOY_USE_LINE = 3; // line where the global is actually used
 const COMMENT_DECOY_USE_CHAR = 4; // cursor on $g in "$g = 1"
 const STRING_DECOY_USE_CHAR = 4; // cursor on $s in "$s = 2"
 
+// Shadowing fixture: a Global $x at the top is shadowed by a Local $x inside
+// Func F(). The in-scope Local declaration (line 2) must be the one dropped when
+// includeDeclaration is false -- NOT the earlier Global line 0 (which the
+// whole-file definition provider would return first, and which is out of range).
+const SHADOW_SRC = [
+  'Global $x = 0', //              0  shadowed global (out of F's range)
+  'Func F()', //                  1
+  '    Local $x = 1', //          2  in-scope Local declaration
+  '    $x = $x + 1', //           3  usage of the local
+  'EndFunc', //                   4
+].join('\n');
+
+const SHADOW_LOCAL_DECL_LINE = 2; // Local $x = 1 (in-scope declaration)
+const SHADOW_LOCAL_DECL_CHAR = 11; // cursor on $x in the Local declaration
+const SHADOW_LOCAL_USE_LINE = 3; // $x = $x + 1 (usage line)
+
+// Parameter shadowing/drop fixture: $p is a parameter of Func P(). With
+// includeDeclaration false, the Func signature line (where the parameter is
+// declared) must be dropped.
+const PARAM_DROP_SRC = [
+  'Func P($p)', //                0  parameter declaration (Func signature)
+  '    $p = $p + 1', //           1  usage of the parameter
+  'EndFunc', //                   2
+].join('\n');
+
+const PARAM_SIG_LINE = 0; // Func P($p) signature line
+const PARAM_USE_LINE = 1; // $p = $p + 1 usage line
+const PARAM_USE_CHAR = 4; // cursor on first $p in the usage line
+
 describe('AutoItReferenceProvider', () => {
   test('returns empty array when cursor is not on a word', async () => {
     const doc = new MockTextDocument('Func Foo()\nEndFunc\n', MAIN_PATH);
@@ -501,6 +530,37 @@ describe('provideReferences - local variable', () => {
     );
     const lines = locs.map(l => l.range.start.line);
     expect(lines).toEqual([SCOPE_P_USE_LINE]); // declaration line 2 dropped
+  });
+
+  test('drops the in-scope Local declaration when it shadows an earlier global', async () => {
+    const doc = new MockTextDocument(SHADOW_SRC, MAIN_PATH);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(SHADOW_LOCAL_DECL_LINE, SHADOW_LOCAL_DECL_CHAR),
+      { includeDeclaration: false },
+      { isCancellationRequested: false },
+    );
+    const lines = locs.map(l => l.range.start.line).sort((a, b) => a - b);
+    // The in-scope Local declaration (line 2) is dropped; only the usage (line 3,
+    // which contains two $x references) remains. The shadowed Global on line 0 is
+    // out of F's range and never appears. Before the fix the definition provider
+    // resolved $x to the Global line 0, so the Local on line 2 was wrongly kept.
+    expect(lines).toEqual([SHADOW_LOCAL_USE_LINE, SHADOW_LOCAL_USE_LINE]);
+  });
+
+  test('drops the Func signature line for a parameter when includeDeclaration is false', async () => {
+    const doc = new MockTextDocument(PARAM_DROP_SRC, MAIN_PATH);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(PARAM_USE_LINE, PARAM_USE_CHAR),
+      { includeDeclaration: false },
+      { isCancellationRequested: false },
+    );
+    const lines = locs.map(l => l.range.start.line).sort((a, b) => a - b);
+    // The Func signature line 0 (where $p is declared as a parameter) is dropped;
+    // only the usage line 1 (two $p references) remains.
+    expect(lines).toEqual([PARAM_USE_LINE, PARAM_USE_LINE]);
+    expect(lines).not.toContain(PARAM_SIG_LINE);
   });
 });
 

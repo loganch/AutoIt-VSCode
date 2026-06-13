@@ -122,7 +122,7 @@ const AutoItReferenceProvider = {
       if (symbol.isVariable) {
         const scope = await this.classifyScope(document, position, symbol.name);
         if (scope.kind === 'local') {
-          return this.collectLocal(document, scope.range, regex, includeDeclaration, position);
+          return this.collectLocal(document, scope.range, regex, includeDeclaration, symbol.name);
         }
       }
       // Function or Global variable -> workspace scan (implemented in Task 6).
@@ -134,7 +134,7 @@ const AutoItReferenceProvider = {
   },
 
   // Scan the whole document, keep only hits inside the enclosing function range.
-  collectLocal(document, range, regex, includeDeclaration, cursorPos) {
+  collectLocal(document, range, regex, includeDeclaration, name) {
     const hits = this.scanText(document.getText(), regex);
     const withinRange = h =>
       (h.line > range.start.line ||
@@ -142,7 +142,7 @@ const AutoItReferenceProvider = {
       (h.line < range.end.line ||
         (h.line === range.end.line && h.character <= range.end.character));
 
-    const declLine = includeDeclaration ? -1 : this.getDeclarationLine(document, cursorPos);
+    const declLine = includeDeclaration ? -1 : this.findLocalDeclarationLine(document, range, name);
 
     const locations = [];
     for (const hit of hits) {
@@ -155,10 +155,24 @@ const AutoItReferenceProvider = {
     return locations;
   },
 
-  // Resolve the declaration line via the existing Go-to-Definition provider.
-  getDeclarationLine(document, cursorPos) {
-    const decl = this.resolveDeclaration(document, cursorPos);
-    return decl && decl.range ? decl.range.start.line : -1;
+  // Find the line (absolute, document-relative) where a Local variable is declared
+  // within its enclosing function range. Returns -1 if not found.
+  // Unlike the definition provider (which returns the first match in the whole file),
+  // this restricts the search to the function body so a Local that shadows an earlier
+  // same-named Global/assignment resolves to the correct in-scope declaration line.
+  findLocalDeclarationLine(document, range, name) {
+    const escaped = escapeRegex(name);
+    // Param in the Func signature, OR a Local/Static/Dim declaration of `name`.
+    const declRe = new RegExp(`\\b(?:Local|Static|Dim)\\b[^\\n]*?${escaped}\\b`, 'i');
+    const paramRe = new RegExp(`^\\s*(?:volatile\\s+)?Func\\b[^\\n(]*\\([^)]*${escaped}\\b`, 'i');
+    const { line: startLine } = range.start;
+    const { line: endLine } = range.end;
+    for (let line = startLine; line <= endLine; line++) {
+      const { text: raw } = document.lineAt(line);
+      const code = blankStrings(stripLineComment(raw)); // ignore comments/strings
+      if (paramRe.test(code) || declRe.test(code)) return line;
+    }
+    return -1;
   },
 
   // Scan every AutoIt file in the workspace (plus the current document) for the
