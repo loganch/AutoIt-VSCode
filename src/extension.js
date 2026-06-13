@@ -24,6 +24,10 @@ const { config } = conf;
 const updateTimers = new Map();
 const DEBOUNCE_DELAY = 300; // ms
 
+// Last document.version successfully checked by Au3Check, keyed by URI string.
+// Used to skip redundant checks (e.g. on tab switch) when the document is unchanged.
+const lastCheckedVersions = new Map();
+
 /**
  * Runs the check process for the given document and returns the console output.
  * @param {import('vscode').TextDocument} document - The document to run the AU3Check process on.
@@ -185,9 +189,17 @@ const checkAutoItCode = async (document, diagnosticCollection) => {
   const { checkPath } = config;
   if (!validateCheckPath(checkPath)) return;
 
+  // Skip if this exact document version was already checked (e.g. tab switch with no edits)
+  const versionKey = document.uri.toString();
+  if (lastCheckedVersions.get(versionKey) === document.version) {
+    return;
+  }
+
   try {
     const consoleOutput = await runCheckProcess(document);
     parseAu3CheckOutput(consoleOutput, diagnosticCollection, document.uri);
+    // Cache only after a successful check so failures are retried next time
+    lastCheckedVersions.set(versionKey, document.version);
   } catch (error) {
     handleCheckProcessError(error);
   }
@@ -338,6 +350,17 @@ export const activate = ctx => {
   // Handle configuration changes
   ctx.subscriptions.push(
     workspace.onDidChangeConfiguration(event => {
+      // Au3Check behavior depends on these settings, not just document content, so
+      // invalidate the version cache to force fresh diagnostics when they change.
+      // Otherwise stale Problems output persists until the document is edited or reopened.
+      if (
+        event.affectsConfiguration('autoit.includePaths') ||
+        event.affectsConfiguration('autoit.checkPath') ||
+        event.affectsConfiguration('autoit.enableDiagnostics')
+      ) {
+        lastCheckedVersions.clear();
+      }
+
       if (
         event.affectsConfiguration('autoit.includePaths') ||
         event.affectsConfiguration('autoit.maps.includeDepth')
@@ -380,53 +403,66 @@ export const activate = ctx => {
     const diagnosticCollection = languages.createDiagnosticCollection('autoit');
     ctx.subscriptions.push(diagnosticCollection);
 
-    workspace.onDidSaveTextDocument(document => checkAutoItCode(document, diagnosticCollection));
-    workspace.onDidOpenTextDocument(document => checkAutoItCode(document, diagnosticCollection));
-    workspace.onDidCloseTextDocument(document => {
-      // First remove all diagnostics owned by the closing document (including in included files)
-      try {
-        clearDiagnosticsOwnedBy(diagnosticCollection, document.uri);
-      } catch (err) {
-        // Optional debug logging to help diagnose cleanup failures without breaking the extension
+    const diagnosticListeners = [];
+    diagnosticListeners.push(
+      workspace.onDidSaveTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
+    );
+    diagnosticListeners.push(
+      workspace.onDidOpenTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
+    );
+    diagnosticListeners.push(
+      workspace.onDidCloseTextDocument(document => {
+        // Drop the cached check version so a reopened document is re-checked
+        lastCheckedVersions.delete(document.uri.toString());
+        // First remove all diagnostics owned by the closing document (including in included files)
         try {
-          const cfg = workspace.getConfiguration('autoit');
-          const dbg = cfg?.get?.('debugLogging') === true;
-          const msg = `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
-          if (dbg) {
-            console.debug(msg);
+          clearDiagnosticsOwnedBy(diagnosticCollection, document.uri);
+        } catch (err) {
+          // Optional debug logging to help diagnose cleanup failures without breaking the extension
+          try {
+            const cfg = workspace.getConfiguration('autoit');
+            const dbg = cfg?.get?.('debugLogging') === true;
+            const msg = `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
+            if (dbg) {
+              console.debug(msg);
+            }
+          } catch (loggingError) {
+            console.debug(
+              '[AutoIt][extension] Failed to emit debug log for clearDiagnosticsOwnedBy error.',
+              loggingError,
+            );
           }
-        } catch (loggingError) {
-          console.debug(
-            '[AutoIt][extension] Failed to emit debug log for clearDiagnosticsOwnedBy error.',
-            loggingError,
-          );
         }
-      }
-      // Then remove any remaining diagnostics specifically for the closed document
-      try {
-        diagnosticCollection.delete(document.uri);
-      } catch (err) {
-        // Optional debug logging for delete failures
+        // Then remove any remaining diagnostics specifically for the closed document
         try {
-          const cfg = workspace.getConfiguration('autoit');
-          const dbg = cfg?.get?.('debugLogging') === true;
-          const msg = `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
-          if (dbg) {
-            console.debug(msg);
+          diagnosticCollection.delete(document.uri);
+        } catch (err) {
+          // Optional debug logging for delete failures
+          try {
+            const cfg = workspace.getConfiguration('autoit');
+            const dbg = cfg?.get?.('debugLogging') === true;
+            const msg = `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
+            if (dbg) {
+              console.debug(msg);
+            }
+          } catch (loggingError) {
+            console.debug(
+              '[AutoIt][extension] Failed to emit debug log for diagnosticCollection.delete error.',
+              loggingError,
+            );
           }
-        } catch (loggingError) {
-          console.debug(
-            '[AutoIt][extension] Failed to emit debug log for diagnosticCollection.delete error.',
-            loggingError,
-          );
         }
-      }
-    });
-    window.onDidChangeActiveTextEditor(editor => {
-      if (editor) {
-        checkAutoItCode(editor.document, diagnosticCollection);
-      }
-    });
+      }),
+    );
+    diagnosticListeners.push(
+      window.onDidChangeActiveTextEditor(editor => {
+        if (editor) {
+          checkAutoItCode(editor.document, diagnosticCollection);
+        }
+      }),
+    );
+
+    ctx.subscriptions.push(...diagnosticListeners);
 
     // Run diagnostic on document that's open when the extension loads
     if (config.enableDiagnostics && window.activeTextEditor) {
@@ -441,4 +477,5 @@ export function deactivate() {
   // Clear all pending debounce timers
   updateTimers.forEach(timer => clearTimeout(timer));
   updateTimers.clear();
+  lastCheckedVersions.clear();
 }
