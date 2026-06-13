@@ -472,37 +472,55 @@ function createMapSymbols(doc, mapDeclaration, keysData, parser) {
 }
 
 /**
- * Convert SymbolInformation array to DocumentSymbol array
+ * Convert SymbolInformation array to DocumentSymbol array, rebuilding the
+ * outline hierarchy from range containment.
+ *
+ * Functions and regions are emitted with an empty containerName, so nesting
+ * cannot be derived from text alone. Instead we nest each symbol under the
+ * innermost other symbol whose range contains it. This reproduces the tree
+ * VSCode previously built automatically from the SymbolInformation ranges
+ * (e.g. functions inside #Region blocks, variables inside functions, and
+ * nested regions).
+ *
  * @param {Array<SymbolInformation>} symbolInfoArray - Array of SymbolInformation
  * @returns {Array<DocumentSymbol>} Array of DocumentSymbol
  */
 function convertToDocumentSymbols(symbolInfoArray) {
+  const nodes = symbolInfoArray.map(({ name, kind, containerName, location }) => ({
+    symbol: new DocumentSymbol(name, containerName || '', kind, location.range, location.range),
+    range: location.range,
+  }));
+
+  // Order by start position; for equal starts, the wider range comes first so a
+  // container is always processed before the symbols it contains.
+  nodes.sort((a, b) => {
+    const startCmp = comparePositions(a.range.start, b.range.start);
+    if (startCmp !== 0) return startCmp;
+    return comparePositions(b.range.end, a.range.end);
+  });
+
   const documentSymbols = [];
-  const functionMap = new Map(); // Track function symbols for nesting variables
+  const stack = []; // ancestors of the current symbol, innermost last
 
-  // First pass: convert all symbols and identify functions
-  symbolInfoArray.forEach(symbolInfo => {
-    const { name, kind, containerName, location } = symbolInfo;
-    const { range } = location;
+  // A symbol only nests when its parent's range is strictly wider. Symbols that
+  // share an identical range (e.g. several variables declared on one line, which
+  // all carry the whole line's range) are siblings, not parent and child.
+  const strictlyContains = (outer, inner) =>
+    rangeContainsRange(outer, inner) && !rangeContainsRange(inner, outer);
 
-    const docSymbol = new DocumentSymbol(name, containerName || '', kind, range, range);
-
-    // Track functions for potential nesting
-    if (kind === SymbolKind.Function) {
-      functionMap.set(name, docSymbol);
+  nodes.forEach(node => {
+    // Drop ancestors that don't strictly contain the current symbol
+    while (stack.length > 0 && !strictlyContains(stack[stack.length - 1].range, node.range)) {
+      stack.pop();
     }
 
-    // If this symbol has a container and it's a function, add as child
-    if (containerName && functionMap.has(containerName)) {
-      const parentFunction = functionMap.get(containerName);
-      if (!parentFunction.children) {
-        parentFunction.children = [];
-      }
-      parentFunction.children.push(docSymbol);
+    if (stack.length > 0) {
+      stack[stack.length - 1].symbol.children.push(node.symbol);
     } else {
-      // Top-level symbol
-      documentSymbols.push(docSymbol);
+      documentSymbols.push(node.symbol);
     }
+
+    stack.push(node);
   });
 
   return documentSymbols;

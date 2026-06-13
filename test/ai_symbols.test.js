@@ -500,6 +500,69 @@ $mData.key = "value"`;
     });
   });
 
+  describe('Outline hierarchy (range-based nesting)', () => {
+    it('should nest functions and nested regions inside their containing region', async () => {
+      // Reproduction from issue #245
+      const source = `#Region A
+Func _InRegion_A()
+EndFunc
+#Region B
+Func _InRegion_B()
+EndFunc
+#EndRegion
+#EndRegion`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      // Region A must be a top-level symbol
+      const regionA = symbols.find(s => s.kind === SymbolKind.Namespace && s.name === 'A');
+      expect(regionA).toBeDefined();
+
+      // Region A contains function _InRegion_A and nested region B
+      const childNames = regionA.children.map(c => c.name);
+      expect(childNames).toContain('_InRegion_A');
+      expect(childNames).toContain('B');
+
+      // Nested region B contains function _InRegion_B
+      const regionB = regionA.children.find(c => c.name === 'B');
+      expect(regionB).toBeDefined();
+      expect(regionB.children.map(c => c.name)).toContain('_InRegion_B');
+
+      // The nested region B should not also appear at the top level
+      expect(symbols.some(s => s.name === 'B')).toBe(false);
+    });
+
+    it('should keep multiple variables declared on one line as siblings', async () => {
+      const source = `Local $a = 1, $b = 2`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      const aSymbol = symbols.find(s => s.name === '$a');
+      const bSymbol = symbols.find(s => s.name === '$b');
+      expect(aSymbol).toBeDefined();
+      expect(bSymbol).toBeDefined();
+      // $b must not become a child of $a (equal line ranges are siblings)
+      expect(aSymbol.children.some(c => c.name === '$b')).toBe(false);
+    });
+
+    it('should nest variables inside their containing function', async () => {
+      const source = `Func TestFunc()
+    Local $insideFunc = 1
+EndFunc`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      const funcSymbol = symbols.find(s => s.kind === SymbolKind.Function);
+      expect(funcSymbol).toBeDefined();
+      expect(funcSymbol.children.map(c => c.name)).toContain('$insideFunc');
+      // Variable must not leak to top level
+      expect(symbols.some(s => s.name === '$insideFunc')).toBe(false);
+    });
+  });
+
   describe('Configuration', () => {
     it('should not show Map keys when Map intelligence is disabled', async () => {
       // Override configuration for this test only
