@@ -10,6 +10,7 @@ import symbolsFeature from './ai_symbols';
 import signaturesFeature, { signatureHoverProvider } from './ai_signature';
 import workspaceSymbolsFeature from './ai_workspaceSymbols';
 import goToDefinitionFeature from './ai_definition';
+import referencesFeature from './ai_references';
 
 import { registerCommands } from './registerCommands';
 import { formatterProvider } from './ai_formatter';
@@ -214,6 +215,7 @@ export const activate = ctx => {
     signatureHoverProvider,
     workspaceSymbolsFeature,
     goToDefinitionFeature,
+    referencesFeature,
   ];
 
   // Only register formatter on Windows with valid paths

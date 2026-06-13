@@ -93,6 +93,7 @@ jest.mock('../src/ai_completion', () => stubFeature);
 jest.mock('../src/ai_symbols', () => stubFeature);
 jest.mock('../src/ai_workspaceSymbols', () => stubFeature);
 jest.mock('../src/ai_definition', () => stubFeature);
+jest.mock('../src/ai_references', () => stubFeature);
 jest.mock('../src/ai_signature', () => ({
   __esModule: true,
   default: { dispose: () => {} },
