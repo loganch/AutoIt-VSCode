@@ -9,6 +9,58 @@ const DEFAULT_BATCH_SIZE = 10;
 // AutoIt is case-insensitive. Word chars: letters, digits, underscore (and $ prefix for vars).
 const WORD_PATTERN = /\$?[A-Za-z_][A-Za-z0-9_]*/;
 
+// AutoIt language keywords. The cursor landing on one of these is not a symbol
+// reference, so getSymbolAtPosition rejects it (lowercased: matching is
+// case-insensitive). Variables always start with `$`, so keywords are
+// function-shaped names only.
+const AUTOIT_KEYWORDS = new Set(
+  [
+    'If',
+    'Else',
+    'ElseIf',
+    'EndIf',
+    'Then',
+    'While',
+    'WEnd',
+    'For',
+    'To',
+    'Step',
+    'Next',
+    'Do',
+    'Until',
+    'Switch',
+    'EndSwitch',
+    'Select',
+    'EndSelect',
+    'Case',
+    'ContinueCase',
+    'Func',
+    'EndFunc',
+    'Return',
+    'Local',
+    'Global',
+    'Dim',
+    'Static',
+    'Const',
+    'Enum',
+    'ReDim',
+    'With',
+    'EndWith',
+    'And',
+    'Or',
+    'Not',
+    'ContinueLoop',
+    'ExitLoop',
+    'Exit',
+    'Null',
+    'True',
+    'False',
+    'Default',
+    'ByRef',
+    'Volatile',
+  ].map(k => k.toLowerCase()),
+);
+
 function escapeRegex(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -196,6 +248,7 @@ const AutoItReferenceProvider = {
     if (!range) return null;
     const name = document.getText(range);
     if (!name || !name.trim()) return null;
+    if (!name.startsWith('$') && AUTOIT_KEYWORDS.has(name.toLowerCase())) return null;
     return { name, isVariable: name.startsWith('$') };
   },
 

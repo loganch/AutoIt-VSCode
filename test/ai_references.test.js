@@ -583,3 +583,72 @@ describe('provideReferences - workspace (functions & globals)', () => {
     expect(locs).toEqual([]);
   });
 });
+
+describe('provideReferences - edge cases', () => {
+  // Cursor on the function name in "Func MyFunc()" (char 6 = start of MyFunc).
+  const MYFUNC_CURSOR_CHAR = 6;
+  // Case-insensitive fixture: declaration line 0, lower/upper-case calls on lines
+  // 2 and 3 (line 1 is EndFunc, no match).
+  const CI_DECL_LINE = 0;
+  const CI_LOWER_CALL_LINE = 2;
+  const CI_UPPER_CALL_LINE = 3;
+  const CI_HIT_LINES = [CI_DECL_LINE, CI_LOWER_CALL_LINE, CI_UPPER_CALL_LINE];
+  // Cursor on DoWork in "Func DoWork()" for the skip-files fixture.
+  const DOWORK_DECL_CURSOR_CHAR = 6;
+  // Skip-files fixture: decl line 0, call line 2 from the readable file only.
+  const SKIP_DECL_LINE = 0;
+  const SKIP_CALL_LINE = 2;
+  const SKIP_HIT_LINES = [SKIP_DECL_LINE, SKIP_CALL_LINE];
+
+  test('matches function references case-insensitively', async () => {
+    const F = path.join(process.cwd(), 'test', 'fixtures', 'ci.au3');
+    const SRC = ['Func MyFunc()', 'EndFunc', 'myfunc()', 'MYFUNC()'].join('\n');
+    vscode.workspace.findFiles.mockResolvedValue([{ fsPath: F, toString: () => F }]);
+    vscode.workspace.openTextDocument.mockResolvedValue(new MockTextDocument(SRC, F));
+    vscode.workspace.getConfiguration.mockReturnValue({ get: (k, d) => d });
+    const doc = new MockTextDocument(SRC, F);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, MYFUNC_CURSOR_CHAR),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: false },
+    );
+    expect(locs.map(l => l.range.start.line).sort((a, b) => a - b)).toEqual(CI_HIT_LINES);
+  });
+
+  test('cursor on an AutoIt keyword returns []', async () => {
+    const doc = new MockTextDocument('If $x Then\nEndIf\n', MAIN_PATH);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, 0),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: false },
+    );
+    expect(locs).toEqual([]);
+    // For the RIGHT reason: a recognized keyword is rejected before any scan, so
+    // the workspace search is never triggered.
+    expect(vscode.workspace.findFiles).not.toHaveBeenCalled();
+  });
+
+  test('skips files that fail to open', async () => {
+    const OK = path.join(process.cwd(), 'test', 'fixtures', 'ok.au3');
+    const BAD = path.join(process.cwd(), 'test', 'fixtures', 'bad.au3');
+    vscode.workspace.findFiles.mockResolvedValue([
+      { fsPath: OK, toString: () => OK },
+      { fsPath: BAD, toString: () => BAD },
+    ]);
+    vscode.workspace.openTextDocument.mockImplementation(uri => {
+      if ((uri.fsPath || uri) === BAD) throw new Error('cannot open');
+      return Promise.resolve(new MockTextDocument('Func DoWork()\nEndFunc\nDoWork()', OK));
+    });
+    vscode.workspace.getConfiguration.mockReturnValue({ get: (k, d) => d });
+    const doc = new MockTextDocument('Func DoWork()\nEndFunc\nDoWork()', OK);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, DOWORK_DECL_CURSOR_CHAR),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: false },
+    );
+    expect(locs.map(l => l.range.start.line).sort((a, b) => a - b)).toEqual(SKIP_HIT_LINES);
+  });
+});
