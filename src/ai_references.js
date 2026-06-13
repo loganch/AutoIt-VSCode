@@ -1,4 +1,4 @@
-import { languages, SymbolKind } from 'vscode';
+import { Location, Position, Range, SymbolKind, languages, window } from 'vscode';
 import { AUTOIT_MODE } from './util';
 import { provideDocumentSymbols } from './ai_symbols';
 
@@ -53,9 +53,65 @@ function blankStrings(line) {
 }
 
 const AutoItReferenceProvider = {
-  // Later tasks add awaited file scanning; the async signature is intentional.
-  // eslint-disable-next-line no-unused-vars, require-await
   async provideReferences(document, position, context, token) {
+    try {
+      const symbol = this.getSymbolAtPosition(document, position);
+      if (!symbol) return [];
+
+      const includeDeclaration = !context || context.includeDeclaration !== false;
+      const regex = this.buildMatchRegex(symbol.name, symbol.isVariable);
+
+      if (symbol.isVariable) {
+        const scope = await this.classifyScope(document, position, symbol.name);
+        if (scope.kind === 'local') {
+          return this.collectLocal(document, scope.range, regex, includeDeclaration, position);
+        }
+      }
+      // Function or Global variable -> workspace scan (implemented in Task 6).
+      return this.collectWorkspace(document, regex, includeDeclaration, position, token);
+    } catch (err) {
+      window.showErrorMessage(`provideReferences error: ${err.message}`);
+      return [];
+    }
+  },
+
+  // Scan the whole document, keep only hits inside the enclosing function range.
+  collectLocal(document, range, regex, includeDeclaration, cursorPos) {
+    const hits = this.scanText(document.getText(), regex);
+    const withinRange = h =>
+      (h.line > range.start.line ||
+        (h.line === range.start.line && h.character >= range.start.character)) &&
+      (h.line < range.end.line ||
+        (h.line === range.end.line && h.character <= range.end.character));
+
+    const declLine = includeDeclaration ? -1 : this.getDeclarationLine(document, cursorPos);
+
+    const locations = [];
+    for (const hit of hits) {
+      if (!withinRange(hit)) continue;
+      if (!includeDeclaration && hit.line === declLine) continue;
+      const start = new Position(hit.line, hit.character);
+      const end = new Position(hit.line, hit.character + hit.length);
+      locations.push(new Location(document.uri, new Range(start, end)));
+    }
+    return locations;
+  },
+
+  // Resolve the declaration line via the existing Go-to-Definition provider.
+  getDeclarationLine(document, cursorPos) {
+    // Lazy require avoids a circular import at module load.
+    const { AutoItDefinitionProvider } = require('./ai_definition');
+    try {
+      const decl = AutoItDefinitionProvider.provideDefinition(document, cursorPos);
+      return decl && decl.range ? decl.range.start.line : -1;
+    } catch {
+      return -1;
+    }
+  },
+
+  // Temporary stub; implemented in Task 6.
+  // eslint-disable-next-line require-await
+  async collectWorkspace() {
     return [];
   },
 

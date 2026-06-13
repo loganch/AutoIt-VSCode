@@ -450,3 +450,31 @@ describe('scope classification', () => {
     expect(scope.kind).toBe('global');
   });
 });
+
+describe('provideReferences - local variable', () => {
+  test('returns only occurrences within the enclosing function', async () => {
+    const doc = new MockTextDocument(SCOPE_SRC, MAIN_PATH);
+    // cursor on $x at its Local declaration (line 2, char 11)
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(SCOPE_X_DECL_LINE, SCOPE_X_DECL_CHAR),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: false },
+    );
+    const lines = locs.map(l => l.range.start.line).sort((a, b) => a - b);
+    expect(lines).toEqual([SCOPE_X_DECL_LINE, SCOPE_P_USE_LINE]); // $x on lines 2 and 3 only, NOT line 6 (Beta)
+    locs.forEach(l => expect(l.uri.fsPath).toBe(doc.uri.fsPath));
+  });
+
+  test('excludes the declaration when includeDeclaration is false', async () => {
+    const doc = new MockTextDocument(SCOPE_SRC, MAIN_PATH);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(SCOPE_X_DECL_LINE, SCOPE_X_DECL_CHAR),
+      { includeDeclaration: false },
+      { isCancellationRequested: false },
+    );
+    const lines = locs.map(l => l.range.start.line);
+    expect(lines).toEqual([SCOPE_P_USE_LINE]); // declaration line 2 dropped
+  });
+});
