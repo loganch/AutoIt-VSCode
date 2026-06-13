@@ -1,6 +1,10 @@
-import { Location, Position, Range, SymbolKind, languages, window } from 'vscode';
+import { Location, Position, Range, SymbolKind, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE } from './util';
 import { provideDocumentSymbols } from './ai_symbols';
+
+// Workspace scan budget (mirrors ai_workspaceSymbols.js defaults).
+const DEFAULT_MAX_FILES = 500;
+const DEFAULT_BATCH_SIZE = 10;
 
 // AutoIt is case-insensitive. Word chars: letters, digits, underscore (and $ prefix for vars).
 const WORD_PATTERN = /\$?[A-Za-z_][A-Za-z0-9_]*/;
@@ -99,20 +103,80 @@ const AutoItReferenceProvider = {
 
   // Resolve the declaration line via the existing Go-to-Definition provider.
   getDeclarationLine(document, cursorPos) {
-    // Lazy require avoids a circular import at module load.
-    const { AutoItDefinitionProvider } = require('./ai_definition');
-    try {
-      const decl = AutoItDefinitionProvider.provideDefinition(document, cursorPos);
-      return decl && decl.range ? decl.range.start.line : -1;
-    } catch {
-      return -1;
-    }
+    const decl = this.resolveDeclaration(document, cursorPos);
+    return decl && decl.range ? decl.range.start.line : -1;
   },
 
-  // Temporary stub; implemented in Task 6.
-  // eslint-disable-next-line require-await
-  async collectWorkspace() {
-    return [];
+  // Scan every AutoIt file in the workspace (plus the current document) for the
+  // symbol. Batched + cancellable + UI-yielding so a large workspace never blocks
+  // the extension host.
+  async collectWorkspace(document, regex, includeDeclaration, cursorPos, token) {
+    if (token?.isCancellationRequested) return [];
+    const config = workspace.getConfiguration('autoit');
+    const maxFiles = config.get('workspaceSymbolMaxFiles', DEFAULT_MAX_FILES);
+    const batchSize = config.get('workspaceSymbolBatchSize', DEFAULT_BATCH_SIZE);
+
+    const found = (await workspace.findFiles('**/*.{au3,a3x}')) || [];
+    const files = found.slice(0, maxFiles);
+    const currentPath = document.uri.fsPath;
+    const locations = [];
+
+    for (let i = 0; i < files.length; i += batchSize) {
+      if (token?.isCancellationRequested) return [];
+      const batch = files.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map(async file => {
+          try {
+            // Reuse the already-open current document instead of reopening it
+            // (avoids double-counting and uses unsaved in-memory edits).
+            const fileDoc =
+              file.fsPath === currentPath ? document : await workspace.openTextDocument(file);
+            const hits = this.scanText(fileDoc.getText(), this.cloneRegex(regex));
+            return { uri: fileDoc.uri, hits };
+          } catch {
+            return null; // skip unreadable files
+          }
+        }),
+      );
+      for (const r of batchResults) {
+        if (!r) continue;
+        for (const hit of r.hits) {
+          const start = new Position(hit.line, hit.character);
+          const end = new Position(hit.line, hit.character + hit.length);
+          locations.push(new Location(r.uri, new Range(start, end)));
+        }
+      }
+      // Yield so a huge workspace doesn't block the extension host.
+      await new Promise(resolve => setImmediate(resolve));
+    }
+
+    if (!includeDeclaration) {
+      const decl = this.resolveDeclaration(document, cursorPos);
+      if (decl && decl.uri) {
+        return locations.filter(
+          l => !(l.uri.fsPath === decl.uri.fsPath && l.range.start.line === decl.range.start.line),
+        );
+      }
+    }
+    return locations;
+  },
+
+  // Each parallel file scan needs its own regex: the `g` flag makes regex
+  // stateful (lastIndex), so a shared instance would corrupt concurrent scans.
+  cloneRegex(regex) {
+    return new RegExp(regex.source, regex.flags);
+  },
+
+  // Resolve the full declaration Location via the existing Go-to-Definition
+  // provider (needed for the includeDeclaration filter, which matches BOTH uri
+  // and line). Lazy require avoids a circular import at module load.
+  resolveDeclaration(document, cursorPos) {
+    const { AutoItDefinitionProvider } = require('./ai_definition');
+    try {
+      return AutoItDefinitionProvider.provideDefinition(document, cursorPos);
+    } catch {
+      return null;
+    }
   },
 
   getSymbolAtPosition(document, position) {

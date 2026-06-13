@@ -478,3 +478,49 @@ describe('provideReferences - local variable', () => {
     expect(lines).toEqual([SCOPE_P_USE_LINE]); // declaration line 2 dropped
   });
 });
+
+describe('provideReferences - workspace (functions & globals)', () => {
+  const FILE_A = path.join(process.cwd(), 'test', 'fixtures', 'a.au3');
+  const FILE_B = path.join(process.cwd(), 'test', 'fixtures', 'b.au3');
+  const A_SRC = ['Func DoWork()', '    Return 1', 'EndFunc', 'DoWork()'].join('\n');
+  const B_SRC = ['#include "a.au3"', 'Local $r = DoWork()', '; DoWork() in comment'].join('\n');
+  const DOWORK_CURSOR_CHAR = 6; // cursor on DoWork in "Func DoWork()"
+
+  // Expected workspace hits: a.au3 decl line 0, call line 3; b.au3 call line 1.
+  const EXPECTED_HITS = ['a.au3:0', 'a.au3:3', 'b.au3:1'];
+
+  beforeEach(() => {
+    vscode.workspace.findFiles.mockResolvedValue([
+      { fsPath: FILE_A, toString: () => FILE_A },
+      { fsPath: FILE_B, toString: () => FILE_B },
+    ]);
+    vscode.workspace.openTextDocument.mockImplementation(uri => {
+      const p = uri.fsPath || uri;
+      return Promise.resolve(new MockTextDocument(p === FILE_A ? A_SRC : B_SRC, p));
+    });
+    vscode.workspace.getConfiguration.mockReturnValue({ get: (k, d) => d });
+  });
+
+  test('finds function references across files, excluding comments', async () => {
+    const doc = new MockTextDocument(A_SRC, FILE_A);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, DOWORK_CURSOR_CHAR),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: false },
+    );
+    const byFile = locs.map(l => `${path.basename(l.uri.fsPath)}:${l.range.start.line}`).sort();
+    expect(byFile).toEqual(EXPECTED_HITS);
+  });
+
+  test('returns [] when cancelled', async () => {
+    const doc = new MockTextDocument(A_SRC, FILE_A);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, DOWORK_CURSOR_CHAR),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: true },
+    );
+    expect(locs).toEqual([]);
+  });
+});
