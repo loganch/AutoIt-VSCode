@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Find All References**: Shift+F12 now lists references to user-defined functions and variables. Functions and global variables are searched workspace-wide; local variables (declared with `Local`/`Static`/`Dim` or as function parameters) are scoped to their enclosing function. Matching is case-insensitive and skips occurrences inside comments and strings, and honors the "include declaration" toggle.
 - **Ternary operator scopes**: syntax highlighting now recognizes ternary operator tokens for improved colorization (#251)
 
 ### Fixed
