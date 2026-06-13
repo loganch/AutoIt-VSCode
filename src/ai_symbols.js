@@ -18,7 +18,6 @@ import {
 } from './util';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import MapTrackingService from './services/MapTrackingService.js';
-const config = workspace.getConfiguration('autoit');
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;
 const commentStartRegex = /^\s*#(?:cs|comments-start)/;
 const continuationRegex = /\s_\b\s*(;.*)?\s*/;
@@ -28,6 +27,16 @@ const DEFAULT_SYMBOL_MAX_LINES = 50000;
 
 // Track which files have been warned about to avoid repeated warnings
 const warnedFiles = new Set();
+
+// Lazily created singleton; output channels are never disposed, so creating
+// one per error would leak channels
+let errorOutputChannel;
+const getErrorOutputChannel = () => {
+  if (!errorOutputChannel) {
+    errorOutputChannel = window.createOutputChannel('AutoIt');
+  }
+  return errorOutputChannel;
+};
 
 /**
  * Creates a symbol information object for a variable.
@@ -58,9 +67,11 @@ const createVariableSymbol = ({ variable, variableKind, doc, line, container = n
  * @returns {SymbolInformation} The generated SymbolInformation object
  */
 const generateFunctionSymbol = (functionName, document, text, startingLineNumber, scriptText) => {
+  // The g flag is required for lastIndex to be honored when searching from the
+  // function's starting offset
   const functionBodyPattern = new RegExp(
-    `[\t ]*(?:volatile[\t ]+)?Func[\t ]+\\b${functionName}+\\b.*?EndFunc`,
-    'si',
+    `[\t ]*(?:volatile[\t ]+)?Func[\t ]+\\b${functionName}\\b.*?EndFunc`,
+    'gsi',
   );
 
   // Set the starting position for the regex search
@@ -157,19 +168,20 @@ const createRegionSymbol = (regionName, document, documentText) => {
  *   @param {number} params.lineNum - The line number where the function symbol is located.
  *   @param {Array} params.result - An array to store the extracted function symbols.
  *   @param {string} params.scriptText - The full text of the script.
- * @returns {void} None. The extracted function symbols are added to the `result` array provided in the `params` object.
+ * @returns {SymbolInformation|null} The extracted function symbol (also added to the `result` array), or null if none was found.
  */
 const parseFunctionFromText = params => {
   const { text, processedSymbols, doc, lineNum, result, scriptText } = params;
 
   const funcName = text.match(functionPattern);
-  if (!funcName || processedSymbols.has(funcName[1])) return;
+  if (!funcName || processedSymbols.has(funcName[1])) return null;
 
   const functionSymbol = generateFunctionSymbol(funcName[1], doc, text, lineNum, scriptText);
-  if (!functionSymbol) return;
+  if (!functionSymbol) return null;
 
   result.push(functionSymbol);
   processedSymbols.add(funcName[1]);
+  return functionSymbol;
 };
 
 /**
@@ -180,15 +192,17 @@ const parseFunctionFromText = params => {
  * @param {Set} params.found - A set containing the already found region names.
  * @param {Object} params.doc - The document object.
  * @param {Array} params.result - An array to store the symbol information objects.
+ * @param {string} params.scriptText - The full text of the script.
+ * @param {import("vscode").WorkspaceConfiguration} params.config - The current AutoIt configuration.
  * @returns {void} This function does not return anything.
  */
 const parseRegionFromText = params => {
-  if (!config.showRegionsInGoToSymbol) return;
+  const { regionName, found, doc, result, scriptText, config } = params;
+  if (!config.get('showRegionsInGoToSymbol', true)) return;
 
-  const { regionName, found, doc, result } = params;
   if (!regionName || found.has(regionName[0])) return;
 
-  const regionSymbol = createRegionSymbol(regionName[1], doc, doc.getText());
+  const regionSymbol = createRegionSymbol(regionName[1], doc, scriptText);
   if (!regionSymbol) return;
   result.push(regionSymbol);
   found.add(regionName[0]);
@@ -196,37 +210,22 @@ const parseRegionFromText = params => {
 
 const delims = ["'", '"', ';'];
 
-/**
- * Finds the variable container for a given line.
- * @param {Array} result - An array of symbols to search through.
- * @param {Object} line - The line to find the variable container for.
- * @returns {Object} The variable container or an empty object if not found.
- */
-function findContainerForVariable(result, line) {
-  return (
-    result.find(
-      symbolToTest =>
-        symbolToTest.location.range.contains(line.range) &&
-        symbolToTest.kind === SymbolKind.Function,
-    ) || {}
-  );
+const variableRegex = /^\s*?(Local|Global)?\s*?(Const|Enum)/;
+
+function comparePositions(left, right) {
+  if (left.line !== right.line) {
+    return left.line - right.line;
+  }
+
+  return left.character - right.character;
 }
 
-/**
- * Check whether a variable with the specified name and container is present in the given array of symbols.
- *
- * @param {Array} result - The array of symbols to search for the variable.
- * @param {string} variable - The name of the variable to search for.
- * @param {Object} container - The container object that the variable is expected to be found in.
- * @returns {boolean} `true` if the variable is found in the symbols array, `false` otherwise.
- */
-const isVariableInResults = (result, variable, container) => {
-  return !!result.find(
-    symbol => symbol.name === variable && symbol.containerName === container.name,
+function rangeContainsRange(outerRange, innerRange) {
+  return (
+    comparePositions(outerRange.start, innerRange.start) <= 0 &&
+    comparePositions(outerRange.end, innerRange.end) >= 0
   );
-};
-
-const variableRegex = /^\s*?(Local|Global)?\s*?(Const|Enum)/;
+}
 
 /**
  * Determines the kind of variable based on the text and inContinuation flag.
@@ -264,13 +263,23 @@ function shouldSkipVariable(variable, lineText = '') {
     return true;
   }
 
+  const escapedVariable = variable.replace(/\$/g, '\\$');
+
   // Skip Map declarations (variables followed by [])
   // Pattern: Local/Global/Dim/Static $var[]
   const mapDeclPattern = new RegExp(
-    `(Local|Global|Dim|Static)\\s+${variable.replace(/\$/g, '\\$')}\\s*\\[\\s*\\]`,
+    `(Local|Global|Dim|Static)\\s+${escapedVariable}\\s*\\[\\s*\\]`,
     'i',
   );
   if (mapDeclPattern.test(lineText)) {
+    return true;
+  }
+
+  // Skip Map member access so the parent Map variable is not duplicated as a
+  // regular variable symbol.
+  const mapDotAccessPattern = new RegExp(`${escapedVariable}\\s*\\.`, 'i');
+  const mapBracketAccessPattern = new RegExp(`${escapedVariable}\\s*\\[(?:["'$])`, 'i');
+  if (mapDotAccessPattern.test(lineText) || mapBracketAccessPattern.test(lineText)) {
     return true;
   }
 
@@ -296,17 +305,21 @@ function addVariableToResults(result, variable, variableKind, doc, line, contain
  *   @param {string} params.text - The text to parse for variables.
  *   @param {array} params.result - An array to store the extracted variables.
  *   @param {import("vscode").TextLine} params.line - The line object from the document.
- *   @param {Set} params.found - A set to keep track of already found variables.
+ *   @param {Set} params.addedVariables - A set of `name::container` keys for variables already added.
  *   @param {import("vscode").TextDocument} params.doc - The document object.
  *   @param {boolean} params.inContinuation - Indicates if the text is a continuation of a previous line.
  *   @param {SymbolKind} params.variableKind - The kind of variable (e.g., local, global).
+ *   @param {SymbolInformation} params.currentFunction - The most recently parsed function symbol, if any.
+ *   @param {import("vscode").WorkspaceConfiguration} params.config - The current AutoIt configuration.
  * @returns {{inContinuation: boolean, variableKind: SymbolKind}} An object containing inContinuation (indicates if the text is a continuation) and variableKind (the kind of variable).
  */
 function parseVariablesFromText(params) {
-  const { text, result, line, found, doc } = params;
+  const { text, result, line, addedVariables, doc, currentFunction, config } = params;
   let { inContinuation, variableKind } = params;
 
-  if (!config.showVariablesInGoToSymbol) return { inContinuation, variableKind };
+  if (!config.get('showVariablesInGoToSymbol', true)) {
+    return { inContinuation, variableKind };
+  }
 
   const variables = text.match(variablePattern);
   if (!variables) return { inContinuation, variableKind };
@@ -315,6 +328,13 @@ function parseVariablesFromText(params) {
 
   inContinuation = continuationRegex.test(text);
 
+  // Functions appear in source order and don't nest in AutoIt, so the most
+  // recently parsed function is the only possible container for this line
+  const container =
+    currentFunction && rangeContainsRange(currentFunction.location.range, line.range)
+      ? currentFunction
+      : {};
+
   for (let i = 0; i < variables.length; i += 1) {
     const variable = variables[i];
 
@@ -322,14 +342,13 @@ function parseVariablesFromText(params) {
       continue;
     }
 
-    const container = findContainerForVariable(result, line);
-
-    if (isVariableInResults(result, variable, container)) {
+    const dedupKey = `${variable}::${container.name || ''}`;
+    if (addedVariables.has(dedupKey)) {
       continue;
     }
 
     addVariableToResults(result, variable, variableKind, doc, line, container);
-    found.add(variable);
+    addedVariables.add(dedupKey);
   }
 
   return { inContinuation, variableKind };
@@ -530,8 +549,7 @@ async function addMapSymbols(doc, result) {
     console.error('[AutoIt] Error generating Map symbols:', error);
 
     // Log to output channel for debugging
-    const outputChannel = window.createOutputChannel('AutoIt');
-    outputChannel.appendLine(`Error generating Map symbols: ${error.message}`);
+    getErrorOutputChannel().appendLine(`Error generating Map symbols: ${error.message}`);
   }
 }
 
@@ -546,12 +564,15 @@ async function addMapSymbols(doc, result) {
 async function provideDocumentSymbols(doc) {
   const result = [];
   const processedSymbols = new Set();
+  const addedVariables = new Set();
   let inComment = false;
   let inContinuation = false;
   let variableKind;
+  let currentFunction = null;
   const scriptText = doc.getText();
 
-  // Get fresh config for the maxLines setting (other settings use module-level config)
+  // Read the configuration fresh on each invocation so setting changes take
+  // effect without a window reload
   const currentConfig = workspace.getConfiguration('autoit');
   const maxLines = currentConfig.get('symbolMaxLines', DEFAULT_SYMBOL_MAX_LINES);
   const lineCount = Math.min(doc.lineCount, maxLines);
@@ -571,7 +592,7 @@ async function provideDocumentSymbols(doc) {
 
     if (!isSkippableLine(line) || regionName) {
       if (!inComment) {
-        parseFunctionFromText({
+        const functionSymbol = parseFunctionFromText({
           text: lineText,
           processedSymbols,
           doc,
@@ -579,18 +600,28 @@ async function provideDocumentSymbols(doc) {
           result,
           scriptText,
         });
+        if (functionSymbol) currentFunction = functionSymbol;
 
         ({ inContinuation, variableKind } = parseVariablesFromText({
           inContinuation,
           text: lineText,
-          found: processedSymbols,
+          addedVariables,
           doc,
           result,
           line,
           variableKind,
+          currentFunction,
+          config: currentConfig,
         }));
 
-        parseRegionFromText({ regionName, found: processedSymbols, doc, result });
+        parseRegionFromText({
+          regionName,
+          found: processedSymbols,
+          doc,
+          result,
+          scriptText,
+          config: currentConfig,
+        });
       }
     }
 
