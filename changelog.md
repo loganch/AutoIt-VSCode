@@ -14,11 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Hover description regex**: corrected line-ending pattern in the function-description RegExp so hover docs display correctly on both CRLF and LF files (#248) (c96895c)
+- **Symbol outline hierarchy**: fixed nesting of symbols under innermost ancestor range to restore region→function and nested-region nesting in outline view (#245) (b88a849)
+- **Au3Check result caching**: cache Au3Check results and invalidate diagnostics when configuration changes (cad393e)
+- **Completion error handling**: improved error handling in getLibraryFunctions for include data retrieval (eac3bc4)
+- **Signature provider robustness**: guard include path handling in signature provider and hardened include parsing (0e76789, 10dc0c8)
 - Fixed changelog comparison link for version 1.5.0 release (9cfd868)
 
 ### Changed
 
 - **Function declaration colorations**: TextMate grammar now colorizes additional token types inside function declarations: keywords/booleans, numbers, assignments, brackets, commas/dots/concatenation operators, and logical operators (#246) (042f18d–e786c7d)
+- **Activation performance**: defer completion and hover metadata loading to lazy initialization on first use, reducing activation work (adccd73)
+- **Workspace symbol performance**: implement debounce handling and caching for provideWorkspaceSymbols to improve responsiveness on large projects (40b22aa)
+- **Completion caching**: cache library include completions per document to improve performance (76ff99f)
+- **Signature caching**: cache document signatures for faster signature help (10dc0c8)
 - Added `.kilo`, `.jest-cache`, and `package.json.backup` to ignore files (#244) (79f7ae9)
 
 ## [1.5.0] - 2026-04-07
