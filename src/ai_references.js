@@ -113,10 +113,20 @@ const AutoItReferenceProvider = {
   async collectWorkspace(document, regex, includeDeclaration, cursorPos, token) {
     if (token?.isCancellationRequested) return [];
     const config = workspace.getConfiguration('autoit');
+    // These keys are intentionally SHARED with the workspace-symbol scan: both do
+    // the same workload (scanning every *.au3/*.a3x), so one performance knob
+    // (autoit.workspaceSymbolMaxFiles / workspaceSymbolBatchSize) controls both.
     const maxFiles = config.get('workspaceSymbolMaxFiles', DEFAULT_MAX_FILES);
     const batchSize = config.get('workspaceSymbolBatchSize', DEFAULT_BATCH_SIZE);
 
     const found = (await workspace.findFiles('**/*.{au3,a3x}')) || [];
+    // Warn before slicing: silently dropping files would make a reference list
+    // look complete when it isn't.
+    if (found.length > maxFiles) {
+      window.showWarningMessage(
+        `AutoIt: Searching ${maxFiles} of ${found.length} files for references. Increase 'autoit.workspaceSymbolMaxFiles' to search more files.`,
+      );
+    }
     const files = found.slice(0, maxFiles);
     const currentPath = document.uri.fsPath;
     const locations = [];

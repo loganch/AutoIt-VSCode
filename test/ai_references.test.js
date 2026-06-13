@@ -218,8 +218,33 @@ jest.mock('../src/util', () => ({
   },
 }));
 
+// Mock the lazily-required definition provider so workspace tests can control
+// what declaration collectWorkspace resolves. The default implementation
+// delegates to the REAL provider so the local-variable includeDeclaration:false
+// test (which relies on resolving $x's declaration line) still passes; only the
+// workspace decl-drop test overrides the return value.
+jest.mock('../src/ai_definition', () => ({
+  AutoItDefinitionProvider: {
+    provideDefinition: jest.fn((...args) =>
+      jest
+        .requireActual('../src/ai_definition')
+        .AutoItDefinitionProvider.provideDefinition(...args),
+    ),
+  },
+}));
+
 const vscode = require('vscode');
 const { AutoItReferenceProvider } = require('../src/ai_references');
+const { AutoItDefinitionProvider } = require('../src/ai_definition');
+
+// clearMocks/restoreMocks strips the delegating default before each test, so the
+// local-path test would otherwise get `undefined` from provideDefinition.
+// Re-install the delegate every test; workspace tests override it as needed.
+beforeEach(() => {
+  AutoItDefinitionProvider.provideDefinition.mockImplementation((...args) =>
+    jest.requireActual('../src/ai_definition').AutoItDefinitionProvider.provideDefinition(...args),
+  );
+});
 
 // Jest is configured with clearMocks/restoreMocks, which strips the factory
 // implementations from mock functions before every test. Re-install the
@@ -511,6 +536,40 @@ describe('provideReferences - workspace (functions & globals)', () => {
     );
     const byFile = locs.map(l => `${path.basename(l.uri.fsPath)}:${l.range.start.line}`).sort();
     expect(byFile).toEqual(EXPECTED_HITS);
+  });
+
+  test('drops the cross-file declaration when includeDeclaration is false', async () => {
+    // B_SRC's line 1 is the only call in b.au3; add a same-LINE-as-decl call so we
+    // can prove the uri component of the filter matters (a hit on b.au3:0 must NOT
+    // be dropped even though it shares the declaration's line number 0).
+    const B_SRC_WITH_LINE0 = ['DoWork()', 'Local $r = DoWork()', '; DoWork() in comment'].join(
+      '\n',
+    );
+    vscode.workspace.openTextDocument.mockImplementation(uri => {
+      const p = uri.fsPath || uri;
+      return Promise.resolve(new MockTextDocument(p === FILE_A ? A_SRC : B_SRC_WITH_LINE0, p));
+    });
+
+    // Declaration resolves to a.au3 line 0 (the Func DoWork() line).
+    AutoItDefinitionProvider.provideDefinition.mockReturnValue({
+      uri: { fsPath: FILE_A },
+      range: { start: { line: 0, character: 0 } },
+    });
+
+    const doc = new MockTextDocument(A_SRC, FILE_A);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, DOWORK_CURSOR_CHAR),
+      { includeDeclaration: false },
+      { isCancellationRequested: false },
+    );
+    const byFile = locs.map(l => `${path.basename(l.uri.fsPath)}:${l.range.start.line}`).sort();
+    // a.au3:0 (the declaration) is dropped. a.au3:3 (different line, same file) and
+    // b.au3:1 remain. CRITICAL: b.au3:0 also remains -- it shares the decl's line
+    // number but lives in a different file, so a line-only filter would wrongly
+    // drop it and a uri-only filter would wrongly drop a.au3:3. Only the uri+line
+    // conjunction produces exactly this set.
+    expect(byFile).toEqual(['a.au3:3', 'b.au3:0', 'b.au3:1']);
   });
 
   test('returns [] when cancelled', async () => {
