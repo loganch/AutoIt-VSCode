@@ -6,6 +6,9 @@ const symbolsCache = new Map();
 
 // Debouncing state for search requests
 let searchDebounceTimer = null;
+// Resolver of the most recent pending (debounced) search, so a superseding
+// search can settle it instead of leaving VS Code awaiting forever.
+let pendingSearchResolve = null;
 const SEARCH_DEBOUNCE_MS = 300;
 const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
 const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
@@ -187,6 +190,22 @@ async function getWorkspaceSymbols(token) {
 }
 
 /**
+ * Flatten the symbol cache into an array, optionally filtered by a query.
+ * @param {string} query - The search query (optional)
+ * @returns {Array} Matching workspace symbols.
+ */
+function filterCachedSymbols(query) {
+  const allSymbols = Array.from(symbolsCache.values()).flat();
+
+  if (query && query.length > 0) {
+    const lowerQuery = query.toLowerCase();
+    return allSymbols.filter(symbol => symbol.name.toLowerCase().includes(lowerQuery));
+  }
+
+  return allSymbols;
+}
+
+/**
  * Provides symbols for the entire workspace, using a cached version if available.
  * Supports cancellation and query-based filtering.
  *
@@ -195,13 +214,27 @@ async function getWorkspaceSymbols(token) {
  * @returns {Promise<Array>} A promise that resolves to an array of workspace symbols.
  */
 function provideWorkspaceSymbols(query, token) {
-  // Debounce search requests
+  // Warm cache: answer immediately instead of paying the full debounce delay.
+  if (symbolsCache.size > 0) {
+    return Promise.resolve(token?.isCancellationRequested ? [] : filterCachedSymbols(query));
+  }
+
+  // Cold cache: debounce so a burst of keystrokes only triggers one indexing pass.
   return new Promise(resolve => {
     if (searchDebounceTimer) {
       clearTimeout(searchDebounceTimer);
+      // The previous search is superseded by this one; settle it so VS Code
+      // isn't left awaiting a promise that will never resolve.
+      if (pendingSearchResolve) {
+        pendingSearchResolve([]);
+      }
     }
+    pendingSearchResolve = resolve;
 
     searchDebounceTimer = setTimeout(async () => {
+      searchDebounceTimer = null;
+      pendingSearchResolve = null;
+
       // Build cache if empty
       if (symbolsCache.size === 0) {
         const symbols = await getWorkspaceSymbols(token);
@@ -220,19 +253,7 @@ function provideWorkspaceSymbols(query, token) {
         return;
       }
 
-      // Flatten cache into array
-      const allSymbols = Array.from(symbolsCache.values()).flat();
-
-      // Filter by query if provided
-      if (query && query.length > 0) {
-        const lowerQuery = query.toLowerCase();
-        const filtered = allSymbols.filter(symbol =>
-          symbol.name.toLowerCase().includes(lowerQuery),
-        );
-        resolve(filtered);
-      } else {
-        resolve(allSymbols);
-      }
+      resolve(filterCachedSymbols(query));
     }, SEARCH_DEBOUNCE_MS);
   });
 }
