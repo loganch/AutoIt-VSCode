@@ -145,8 +145,8 @@ jest.mock(
       onDidChangeConfiguration: jest.fn(),
       getConfiguration: jest.fn(() => ({
         get: (key, def) => {
-          // Disable Map intelligence so provideDocumentSymbols returns plain
-          // SymbolInformation deterministically under the mock.
+          // Disable Map intelligence so the symbol provider mock stays simple
+          // and deterministic under the mock.
           if (key === 'enableIntelligence') return false;
           return def;
         },
@@ -181,8 +181,8 @@ jest.mock(
   { virtual: true },
 );
 
-// Mock util to provide the surface ai_symbols needs (used by classifyScope ->
-// provideDocumentSymbols) without triggering the heavy ai_config load chain.
+// Mock util to provide the surface ai_symbols needs without triggering the
+// heavy ai_config load chain.
 //
 // NOTE: These values are deliberately hand-copied and MUST be kept in sync with
 // src/util.js. jest.requireActual('../src/util') was attempted to avoid this
@@ -248,8 +248,8 @@ beforeEach(() => {
 
 // Jest is configured with clearMocks/restoreMocks, which strips the factory
 // implementations from mock functions before every test. Re-install the
-// getConfiguration implementation so ai_symbols (invoked by classifyScope) can
-// read settings and Map intelligence stays disabled for determinism.
+// getConfiguration implementation so symbol tests can read settings and Map
+// intelligence stays disabled for determinism.
 beforeEach(() => {
   vscode.workspace.getConfiguration.mockImplementation(() => ({
     get: (key, def) => (key === 'enableIntelligence' ? false : def),

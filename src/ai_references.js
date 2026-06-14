@@ -1,6 +1,6 @@
 import { Location, Position, Range, SymbolKind, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE } from './util';
-import { provideDocumentSymbols } from './ai_symbols';
+import { findEnclosingFunctionFromText, isLocalDeclaredInBody } from './utils/scopeAnalysis';
 
 // Workspace scan budget (mirrors ai_workspaceSymbols.js defaults).
 const DEFAULT_MAX_FILES = 500;
@@ -315,63 +315,14 @@ const AutoItReferenceProvider = {
   },
 
   async classifyScope(document, position, name) {
-    let symbols = [];
-    try {
-      symbols = (await provideDocumentSymbols(document)) || [];
-    } catch {
-      return { kind: 'global' };
-    }
+    const range = findEnclosingFunctionFromText(document, position);
+    if (!range) return { kind: 'global' };
 
-    // Find the innermost Function symbol whose range contains the position.
-    const enclosing = this.findEnclosingFunction(symbols, position);
-    if (!enclosing) return { kind: 'global' };
-
-    // Is `name` declared Local/Static/Dim or a parameter within this function body?
-    const range = enclosing.range || enclosing.location?.range;
     const bodyText = document.getText(range);
-    if (this.isLocalDeclaredInBody(bodyText, name)) {
+    if (isLocalDeclaredInBody(bodyText, name)) {
       return { kind: 'local', range };
     }
     return { kind: 'global' };
-  },
-
-  findEnclosingFunction(symbols, position, found = null) {
-    // AutoIt has no nested functions; the children recursion is defensive
-    // (children are Map keys/region groupings, not functions).
-    const contains = (r, p) =>
-      (r.start.line < p.line || (r.start.line === p.line && r.start.character <= p.character)) &&
-      (r.end.line > p.line || (r.end.line === p.line && r.end.character >= p.character));
-    let result = found;
-    for (const s of symbols) {
-      const { kind } = s;
-      const range = s.range || s.location?.range;
-      if (!range) continue;
-      if (kind === SymbolKind.Function && contains(range, position)) {
-        result = s;
-      }
-      if (s.children && s.children.length) {
-        result = this.findEnclosingFunction(s.children, position, result);
-      }
-    }
-    return result;
-  },
-
-  isLocalDeclaredInBody(bodyText, name) {
-    const escaped = escapeRegex(name);
-    // Strip line comments and blank out string contents per line so decoys like
-    // `; Local $x` or `"Local $x"` cannot falsely match and misclassify a global.
-    const codeOnly = bodyText
-      .split(/\r?\n/)
-      .map(l => blankStrings(stripLineComment(l)))
-      .join('\n');
-    // Local/Static/Dim declaration (possibly in a comma list): keyword ... $name.
-    // Line-continuation (`_`) split declarations are intentionally not handled:
-    // missing a local declaration only widens the (global) search, the safe direction.
-    const declRe = new RegExp(`\\b(?:Local|Static|Dim)\\b[^\\n]*?${escaped}\\b`, 'i');
-    if (declRe.test(codeOnly)) return true;
-    // Parameter in the Func signature: Func Name(... $name ...)
-    const sigRe = new RegExp(`^\\s*(?:volatile\\s+)?Func\\b[^\\n(]*\\([^)]*${escaped}\\b`, 'i');
-    return sigRe.test(codeOnly);
   },
 };
 

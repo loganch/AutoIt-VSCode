@@ -16,6 +16,7 @@ import {
   regionPattern,
   variablePattern,
 } from './util';
+import { rangeContainsRange as sharedRangeContainsRange } from './utils/scopeAnalysis';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import MapTrackingService from './services/MapTrackingService.js';
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;
@@ -221,10 +222,7 @@ function comparePositions(left, right) {
 }
 
 function rangeContainsRange(outerRange, innerRange) {
-  return (
-    comparePositions(outerRange.start, innerRange.start) <= 0 &&
-    comparePositions(outerRange.end, innerRange.end) >= 0
-  );
+  return sharedRangeContainsRange(outerRange, innerRange);
 }
 
 /**
