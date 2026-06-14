@@ -188,20 +188,27 @@ const AutoItReferenceProvider = {
     const batchSize = config.get('workspaceSymbolBatchSize', DEFAULT_BATCH_SIZE);
 
     const found = (await workspace.findFiles('**/*.{au3,a3x}')) || [];
-    // Warn before slicing: silently dropping files would make a reference list
-    // look complete when it isn't.
-    if (found.length > maxFiles) {
+    const currentPath = document.uri.fsPath;
+    const seen = new Set([currentPath]);
+    const files = [{ fsPath: currentPath, toString: () => currentPath }];
+    for (const f of found) {
+      if (!seen.has(f.fsPath)) {
+        seen.add(f.fsPath);
+        files.push(f);
+      }
+    }
+    const capped = files.length > maxFiles;
+    if (capped) {
       window.showWarningMessage(
-        `AutoIt: Searching ${maxFiles} of ${found.length} files for references. Increase 'autoit.workspaceSymbolMaxFiles' to search more files.`,
+        `AutoIt: Searching ${maxFiles} of ${files.length} files for references. Increase 'autoit.workspaceSymbolMaxFiles' to search more files.`,
       );
     }
-    const files = found.slice(0, maxFiles);
-    const currentPath = document.uri.fsPath;
+    const searchFiles = capped ? files.slice(0, maxFiles) : files;
     const locations = [];
 
-    for (let i = 0; i < files.length; i += batchSize) {
+    for (let i = 0; i < searchFiles.length; i += batchSize) {
       if (token?.isCancellationRequested) return [];
-      const batch = files.slice(i, i + batchSize);
+      const batch = searchFiles.slice(i, i + batchSize);
       const batchResults = await Promise.all(
         batch.map(async file => {
           try {

@@ -632,6 +632,26 @@ describe('provideReferences - workspace (functions & globals)', () => {
     expect(byFile).toEqual(['a.au3:3', 'b.au3:0', 'b.au3:1']);
   });
 
+  test('includes the active document even when findFiles omits it', async () => {
+    const SRC = ['Func DoWork()', '    Return 1', 'EndFunc', 'DoWork()'].join('\n');
+    const OTHER = path.join(process.cwd(), 'test', 'fixtures', 'other.au3');
+    vscode.workspace.findFiles.mockResolvedValue([{ fsPath: OTHER, toString: () => OTHER }]);
+    vscode.workspace.openTextDocument.mockImplementation(uri => {
+      const p = uri.fsPath || uri;
+      return Promise.resolve(new MockTextDocument(p === OTHER ? 'Func Other()\nEndFunc\n' : SRC, p));
+    });
+    vscode.workspace.getConfiguration.mockReturnValue({ get: (k, d) => d });
+    const doc = new MockTextDocument(SRC, FILE_A);
+    const locs = await AutoItReferenceProvider.provideReferences(
+      doc,
+      new MockPosition(0, DOWORK_CURSOR_CHAR),
+      CONTEXT_WITH_DECL,
+      { isCancellationRequested: false },
+    );
+    const byFile = locs.map(l => `${path.basename(l.uri.fsPath)}:${l.range.start.line}`).sort();
+    expect(byFile).toEqual(['a.au3:0', 'a.au3:3']);
+  });
+
   test('returns [] when cancelled', async () => {
     const doc = new MockTextDocument(A_SRC, FILE_A);
     const locs = await AutoItReferenceProvider.provideReferences(
