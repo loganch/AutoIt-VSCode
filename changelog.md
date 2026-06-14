@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Scope analysis utilities**: added utility functions for range handling and improved scope classification (1274bfd)
 - **Find All References**: Shift+F12 now lists references to user-defined functions and variables. Functions and global variables are searched workspace-wide; local variables (declared with `Local`/`Static`/`Dim` or as function parameters) are scoped to their enclosing function. Matching is case-insensitive and skips occurrences inside comments and strings, and honors the "include declaration" toggle.
 - **Ternary operator scopes**: syntax highlighting now recognizes ternary operator tokens for improved colorization (#251)
 
 ### Fixed
 
+- **Find All References scope**: ensure current document is included in reference search scope (64914bb)
+- **Shadowed variable references**: drop the in-scope declaration when local variables shadow outer scope declarations (6450bb2)
 - **Hover description regex**: corrected line-ending pattern in the function-description RegExp so hover docs display correctly on both CRLF and LF files (#248) (c96895c)
 - **Symbol outline hierarchy**: fixed nesting of symbols under innermost ancestor range to restore region→function and nested-region nesting in outline view (#245) (b88a849)
 - **Au3Check result caching**: cache Au3Check results and invalidate diagnostics when configuration changes (cad393e)
@@ -23,6 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Code organization**: reorganized utility functions and constants for better structure and maintainability (b7ce257)
+- **Code review cleanup**: addressed code review findings from brooks-lint audit, including function and module renaming (55b9e3d)
 - **Function declaration colorations**: TextMate grammar now colorizes additional token types inside function declarations: keywords/booleans, numbers, assignments, brackets, commas/dots/concatenation operators, and logical operators (#246) (042f18d–e786c7d)
 - **Activation performance**: defer completion and hover metadata loading to lazy initialization on first use, reducing activation work (adccd73)
 - **Workspace symbol performance**: implement debounce handling and caching for provideWorkspaceSymbols to improve responsiveness on large projects (40b22aa)
