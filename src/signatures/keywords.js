@@ -215,5 +215,6 @@ const signatures = {
 
 const hovers = signatureToHover(signatures);
 const completions = signatureToCompletion(signatures, CompletionItemKind.Keyword, 'Keyword');
+const AUTOIT_KEYWORDS = new Set(Object.keys(signatures).map(k => k.toLowerCase()));
 
-export { signatures as default, hovers, completions };
+export { signatures as default, hovers, completions, AUTOIT_KEYWORDS };

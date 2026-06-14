@@ -3,6 +3,11 @@ import fs from 'fs';
 import path from 'path';
 import { CompletionItemKind, MarkdownString, window, workspace } from 'vscode';
 import aiConfig from './ai_config';
+import {
+  AI_CONSTANTS,
+  AUTOIT_MODE,
+  REGEX_PATTERNS as CORE_REGEX_PATTERNS,
+} from './utils/coreConstants';
 import { splitTopLevel } from './utils/functionSignatureParsing';
 
 // ============================================================================
@@ -20,17 +25,6 @@ const opt = '**[optional]**';
 const br = '\u0020\u0020';
 const defaultZero = `${br + br}\`Default = 0\``;
 
-// AutoIt specific constants
-const AI_CONSTANTS = [
-  '$MB_ICONERROR',
-  '$MB_ICONINFORMATION',
-  '$MB_YESNO',
-  '$MB_TASKMODAL',
-  '$IDYES',
-  '$IDNO',
-];
-
-const AUTOIT_MODE = { language: 'autoit', scheme: 'file' };
 const MIN_FUNCTION_MATCH_PARTS = 4;
 
 /**
@@ -50,16 +44,12 @@ const escapeRegexLiteral = value => {
 
 // Cached regex patterns to avoid recreation
 const REGEX_PATTERNS = Object.freeze({
+  ...CORE_REGEX_PATTERNS,
   includePattern: /^#include\s"([^"]+)"/gm,
   relativeInclude: /^\s*#include\s"([^"]+)"/gm,
   libraryInclude: /^\s*#include\s<([^>]+)>/gm,
   libraryIncludePattern: /^#include\s+<([\w.]+\.au3)>/gm,
-  functionPattern: /^[\t ]*(?:volatile[\t ]+)?Func[\t ]+(\w+)[\t ]*\(/i,
   functionDefinitionRegex: /^[\t ]*(?:volatile[\t ]+)?Func[\t ]+((\w+)[\t ]*\((.*)\))/gim,
-  variablePattern: /(?:["'].*?["'])|(?:;.*)|(\$\w+)/g,
-  regionPattern: /^[\t ]*#region\s[- ]*(.+)/i,
-  commentBlockStart: /^\s*#(cs|comments-start)/,
-  commentBlockEnd: /^\s*#(ce|comments-end)/,
   hasAngleBrackets: /^<.+>$/,
   hasQuotes: /^".+"$/,
   windowsDriveLetter: /^[A-Z]:[\\/]/,

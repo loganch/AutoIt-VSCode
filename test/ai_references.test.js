@@ -167,9 +167,23 @@ jest.mock(
       createOutputChannel: jest.fn(() => ({ appendLine: jest.fn() })),
     },
     SymbolKind: { Function: 11, Variable: 12, Constant: 13, Enum: 9, Key: 19, Namespace: 2 },
+    CompletionItemKind: { Keyword: 14 },
     SymbolInformation: class {
       constructor(name, kind, containerName, location) {
         Object.assign(this, { name, kind, containerName, location });
+      }
+    },
+    SnippetString: class {
+      constructor(value) {
+        this.value = value;
+      }
+      appendPlaceholder(text) {
+        this.value += text;
+        return this;
+      }
+      appendText(text) {
+        this.value += text;
+        return this;
       }
     },
     DocumentSymbol: class {
@@ -193,29 +207,9 @@ jest.mock(
 // manual mock is retained. If any of these patterns/constants change in
 // src/util.js, update them here too.
 jest.mock('../src/util', () => ({
-  AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
-  AI_CONSTANTS: [
-    '$MB_ICONERROR',
-    '$MB_ICONINFORMATION',
-    '$MB_YESNO',
-    '$MB_TASKMODAL',
-    '$IDYES',
-    '$IDNO',
-  ],
-  functionPattern: /^[\t ]*(?:volatile[\t ]+)?Func[\t ]+(\w+)[\t ]*\(/i,
-  variablePattern: /(?:["'].*?["'])|(?:;.*)|(\$\w+)/g,
-  regionPattern: /^[\t ]*#region\s[- ]*(.+)/i,
-  isSkippableLine: line => {
-    if (!line || line.isEmptyOrWhitespace) return true;
-    const firstChar = line.text.charAt(line.firstNonWhitespaceCharacterIndex);
-    if (firstChar === ';') return true;
-    if (firstChar === '#') {
-      return (
-        !/^\s*#(cs|comments-start)/.test(line.text) && !/^\s*#(ce|comments-end)/.test(line.text)
-      );
-    }
-    return false;
-  },
+  ...jest.requireActual('../src/utils/coreConstants'),
+  signatureToHover: signatures => signatures,
+  signatureToCompletion: signatures => signatures,
 }));
 
 // Mock the lazily-required definition provider so workspace tests can control

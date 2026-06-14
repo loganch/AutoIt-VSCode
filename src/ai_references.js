@@ -1,6 +1,14 @@
-import { Location, Position, Range, SymbolKind, languages, window, workspace } from 'vscode';
+import { Location, Position, Range, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE } from './util';
-import { findEnclosingFunctionFromText, isLocalDeclaredInBody } from './utils/scopeAnalysis';
+import { AUTOIT_KEYWORDS } from './signatures/keywords';
+import {
+  blankStrings,
+  escapeRegex,
+  findEnclosingFunctionFromText,
+  isLocalDeclaredInBody,
+  stringMask,
+  stripLineComment,
+} from './utils/textUtils.js';
 
 // Workspace scan budget (mirrors ai_workspaceSymbols.js defaults).
 const DEFAULT_MAX_FILES = 500;
@@ -8,107 +16,6 @@ const DEFAULT_BATCH_SIZE = 10;
 
 // AutoIt is case-insensitive. Word chars: letters, digits, underscore (and $ prefix for vars).
 const WORD_PATTERN = /\$?[A-Za-z_][A-Za-z0-9_]*/;
-
-// AutoIt language keywords. The cursor landing on one of these is not a symbol
-// reference, so getSymbolAtPosition rejects it (lowercased: matching is
-// case-insensitive). Variables always start with `$`, so keywords are
-// function-shaped names only.
-// Keep in sync with src/signatures/keywords.js (the authoritative keyword list).
-const AUTOIT_KEYWORDS = new Set(
-  [
-    'If',
-    'Else',
-    'ElseIf',
-    'EndIf',
-    'Then',
-    'While',
-    'WEnd',
-    'For',
-    'In',
-    'To',
-    'Step',
-    'Next',
-    'Do',
-    'Until',
-    'Switch',
-    'EndSwitch',
-    'Select',
-    'EndSelect',
-    'Case',
-    'ContinueCase',
-    'Func',
-    'EndFunc',
-    'Return',
-    'Local',
-    'Global',
-    'Dim',
-    'Static',
-    'Const',
-    'Enum',
-    'ReDim',
-    'With',
-    'EndWith',
-    'And',
-    'Or',
-    'Not',
-    'ContinueLoop',
-    'ExitLoop',
-    'Exit',
-    'Null',
-    'True',
-    'False',
-    'Default',
-    'ByRef',
-    'Volatile',
-  ].map(k => k.toLowerCase()),
-);
-
-function escapeRegex(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-// Remove the comment tail of a line (a `;` not inside a string).
-function stripLineComment(line) {
-  let inSingle = false;
-  let inDouble = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"' && !inSingle) inDouble = !inDouble;
-    else if (ch === "'" && !inDouble) inSingle = !inSingle;
-    else if (ch === ';' && !inSingle && !inDouble) return line.slice(0, i);
-  }
-  return line;
-}
-
-// Build a boolean mask of columns that fall inside a quoted string.
-function stringMask(line) {
-  const mask = new Array(line.length).fill(false);
-  let inSingle = false;
-  let inDouble = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"' && !inSingle) {
-      inDouble = !inDouble;
-      mask[i] = true;
-    } else if (ch === "'" && !inDouble) {
-      inSingle = !inSingle;
-      mask[i] = true;
-    } else {
-      mask[i] = inSingle || inDouble;
-    }
-  }
-  return mask;
-}
-
-// Replace quoted-string characters on a line with spaces so they can't match
-// code patterns (e.g. a decoy `"Local $x"` literal).
-function blankStrings(line) {
-  const mask = stringMask(line);
-  return line
-    .split('')
-    .map((ch, i) => (mask[i] ? ' ' : ch))
-    .join('');
-}
 
 const AutoItReferenceProvider = {
   async provideReferences(document, position, context, token) {
@@ -215,7 +122,9 @@ const AutoItReferenceProvider = {
             // Reuse the already-open current document instead of reopening it
             // (avoids double-counting and uses unsaved in-memory edits).
             const fileDoc =
-              file.fsPath === currentPath ? document : await workspace.openTextDocument(file);
+              file.fsPath === currentPath
+                ? document
+                : await workspace.openTextDocument(file.fsPath);
             const hits = this.scanText(fileDoc.getText(), this.cloneRegex(regex));
             return { uri: fileDoc.uri, hits };
           } catch {
@@ -314,7 +223,7 @@ const AutoItReferenceProvider = {
     return results;
   },
 
-  async classifyScope(document, position, name) {
+  classifyScope(document, position, name) {
     const range = findEnclosingFunctionFromText(document, position);
     if (!range) return { kind: 'global' };
 
