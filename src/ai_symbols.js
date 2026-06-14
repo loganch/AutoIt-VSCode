@@ -16,7 +16,7 @@ import {
   regionPattern,
   variablePattern,
 } from './util';
-import { rangeContainsRange as sharedRangeContainsRange } from './utils/scopeAnalysis';
+import { rangeContainsRange as sharedRangeContainsRange } from './utils/textUtils';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import MapTrackingService from './services/MapTrackingService.js';
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;

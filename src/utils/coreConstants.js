@@ -17,20 +17,4 @@ const REGEX_PATTERNS = Object.freeze({
   commentBlockEnd: /^\s*#(ce|comments-end)/,
 });
 
-const isSkippableLine = line => {
-  if (!line || line.isEmptyOrWhitespace) return true;
-
-  const firstChar = line.text.charAt(line.firstNonWhitespaceCharacterIndex);
-  if (firstChar === ';') return true;
-
-  if (firstChar === '#') {
-    return (
-      !REGEX_PATTERNS.commentBlockStart.test(line.text) &&
-      !REGEX_PATTERNS.commentBlockEnd.test(line.text)
-    );
-  }
-
-  return false;
-};
-
-export { AI_CONSTANTS, AUTOIT_MODE, REGEX_PATTERNS, isSkippableLine };
+export { AI_CONSTANTS, AUTOIT_MODE, REGEX_PATTERNS };

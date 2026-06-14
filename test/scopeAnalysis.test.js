@@ -53,11 +53,18 @@ class MockTextDocument {
   }
 }
 
-jest.mock('vscode', () => ({
-  Range: MockRange,
-}), { virtual: true });
+jest.mock(
+  'vscode',
+  () => ({
+    Range: MockRange,
+  }),
+  { virtual: true },
+);
 
-const { findEnclosingFunctionFromText, isLocalDeclaredInBody } = require('../src/utils/scopeAnalysis');
+const {
+  findEnclosingFunctionInDocument,
+  isLocalDeclaredInBody,
+} = require('../src/utils/textUtils');
 
 const SAMPLE = [
   'Global $g = 0',
@@ -74,7 +81,7 @@ const SAMPLE = [
 describe('scopeAnalysis helper', () => {
   test('finds the enclosing function range from text', () => {
     const doc = new MockTextDocument(SAMPLE);
-    const range = findEnclosingFunctionFromText(doc, new MockPosition(3, 4));
+    const range = findEnclosingFunctionInDocument(doc, new MockPosition(3, 4));
 
     expect(range).not.toBeNull();
     expect(range.start.line).toBe(1);

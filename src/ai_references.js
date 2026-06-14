@@ -4,7 +4,7 @@ import { AUTOIT_KEYWORDS } from './signatures/keywords';
 import {
   blankStrings,
   escapeRegex,
-  findEnclosingFunctionFromText,
+  findEnclosingFunctionInDocument,
   isLocalDeclaredInBody,
   stringMask,
   stripLineComment,
@@ -224,7 +224,7 @@ const AutoItReferenceProvider = {
   },
 
   classifyScope(document, position, name) {
-    const range = findEnclosingFunctionFromText(document, position);
+    const range = findEnclosingFunctionInDocument(document, position);
     if (!range) return { kind: 'global' };
 
     const bodyText = document.getText(range);

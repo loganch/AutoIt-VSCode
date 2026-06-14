@@ -43,7 +43,7 @@ function blankStrings(line) {
     .join('');
 }
 
-function findEnclosingFunctionFromText(document, position) {
+function findEnclosingFunctionInDocument(document, position) {
   const funcStartRe = /^\s*(?:volatile\s+)?Func\b/i;
   const funcEndRe = /^\s*EndFunc\b/i;
   let startLine = null;
@@ -95,7 +95,7 @@ function isLocalDeclaredInBody(bodyText, name) {
 export {
   blankStrings,
   escapeRegex,
-  findEnclosingFunctionFromText,
+  findEnclosingFunctionInDocument,
   isLocalDeclaredInBody,
   rangeContainsRange,
   stringMask,
