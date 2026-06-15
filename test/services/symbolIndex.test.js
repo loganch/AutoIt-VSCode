@@ -80,4 +80,10 @@ describe('symbolIndex.getIncludeSet', () => {
     expect(set.has('file://fresh')).toBe(true);
     expect(set.has('file://stale')).toBe(false);
   });
+
+  it('treats an empty liveEdges array as overriding cached edges (active doc with no includes)', () => {
+    index.__setEdgesForTests('file://a', ['file://stale']);
+    const set = index.getIncludeSet('file://a', []);
+    expect([...set]).toEqual(['file://a']);
+  });
 });
