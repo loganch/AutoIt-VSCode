@@ -21,6 +21,8 @@ async function processBatch(files, batchSize, token) {
   for (let i = 0; i < files.length; i += batchSize) {
     // Check for cancellation
     if (token?.isCancellationRequested) {
+      // On cancellation the partially-built cache is intentionally kept: the index is
+      // incrementally maintained (the file watcher refreshes it), so partial data is useful.
       break;
     }
 

@@ -180,6 +180,8 @@ describe('ai_workspaceSymbols module', () => {
     await capturedProviderArg.provideWorkspaceSymbols('', { isCancellationRequested: false });
 
     expect(symbolIndex.symbolsCache.size).toBeGreaterThan(0);
+    const allNames = [...symbolIndex.symbolsCache.values()].flat().map(s => s.name);
+    expect(allNames).toContain('SharedFunc');
   });
 });
 
