@@ -229,6 +229,9 @@ async function warmDocument(document) {
 function noteFileContent(fsPath, content) {
   if (!fsPath || !content) return;
   const uriString = toUriString(fsPath);
+  // Note: the cache write lands after an await in indexDocument, so two
+  // overlapping notes for the same file may both index it (benign: identical
+  // last-writer-wins entry). The window is intentionally left untreated.
   if (symbolsCache.has(uriString)) return;
   Promise.resolve()
     .then(() => workspace.openTextDocument(Uri.file(fsPath)))
