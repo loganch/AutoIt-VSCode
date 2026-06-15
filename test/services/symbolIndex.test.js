@@ -56,3 +56,28 @@ describe('symbolIndex.lookupDefinition', () => {
     expect(index.lookupDefinition('nope', false)).toEqual([]);
   });
 });
+
+describe('symbolIndex.getIncludeSet', () => {
+  beforeEach(() => index.__resetForTests());
+
+  it('returns the document itself plus transitively-included files', () => {
+    index.__setEdgesForTests('file://a', ['file://b']);
+    index.__setEdgesForTests('file://b', ['file://c']);
+    const set = index.getIncludeSet('file://a');
+    expect([...set].sort()).toEqual(['file://a', 'file://b', 'file://c']);
+  });
+
+  it('tolerates circular includes without infinite looping', () => {
+    index.__setEdgesForTests('file://a', ['file://b']);
+    index.__setEdgesForTests('file://b', ['file://a']);
+    const set = index.getIncludeSet('file://a');
+    expect([...set].sort()).toEqual(['file://a', 'file://b']);
+  });
+
+  it('honors live edges for the active document over cached edges', () => {
+    index.__setEdgesForTests('file://a', ['file://stale']);
+    const set = index.getIncludeSet('file://a', ['file://fresh']);
+    expect(set.has('file://fresh')).toBe(true);
+    expect(set.has('file://stale')).toBe(false);
+  });
+});
