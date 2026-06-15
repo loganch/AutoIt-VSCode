@@ -1,5 +1,5 @@
 // src/services/symbolIndex.js
-import { Location, SymbolInformation, SymbolKind, Uri } from 'vscode';
+import { Location, SymbolInformation, SymbolKind, Uri, window, workspace } from 'vscode';
 import { getIncludePath } from '../util';
 import { provideDocumentSymbols } from '../ai_symbols';
 
@@ -10,6 +10,9 @@ const symbolsCache = new Map();
 const includeEdges = new Map();
 
 const VARIABLE_KINDS = new Set([SymbolKind.Variable, SymbolKind.Constant, SymbolKind.Enum]);
+
+const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
+const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
 
 const RELATIVE_INCLUDE = /^\s*#include\s+"([^"]+)"/gm;
 const LIBRARY_INCLUDE = /^\s*#include\s+<([^>]+)>/gm;
@@ -210,10 +213,91 @@ function removeDocument(uriString) {
   includeEdges.delete(uriString);
 }
 
+/**
+ * Build (or rebuild) the workspace symbol index: find all AutoIt scripts and
+ * index them in batches, yielding between batches so the UI stays responsive.
+ * Populates the shared symbolsCache / includeEdges directly.
+ * @param {import('vscode').CancellationToken} [token] - Cancellation token to abort processing.
+ * @returns {Promise<void>}
+ */
+async function buildWorkspaceIndex(token) {
+  const config = workspace.getConfiguration('autoit');
+  const maxFiles = config.get('workspaceSymbolMaxFiles', DEFAULT_MAX_WORKSPACE_SYMBOL_FILES);
+  const batchSize = config.get('workspaceSymbolBatchSize', DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE);
+
+  const workspaceScripts = await workspace.findFiles('**/*.{au3,a3x}');
+
+  // Limit number of files to process
+  const files = workspaceScripts.slice(0, maxFiles);
+
+  if (workspaceScripts.length > maxFiles) {
+    window.showWarningMessage(
+      `AutoIt: Processing ${maxFiles} of ${workspaceScripts.length} files. Increase 'autoit.workspaceSymbolMaxFiles' to index more files.`,
+    );
+  }
+
+  for (let i = 0; i < files.length; i += batchSize) {
+    // On cancellation the partially-built cache is intentionally kept: the index is
+    // incrementally maintained (the file watcher refreshes it), so partial data is useful.
+    if (token?.isCancellationRequested) break;
+
+    const batch = files.slice(i, i + batchSize);
+
+    // Index batch in parallel. indexDocument writes symbols + include edges
+    // directly into the shared cache and is internally resilient; guard only
+    // the document open so a file that vanished after findFiles is skipped.
+    await Promise.all(
+      batch.map(async file => {
+        try {
+          const doc = await workspace.openTextDocument(file);
+          await indexDocument(doc);
+        } catch {
+          // Skip files that can't be opened
+        }
+      }),
+    );
+
+    // Yield control to prevent UI freezing
+    await new Promise(resolve => setImmediate(resolve));
+  }
+}
+
+// --- background warm-up ---
+let warmState = 'cold'; // 'cold' | 'warming' | 'warm'
+let warmPromise = null;
+let builder = buildWorkspaceIndex; // injectable for tests
+
+/** Idempotently warm the index in the background. Safe to call repeatedly. */
+function ensureWarm() {
+  if (warmState !== 'cold') return warmPromise;
+  warmState = 'warming';
+  warmPromise = Promise.resolve()
+    .then(() => builder())
+    .then(() => {
+      warmState = 'warm';
+    })
+    .catch(() => {
+      warmState = 'cold';
+      warmPromise = null;
+    });
+  return warmPromise;
+}
+
+/** @returns {boolean} True once the background warm-up has completed. */
+function isWarm() {
+  return warmState === 'warm';
+}
+
 // --- test seams ---
 function __resetForTests() {
   symbolsCache.clear();
   includeEdges.clear();
+  warmState = 'cold';
+  warmPromise = null;
+  builder = buildWorkspaceIndex;
+}
+function __setBuilderForTests(fn) {
+  builder = fn;
 }
 function __setSymbolsForTests(uriString, symbols) {
   symbolsCache.set(uriString, symbols);
@@ -232,7 +316,11 @@ export {
   extractIncludeEdges,
   indexDocument,
   removeDocument,
+  buildWorkspaceIndex,
+  ensureWarm,
+  isWarm,
   __resetForTests,
   __setSymbolsForTests,
   __setEdgesForTests,
+  __setBuilderForTests,
 };

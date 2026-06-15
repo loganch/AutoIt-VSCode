@@ -124,6 +124,19 @@ describe('symbolIndex.removeDocument', () => {
   });
 });
 
+describe('symbolIndex.ensureWarm', () => {
+  beforeEach(() => index.__resetForTests());
+
+  it('runs the build at most once across repeated calls', async () => {
+    const build = jest.fn(() => Promise.resolve());
+    index.__setBuilderForTests(build);
+    index.ensureWarm();
+    index.ensureWarm();
+    await Promise.resolve();
+    expect(build).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('symbolIndex.extractIncludeEdges', () => {
   beforeEach(() => index.__resetForTests());
 

@@ -16,6 +16,7 @@ import { registerCommands } from './registerCommands';
 import { formatterProvider } from './ai_formatter';
 import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
 import conf from './ai_config';
+import { ensureWarm } from './services/symbolIndex';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
 
@@ -228,6 +229,8 @@ export const activate = ctx => {
   ctx.subscriptions.push(languages.setLanguageConfiguration('autoit', languageConfiguration));
 
   registerCommands(ctx);
+
+  ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
 
   // Initialize MapTrackingService
   const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || '';

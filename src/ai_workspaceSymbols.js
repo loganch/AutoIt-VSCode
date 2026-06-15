@@ -1,5 +1,5 @@
-import { languages, window, workspace } from 'vscode';
-import { symbolsCache, indexDocument, removeDocument } from './services/symbolIndex';
+import { languages, workspace } from 'vscode';
+import { symbolsCache, indexDocument, removeDocument, ensureWarm } from './services/symbolIndex';
 
 // Debouncing state for search requests
 let searchDebounceTimer = null;
@@ -7,78 +7,6 @@ let searchDebounceTimer = null;
 // search can settle it instead of leaving VS Code awaiting forever.
 let pendingSearchResolve = null;
 const SEARCH_DEBOUNCE_MS = 300;
-const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
-const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
-
-/**
- * Process files in batches to prevent UI freezing on large workspaces.
- * @param {Array} files - Array of file URIs to process
- * @param {number} batchSize - Number of files to process per batch
- * @param {import('vscode').CancellationToken} token - Cancellation token to abort processing
- * @returns {Promise<Map>} The shared symbol cache (uri -> symbols).
- */
-async function processBatch(files, batchSize, token) {
-  for (let i = 0; i < files.length; i += batchSize) {
-    // Check for cancellation
-    if (token?.isCancellationRequested) {
-      // On cancellation the partially-built cache is intentionally kept: the index is
-      // incrementally maintained (the file watcher refreshes it), so partial data is useful.
-      break;
-    }
-
-    const batch = files.slice(i, i + batchSize);
-
-    // Index batch in parallel. indexDocument writes symbols + include edges
-    // directly into the shared cache and is internally resilient; guard only
-    // the document open so a file that vanished after findFiles is skipped.
-    await Promise.all(
-      batch.map(async file => {
-        try {
-          const document = await workspace.openTextDocument(file);
-          await indexDocument(document);
-        } catch {
-          // Skip files that can't be opened
-        }
-      }),
-    );
-
-    // Yield control to prevent UI freezing
-    await new Promise(resolve => setImmediate(resolve));
-  }
-
-  return symbolsCache;
-}
-
-/**
- * Fetches symbols for all AutoIt scripts in the workspace.
- * Uses batch processing to prevent UI freezing on large projects.
- *
- * @param {import('vscode').CancellationToken} token - Cancellation token
- * @returns {Promise<Map>} A promise that resolves to a map of file URI to symbols.
- */
-async function getWorkspaceSymbols(token) {
-  try {
-    const config = workspace.getConfiguration('autoit');
-    const maxFiles = config.get('workspaceSymbolMaxFiles', DEFAULT_MAX_WORKSPACE_SYMBOL_FILES);
-    const batchSize = config.get('workspaceSymbolBatchSize', DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE);
-
-    const workspaceScripts = await workspace.findFiles('**/*.{au3,a3x}');
-
-    // Limit number of files to process
-    const filesToProcess = workspaceScripts.slice(0, maxFiles);
-
-    if (workspaceScripts.length > maxFiles) {
-      window.showWarningMessage(
-        `AutoIt: Processing ${maxFiles} of ${workspaceScripts.length} files. Increase 'autoit.workspaceSymbolMaxFiles' to index more files.`,
-      );
-    }
-
-    return await processBatch(filesToProcess, batchSize, token);
-  } catch (error) {
-    window.showErrorMessage(error.message || 'Error fetching workspace symbols');
-    return new Map();
-  }
-}
 
 /**
  * Flatten the symbol cache into an array, optionally filtered by a query.
@@ -126,10 +54,11 @@ function provideWorkspaceSymbols(query, token) {
       searchDebounceTimer = null;
       pendingSearchResolve = null;
 
-      // Build cache if empty. getWorkspaceSymbols populates the shared
-      // symbolsCache directly (via indexDocument), so no copy step is needed.
+      // Build cache if empty. ensureWarm runs the single shared workspace-build
+      // implementation (populating symbolsCache directly via indexDocument) and is
+      // idempotent, so it coalesces with any activation-time warm-up — no double build.
       if (symbolsCache.size === 0) {
-        await getWorkspaceSymbols(token);
+        await ensureWarm();
       }
 
       // Return early if cancelled
