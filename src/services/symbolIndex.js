@@ -10,7 +10,7 @@ const VARIABLE_KINDS = new Set([SymbolKind.Variable, SymbolKind.Constant, Symbol
  * Find definition matches for a symbol name in the warm index.
  * @param {string} name - Symbol name (e.g. "MyFunc" or "$Global").
  * @param {boolean} isVariable - True when the token starts with "$".
- * @returns {Array} Matching indexed symbol entries (each has a `.location`).
+ * @returns {Array<import('vscode').SymbolInformation>} Matching indexed symbol entries (each has a `.location`).
  */
 function lookupDefinition(name, isVariable) {
   if (!name) return [];
