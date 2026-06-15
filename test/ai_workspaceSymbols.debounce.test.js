@@ -49,6 +49,12 @@ jest.mock('../src/ai_symbols', () => ({
   provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
 }));
 
+// symbolIndex (imported transitively via ai_workspaceSymbols) imports getIncludePath
+// from util; mock it so the real util -> ai_config side-effect chain never loads.
+jest.mock('../src/util', () => ({
+  getIncludePath: jest.fn(() => ''),
+}));
+
 /**
  * Load a fresh copy of the module so each test starts with an empty cache and a
  * fresh debounce timer, returning the registered provider and the file-watcher

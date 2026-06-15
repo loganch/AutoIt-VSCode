@@ -1,5 +1,6 @@
-import { languages, window, workspace, SymbolInformation, Location, SymbolKind } from 'vscode';
+import { languages, window, workspace } from 'vscode';
 import { provideDocumentSymbols } from './ai_symbols';
+import { flattenSymbols } from './services/symbolIndex';
 
 // Map of file URI to symbols for incremental updates
 const symbolsCache = new Map();
@@ -12,101 +13,6 @@ let pendingSearchResolve = null;
 const SEARCH_DEBOUNCE_MS = 300;
 const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
 const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
-
-/**
- * Recursively extract key symbols from nested structure
- * @param {Array<import('vscode').DocumentSymbol>} keySymbols - Key DocumentSymbols
- * @param {import('vscode').Uri} uri - File URI
- * @param {string} containerName - Parent Map name
- * @param {Array<import('vscode').SymbolInformation>} results - Array to append to
- */
-function extractKeyChildren(keySymbols, uri, containerName, results) {
-  keySymbols.forEach(keySymbol => {
-    // Add key SymbolInformation
-    results.push(
-      new SymbolInformation(
-        keySymbol.name,
-        SymbolKind.Key,
-        containerName,
-        new Location(uri, keySymbol.range),
-      ),
-    );
-
-    // Recursively process nested keys
-    if (keySymbol.children && keySymbol.children.length > 0) {
-      extractKeyChildren(keySymbol.children, uri, containerName, results);
-    }
-  });
-}
-
-/**
- * Extract Map key SymbolInformation from DocumentSymbol tree
- * @param {import('vscode').DocumentSymbol} symbol - Document symbol
- * @param {import('vscode').Uri} uri - File URI
- * @param {Array<import('vscode').SymbolInformation>} results - Array to append to
- */
-function extractMapKeySymbols(symbol, uri, results) {
-  // If this is a Map variable, process its key children
-  if (symbol.kind === SymbolKind.Variable && symbol.detail === 'Map') {
-    // Add the Map variable itself
-    results.push(
-      new SymbolInformation(symbol.name, SymbolKind.Variable, '', new Location(uri, symbol.range)),
-    );
-
-    // Recursively extract key symbols
-    if (symbol.children && symbol.children.length > 0) {
-      extractKeyChildren(symbol.children, uri, symbol.name, results);
-    }
-  }
-}
-
-/**
- * Normalize a mixed array of DocumentSymbols/SymbolInformation into SymbolInformation.
- * @param {Array<import('vscode').DocumentSymbol|import('vscode').SymbolInformation>|any} symbols
- * @param {import('vscode').Uri} uri
- * @returns {Array<import('vscode').SymbolInformation>}
- */
-function flattenSymbols(symbols, uri) {
-  const flatSymbols = [];
-
-  if (!Array.isArray(symbols)) {
-    return flatSymbols;
-  }
-
-  symbols.forEach(symbol => {
-    if (symbol && symbol.children !== undefined) {
-      if (symbol.kind === SymbolKind.Variable && symbol.detail === 'Map') {
-        extractMapKeySymbols(symbol, uri, flatSymbols);
-      } else {
-        flatSymbols.push(
-          new SymbolInformation(
-            symbol.name,
-            symbol.kind,
-            symbol.detail || '',
-            new Location(uri, symbol.range),
-          ),
-        );
-
-        if (symbol.children && symbol.children.length > 0) {
-          symbol.children.forEach(child => {
-            flatSymbols.push(
-              new SymbolInformation(
-                child.name,
-                child.kind,
-                symbol.name,
-                new Location(uri, child.range),
-              ),
-            );
-          });
-        }
-      }
-    } else if (symbol) {
-      flatSymbols.push(symbol);
-    }
-  });
-
-  return flatSymbols;
-}
 
 /**
  * Process files in batches to prevent UI freezing on large workspaces.

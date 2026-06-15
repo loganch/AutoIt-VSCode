@@ -5,6 +5,11 @@ jest.mock('vscode', () => ({
   },
   Uri: { file: p => ({ fsPath: p, toString: () => `file://${p}` }) },
   SymbolKind: { Function: 11, Variable: 12, Constant: 13, Enum: 9, Key: 19 },
+  SymbolInformation: class SymbolInformation {
+    constructor(name, kind, containerName, location) {
+      this.name = name; this.kind = kind; this.containerName = containerName; this.location = location;
+    }
+  },
   workspace: {
     findFiles: jest.fn(() => Promise.resolve([])),
     openTextDocument: jest.fn(),
@@ -14,6 +19,16 @@ jest.mock('vscode', () => ({
     })),
     onDidOpenTextDocument: jest.fn(),
   },
+}));
+
+// symbolIndex imports provideDocumentSymbols from ai_symbols and getIncludePath
+// from util; mock both so their real (vscode-heavy) module side-effects never load.
+jest.mock('../../src/ai_symbols', () => ({
+  __esModule: true,
+  provideDocumentSymbols: jest.fn(() => Promise.resolve([])),
+}));
+jest.mock('../../src/util', () => ({
+  getIncludePath: jest.fn(() => ''),
 }));
 
 const { SymbolKind } = require('vscode');
@@ -85,5 +100,26 @@ describe('symbolIndex.getIncludeSet', () => {
     index.__setEdgesForTests('file://a', ['file://stale']);
     const set = index.getIncludeSet('file://a', []);
     expect([...set]).toEqual(['file://a']);
+  });
+});
+
+const { Uri } = require('vscode');
+
+describe('symbolIndex.extractIncludeEdges', () => {
+  beforeEach(() => index.__resetForTests());
+
+  it('resolves relative and library includes into edges in URI key space', () => {
+    const resolve = jest.fn(raw =>
+      raw.includes('helper') ? '/proj/helper.au3' : '/lib/Array.au3',
+    );
+    const text = '#include "helper.au3"\n#include <Array.au3>\n';
+    const edges = index.extractIncludeEdges('file:///proj/main.au3', text, {
+      uri: { fsPath: '/proj/main.au3' },
+    }, resolve);
+    expect(edges).toEqual([
+      Uri.file('/proj/helper.au3').toString(),
+      Uri.file('/lib/Array.au3').toString(),
+    ]);
+    expect(index.getIncludeSet('file:///proj/main.au3').size).toBe(3);
   });
 });
