@@ -201,6 +201,15 @@ async function indexDocument(document) {
   }
 }
 
+/**
+ * Remove a document's symbols and include edges from the index.
+ * @param {string} uriString
+ */
+function removeDocument(uriString) {
+  symbolsCache.delete(uriString);
+  includeEdges.delete(uriString);
+}
+
 // --- test seams ---
 function __resetForTests() {
   symbolsCache.clear();
@@ -222,6 +231,7 @@ export {
   toUriString,
   extractIncludeEdges,
   indexDocument,
+  removeDocument,
   __resetForTests,
   __setSymbolsForTests,
   __setEdgesForTests,

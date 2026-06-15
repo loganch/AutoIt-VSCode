@@ -1,9 +1,5 @@
 import { languages, window, workspace } from 'vscode';
-import { provideDocumentSymbols } from './ai_symbols';
-import { flattenSymbols } from './services/symbolIndex';
-
-// Map of file URI to symbols for incremental updates
-const symbolsCache = new Map();
+import { symbolsCache, indexDocument, removeDocument } from './services/symbolIndex';
 
 // Debouncing state for search requests
 let searchDebounceTimer = null;
@@ -19,11 +15,9 @@ const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
  * @param {Array} files - Array of file URIs to process
  * @param {number} batchSize - Number of files to process per batch
  * @param {import('vscode').CancellationToken} token - Cancellation token to abort processing
- * @returns {Promise<Map>} Map of file URI to symbols
+ * @returns {Promise<Map>} The shared symbol cache (uri -> symbols).
  */
 async function processBatch(files, batchSize, token) {
-  const results = new Map();
-
   for (let i = 0; i < files.length; i += batchSize) {
     // Check for cancellation
     if (token?.isCancellationRequested) {
@@ -32,36 +26,25 @@ async function processBatch(files, batchSize, token) {
 
     const batch = files.slice(i, i + batchSize);
 
-    // Process batch in parallel
-    const batchResults = await Promise.all(
+    // Index batch in parallel. indexDocument writes symbols + include edges
+    // directly into the shared cache and is internally resilient; guard only
+    // the document open so a file that vanished after findFiles is skipped.
+    await Promise.all(
       batch.map(async file => {
         try {
           const document = await workspace.openTextDocument(file);
-          const symbols = await provideDocumentSymbols(document);
-
-          // Flatten DocumentSymbol to SymbolInformation
-          const flatSymbols = flattenSymbols(symbols, file);
-
-          return { uri: file.toString(), symbols: flatSymbols };
+          await indexDocument(document);
         } catch {
           // Skip files that can't be opened
-          return null;
         }
       }),
     );
-
-    // Add batch results to map
-    batchResults.forEach(result => {
-      if (result && result.symbols) {
-        results.set(result.uri, result.symbols);
-      }
-    });
 
     // Yield control to prevent UI freezing
     await new Promise(resolve => setImmediate(resolve));
   }
 
-  return results;
+  return symbolsCache;
 }
 
 /**
@@ -141,16 +124,10 @@ function provideWorkspaceSymbols(query, token) {
       searchDebounceTimer = null;
       pendingSearchResolve = null;
 
-      // Build cache if empty
+      // Build cache if empty. getWorkspaceSymbols populates the shared
+      // symbolsCache directly (via indexDocument), so no copy step is needed.
       if (symbolsCache.size === 0) {
-        const symbols = await getWorkspaceSymbols(token);
-
-        // Only update cache if not cancelled
-        if (!token?.isCancellationRequested) {
-          symbols.forEach((value, key) => {
-            symbolsCache.set(key, value);
-          });
-        }
+        await getWorkspaceSymbols(token);
       }
 
       // Return early if cancelled
@@ -171,18 +148,8 @@ const watcher = workspace.createFileSystemWatcher('**/*.{au3,a3x}');
  * @param {import('vscode').Uri} uri - The file URI that changed
  */
 async function updateFileSymbols(uri) {
-  try {
-    const document = await workspace.openTextDocument(uri);
-    const symbols = await provideDocumentSymbols(document);
-
-    // Flatten DocumentSymbol to SymbolInformation
-    const flatSymbols = flattenSymbols(symbols, uri);
-
-    symbolsCache.set(uri.toString(), flatSymbols);
-  } catch {
-    // If file can't be opened, remove from cache
-    symbolsCache.delete(uri.toString());
-  }
+  const document = await workspace.openTextDocument(uri);
+  await indexDocument(document);
 }
 
 /**
@@ -190,7 +157,7 @@ async function updateFileSymbols(uri) {
  * @param {import('vscode').Uri} uri - The file URI that was deleted
  */
 function removeFileSymbols(uri) {
-  symbolsCache.delete(uri.toString());
+  removeDocument(uri.toString());
 }
 
 // Incremental cache updates instead of full invalidation

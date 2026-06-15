@@ -79,7 +79,11 @@ function loadProvider() {
 
 /** Populate the module cache directly via the file-watcher create handler. */
 async function warmCache(onCreate, symbols) {
-  mockOpenTextDocument.mockResolvedValueOnce({ getText: () => '' });
+  // indexDocument requires a document.uri, so the opened doc must carry one.
+  mockOpenTextDocument.mockResolvedValueOnce({
+    uri: { toString: () => 'file:///test.au3', fsPath: '/test.au3' },
+    getText: () => '',
+  });
   mockProvideDocumentSymbols.mockResolvedValueOnce(symbols);
   await onCreate({ toString: () => 'file:///test.au3' });
 }
@@ -144,7 +148,10 @@ describe('provideWorkspaceSymbols debounce lifecycle', () => {
     const token = { isCancellationRequested: false };
 
     mockFindFiles.mockResolvedValueOnce([{ toString: () => 'file:///a.au3' }]);
-    mockOpenTextDocument.mockResolvedValueOnce({ getText: () => '' });
+    mockOpenTextDocument.mockResolvedValueOnce({
+      uri: { toString: () => 'file:///a.au3', fsPath: '/a.au3' },
+      getText: () => '',
+    });
     mockProvideDocumentSymbols.mockResolvedValueOnce([{ name: 'Foo' }]);
 
     // Real timers: the debounce elapses for real (300 ms) and the cache builds.

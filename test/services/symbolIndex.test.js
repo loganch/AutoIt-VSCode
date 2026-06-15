@@ -105,6 +105,25 @@ describe('symbolIndex.getIncludeSet', () => {
 
 const { Uri } = require('vscode');
 
+describe('symbolIndex.removeDocument', () => {
+  beforeEach(() => index.__resetForTests());
+
+  it('deletes the uri from both symbolsCache and includeEdges', () => {
+    index.__setSymbolsForTests('file://a', [
+      { name: 'Foo', kind: SymbolKind.Function, location: loc('file://a') },
+    ]);
+    index.__setEdgesForTests('file://a', ['file://b']);
+
+    expect(index.symbolsCache.has('file://a')).toBe(true);
+    expect(index.includeEdges.has('file://a')).toBe(true);
+
+    index.removeDocument('file://a');
+
+    expect(index.symbolsCache.has('file://a')).toBe(false);
+    expect(index.includeEdges.has('file://a')).toBe(false);
+  });
+});
+
 describe('symbolIndex.extractIncludeEdges', () => {
   beforeEach(() => index.__resetForTests());
 
