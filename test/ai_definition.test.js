@@ -1327,6 +1327,24 @@ describe('ai_definition: index fast path', () => {
     expect(loc.uri.toString()).toBe(helperUri);
   });
 
+  it('performs ZERO getIncludeText reads when resolving via the warm index', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    const mainUri = doc.uri.toString();
+    const helperUri = 'file:///proj/helper.au3';
+    const helperLoc = { uri: { toString: () => helperUri }, range: {} };
+
+    symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
+    symbolIndex.extractIncludeEdges.mockReturnValue([helperUri]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri, helperUri]));
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+
+    const loc = Array.isArray(result) ? result[0] : result;
+    expect(loc.uri.toString()).toBe(helperUri); // resolved via index
+    expect(util.getIncludeText).not.toHaveBeenCalled(); // ZERO file-content reads
+  });
+
   it('rejects an index match whose file is not in the include set', () => {
     const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
     const mainUri = doc.uri.toString();
