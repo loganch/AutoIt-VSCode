@@ -391,6 +391,17 @@ jest.mock('../src/util', () => {
   return mod;
 });
 
+// Mock the symbol-index service so the fast path is deterministic and free of
+// fs / real-index behavior. With these defaults (lookupDefinition -> []), the
+// fast path is a no-op and every existing test falls through to the scan path.
+jest.mock('../src/services/symbolIndex', () => ({
+  lookupDefinition: jest.fn(() => []),
+  getIncludeSet: jest.fn(() => new Set()),
+  extractIncludeEdges: jest.fn(() => []),
+  isWarm: jest.fn(() => true),
+}));
+const symbolIndex = require('../src/services/symbolIndex');
+
 const util = jest.mocked(require('../src/util')); // get the mock instance with proper typing
 
 // Import the module under test
@@ -1266,5 +1277,91 @@ describe('ai_definition: performance and timeout boundaries', () => {
 
     // Second lookup should be faster or equal (caching benefit)
     expect(secondLookupTime).toBeLessThanOrEqual(firstLookupTime + CACHE_LOOKUP_TOLERANCE_MS); // Allow 5ms tolerance
+  });
+});
+
+describe('ai_definition: index fast path', () => {
+  // The mock document's uri is { fsPath }, which has no toString override, so
+  // document.uri.toString() yields the default object string. We build the
+  // include set against that same value (doc.uri.toString()) so the fast path
+  // is self-consistent.
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    definitionCache.clear();
+    mockState.reset();
+    mockState.clearCache();
+    global.getIncludeTextCallCounts = mockState.callCounts;
+    global.__UNREADABLE_LIB__ = false;
+
+    // Restore default fast-path no-op behavior (overridden per-test below).
+    symbolIndex.lookupDefinition.mockReturnValue([]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set());
+    symbolIndex.extractIncludeEdges.mockReturnValue([]);
+
+    // util mocks return nothing for the include scan so a rejected fast-path
+    // match falls through to a null result.
+    util.getIncludeScripts.mockImplementation(() => []);
+    util.getIncludeText.mockImplementation(() => '');
+  });
+
+  // A document with no local DoWork definition so the same-document scan misses
+  // and the index fast path runs.
+  const NO_LOCAL_DEF = ['; calls only', 'Local $r = DoWork()'].join('\n');
+
+  it('resolves a function via the warm index when its file is in the include set', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    const mainUri = doc.uri.toString();
+    const helperUri = 'file:///proj/helper.au3';
+    const helperLoc = { uri: { toString: () => helperUri }, range: {} };
+
+    symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
+    symbolIndex.extractIncludeEdges.mockReturnValue([helperUri]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri, helperUri]));
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+    const loc = Array.isArray(result) ? result[0] : result;
+    expect(loc).toBeTruthy();
+    expect(loc.uri.toString()).toBe(helperUri);
+  });
+
+  it('rejects an index match whose file is not in the include set', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    const mainUri = doc.uri.toString();
+    const strangerUri = 'file:///other/stranger.au3';
+
+    symbolIndex.lookupDefinition.mockReturnValue([
+      { name: 'DoWork', location: { uri: { toString: () => strangerUri }, range: {} } },
+    ]);
+    symbolIndex.extractIncludeEdges.mockReturnValue([]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri])); // stranger NOT included
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+    // Fast path filters out the stranger; falls through to the include scan
+    // which (util mocks return no match) yields null.
+    expect(result).toBeNull();
+  });
+
+  it('returns an array of locations when multiple in-scope matches exist', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    const mainUri = doc.uri.toString();
+    const aUri = 'file:///proj/a.au3';
+    const bUri = 'file:///proj/b.au3';
+
+    symbolIndex.lookupDefinition.mockReturnValue([
+      { name: 'DoWork', location: { uri: { toString: () => aUri }, range: {} } },
+      { name: 'DoWork', location: { uri: { toString: () => bUri }, range: {} } },
+    ]);
+    symbolIndex.extractIncludeEdges.mockReturnValue([aUri, bUri]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri, aUri, bUri]));
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+    const expectedLocations = [aUri, bUri];
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(expectedLocations.length);
+    expect(result.map(loc => loc.uri.toString()).sort()).toEqual(expectedLocations);
   });
 });

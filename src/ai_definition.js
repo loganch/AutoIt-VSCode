@@ -1,5 +1,6 @@
 import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE, getIncludePath, getIncludeScripts, getIncludeText } from './util';
+import { lookupDefinition, getIncludeSet, extractIncludeEdges } from './services/symbolIndex';
 
 // Constants for better maintainability
 const REGEX_FLAGS = 'mi';
@@ -170,6 +171,33 @@ const AutoItDefinitionProvider = {
         const locationResult = new Location(document.uri, range);
         definitionCache.set(cacheKey, locationResult);
         return locationResult;
+      }
+
+      // Index fast path: look up the symbol in the warm index, then keep only
+      // definitions whose file is reachable via #include from this document. Pure
+      // in-memory (no file-content reads); falls through to the scan on miss/error.
+      try {
+        const isVariable = lookupText.startsWith('$');
+        const candidates = lookupDefinition(lookupText, isVariable);
+        if (candidates.length > 0) {
+          const docUriString = document.uri.toString();
+          // Parse the active document's includes live so unsaved edits are honored.
+          const liveEdges = extractIncludeEdges(docUriString, documentText, document);
+          const includeSet = getIncludeSet(docUriString, liveEdges);
+          const inScope = candidates
+            .map(entry => entry.location)
+            .filter(loc => loc && loc.uri && includeSet.has(loc.uri.toString()));
+          if (inScope.length === 1) {
+            definitionCache.set(cacheKey, inScope[0]);
+            return inScope[0];
+          }
+          if (inScope.length > 1) {
+            definitionCache.set(cacheKey, inScope);
+            return inScope; // VS Code renders a peek list
+          }
+        }
+      } catch {
+        // fall through to the include-graph scan
       }
 
       // Search include files
