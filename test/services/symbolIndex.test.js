@@ -120,6 +120,8 @@ describe('symbolIndex.extractIncludeEdges', () => {
       Uri.file('/proj/helper.au3').toString(),
       Uri.file('/lib/Array.au3').toString(),
     ]);
+    expect(resolve).toHaveBeenCalledWith('"helper.au3"', { uri: { fsPath: '/proj/main.au3' } });
+    expect(resolve).toHaveBeenCalledWith('<Array.au3>', { uri: { fsPath: '/proj/main.au3' } });
     expect(index.getIncludeSet('file:///proj/main.au3').size).toBe(3);
   });
 });

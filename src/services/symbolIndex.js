@@ -27,9 +27,7 @@ function lookupDefinition(name, isVariable) {
   for (const symbols of symbolsCache.values()) {
     for (const sym of symbols) {
       if (!sym || sym.name.toLowerCase() !== target) continue;
-      const kindOk = isVariable
-        ? VARIABLE_KINDS.has(sym.kind)
-        : sym.kind === SymbolKind.Function;
+      const kindOk = isVariable ? VARIABLE_KINDS.has(sym.kind) : sym.kind === SymbolKind.Function;
       if (kindOk && sym.location) matches.push(sym);
     }
   }
@@ -179,7 +177,7 @@ function extractIncludeEdges(documentUriString, text, docLike, resolveInclude = 
       if (resolved) edges.push(toUriString(resolved));
     }
   };
-  collect(RELATIVE_INCLUDE, raw => raw);
+  collect(RELATIVE_INCLUDE, raw => `"${raw}"`);
   collect(LIBRARY_INCLUDE, raw => `<${raw}>`);
   includeEdges.set(documentUriString, edges);
   return edges;
