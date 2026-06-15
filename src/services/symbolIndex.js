@@ -267,7 +267,19 @@ let warmState = 'cold'; // 'cold' | 'warming' | 'warm'
 let warmPromise = null;
 let builder = buildWorkspaceIndex; // injectable for tests
 
-/** Idempotently warm the index in the background. Safe to call repeatedly. */
+/**
+ * Idempotently warm the index in the background. Safe to call repeatedly.
+ *
+ * The build is run as a single shared, non-cancellable background warm-up:
+ * concurrent callers coalesce onto the one in-flight build rather than each
+ * starting their own, so we deliberately do not thread a per-request
+ * cancellation token into it.
+ *
+ * @returns {Promise<void>} Resolves when the warm-up settles. This promise
+ *   NEVER rejects — build failures are swallowed (state is reset to 'cold' so
+ *   the next call retries). Callers must re-check `isWarm()`/cache state rather
+ *   than relying on rejection to detect failure.
+ */
 function ensureWarm() {
   if (warmState !== 'cold') return warmPromise;
   warmState = 'warming';
@@ -276,9 +288,10 @@ function ensureWarm() {
     .then(() => {
       warmState = 'warm';
     })
-    .catch(() => {
+    .catch(err => {
       warmState = 'cold';
       warmPromise = null;
+      console.error('AutoIt: symbol index warm-up failed', err);
     });
   return warmPromise;
 }
