@@ -182,6 +182,7 @@ const AutoItDefinitionProvider = {
         if (candidates.length > 0) {
           const docUriString = document.uri.toString();
           // Parse the active document's includes live so unsaved edits are honored.
+          // (This also refreshes the service's edge map for this document as a side effect.)
           const liveEdges = extractIncludeEdges(docUriString, documentText, document);
           const includeSet = getIncludeSet(docUriString, liveEdges);
           const inScope = candidates
@@ -196,8 +197,10 @@ const AutoItDefinitionProvider = {
             return inScope; // VS Code renders a peek list
           }
         }
-      } catch {
-        // fall through to the include-graph scan
+      } catch (err) {
+        // Unexpected: the in-memory fast path should not throw. Log and fall through
+        // to the include-graph scan so F12 still works.
+        console.error('AutoIt: definition index fast path failed', err);
       }
 
       // Search include files
@@ -390,7 +393,7 @@ const AutoItDefinitionProvider = {
 // ---------------------------------------------------------------------------
 // Definition result cache
 // Key:   `${document.uri.toString()}::${lookupText}`
-// Value: Location | null
+// Value: Location | Location[] | null
 // Entries are evicted the moment the document is edited, so results never go
 // stale.  The cache only pays off for repeated F12 on the same symbol without
 // any intervening edit (common during code navigation).

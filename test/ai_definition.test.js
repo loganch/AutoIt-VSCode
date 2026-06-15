@@ -1364,4 +1364,21 @@ describe('ai_definition: index fast path', () => {
     expect(result).toHaveLength(expectedLocations.length);
     expect(result.map(loc => loc.uri.toString()).sort()).toEqual(expectedLocations);
   });
+
+  it('forwards isVariable=true to lookupDefinition for a $variable lookup', () => {
+    // The document references $myVar but never declares it, so the same-document
+    // scan misses and the index fast path runs.
+    const NO_LOCAL_VAR = ['; uses an externally-declared variable', 'ConsoleWrite($myVar)'].join(
+      '\n',
+    );
+    const doc = new MockTextDocument(NO_LOCAL_VAR, MAIN_PATH);
+
+    // Return [] so the fast path falls through; we only assert the forwarding call.
+    symbolIndex.lookupDefinition.mockReturnValue([]);
+
+    const position = posAtFirst(doc, '$myVar');
+    definitionProvider.provideDefinition(doc, position);
+
+    expect(symbolIndex.lookupDefinition).toHaveBeenCalledWith('$myVar', true);
+  });
 });
