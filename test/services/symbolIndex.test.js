@@ -1,0 +1,58 @@
+// test/services/symbolIndex.test.js
+jest.mock('vscode', () => ({
+  Location: class Location {
+    constructor(uri, range) { this.uri = uri; this.range = range; }
+  },
+  Uri: { file: p => ({ fsPath: p, toString: () => `file://${p}` }) },
+  SymbolKind: { Function: 11, Variable: 12, Constant: 13, Enum: 9, Key: 19 },
+  workspace: {
+    findFiles: jest.fn(() => Promise.resolve([])),
+    openTextDocument: jest.fn(),
+    getConfiguration: jest.fn(() => ({ get: (_k, d) => d })),
+    createFileSystemWatcher: jest.fn(() => ({
+      onDidChange: jest.fn(), onDidCreate: jest.fn(), onDidDelete: jest.fn(),
+    })),
+    onDidOpenTextDocument: jest.fn(),
+  },
+}));
+
+const { SymbolKind } = require('vscode');
+const index = require('../../src/services/symbolIndex');
+
+const loc = uri => ({ uri: { toString: () => uri }, range: {} });
+
+describe('symbolIndex.lookupDefinition', () => {
+  beforeEach(() => index.__resetForTests());
+
+  it('returns function locations matching a name, case-insensitively', () => {
+    index.__setSymbolsForTests('file://a', [
+      { name: 'MyFunc', kind: SymbolKind.Function, location: loc('file://a') },
+      { name: 'Other', kind: SymbolKind.Function, location: loc('file://a') },
+    ]);
+    const results = index.lookupDefinition('myfunc', false);
+    expect(results).toHaveLength(1);
+    expect(results[0].location.uri.toString()).toBe('file://a');
+  });
+
+  it('matches variables/constants/enums when token is a variable', () => {
+    index.__setSymbolsForTests('file://a', [
+      { name: '$G', kind: SymbolKind.Variable, location: loc('file://a') },
+      { name: 'NotAVar', kind: SymbolKind.Function, location: loc('file://a') },
+    ]);
+    expect(index.lookupDefinition('$g', true)).toHaveLength(1);
+  });
+
+  it('returns all matches across files on a name collision', () => {
+    index.__setSymbolsForTests('file://a', [
+      { name: 'Dup', kind: SymbolKind.Function, location: loc('file://a') },
+    ]);
+    index.__setSymbolsForTests('file://b', [
+      { name: 'Dup', kind: SymbolKind.Function, location: loc('file://b') },
+    ]);
+    expect(index.lookupDefinition('dup', false)).toHaveLength(2);
+  });
+
+  it('returns an empty array when nothing matches', () => {
+    expect(index.lookupDefinition('nope', false)).toEqual([]);
+  });
+});
