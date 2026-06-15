@@ -398,6 +398,7 @@ jest.mock('../src/services/symbolIndex', () => ({
   lookupDefinition: jest.fn(() => []),
   getIncludeSet: jest.fn(() => new Set()),
   extractIncludeEdges: jest.fn(() => []),
+  noteFileContent: jest.fn(),
   isWarm: jest.fn(() => true),
 }));
 const symbolIndex = require('../src/services/symbolIndex');

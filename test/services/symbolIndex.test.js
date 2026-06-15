@@ -214,3 +214,67 @@ describe('symbolIndex.extractIncludeEdges', () => {
     expect(index.getIncludeSet('file:///proj/main.au3').size).toBe(3);
   });
 });
+
+const { workspace } = require('vscode');
+
+// Build a document whose uri matches the Uri.file mock key space so cache
+// assertions can be made by fsPath.
+const docFor = fsPath => ({
+  uri: { fsPath, toString: () => `file://${fsPath}` },
+  getText: () => '',
+});
+
+describe('symbolIndex.warmDocument', () => {
+  beforeEach(() => index.__resetForTests());
+
+  it('indexes a just-opened .au3 document', async () => {
+    const doc = docFor('/proj/opened.au3');
+    await index.warmDocument(doc);
+    expect(index.symbolsCache.has(doc.uri.toString())).toBe(true);
+  });
+
+  it('skips a non-.au3 document', async () => {
+    const doc = docFor('/proj/notes.txt');
+    await index.warmDocument(doc);
+    expect(index.symbolsCache.has(doc.uri.toString())).toBe(false);
+  });
+});
+
+describe('symbolIndex.noteFileContent', () => {
+  beforeEach(() => index.__resetForTests());
+
+  it('indexes a not-yet-cached file via openTextDocument', async () => {
+    const fsPath = '/lib/Array.au3';
+    const uriString = index.toUriString(fsPath);
+    const doc = docFor(fsPath);
+    workspace.openTextDocument.mockResolvedValueOnce(doc);
+
+    index.noteFileContent(fsPath, 'Func _Foo()\nEndFunc\n');
+    // Let the fire-and-forget promise chain (openTextDocument -> indexDocument
+    // -> provideDocumentSymbols) settle before asserting.
+    await new Promise(resolve => setImmediate(resolve));
+
+    expect(workspace.openTextDocument).toHaveBeenCalled();
+    expect(index.symbolsCache.has(uriString)).toBe(true);
+  });
+
+  it('does not re-index an already-cached path', async () => {
+    const fsPath = '/lib/Array.au3';
+    const uriString = index.toUriString(fsPath);
+    index.__setSymbolsForTests(uriString, []);
+    workspace.openTextDocument.mockClear();
+
+    index.noteFileContent(fsPath, 'Func _Foo()\nEndFunc\n');
+    await Promise.resolve();
+
+    expect(workspace.openTextDocument).not.toHaveBeenCalled();
+  });
+
+  it('does nothing for empty content or missing path', async () => {
+    workspace.openTextDocument.mockClear();
+    index.noteFileContent('/lib/Array.au3', '');
+    index.noteFileContent('', 'some content');
+    await Promise.resolve();
+    expect(workspace.openTextDocument).not.toHaveBeenCalled();
+  });
+});

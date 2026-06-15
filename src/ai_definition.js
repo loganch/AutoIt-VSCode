@@ -1,6 +1,11 @@
 import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE, getIncludePath, getIncludeScripts, getIncludeText } from './util';
-import { lookupDefinition, getIncludeSet, extractIncludeEdges } from './services/symbolIndex';
+import {
+  lookupDefinition,
+  getIncludeSet,
+  extractIncludeEdges,
+  noteFileContent,
+} from './services/symbolIndex';
 
 // Constants for better maintainability
 const REGEX_FLAGS = 'mi';
@@ -327,6 +332,11 @@ const AutoItDefinitionProvider = {
           continue;
         }
         if (!scriptContent || scriptContent.trim().length === 0) continue;
+
+        // Opportunistic fill: index this just-read file into the warm index so
+        // the next nearby navigation is warm and library files get indexed on
+        // first use. Fire-and-forget; never throws and never alters this scan.
+        noteFileContent(scriptPath, scriptContent);
 
         // Reset regex lastIndex to ensure fresh search
         if (defRegex && typeof defRegex.lastIndex === 'number') {

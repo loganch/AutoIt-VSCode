@@ -16,7 +16,7 @@ import { registerCommands } from './registerCommands';
 import { formatterProvider } from './ai_formatter';
 import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
 import conf from './ai_config';
-import { ensureWarm } from './services/symbolIndex';
+import { ensureWarm, warmDocument } from './services/symbolIndex';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
 
@@ -231,6 +231,14 @@ export const activate = ctx => {
   registerCommands(ctx);
 
   ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
+
+  // Prioritized warming: index a freshly-opened .au3 document immediately so it
+  // is navigable without waiting for the background workspace pass.
+  ctx.subscriptions.push(
+    workspace.onDidOpenTextDocument(doc => {
+      if (doc.languageId === 'autoit') warmDocument(doc);
+    }),
+  );
 
   // Initialize MapTrackingService
   const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || '';

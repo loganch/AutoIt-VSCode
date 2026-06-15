@@ -204,6 +204,40 @@ async function indexDocument(document) {
   }
 }
 
+/** Index a just-opened document ahead of (or alongside) the full workspace pass. */
+async function warmDocument(document) {
+  if (!document || !document.uri) return;
+  const fsPath = document.uri.fsPath || '';
+  if (!fsPath.toLowerCase().endsWith('.au3')) return;
+  await indexDocument(document);
+}
+
+/**
+ * Opportunistically index a file the fallback scan already read, so repeated
+ * navigation self-heals and library files get indexed on first use.
+ *
+ * provideDocumentSymbols consumes a rich TextDocument API (getText, lineCount,
+ * lineAt, offsetAt, positionAt), so a hand-built {uri, getText} stub is not
+ * sufficient. We obtain a real TextDocument via workspace.openTextDocument
+ * (VS Code caches opened documents) and index that. The already-read `content`
+ * only gates the call (skip empties) — VS Code re-uses its own cached buffer.
+ *
+ * Fire-and-forget; never throws to the caller.
+ * @param {string} fsPath - Absolute path of the file.
+ * @param {string} content - File text already loaded by the caller.
+ */
+function noteFileContent(fsPath, content) {
+  if (!fsPath || !content) return;
+  const uriString = toUriString(fsPath);
+  if (symbolsCache.has(uriString)) return;
+  Promise.resolve()
+    .then(() => workspace.openTextDocument(Uri.file(fsPath)))
+    .then(doc => indexDocument(doc))
+    .catch(() => {
+      // Fire-and-forget: swallow errors so the hot-ish scan loop is unaffected.
+    });
+}
+
 /**
  * Remove a document's symbols and include edges from the index.
  * @param {string} uriString
@@ -328,6 +362,8 @@ export {
   toUriString,
   extractIncludeEdges,
   indexDocument,
+  warmDocument,
+  noteFileContent,
   removeDocument,
   buildWorkspaceIndex,
   ensureWarm,
