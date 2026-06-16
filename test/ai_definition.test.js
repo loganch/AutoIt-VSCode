@@ -387,6 +387,19 @@ jest.mock('../src/util', () => {
     }),
     normalizePath: jest.fn(p => pathModule.normalize(p)),
     AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
+    // ai_definition's createVariableRegex now delegates to this shared builder.
+    // Mirror the real implementation (src/util.js) so variable-definition
+    // matching behaves identically under the mock. Use a PLAIN function (not
+    // jest.fn) so the global `resetMocks: true` jest config does not wipe its
+    // implementation between tests.
+    buildVariableRegex: variableName => {
+      const escaped = String(variableName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const keywords = ['Local', 'Global', 'Const'].join('|');
+      const pattern = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b'
+        .replace('{keywords}', keywords)
+        .replace('{escaped}', escaped);
+      return new RegExp(pattern, 'mi');
+    },
   };
   return mod;
 });

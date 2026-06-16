@@ -1,6 +1,6 @@
 // src/services/symbolIndex.js
 import { Location, SymbolInformation, SymbolKind, Uri, window, workspace } from 'vscode';
-import { getIncludePath } from '../util';
+import { getIncludePath, isVariableDeclarationLine } from '../util';
 import { provideDocumentSymbols } from '../ai_symbols';
 
 // uriString -> SymbolInformation[]
@@ -10,6 +10,11 @@ const symbolsCache = new Map();
 const includeEdges = new Map();
 
 const VARIABLE_KINDS = new Set([SymbolKind.Variable, SymbolKind.Constant, SymbolKind.Enum]);
+
+/** True for the symbol kinds treated as variable-like by lookupDefinition. */
+function isVariableKind(kind) {
+  return kind !== undefined && VARIABLE_KINDS.has(kind);
+}
 
 const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
 const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
@@ -30,7 +35,13 @@ function lookupDefinition(name, isVariable) {
   for (const symbols of symbolsCache.values()) {
     for (const sym of symbols) {
       if (!sym || sym.name.toLowerCase() !== target) continue;
-      const kindOk = isVariable ? VARIABLE_KINDS.has(sym.kind) : sym.kind === SymbolKind.Function;
+      // For variable tokens, only declaration-tagged symbols are definitions —
+      // a mere usage (e.g. `ConsoleWrite($g_Config)`) is recorded by
+      // provideDocumentSymbols but must not appear as a Go-to-Definition target.
+      // Const/Enum lines are always declarations, so they pass the tag check.
+      const kindOk = isVariable
+        ? VARIABLE_KINDS.has(sym.kind) && sym.isVariableDeclaration === true
+        : sym.kind === SymbolKind.Function;
       if (kindOk && sym.location) matches.push(sym);
     }
   }
@@ -209,7 +220,23 @@ async function indexDocument(document) {
   const uriString = toUriString(document.uri.fsPath);
   try {
     const symbols = await provideDocumentSymbols(document);
-    symbolsCache.set(uriString, flattenSymbols(symbols, document.uri));
+    const flat = flattenSymbols(symbols, document.uri);
+    // Tag variable-kind symbols with whether their source line is an actual
+    // DECLARATION (vs. a mere usage). The document is in hand here, so this adds
+    // no extra file read and does not affect F12's zero-read fast path.
+    for (const sym of flat) {
+      if (isVariableKind(sym.kind)) {
+        const lineNo = sym.location?.range?.start?.line;
+        let lineText = '';
+        try {
+          lineText = typeof lineNo === 'number' ? document.lineAt(lineNo).text || '' : '';
+        } catch {
+          lineText = '';
+        }
+        sym.isVariableDeclaration = isVariableDeclarationLine(lineText, sym.name);
+      }
+    }
+    symbolsCache.set(uriString, flat);
     extractIncludeEdges(uriString, document.getText(), document);
   } catch {
     symbolsCache.delete(uriString);

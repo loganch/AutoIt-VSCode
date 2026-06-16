@@ -35,8 +35,23 @@ jest.mock('../../src/ai_symbols', () => ({
   __esModule: true,
   provideDocumentSymbols: jest.fn(() => Promise.resolve([])),
 }));
+// Stub getIncludePath so util's vscode-heavy side effects never load, but
+// provide a faithful isVariableDeclarationLine (the behavior under test) that
+// mirrors the real implementation in src/util.js. A plain function so the
+// global resetMocks does not wipe it.
 jest.mock('../../src/util', () => ({
   getIncludePath: jest.fn(() => ''),
+  isVariableDeclarationLine: (lineText, variableName) => {
+    if (typeof lineText !== 'string' || !variableName || typeof variableName !== 'string') {
+      return false;
+    }
+    const escaped = variableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const keywords = ['Local', 'Global', 'Const'].join('|');
+    const pattern = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b'
+      .replace('{keywords}', keywords)
+      .replace('{escaped}', escaped);
+    return new RegExp(pattern, 'mi').test(lineText);
+  },
 }));
 
 const { SymbolKind } = require('vscode');
@@ -58,8 +73,15 @@ describe('symbolIndex.lookupDefinition', () => {
   });
 
   it('matches variables/constants/enums when token is a variable', () => {
+    // Variable-kind symbols are only treated as definitions when tagged as a
+    // declaration at index time (isVariableDeclaration: true).
     index.__setSymbolsForTests('file://a', [
-      { name: '$G', kind: SymbolKind.Variable, location: loc('file://a') },
+      {
+        name: '$G',
+        kind: SymbolKind.Variable,
+        location: loc('file://a'),
+        isVariableDeclaration: true,
+      },
       { name: 'NotAVar', kind: SymbolKind.Function, location: loc('file://a') },
     ]);
     expect(index.lookupDefinition('$g', true)).toHaveLength(1);
@@ -77,6 +99,49 @@ describe('symbolIndex.lookupDefinition', () => {
 
   it('returns an empty array when nothing matches', () => {
     expect(index.lookupDefinition('nope', false)).toEqual([]);
+  });
+});
+
+describe('symbolIndex.indexDocument variable declaration tagging', () => {
+  const ai_symbols = require('../../src/ai_symbols');
+
+  beforeEach(() => index.__resetForTests());
+
+  it('excludes a variable USAGE from definition lookups (only declarations are definitions)', async () => {
+    ai_symbols.provideDocumentSymbols.mockResolvedValue([
+      {
+        name: '$g_Config',
+        kind: SymbolKind.Variable,
+        range: { start: { line: 9, character: 13 }, end: { line: 9, character: 22 } },
+        children: [],
+      },
+    ]);
+    const doc = {
+      uri: { fsPath: '/proj/main.au3', toString: () => 'file:///proj/main.au3' },
+      getText: () => '',
+      lineAt: n => ({ text: n === 9 ? 'ConsoleWrite($g_Config & @CRLF)' : '' }),
+    };
+    await index.indexDocument(doc);
+    expect(index.lookupDefinition('$g_Config', true)).toHaveLength(0);
+  });
+
+  it('includes a variable DECLARATION in definition lookups', async () => {
+    ai_symbols.provideDocumentSymbols.mockResolvedValue([
+      {
+        name: '$g_Config',
+        kind: SymbolKind.Variable,
+        range: { start: { line: 2, character: 7 }, end: { line: 2, character: 16 } },
+        children: [],
+      },
+    ]);
+    const doc = {
+      uri: { fsPath: '/proj/helper.au3', toString: () => 'file:///proj/helper.au3' },
+      getText: () => '',
+      lineAt: n => ({ text: n === 2 ? 'Global $g_Config = "x"' : '' }),
+    };
+    await index.indexDocument(doc);
+    const res = index.lookupDefinition('$g_config', true); // case-insensitive
+    expect(res).toHaveLength(1);
   });
 });
 

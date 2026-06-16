@@ -54,6 +54,8 @@ jest.mock('../src/ai_symbols', () => ({
 // from util; mock it so the real util -> ai_config side-effect chain never loads.
 jest.mock('../src/util', () => ({
   getIncludePath: jest.fn(() => ''),
+  // symbolIndex.indexDocument tags variable symbols via this helper.
+  isVariableDeclarationLine: () => false,
 }));
 
 /**

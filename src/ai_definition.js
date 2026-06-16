@@ -1,5 +1,11 @@
 import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
-import { AUTOIT_MODE, getIncludePath, getIncludeScripts, getIncludeText } from './util';
+import {
+  AUTOIT_MODE,
+  buildVariableRegex,
+  getIncludePath,
+  getIncludeScripts,
+  getIncludeText,
+} from './util';
 import {
   lookupDefinition,
   getIncludeSet,
@@ -10,24 +16,12 @@ import {
 
 // Constants for better maintainability
 const REGEX_FLAGS = 'mi';
-const VARIABLE_KEYWORDS = ['Local', 'Global', 'Const'];
 const FUNCTION_KEYWORD = 'Func';
 const VOLATILE_KEYWORD = 'volatile';
 
-// Regex patterns
-//
-// VARIABLE_PATTERN_TEMPLATE - simple, O(n) per line:
-//   ^[ \t]*                                    leading whitespace
-//   (?:(?:{keywords})[ \t]+(?:.*,[ \t]*)?)?   optional declaration keyword;
-//                                              when present, greedily skips
-//                                              any leading comma-separated
-//                                              siblings with one backtrack pass
-//   ({escaped})\b                              the actual target variable
-//
-// The old template used a lazy outer *? loop (nested quantifiers) plus a
-// fully-optional tail that never affected match position — O(k²) per line.
-const VARIABLE_PATTERN_TEMPLATE = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b';
-
+// Regex patterns. The variable-definition pattern lives in ./util
+// (buildVariableRegex) as the single source of truth shared with the warm
+// symbol index; createVariableRegex below delegates to it.
 const FUNCTION_PATTERN_A_TEMPLATE =
   '^[ \\t]*{funcKeyword}[ \\t]+(?:{volatile}[ \\t]+)?({escaped})[ \\t]*\\(';
 const FUNCTION_PATTERN_B_TEMPLATE =
@@ -80,14 +74,9 @@ const AutoItDefinitionProvider = {
         throw new ValidationError('Variable name must be a non-empty string');
       }
 
-      const escaped = this.escapeRegex(variableName);
-      const keywords = VARIABLE_KEYWORDS.join('|');
-      const pattern = VARIABLE_PATTERN_TEMPLATE.replace('{keywords}', keywords).replace(
-        '{escaped}',
-        escaped,
-      );
-
-      return new RegExp(pattern, REGEX_FLAGS);
+      // Delegate to the shared builder (single source of truth, also used by
+      // the warm symbol index). Same pattern + flags as before.
+      return buildVariableRegex(variableName);
     } catch (error) {
       if (error instanceof ValidationError) {
         throw error;

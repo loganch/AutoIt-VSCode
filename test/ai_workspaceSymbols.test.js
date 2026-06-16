@@ -119,6 +119,8 @@ jest.mock('../src/util', () => ({
   regionPattern: /#region/i,
   variablePattern: /\$\w+/g,
   getIncludePath: jest.fn(() => ''),
+  // symbolIndex.indexDocument tags variable symbols via this helper.
+  isVariableDeclarationLine: () => false,
 }));
 
 // The provider delegates per-file indexing to symbolIndex.indexDocument, which
