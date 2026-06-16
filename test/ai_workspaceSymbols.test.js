@@ -30,6 +30,9 @@ const mockCreateFileSystemWatcher = jest.fn(() => ({
 }));
 const mockFindFiles = jest.fn(() => Promise.resolve([]));
 const mockOpenTextDocument = jest.fn(() => Promise.resolve({ getText: () => '' }));
+// provideDocumentSymbols now lives in ai_symbols and is invoked by the service's
+// indexDocument (which the provider delegates to), so the mock must intercept there.
+const mockProvideDocumentSymbols = jest.fn(() => Promise.resolve([]));
 
 jest.mock('vscode', () => ({
   DocumentSymbol: class DocumentSymbol {
@@ -72,6 +75,7 @@ jest.mock('vscode', () => ({
     Variable: 12,
     Key: 19,
   },
+  Uri: { file: p => ({ fsPath: p, toString: () => `file://${p}` }) },
   languages: {
     registerDocumentSymbolProvider: jest.fn(() => ({ dispose: jest.fn() })),
     registerWorkspaceSymbolProvider: (...args) => mockRegisterWorkspaceSymbolProvider(...args),
@@ -114,6 +118,18 @@ jest.mock('../src/util', () => ({
   isSkippableLine: jest.fn(() => false),
   regionPattern: /#region/i,
   variablePattern: /\$\w+/g,
+  getIncludePath: jest.fn(() => ''),
+  // symbolIndex.indexDocument tags variable symbols via this helper.
+  isVariableDeclarationLine: () => false,
+}));
+
+// The provider delegates per-file indexing to symbolIndex.indexDocument, which
+// pulls provideDocumentSymbols from ai_symbols. Mock it here so the indexer sees
+// the mock and the heavy real ai_symbols module never loads.
+jest.mock('../src/ai_symbols', () => ({
+  __esModule: true,
+  default: { dispose: jest.fn() },
+  provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
 }));
 
 describe('ai_workspaceSymbols module', () => {
@@ -143,6 +159,31 @@ describe('ai_workspaceSymbols module', () => {
 
   test('creates a file system watcher on module load', () => {
     expect(capturedWatcherArg).toBe('**/*.{au3,a3x}');
+  });
+
+  test('a workspace build populates the shared symbolIndex cache', async () => {
+    // eslint-disable-next-line global-require
+    const { workspace } = require('vscode');
+    // eslint-disable-next-line global-require
+    const symbolIndex = require('../src/services/symbolIndex');
+    symbolIndex.__resetForTests();
+
+    // resetMocks wipes the getConfiguration implementation each test; restore a
+    // config that returns sane batch/maxFiles defaults so the build can run.
+    workspace.getConfiguration.mockReturnValue({ get: (_key, def) => def ?? SYMBOL_MAX_LINES });
+    mockFindFiles.mockResolvedValue([{ toString: () => 'file:///shared.au3' }]);
+    mockOpenTextDocument.mockResolvedValue({
+      uri: { toString: () => 'file:///shared.au3', fsPath: '/shared.au3' },
+      getText: () => '',
+    });
+    mockProvideDocumentSymbols.mockResolvedValue([{ name: 'SharedFunc' }]);
+
+    // Cold cache: provideWorkspaceSymbols debounces (300ms real) then builds.
+    await capturedProviderArg.provideWorkspaceSymbols('', { isCancellationRequested: false });
+
+    expect(symbolIndex.symbolsCache.size).toBeGreaterThan(0);
+    const allNames = [...symbolIndex.symbolsCache.values()].flat().map(s => s.name);
+    expect(allNames).toContain('SharedFunc');
   });
 });
 

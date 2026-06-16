@@ -1,26 +1,27 @@
 import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
-import { AUTOIT_MODE, getIncludePath, getIncludeScripts, getIncludeText } from './util';
+import {
+  AUTOIT_MODE,
+  buildVariableRegex,
+  getIncludePath,
+  getIncludeScripts,
+  getIncludeText,
+} from './util';
+import {
+  lookupDefinition,
+  getIncludeSet,
+  extractIncludeEdges,
+  noteFileContent,
+  toUriString,
+} from './services/symbolIndex';
 
 // Constants for better maintainability
 const REGEX_FLAGS = 'mi';
-const VARIABLE_KEYWORDS = ['Local', 'Global', 'Const'];
 const FUNCTION_KEYWORD = 'Func';
 const VOLATILE_KEYWORD = 'volatile';
 
-// Regex patterns
-//
-// VARIABLE_PATTERN_TEMPLATE - simple, O(n) per line:
-//   ^[ \t]*                                    leading whitespace
-//   (?:(?:{keywords})[ \t]+(?:.*,[ \t]*)?)?   optional declaration keyword;
-//                                              when present, greedily skips
-//                                              any leading comma-separated
-//                                              siblings with one backtrack pass
-//   ({escaped})\b                              the actual target variable
-//
-// The old template used a lazy outer *? loop (nested quantifiers) plus a
-// fully-optional tail that never affected match position — O(k²) per line.
-const VARIABLE_PATTERN_TEMPLATE = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b';
-
+// Regex patterns. The variable-definition pattern lives in ./util
+// (buildVariableRegex) as the single source of truth shared with the warm
+// symbol index; createVariableRegex below delegates to it.
 const FUNCTION_PATTERN_A_TEMPLATE =
   '^[ \\t]*{funcKeyword}[ \\t]+(?:{volatile}[ \\t]+)?({escaped})[ \\t]*\\(';
 const FUNCTION_PATTERN_B_TEMPLATE =
@@ -73,14 +74,9 @@ const AutoItDefinitionProvider = {
         throw new ValidationError('Variable name must be a non-empty string');
       }
 
-      const escaped = this.escapeRegex(variableName);
-      const keywords = VARIABLE_KEYWORDS.join('|');
-      const pattern = VARIABLE_PATTERN_TEMPLATE.replace('{keywords}', keywords).replace(
-        '{escaped}',
-        escaped,
-      );
-
-      return new RegExp(pattern, REGEX_FLAGS);
+      // Delegate to the shared builder (single source of truth, also used by
+      // the warm symbol index). Same pattern + flags as before.
+      return buildVariableRegex(variableName);
     } catch (error) {
       if (error instanceof ValidationError) {
         throw error;
@@ -170,6 +166,41 @@ const AutoItDefinitionProvider = {
         const locationResult = new Location(document.uri, range);
         definitionCache.set(cacheKey, locationResult);
         return locationResult;
+      }
+
+      // Index fast path: look up the symbol in the warm index, then keep only
+      // definitions whose file is reachable via #include from this document. Pure
+      // in-memory (no file-content reads); falls through to the scan on miss/error.
+      try {
+        const isVariable = lookupText.startsWith('$');
+        const candidates = lookupDefinition(lookupText, isVariable);
+        if (candidates.length > 0) {
+          // Use the canonical (case-normalized) key so edge keys and candidate
+          // location keys share one space on case-insensitive filesystems.
+          const docUriString = toUriString(document.uri.fsPath);
+          // Parse the active document's includes live so unsaved edits are honored.
+          // (This also refreshes the service's edge map for this document as a side effect.)
+          const liveEdges = extractIncludeEdges(docUriString, documentText, document);
+          const includeSet = getIncludeSet(docUriString, liveEdges);
+          const inScope = candidates
+            .map(entry => entry.location)
+            .filter(
+              loc =>
+                loc && loc.uri && loc.uri.fsPath && includeSet.has(toUriString(loc.uri.fsPath)),
+            );
+          if (inScope.length === 1) {
+            definitionCache.set(cacheKey, inScope[0]);
+            return inScope[0];
+          }
+          if (inScope.length > 1) {
+            definitionCache.set(cacheKey, inScope);
+            return inScope; // VS Code renders a peek list
+          }
+        }
+      } catch (err) {
+        // Unexpected: the in-memory fast path should not throw. Log and fall through
+        // to the include-graph scan so F12 still works.
+        console.error('AutoIt: definition index fast path failed', err);
       }
 
       // Search include files
@@ -297,6 +328,11 @@ const AutoItDefinitionProvider = {
         }
         if (!scriptContent || scriptContent.trim().length === 0) continue;
 
+        // Opportunistic fill: index this just-read file into the warm index so
+        // the next nearby navigation is warm and library files get indexed on
+        // first use. Fire-and-forget; never throws and never alters this scan.
+        noteFileContent(scriptPath, scriptContent);
+
         // Reset regex lastIndex to ensure fresh search
         if (defRegex && typeof defRegex.lastIndex === 'number') {
           defRegex.lastIndex = 0;
@@ -362,7 +398,7 @@ const AutoItDefinitionProvider = {
 // ---------------------------------------------------------------------------
 // Definition result cache
 // Key:   `${document.uri.toString()}::${lookupText}`
-// Value: Location | null
+// Value: Location | Location[] | null
 // Entries are evicted the moment the document is edited, so results never go
 // stale.  The cache only pays off for repeated F12 on the same symbol without
 // any intervening edit (common during code navigation).

@@ -1,8 +1,11 @@
-import { languages, window, workspace, SymbolInformation, Location, SymbolKind } from 'vscode';
-import { provideDocumentSymbols } from './ai_symbols';
-
-// Map of file URI to symbols for incremental updates
-const symbolsCache = new Map();
+import { languages, workspace } from 'vscode';
+import {
+  symbolsCache,
+  indexDocument,
+  removeDocument,
+  toUriString,
+  ensureWarm,
+} from './services/symbolIndex';
 
 // Debouncing state for search requests
 let searchDebounceTimer = null;
@@ -10,184 +13,6 @@ let searchDebounceTimer = null;
 // search can settle it instead of leaving VS Code awaiting forever.
 let pendingSearchResolve = null;
 const SEARCH_DEBOUNCE_MS = 300;
-const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
-const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
-
-/**
- * Recursively extract key symbols from nested structure
- * @param {Array<import('vscode').DocumentSymbol>} keySymbols - Key DocumentSymbols
- * @param {import('vscode').Uri} uri - File URI
- * @param {string} containerName - Parent Map name
- * @param {Array<import('vscode').SymbolInformation>} results - Array to append to
- */
-function extractKeyChildren(keySymbols, uri, containerName, results) {
-  keySymbols.forEach(keySymbol => {
-    // Add key SymbolInformation
-    results.push(
-      new SymbolInformation(
-        keySymbol.name,
-        SymbolKind.Key,
-        containerName,
-        new Location(uri, keySymbol.range),
-      ),
-    );
-
-    // Recursively process nested keys
-    if (keySymbol.children && keySymbol.children.length > 0) {
-      extractKeyChildren(keySymbol.children, uri, containerName, results);
-    }
-  });
-}
-
-/**
- * Extract Map key SymbolInformation from DocumentSymbol tree
- * @param {import('vscode').DocumentSymbol} symbol - Document symbol
- * @param {import('vscode').Uri} uri - File URI
- * @param {Array<import('vscode').SymbolInformation>} results - Array to append to
- */
-function extractMapKeySymbols(symbol, uri, results) {
-  // If this is a Map variable, process its key children
-  if (symbol.kind === SymbolKind.Variable && symbol.detail === 'Map') {
-    // Add the Map variable itself
-    results.push(
-      new SymbolInformation(symbol.name, SymbolKind.Variable, '', new Location(uri, symbol.range)),
-    );
-
-    // Recursively extract key symbols
-    if (symbol.children && symbol.children.length > 0) {
-      extractKeyChildren(symbol.children, uri, symbol.name, results);
-    }
-  }
-}
-
-/**
- * Normalize a mixed array of DocumentSymbols/SymbolInformation into SymbolInformation.
- * @param {Array<import('vscode').DocumentSymbol|import('vscode').SymbolInformation>|any} symbols
- * @param {import('vscode').Uri} uri
- * @returns {Array<import('vscode').SymbolInformation>}
- */
-function flattenSymbols(symbols, uri) {
-  const flatSymbols = [];
-
-  if (!Array.isArray(symbols)) {
-    return flatSymbols;
-  }
-
-  symbols.forEach(symbol => {
-    if (symbol && symbol.children !== undefined) {
-      if (symbol.kind === SymbolKind.Variable && symbol.detail === 'Map') {
-        extractMapKeySymbols(symbol, uri, flatSymbols);
-      } else {
-        flatSymbols.push(
-          new SymbolInformation(
-            symbol.name,
-            symbol.kind,
-            symbol.detail || '',
-            new Location(uri, symbol.range),
-          ),
-        );
-
-        if (symbol.children && symbol.children.length > 0) {
-          symbol.children.forEach(child => {
-            flatSymbols.push(
-              new SymbolInformation(
-                child.name,
-                child.kind,
-                symbol.name,
-                new Location(uri, child.range),
-              ),
-            );
-          });
-        }
-      }
-    } else if (symbol) {
-      flatSymbols.push(symbol);
-    }
-  });
-
-  return flatSymbols;
-}
-
-/**
- * Process files in batches to prevent UI freezing on large workspaces.
- * @param {Array} files - Array of file URIs to process
- * @param {number} batchSize - Number of files to process per batch
- * @param {import('vscode').CancellationToken} token - Cancellation token to abort processing
- * @returns {Promise<Map>} Map of file URI to symbols
- */
-async function processBatch(files, batchSize, token) {
-  const results = new Map();
-
-  for (let i = 0; i < files.length; i += batchSize) {
-    // Check for cancellation
-    if (token?.isCancellationRequested) {
-      break;
-    }
-
-    const batch = files.slice(i, i + batchSize);
-
-    // Process batch in parallel
-    const batchResults = await Promise.all(
-      batch.map(async file => {
-        try {
-          const document = await workspace.openTextDocument(file);
-          const symbols = await provideDocumentSymbols(document);
-
-          // Flatten DocumentSymbol to SymbolInformation
-          const flatSymbols = flattenSymbols(symbols, file);
-
-          return { uri: file.toString(), symbols: flatSymbols };
-        } catch {
-          // Skip files that can't be opened
-          return null;
-        }
-      }),
-    );
-
-    // Add batch results to map
-    batchResults.forEach(result => {
-      if (result && result.symbols) {
-        results.set(result.uri, result.symbols);
-      }
-    });
-
-    // Yield control to prevent UI freezing
-    await new Promise(resolve => setImmediate(resolve));
-  }
-
-  return results;
-}
-
-/**
- * Fetches symbols for all AutoIt scripts in the workspace.
- * Uses batch processing to prevent UI freezing on large projects.
- *
- * @param {import('vscode').CancellationToken} token - Cancellation token
- * @returns {Promise<Map>} A promise that resolves to a map of file URI to symbols.
- */
-async function getWorkspaceSymbols(token) {
-  try {
-    const config = workspace.getConfiguration('autoit');
-    const maxFiles = config.get('workspaceSymbolMaxFiles', DEFAULT_MAX_WORKSPACE_SYMBOL_FILES);
-    const batchSize = config.get('workspaceSymbolBatchSize', DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE);
-
-    const workspaceScripts = await workspace.findFiles('**/*.{au3,a3x}');
-
-    // Limit number of files to process
-    const filesToProcess = workspaceScripts.slice(0, maxFiles);
-
-    if (workspaceScripts.length > maxFiles) {
-      window.showWarningMessage(
-        `AutoIt: Processing ${maxFiles} of ${workspaceScripts.length} files. Increase 'autoit.workspaceSymbolMaxFiles' to index more files.`,
-      );
-    }
-
-    return await processBatch(filesToProcess, batchSize, token);
-  } catch (error) {
-    window.showErrorMessage(error.message || 'Error fetching workspace symbols');
-    return new Map();
-  }
-}
 
 /**
  * Flatten the symbol cache into an array, optionally filtered by a query.
@@ -235,16 +60,11 @@ function provideWorkspaceSymbols(query, token) {
       searchDebounceTimer = null;
       pendingSearchResolve = null;
 
-      // Build cache if empty
+      // Build cache if empty. ensureWarm runs the single shared workspace-build
+      // implementation (populating symbolsCache directly via indexDocument) and is
+      // idempotent, so it coalesces with any activation-time warm-up — no double build.
       if (symbolsCache.size === 0) {
-        const symbols = await getWorkspaceSymbols(token);
-
-        // Only update cache if not cancelled
-        if (!token?.isCancellationRequested) {
-          symbols.forEach((value, key) => {
-            symbolsCache.set(key, value);
-          });
-        }
+        await ensureWarm();
       }
 
       // Return early if cancelled
@@ -265,18 +85,8 @@ const watcher = workspace.createFileSystemWatcher('**/*.{au3,a3x}');
  * @param {import('vscode').Uri} uri - The file URI that changed
  */
 async function updateFileSymbols(uri) {
-  try {
-    const document = await workspace.openTextDocument(uri);
-    const symbols = await provideDocumentSymbols(document);
-
-    // Flatten DocumentSymbol to SymbolInformation
-    const flatSymbols = flattenSymbols(symbols, uri);
-
-    symbolsCache.set(uri.toString(), flatSymbols);
-  } catch {
-    // If file can't be opened, remove from cache
-    symbolsCache.delete(uri.toString());
-  }
+  const document = await workspace.openTextDocument(uri);
+  await indexDocument(document);
 }
 
 /**
@@ -284,7 +94,9 @@ async function updateFileSymbols(uri) {
  * @param {import('vscode').Uri} uri - The file URI that was deleted
  */
 function removeFileSymbols(uri) {
-  symbolsCache.delete(uri.toString());
+  // Delete under the same case-normalized key indexDocument writes under,
+  // otherwise stale entries leak on case-insensitive filesystems.
+  removeDocument(toUriString(uri.fsPath));
 }
 
 // Incremental cache updates instead of full invalidation

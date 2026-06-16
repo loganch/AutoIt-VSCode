@@ -31,6 +31,7 @@ jest.mock('vscode', () => ({
     }
   },
   SymbolKind: { Function: 11, Variable: 12, Key: 19 },
+  Uri: { file: p => ({ fsPath: p, toString: () => `file://${p}` }) },
   languages: {
     registerWorkspaceSymbolProvider: (...args) => mockRegisterWorkspaceSymbolProvider(...args),
   },
@@ -47,6 +48,14 @@ jest.mock('../src/ai_symbols', () => ({
   __esModule: true,
   default: { dispose: jest.fn() },
   provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
+}));
+
+// symbolIndex (imported transitively via ai_workspaceSymbols) imports getIncludePath
+// from util; mock it so the real util -> ai_config side-effect chain never loads.
+jest.mock('../src/util', () => ({
+  getIncludePath: jest.fn(() => ''),
+  // symbolIndex.indexDocument tags variable symbols via this helper.
+  isVariableDeclarationLine: () => false,
 }));
 
 /**
@@ -73,7 +82,11 @@ function loadProvider() {
 
 /** Populate the module cache directly via the file-watcher create handler. */
 async function warmCache(onCreate, symbols) {
-  mockOpenTextDocument.mockResolvedValueOnce({ getText: () => '' });
+  // indexDocument requires a document.uri, so the opened doc must carry one.
+  mockOpenTextDocument.mockResolvedValueOnce({
+    uri: { toString: () => 'file:///test.au3', fsPath: '/test.au3' },
+    getText: () => '',
+  });
   mockProvideDocumentSymbols.mockResolvedValueOnce(symbols);
   await onCreate({ toString: () => 'file:///test.au3' });
 }
@@ -138,7 +151,10 @@ describe('provideWorkspaceSymbols debounce lifecycle', () => {
     const token = { isCancellationRequested: false };
 
     mockFindFiles.mockResolvedValueOnce([{ toString: () => 'file:///a.au3' }]);
-    mockOpenTextDocument.mockResolvedValueOnce({ getText: () => '' });
+    mockOpenTextDocument.mockResolvedValueOnce({
+      uri: { toString: () => 'file:///a.au3', fsPath: '/a.au3' },
+      getText: () => '',
+    });
     mockProvideDocumentSymbols.mockResolvedValueOnce([{ name: 'Foo' }]);
 
     // Real timers: the debounce elapses for real (300 ms) and the cache builds.
