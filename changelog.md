@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Function declaration colorations**: TextMate grammar now colorizes additional token types inside function declarations: keywords/booleans, numbers, assignments, brackets, commas/dots/concatenation operators, and logical operators (#246) (042f18d–e786c7d)
 - **Activation performance**: defer completion and hover metadata loading to lazy initialization on first use, reducing activation work (adccd73)
 - **Workspace symbol performance**: implement debounce handling and caching for provideWorkspaceSymbols to improve responsiveness on large projects (40b22aa)
+- **Go to Definition performance**: F12 now resolves through a warm, incrementally maintained symbol index instead of rescanning the include graph on every press, fixing multi-second delays on large workspaces (#241). Definitions remain scoped to files reachable via `#include`. The index is warmed in the background at activation and self-heals on cold lookups.
 - **Completion caching**: cache library include completions per document to improve performance (76ff99f)
 - **Signature caching**: cache document signatures for faster signature help (10dc0c8)
 - Added `.kilo`, `.jest-cache`, and `package.json.backup` to ignore files (#244) (79f7ae9)
