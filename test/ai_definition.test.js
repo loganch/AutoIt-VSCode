@@ -1337,12 +1337,21 @@ describe('ai_definition: index fast path', () => {
     symbolIndex.extractIncludeEdges.mockReturnValue([helperUri]);
     symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri, helperUri]));
 
+    // Arm the include-graph scan so that IF the fast path failed to
+    // short-circuit, the scan WOULD read a file (getIncludeText) and find a
+    // DoWork definition. This makes the not.toHaveBeenCalled() assertion below
+    // load-bearing: it can only pass because the warm-index fast path returns
+    // before the scan runs.
+    util.getIncludeScripts.mockImplementation(() => [HELPER_PATH]);
+    util.getIncludePath.mockImplementation(() => HELPER_PATH);
+    util.getIncludeText.mockImplementation(() => 'Func DoWork()\nEndFunc');
+
     const position = posAtFirst(doc, 'DoWork');
     const result = definitionProvider.provideDefinition(doc, position);
 
     const loc = Array.isArray(result) ? result[0] : result;
-    expect(loc.uri.toString()).toBe(helperUri); // resolved via index
     expect(util.getIncludeText).not.toHaveBeenCalled(); // ZERO file-content reads
+    expect(loc.uri.toString()).toBe(helperUri); // resolved via the IN-MEMORY index, not the scan
   });
 
   it('rejects an index match whose file is not in the include set', () => {
