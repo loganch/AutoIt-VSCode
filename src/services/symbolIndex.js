@@ -38,9 +38,10 @@ function lookupDefinition(name, isVariable) {
       // For variable tokens, only declaration-tagged symbols are definitions —
       // a mere usage (e.g. `ConsoleWrite($g_Config)`) is recorded by
       // provideDocumentSymbols but must not appear as a Go-to-Definition target.
-      // Const/Enum lines are always declarations, so they pass the tag check.
+      // Const/Enum kinds are tagged as declarations by kind at index time (a
+      // usage would be a plain Variable), so they always pass this tag check.
       const kindOk = isVariable
-        ? VARIABLE_KINDS.has(sym.kind) && sym.isVariableDeclaration === true
+        ? isVariableKind(sym.kind) && sym.isVariableDeclaration === true
         : sym.kind === SymbolKind.Function;
       if (kindOk && sym.location) matches.push(sym);
     }
@@ -226,14 +227,20 @@ async function indexDocument(document) {
     // no extra file read and does not affect F12's zero-read fast path.
     for (const sym of flat) {
       if (isVariableKind(sym.kind)) {
-        const lineNo = sym.location?.range?.start?.line;
-        let lineText = '';
-        try {
-          lineText = typeof lineNo === 'number' ? document.lineAt(lineNo).text || '' : '';
-        } catch {
-          lineText = '';
+        if (sym.kind === SymbolKind.Constant || sym.kind === SymbolKind.Enum) {
+          // getVariableKind only assigns Constant/Enum on declaration lines, so the
+          // symbol's kind alone proves it's a declaration (a usage would be Variable).
+          sym.isVariableDeclaration = true;
+        } else {
+          const lineNo = sym.location?.range?.start?.line;
+          let lineText = '';
+          try {
+            lineText = typeof lineNo === 'number' ? document.lineAt(lineNo).text || '' : '';
+          } catch {
+            lineText = '';
+          }
+          sym.isVariableDeclaration = isVariableDeclarationLine(lineText, sym.name);
         }
-        sym.isVariableDeclaration = isVariableDeclarationLine(lineText, sym.name);
       }
     }
     symbolsCache.set(uriString, flat);

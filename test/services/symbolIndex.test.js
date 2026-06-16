@@ -143,6 +143,42 @@ describe('symbolIndex.indexDocument variable declaration tagging', () => {
     const res = index.lookupDefinition('$g_config', true); // case-insensitive
     expect(res).toHaveLength(1);
   });
+
+  it('includes a Const declaration (SymbolKind.Constant) as a definition', async () => {
+    ai_symbols.provideDocumentSymbols.mockResolvedValue([
+      {
+        name: '$MAX',
+        kind: SymbolKind.Constant,
+        range: { start: { line: 0, character: 13 }, end: { line: 0, character: 17 } },
+        children: [],
+      },
+    ]);
+    const doc = {
+      uri: { fsPath: '/proj/c.au3', toString: () => 'file:///proj/c.au3' },
+      getText: () => '',
+      lineAt: n => ({ text: n === 0 ? 'Global Const $MAX = 1' : '' }),
+    };
+    await index.indexDocument(doc);
+    expect(index.lookupDefinition('$MAX', true)).toHaveLength(1);
+  });
+
+  it('includes an Enum declaration (SymbolKind.Enum) as a definition', async () => {
+    ai_symbols.provideDocumentSymbols.mockResolvedValue([
+      {
+        name: '$A',
+        kind: SymbolKind.Enum,
+        range: { start: { line: 0, character: 5 }, end: { line: 0, character: 7 } },
+        children: [],
+      },
+    ]);
+    const doc = {
+      uri: { fsPath: '/proj/e.au3', toString: () => 'file:///proj/e.au3' },
+      getText: () => '',
+      lineAt: n => ({ text: n === 0 ? 'Enum $A, $B' : '' }),
+    };
+    await index.indexDocument(doc);
+    expect(index.lookupDefinition('$A', true)).toHaveLength(1);
+  });
 });
 
 describe('symbolIndex.getIncludeSet', () => {
