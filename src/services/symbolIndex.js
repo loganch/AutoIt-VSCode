@@ -157,9 +157,20 @@ function flattenSymbols(symbols, uri) {
   return flatSymbols;
 }
 
-/** Normalize an fs path to the canonical URI key used across the index. */
+const CASE_INSENSITIVE_FS = process.platform === 'win32' || process.platform === 'darwin';
+
+/**
+ * Canonical URI key for the index. On case-insensitive filesystems the path is
+ * lowercased so that include-edge keys (derived from the user's #include
+ * spelling) and symbol-cache keys (derived from on-disk paths) compare equal.
+ * On case-sensitive filesystems (Linux) the path is left untouched, since
+ * `Helper.au3` and `helper.au3` can legitimately be distinct files there.
+ * @param {string} fsPath
+ * @returns {string}
+ */
 function toUriString(fsPath) {
-  return Uri.file(fsPath).toString();
+  const normalized = CASE_INSENSITIVE_FS ? fsPath.toLowerCase() : fsPath;
+  return Uri.file(normalized).toString();
 }
 
 /**
@@ -193,7 +204,9 @@ function extractIncludeEdges(documentUriString, text, docLike, resolveInclude = 
  */
 async function indexDocument(document) {
   if (!document || !document.uri) return;
-  const uriString = document.uri.toString();
+  // Canonical index key (case-normalized on case-insensitive FS). The stored
+  // symbol Location keeps the REAL document.uri so navigation is unaffected.
+  const uriString = toUriString(document.uri.fsPath);
   try {
     const symbols = await provideDocumentSymbols(document);
     symbolsCache.set(uriString, flattenSymbols(symbols, document.uri));
@@ -208,7 +221,8 @@ async function indexDocument(document) {
 async function warmDocument(document) {
   if (!document || !document.uri) return;
   const fsPath = document.uri.fsPath || '';
-  if (!fsPath.toLowerCase().endsWith('.au3')) return;
+  // Align with the watcher glob `{au3,a3x}`.
+  if (!/\.(au3|a3x)$/i.test(fsPath)) return;
   await indexDocument(document);
 }
 

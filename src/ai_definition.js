@@ -5,6 +5,7 @@ import {
   getIncludeSet,
   extractIncludeEdges,
   noteFileContent,
+  toUriString,
 } from './services/symbolIndex';
 
 // Constants for better maintainability
@@ -185,14 +186,19 @@ const AutoItDefinitionProvider = {
         const isVariable = lookupText.startsWith('$');
         const candidates = lookupDefinition(lookupText, isVariable);
         if (candidates.length > 0) {
-          const docUriString = document.uri.toString();
+          // Use the canonical (case-normalized) key so edge keys and candidate
+          // location keys share one space on case-insensitive filesystems.
+          const docUriString = toUriString(document.uri.fsPath);
           // Parse the active document's includes live so unsaved edits are honored.
           // (This also refreshes the service's edge map for this document as a side effect.)
           const liveEdges = extractIncludeEdges(docUriString, documentText, document);
           const includeSet = getIncludeSet(docUriString, liveEdges);
           const inScope = candidates
             .map(entry => entry.location)
-            .filter(loc => loc && loc.uri && includeSet.has(loc.uri.toString()));
+            .filter(
+              loc =>
+                loc && loc.uri && loc.uri.fsPath && includeSet.has(toUriString(loc.uri.fsPath)),
+            );
           if (inScope.length === 1) {
             definitionCache.set(cacheKey, inScope[0]);
             return inScope[0];

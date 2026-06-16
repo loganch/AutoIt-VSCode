@@ -1,5 +1,11 @@
 import { languages, workspace } from 'vscode';
-import { symbolsCache, indexDocument, removeDocument, ensureWarm } from './services/symbolIndex';
+import {
+  symbolsCache,
+  indexDocument,
+  removeDocument,
+  toUriString,
+  ensureWarm,
+} from './services/symbolIndex';
 
 // Debouncing state for search requests
 let searchDebounceTimer = null;
@@ -88,7 +94,9 @@ async function updateFileSymbols(uri) {
  * @param {import('vscode').Uri} uri - The file URI that was deleted
  */
 function removeFileSymbols(uri) {
-  removeDocument(uri.toString());
+  // Delete under the same case-normalized key indexDocument writes under,
+  // otherwise stale entries leak on case-insensitive filesystems.
+  removeDocument(toUriString(uri.fsPath));
 }
 
 // Incremental cache updates instead of full invalidation

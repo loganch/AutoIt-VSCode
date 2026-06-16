@@ -31,6 +31,7 @@ jest.mock('vscode', () => ({
     }
   },
   SymbolKind: { Function: 11, Variable: 12, Key: 19 },
+  Uri: { file: p => ({ fsPath: p, toString: () => `file://${p}` }) },
   languages: {
     registerWorkspaceSymbolProvider: (...args) => mockRegisterWorkspaceSymbolProvider(...args),
   },

@@ -394,13 +394,19 @@ jest.mock('../src/util', () => {
 // Mock the symbol-index service so the fast path is deterministic and free of
 // fs / real-index behavior. With these defaults (lookupDefinition -> []), the
 // fast path is a no-op and every existing test falls through to the scan path.
-jest.mock('../src/services/symbolIndex', () => ({
-  lookupDefinition: jest.fn(() => []),
-  getIncludeSet: jest.fn(() => new Set()),
-  extractIncludeEdges: jest.fn(() => []),
-  noteFileContent: jest.fn(),
-  isWarm: jest.fn(() => true),
-}));
+jest.mock('../src/services/symbolIndex', () => {
+  const CASE_INSENSITIVE_FS = process.platform === 'win32' || process.platform === 'darwin';
+  return {
+    lookupDefinition: jest.fn(() => []),
+    getIncludeSet: jest.fn(() => new Set()),
+    extractIncludeEdges: jest.fn(() => []),
+    noteFileContent: jest.fn(),
+    isWarm: jest.fn(() => true),
+    // Mirror the real canonical-key normalizer so the fast-path filter and the
+    // mocked include-set land in the same key space.
+    toUriString: jest.fn(fsPath => `file://${CASE_INSENSITIVE_FS ? fsPath.toLowerCase() : fsPath}`),
+  };
+});
 const symbolIndex = require('../src/services/symbolIndex');
 
 const util = jest.mocked(require('../src/util')); // get the mock instance with proper typing
@@ -1312,30 +1318,34 @@ describe('ai_definition: index fast path', () => {
 
   it('resolves a function via the warm index when its file is in the include set', () => {
     const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
-    const mainUri = doc.uri.toString();
-    const helperUri = 'file:///proj/helper.au3';
-    const helperLoc = { uri: { toString: () => helperUri }, range: {} };
+    // Candidate locations carry a real Uri with .fsPath (as vscode Locations do);
+    // the in-scope filter compares them via toUriString.
+    const helperFsPath = '/proj/helper.au3';
+    const mainKey = symbolIndex.toUriString(doc.uri.fsPath);
+    const helperKey = symbolIndex.toUriString(helperFsPath);
+    const helperLoc = { uri: { fsPath: helperFsPath, toString: () => helperKey }, range: {} };
 
     symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
-    symbolIndex.extractIncludeEdges.mockReturnValue([helperUri]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri, helperUri]));
+    symbolIndex.extractIncludeEdges.mockReturnValue([helperKey]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
 
     const position = posAtFirst(doc, 'DoWork');
     const result = definitionProvider.provideDefinition(doc, position);
     const loc = Array.isArray(result) ? result[0] : result;
     expect(loc).toBeTruthy();
-    expect(loc.uri.toString()).toBe(helperUri);
+    expect(loc.uri.fsPath).toBe(helperFsPath);
   });
 
   it('performs ZERO getIncludeText reads when resolving via the warm index', () => {
     const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
-    const mainUri = doc.uri.toString();
-    const helperUri = 'file:///proj/helper.au3';
-    const helperLoc = { uri: { toString: () => helperUri }, range: {} };
+    const helperFsPath = '/proj/helper.au3';
+    const mainKey = symbolIndex.toUriString(doc.uri.fsPath);
+    const helperKey = symbolIndex.toUriString(helperFsPath);
+    const helperLoc = { uri: { fsPath: helperFsPath, toString: () => helperKey }, range: {} };
 
     symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
-    symbolIndex.extractIncludeEdges.mockReturnValue([helperUri]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri, helperUri]));
+    symbolIndex.extractIncludeEdges.mockReturnValue([helperKey]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
 
     // Arm the include-graph scan so that IF the fast path failed to
     // short-circuit, the scan WOULD read a file (getIncludeText) and find a
@@ -1351,7 +1361,7 @@ describe('ai_definition: index fast path', () => {
 
     const loc = Array.isArray(result) ? result[0] : result;
     expect(util.getIncludeText).not.toHaveBeenCalled(); // ZERO file-content reads
-    expect(loc.uri.toString()).toBe(helperUri); // resolved via the IN-MEMORY index, not the scan
+    expect(loc.uri.fsPath).toBe(helperFsPath); // resolved via the IN-MEMORY index, not the scan
   });
 
   it('rejects an index match whose file is not in the include set', () => {
@@ -1374,23 +1384,25 @@ describe('ai_definition: index fast path', () => {
 
   it('returns an array of locations when multiple in-scope matches exist', () => {
     const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
-    const mainUri = doc.uri.toString();
-    const aUri = 'file:///proj/a.au3';
-    const bUri = 'file:///proj/b.au3';
+    const mainKey = symbolIndex.toUriString(doc.uri.fsPath);
+    const aFsPath = '/proj/a.au3';
+    const bFsPath = '/proj/b.au3';
+    const aKey = symbolIndex.toUriString(aFsPath);
+    const bKey = symbolIndex.toUriString(bFsPath);
 
     symbolIndex.lookupDefinition.mockReturnValue([
-      { name: 'DoWork', location: { uri: { toString: () => aUri }, range: {} } },
-      { name: 'DoWork', location: { uri: { toString: () => bUri }, range: {} } },
+      { name: 'DoWork', location: { uri: { fsPath: aFsPath, toString: () => aKey }, range: {} } },
+      { name: 'DoWork', location: { uri: { fsPath: bFsPath, toString: () => bKey }, range: {} } },
     ]);
-    symbolIndex.extractIncludeEdges.mockReturnValue([aUri, bUri]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri, aUri, bUri]));
+    symbolIndex.extractIncludeEdges.mockReturnValue([aKey, bKey]);
+    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainKey, aKey, bKey]));
 
     const position = posAtFirst(doc, 'DoWork');
     const result = definitionProvider.provideDefinition(doc, position);
-    const expectedLocations = [aUri, bUri];
+    const expectedPaths = [aFsPath, bFsPath];
     expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(expectedLocations.length);
-    expect(result.map(loc => loc.uri.toString()).sort()).toEqual(expectedLocations);
+    expect(result).toHaveLength(expectedPaths.length);
+    expect(result.map(loc => loc.uri.fsPath).sort()).toEqual(expectedPaths);
   });
 
   it('forwards isVariable=true to lookupDefinition for a $variable lookup', () => {
