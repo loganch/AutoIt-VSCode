@@ -407,20 +407,22 @@ jest.mock('../src/util', () => {
 // Mock the symbol-index service so the fast path is deterministic and free of
 // fs / real-index behavior. With these defaults (lookupDefinition -> []), the
 // fast path is a no-op and every existing test falls through to the scan path.
-jest.mock('../src/services/symbolIndex', () => {
+jest.mock('../src/services/symbolIndex', () => ({
+  lookupDefinition: jest.fn(() => []),
+  noteFileContent: jest.fn(),
+}));
+jest.mock('../src/services/includeGraph', () => {
   const CASE_INSENSITIVE_FS = process.platform === 'win32' || process.platform === 'darwin';
   return {
-    lookupDefinition: jest.fn(() => []),
     getIncludeSet: jest.fn(() => new Set()),
     extractIncludeEdges: jest.fn(() => []),
-    noteFileContent: jest.fn(),
-    isWarm: jest.fn(() => true),
     // Mirror the real canonical-key normalizer so the fast-path filter and the
     // mocked include-set land in the same key space.
     toUriString: jest.fn(fsPath => `file://${CASE_INSENSITIVE_FS ? fsPath.toLowerCase() : fsPath}`),
   };
 });
 const symbolIndex = require('../src/services/symbolIndex');
+const includeGraph = require('../src/services/includeGraph');
 
 const util = jest.mocked(require('../src/util')); // get the mock instance with proper typing
 
@@ -1316,8 +1318,8 @@ describe('ai_definition: index fast path', () => {
 
     // Restore default fast-path no-op behavior (overridden per-test below).
     symbolIndex.lookupDefinition.mockReturnValue([]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set());
-    symbolIndex.extractIncludeEdges.mockReturnValue([]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set());
+    includeGraph.extractIncludeEdges.mockReturnValue([]);
 
     // util mocks return nothing for the include scan so a rejected fast-path
     // match falls through to a null result.
@@ -1334,13 +1336,13 @@ describe('ai_definition: index fast path', () => {
     // Candidate locations carry a real Uri with .fsPath (as vscode Locations do);
     // the in-scope filter compares them via toUriString.
     const helperFsPath = '/proj/helper.au3';
-    const mainKey = symbolIndex.toUriString(doc.uri.fsPath);
-    const helperKey = symbolIndex.toUriString(helperFsPath);
+    const mainKey = includeGraph.toUriString(doc.uri.fsPath);
+    const helperKey = includeGraph.toUriString(helperFsPath);
     const helperLoc = { uri: { fsPath: helperFsPath, toString: () => helperKey }, range: {} };
 
     symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
-    symbolIndex.extractIncludeEdges.mockReturnValue([helperKey]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
+    includeGraph.extractIncludeEdges.mockReturnValue([helperKey]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
 
     const position = posAtFirst(doc, 'DoWork');
     const result = definitionProvider.provideDefinition(doc, position);
@@ -1352,13 +1354,13 @@ describe('ai_definition: index fast path', () => {
   it('performs ZERO getIncludeText reads when resolving via the warm index', () => {
     const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
     const helperFsPath = '/proj/helper.au3';
-    const mainKey = symbolIndex.toUriString(doc.uri.fsPath);
-    const helperKey = symbolIndex.toUriString(helperFsPath);
+    const mainKey = includeGraph.toUriString(doc.uri.fsPath);
+    const helperKey = includeGraph.toUriString(helperFsPath);
     const helperLoc = { uri: { fsPath: helperFsPath, toString: () => helperKey }, range: {} };
 
     symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
-    symbolIndex.extractIncludeEdges.mockReturnValue([helperKey]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
+    includeGraph.extractIncludeEdges.mockReturnValue([helperKey]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
 
     // Arm the include-graph scan so that IF the fast path failed to
     // short-circuit, the scan WOULD read a file (getIncludeText) and find a
@@ -1385,8 +1387,8 @@ describe('ai_definition: index fast path', () => {
     symbolIndex.lookupDefinition.mockReturnValue([
       { name: 'DoWork', location: { uri: { toString: () => strangerUri }, range: {} } },
     ]);
-    symbolIndex.extractIncludeEdges.mockReturnValue([]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainUri])); // stranger NOT included
+    includeGraph.extractIncludeEdges.mockReturnValue([]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainUri])); // stranger NOT included
 
     const position = posAtFirst(doc, 'DoWork');
     const result = definitionProvider.provideDefinition(doc, position);
@@ -1397,18 +1399,18 @@ describe('ai_definition: index fast path', () => {
 
   it('returns an array of locations when multiple in-scope matches exist', () => {
     const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
-    const mainKey = symbolIndex.toUriString(doc.uri.fsPath);
+    const mainKey = includeGraph.toUriString(doc.uri.fsPath);
     const aFsPath = '/proj/a.au3';
     const bFsPath = '/proj/b.au3';
-    const aKey = symbolIndex.toUriString(aFsPath);
-    const bKey = symbolIndex.toUriString(bFsPath);
+    const aKey = includeGraph.toUriString(aFsPath);
+    const bKey = includeGraph.toUriString(bFsPath);
 
     symbolIndex.lookupDefinition.mockReturnValue([
       { name: 'DoWork', location: { uri: { fsPath: aFsPath, toString: () => aKey }, range: {} } },
       { name: 'DoWork', location: { uri: { fsPath: bFsPath, toString: () => bKey }, range: {} } },
     ]);
-    symbolIndex.extractIncludeEdges.mockReturnValue([aKey, bKey]);
-    symbolIndex.getIncludeSet.mockReturnValue(new Set([mainKey, aKey, bKey]));
+    includeGraph.extractIncludeEdges.mockReturnValue([aKey, bKey]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainKey, aKey, bKey]));
 
     const position = posAtFirst(doc, 'DoWork');
     const result = definitionProvider.provideDefinition(doc, position);

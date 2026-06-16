@@ -6,13 +6,8 @@ import {
   getIncludeScripts,
   getIncludeText,
 } from './util';
-import {
-  lookupDefinition,
-  getIncludeSet,
-  extractIncludeEdges,
-  noteFileContent,
-  toUriString,
-} from './services/symbolIndex';
+import { lookupDefinition, noteFileContent } from './services/symbolIndex';
+import { getIncludeSet, extractIncludeEdges, toUriString } from './services/includeGraph';
 
 // Constants for better maintainability
 const REGEX_FLAGS = 'mi';

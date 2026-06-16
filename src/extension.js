@@ -16,7 +16,8 @@ import { registerCommands } from './registerCommands';
 import { formatterProvider } from './ai_formatter';
 import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
 import conf from './ai_config';
-import { ensureWarm, warmDocument } from './services/symbolIndex';
+import { warmDocument } from './services/symbolIndex';
+import { ensureWarm } from './services/symbolWarmup';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
 
