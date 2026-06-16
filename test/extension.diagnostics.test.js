@@ -39,6 +39,9 @@ jest.mock('vscode', () => {
   return {
     __esModule: true,
     Uri: { file: p => ({ fsPath: p, toString: () => p }) },
+    // extension.js imports services/symbolIndex (and its split-out modules) at
+    // module load time, which read SymbolKind off this mock eagerly.
+    SymbolKind: { Function: 11, Namespace: 2, Constant: 13, Enum: 9, Variable: 12, Key: 19 },
     languages: {
       setLanguageConfiguration: () => ({ dispose: () => {} }),
       createDiagnosticCollection: () => ({
