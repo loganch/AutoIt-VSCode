@@ -132,6 +132,11 @@ jest.mock('vscode', () => {
         this.detail = '';
       }
     },
+    MarkdownString: class {
+      constructor(value) {
+        this.value = value;
+      }
+    },
     CompletionItemKind: {
       Function: 3,
       Variable: 6,
@@ -182,6 +187,7 @@ const applyMockImplementations = () => {
 
 jest.mock('../src/util', () => ({
   AUTOIT_MODE: { language: 'autoit' },
+  buildFunctionSignature: jest.fn(() => ({ functionName: '', functionObject: { description: '', documentation: '' } })),
   functionPattern: /Func\s+(?:volatile\s+)?(\w+)/i,
   variablePattern: /\$(\w+)/g,
   includePattern: /#include\s+"([^"]+)"/g,
@@ -387,6 +393,25 @@ describe('ai_completion cache behavior', () => {
 
     const completions = await provideCompletionItems(doc, position);
     expect(completions).toBeNull();
+  });
+
+  test('getLocalFunctionCompletions sets documentation from buildFunctionSignature description', async () => {
+    const { buildFunctionSignature } = require('../src/util');
+    buildFunctionSignature.mockReturnValueOnce({
+      functionName: 'DoThing',
+      functionObject: {
+        description: 'Does the thing',
+        documentation: 'Does the thing\rtest.au3',
+      },
+    });
+
+    const doc = new MockTextDocument('Func DoThing()\nEndFunc\nLocal $x = 1', '/test.au3');
+    const position = new MockPosition(2, 0);
+
+    const result = await provideCompletionItems(doc, position);
+    const funcItem = result?.find(item => item.label === 'DoThing');
+    expect(funcItem).toBeDefined();
+    expect(funcItem.documentation?.value).toBe('Does the thing');
   });
 });
 
