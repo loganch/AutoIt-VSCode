@@ -125,7 +125,7 @@ const REGEX_PATTERNS = Object.freeze({
     // Allow Description to be on same line as Name OR on the next line
     return new RegExp(
       `;\\s*Name\\s*\\.+:\\s+${escapedFunctionName}\\s*` +
-        `(?:(?:\\r\\n|\\n)?\\s*;\\s+Description\\s*\\.+:\\s+(?<description>.+))?` +
+        `(?:(?:\\r\\n|\\n)?\\s*;\\s+Description\\s*\\.+:[ \\t]+(?<description>\\S.*))?` +
         `(?:\\r\\n|\\n|$)`,
     );
   },

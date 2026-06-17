@@ -68,6 +68,34 @@ describe('util signature regex safety', () => {
     expect(() => patterns.headerRegex('Fn[Name]+')).not.toThrow();
   });
 
+  test('buildFunctionSignature leaves documentation blank when Description is empty', () => {
+    const fileText = [
+      '; #FUNCTION# ====================================================================================================================',
+      '; Name ..........: _InRegion_B',
+      '; Description ...:',
+      '; Syntax ........: _InRegion_B($firstParam)',
+      '; Parameters ....: $firstParam          - The first parameter',
+      'Func _InRegion_B($firstParam)',
+      'EndFunc',
+    ].join('\r\n');
+
+    const functionMatch = /** @type {RegExpExecArray} */ (
+      /** @type {unknown} */ ([
+        'Func _InRegion_B($firstParam)',
+        '_InRegion_B($firstParam)',
+        '_InRegion_B',
+        '$firstParam',
+      ])
+    );
+    functionMatch.index = fileText.indexOf('Func _InRegion_B');
+    functionMatch.input = fileText;
+
+    const result = buildFunctionSignature(functionMatch, fileText, 'regression.au3');
+
+    expect(result.functionObject.documentation).not.toContain('Syntax');
+    expect(result.functionObject.documentation).toBe('Included from regression.au3');
+  });
+
   test('parameterDoc escapes regex metacharacters in parameter names', () => {
     expect(() => patterns.parameterDoc('UBOUND_ROWS) -1))')).not.toThrow();
     expect(() => patterns.parameterDoc('param.*+?^${}()|[]\\')).not.toThrow();
