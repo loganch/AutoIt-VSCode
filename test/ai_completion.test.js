@@ -406,6 +406,7 @@ describe('ai_completion cache behavior', () => {
     });
 
     const doc = new MockTextDocument('Func DoThing()\nEndFunc\nLocal $x = 1', '/test.au3');
+    // Line 2 (Local) avoids the early-exit guard that returns null on Func declaration lines
     const position = new MockPosition(2, 0);
 
     const result = await provideCompletionItems(doc, position);
