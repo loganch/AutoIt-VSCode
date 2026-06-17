@@ -96,9 +96,55 @@ describe('util signature regex safety', () => {
     expect(result.functionObject.documentation).toBe('Included from regression.au3');
   });
 
+  test('buildFunctionSignature uses single-line comment above Func when no header block', () => {
+    const fileText = ['; Validates the user input', 'Func ValidateInput($val)', 'EndFunc'].join(
+      '\r\n',
+    );
+    const functionMatch = /** @type {RegExpExecArray} */ (
+      /** @type {unknown} */ ([
+        'Func ValidateInput($val)',
+        'ValidateInput($val)',
+        'ValidateInput',
+        '$val',
+      ])
+    );
+    functionMatch.index = fileText.indexOf('Func ValidateInput');
+    functionMatch.input = fileText;
+
+    const result = buildFunctionSignature(functionMatch, fileText, 'test.au3');
+    expect(result.functionObject.documentation).toContain('Validates the user input');
+  });
+
+  test('buildFunctionSignature concatenates multiple comment lines above Func', () => {
+    const fileText = ['; First line.', '; Second line.', 'Func MyHelper($x)', 'EndFunc'].join(
+      '\r\n',
+    );
+    const functionMatch = /** @type {RegExpExecArray} */ (
+      /** @type {unknown} */ (['Func MyHelper($x)', 'MyHelper($x)', 'MyHelper', '$x'])
+    );
+    functionMatch.index = fileText.indexOf('Func MyHelper');
+    functionMatch.input = fileText;
+
+    const result = buildFunctionSignature(functionMatch, fileText, 'test.au3');
+    expect(result.functionObject.documentation).toContain('First line.');
+    expect(result.functionObject.documentation).toContain('Second line.');
+  });
+
   test('parameterDoc escapes regex metacharacters in parameter names', () => {
     expect(() => patterns.parameterDoc('UBOUND_ROWS) -1))')).not.toThrow();
     expect(() => patterns.parameterDoc('param.*+?^${}()|[]\\')).not.toThrow();
+  });
+
+  test('buildFunctionSignature exposes description as own field on functionObject', () => {
+    const fileText = ['; Cleans up resources', 'Func Cleanup()', 'EndFunc'].join('\r\n');
+    const functionMatch = /** @type {RegExpExecArray} */ (
+      /** @type {unknown} */ (['Func Cleanup()', 'Cleanup()', 'Cleanup', ''])
+    );
+    functionMatch.index = fileText.indexOf('Func Cleanup');
+    functionMatch.input = fileText;
+
+    const result = buildFunctionSignature(functionMatch, fileText, 'test.au3');
+    expect(result.functionObject.description).toBe('Cleans up resources');
   });
 
   test('getParams handles nested defaults with commas and closing parenthesis', () => {

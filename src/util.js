@@ -804,6 +804,25 @@ const buildFunctionSignature = (functionMatch, fileText, fileName) => {
       const headerMatch = fileText.match(headerRegex);
       description = headerMatch?.groups?.description || '';
       functionIndex = headerMatch?.index ?? -1;
+
+      // Fallback: collect consecutive ; comment lines immediately above the Func declaration.
+      // Only applies when there is no structured header block at all (functionIndex === -1),
+      // so an intentionally-empty Description in a header is not overridden.
+      if (!description && functionIndex === -1 && functionMatch.index != null) {
+        const lines = fileText.slice(0, functionMatch.index).split(/\r?\n/);
+        const commentLines = [];
+        for (let i = lines.length - 1; i >= 0; i--) {
+          const trimmed = lines[i].trim();
+          if (!trimmed) continue;
+          const m = trimmed.match(/^;[ \t]*(.*)/);
+          if (m) {
+            commentLines.unshift(m[1].trim());
+          } else {
+            break;
+          }
+        }
+        description = commentLines.join('\n\n').trim();
+      }
       return null;
     },
     null,
@@ -816,6 +835,7 @@ const buildFunctionSignature = (functionMatch, fileText, fileName) => {
     functionName,
     functionObject: {
       label: functionLabel || functionName,
+      description,
       documentation: functionDocumentation,
       params: getParams(paramsText || '', fileText, functionIndex),
     },
