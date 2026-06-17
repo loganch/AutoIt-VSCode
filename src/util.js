@@ -777,7 +777,7 @@ const getParams = (paramText, text, headerIndex) => {
  * @param {RegExpExecArray} functionMatch - Regex match result containing function definition parts [full_match, label, name, params]
  * @param {string} fileText - Complete content of the source file containing the function
  * @param {string} fileName - Name of the file containing the function (used in documentation)
- * @returns {Object} Object with functionName (string) and functionObject (signature data with label, documentation, params)
+ * @returns {Object} Object with functionName (string) and functionObject (signature data with label, description, documentation, params)
  */
 const buildFunctionSignature = (functionMatch, fileText, fileName) => {
   if (
@@ -809,11 +809,14 @@ const buildFunctionSignature = (functionMatch, fileText, fileName) => {
       // Only applies when there is no structured header block at all (functionIndex === -1),
       // so an intentionally-empty Description in a header is not overridden.
       if (!description && functionIndex === -1 && functionMatch.index != null) {
-        const lines = fileText.slice(0, functionMatch.index).split(/\r?\n/);
+        const rawLines = fileText.slice(0, functionMatch.index).split(/\r?\n/);
+        // Drop the trailing empty string that results when the slice ends with a newline.
+        while (rawLines.length && rawLines[rawLines.length - 1].trim() === '') rawLines.pop();
+        const lines = rawLines;
         const commentLines = [];
         for (let i = lines.length - 1; i >= 0; i--) {
           const trimmed = lines[i].trim();
-          if (!trimmed) continue;
+          if (!trimmed) break;
           const m = trimmed.match(/^;[ \t]*(.*)/);
           if (m) {
             commentLines.unshift(m[1].trim());
