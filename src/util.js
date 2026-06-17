@@ -824,6 +824,7 @@ const buildFunctionSignature = (functionMatch, fileText, fileName) => {
             break;
           }
         }
+        // '\n\n' is intentional: VSCode MarkdownString renders double-newline as a visible paragraph break
         description = commentLines.join('\n\n').trim();
       }
       return null;
