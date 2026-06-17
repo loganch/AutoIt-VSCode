@@ -242,9 +242,13 @@ export const signatureHoverProvider = languages.registerHoverProvider(AUTOIT_MOD
 
     if (!matchedSignature || !matchedSignature.label) return null;
 
-    const documentationLines = matchedSignature.documentation.split('\r');
-    documentationLines[1] = `##### ${documentationLines[1]}`;
-    const hoverText = [...documentationLines, `\`\`\`\r${matchedSignature.label}\r\`\`\``];
+    const description = matchedSignature.description || '';
+    const includedFrom = matchedSignature.documentation.split('\r').at(-1) || '';
+    const hoverText = [
+      ...(description ? [description] : []),
+      `##### ${includedFrom}`,
+      `\`\`\`\r${matchedSignature.label}\r\`\`\``,
+    ];
 
     return new Hover(hoverText);
   },
