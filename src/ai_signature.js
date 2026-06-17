@@ -243,6 +243,7 @@ export const signatureHoverProvider = languages.registerHoverProvider(AUTOIT_MOD
     if (!matchedSignature || !matchedSignature.label) return null;
 
     const description = matchedSignature.description || '';
+    // documentation format: "Included from X" or "description\rIncluded from X"
     const includedFrom = matchedSignature.documentation.split('\r').at(-1) || '';
     const hoverText = [
       ...(description ? [description] : []),
