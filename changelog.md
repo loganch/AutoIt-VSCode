@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Empty Description in UDF headers**: hover/signature documentation no longer leaks the following `; Syntax ...` comment line when a standard UDF header's `; Description ...:` line is left blank (9099dba)
 - **Find All References scope**: ensure current document is included in reference search scope (64914bb)
 - **Shadowed variable references**: drop the in-scope declaration when local variables shadow outer scope declarations (6450bb2)
 - **Hover description regex**: corrected line-ending pattern in the function-description RegExp so hover docs display correctly on both CRLF and LF files (#248) (c96895c)
