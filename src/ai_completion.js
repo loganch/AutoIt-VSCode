@@ -1,9 +1,17 @@
-import { CompletionItem, CompletionItemKind, Range, languages, workspace } from 'vscode';
+import {
+  CompletionItem,
+  CompletionItemKind,
+  MarkdownString,
+  Range,
+  languages,
+  workspace,
+} from 'vscode';
 
 // Deferred until first completion so the ~70 completion modules don't load at activation.
 let completions = null;
 import {
   AUTOIT_MODE,
+  buildFunctionSignature,
   functionPattern as _functionPattern,
   findFilepath,
   getIncludeData,
@@ -221,7 +229,10 @@ const getLocalFunctionCompletions = text => {
     const { 1: functionName } = pattern;
     if (!(functionName in foundFunctions)) {
       foundFunctions[functionName] = true;
-      functions.push(createNewCompletionItem(CompletionItemKind.Function, functionName));
+      const item = createNewCompletionItem(CompletionItemKind.Function, functionName);
+      const { functionObject } = buildFunctionSignature(pattern, text, '');
+      if (functionObject.description) item.documentation = new MarkdownString(functionObject.description);
+      functions.push(item);
     }
     pattern = functionPattern.exec(text);
   }
