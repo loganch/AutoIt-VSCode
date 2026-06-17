@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../util';
 
 const type = 'Frame Type Constant';
 const initial = 'Initial Frame State Constant';
@@ -178,4 +178,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'FrameConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'FrameConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

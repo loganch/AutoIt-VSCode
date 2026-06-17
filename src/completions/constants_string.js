@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../util';
 
 const multi = 'StringCompare/StringInStr/StringReplace Constant';
 const stringStripWS = 'StringStripWS Constant';
@@ -144,4 +144,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'StringConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'StringConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

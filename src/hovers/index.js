@@ -69,6 +69,30 @@ import { hovers as udfWord } from '../signatures/udf_word';
 import { hovers as udfDebug } from '../signatures/udf_debug';
 import { hovers as AVIConstants } from '../completions/constants_avi';
 import { hovers as InetConstants } from '../completions/constantsInet';
+import { hovers as ButtonConstants } from '../completions/constants_buttonconstants';
+import { hovers as ComboConstants } from '../completions/constants_combo';
+import { hovers as DateTimeConstants } from '../completions/constants_datetime';
+import { hovers as DirConstants } from '../completions/constants_dir';
+import { hovers as EditConstants } from '../completions/constants_edit';
+import { hovers as ExcelConstants } from '../completions/constants_excel';
+import { hovers as FileConstants } from '../completions/constants_file';
+import { hovers as FontConstants } from '../completions/constants_font';
+import { hovers as FrameConstants } from '../completions/constants_frame';
+import { hovers as GdiplusConstants } from '../completions/constants_gdiplus';
+import { hovers as ListBoxConstants } from '../completions/constants_listbox';
+import { hovers as ListViewConstants } from '../completions/constants_listview';
+import { hovers as MsgBoxConstants } from '../completions/constants_msgbox';
+import { hovers as ProgressConstants } from '../completions/constants_progress';
+import { hovers as SliderConstants } from '../completions/constants_slider';
+import { hovers as StaticConstants } from '../completions/constants_static';
+import { hovers as StatusBarConstants } from '../completions/constants_statusbar';
+import { hovers as StringConstants } from '../completions/constants_string';
+import { hovers as TabConstants } from '../completions/constants_tab';
+import { hovers as TrayConstants } from '../completions/constants_tray';
+import { hovers as TreeViewConstants } from '../completions/constants_treeview';
+import { hovers as UpDownConstants } from '../completions/constants_updown';
+import { hovers as WindowsConstants } from '../completions/constants_windows';
+import { hovers as WordConstants } from '../completions/constants_word';
 import {
   au3CheckDirectivesHovers,
   au3StripperDirectivesHovers,
@@ -148,6 +172,30 @@ const hoverImports = {
   ...udfDebug,
   ...AVIConstants,
   ...InetConstants,
+  ...ButtonConstants,
+  ...ComboConstants,
+  ...DateTimeConstants,
+  ...DirConstants,
+  ...EditConstants,
+  ...ExcelConstants,
+  ...FileConstants,
+  ...FontConstants,
+  ...FrameConstants,
+  ...GdiplusConstants,
+  ...ListBoxConstants,
+  ...ListViewConstants,
+  ...MsgBoxConstants,
+  ...ProgressConstants,
+  ...SliderConstants,
+  ...StaticConstants,
+  ...StatusBarConstants,
+  ...StringConstants,
+  ...TabConstants,
+  ...TrayConstants,
+  ...TreeViewConstants,
+  ...UpDownConstants,
+  ...WindowsConstants,
+  ...WordConstants,
   ...wrapperDirectivesHovers,
   ...au3StripperDirectivesHovers,
   ...au3CheckDirectivesHovers,

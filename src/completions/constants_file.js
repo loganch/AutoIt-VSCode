@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../util';
 
 const copyAndInstall = 'File Copy/Install Option Constant';
 const dateTime = 'File Date/Time Option Constant';
@@ -570,4 +570,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'FileConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'FileConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

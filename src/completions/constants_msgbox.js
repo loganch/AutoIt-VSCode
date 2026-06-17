@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../util';
 
 const flagParam = 'MsgBox Constant Flag Parameter';
 const returnValue = 'MsgBox Constant Return Value';
@@ -190,4 +190,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'MsgBoxConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'MsgBoxConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

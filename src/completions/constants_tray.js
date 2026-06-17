@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../util';
 
 const predefined = 'Tray predefined ID Constant';
 const stateValue = 'Tray menu/item state value Constant';
@@ -222,4 +222,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'TrayConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'TrayConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

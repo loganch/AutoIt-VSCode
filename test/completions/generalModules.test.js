@@ -111,5 +111,7 @@ describe('general completion modules', () => {
     const labels = items.map(item => item.label);
     expect(labels).toContain('#AutoIt3Wrapper_testing');
     expect(labels.some(label => String(label).toLowerCase().includes('winapi'))).toBe(true);
+    expect(labels).toContain('_MemGlobalAlloc');
+    expect(labels).toContain('_ProcessGetName');
   });
 });

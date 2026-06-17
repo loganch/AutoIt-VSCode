@@ -27,7 +27,7 @@ import { completions as KEYWORDS } from '../signatures/keywords';
 import { completions as MACROS } from '../signatures/macros';
 import { completions as MAIN_FUNCTIONS } from '../signatures/functions';
 import SendKeys from './send_keys';
-import Debug from './udf_debug';
+import { completions as Debug } from '../signatures/udf_debug';
 import { completions as Visa } from '../signatures/udf_visa';
 import { completions as ArrayUDF } from '../signatures/udf_array';
 import { completions as Clipboard } from '../signatures/udf_clipboard';
@@ -64,9 +64,11 @@ import { completions as GuiTreeView } from '../signatures/udf_guictrltreeview';
 import { completions as IE } from '../signatures/udf_ie';
 import { completions as Inet } from '../signatures/udf_inet';
 import { completions as MathUDF } from '../signatures/udf_math';
+import { completions as Memory } from '../signatures/udf_memory';
 import { completions as Misc } from '../signatures/udf_misc';
 import { completions as NamedPipes } from '../signatures/udf_namedpipes';
 import { completions as NetShare } from '../signatures/udf_netshare';
+import { completions as Process } from '../signatures/udf_process';
 import { completions as ScreenCapture } from '../signatures/udf_screencapture';
 import { completions as Security } from '../signatures/udf_security';
 import { completions as SendMessage } from '../signatures/udf_sendmessage';
@@ -164,9 +166,11 @@ const completions = [
   ...IE,
   ...Inet,
   ...MathUDF,
+  ...Memory,
   ...Misc,
   ...NamedPipes,
   ...NetShare,
+  ...Process,
   ...ScreenCapture,
   ...Security,
   ...SendMessage,

@@ -70,5 +70,6 @@ describe('hovers/index', () => {
     expect(hovers.abs).toBeDefined();
     expect(hovers['#include']).toBeDefined();
     expect(hovers._arrayadd).toBeDefined();
+    expect(hovers['$dts_updown']).toBeDefined();
   });
 });

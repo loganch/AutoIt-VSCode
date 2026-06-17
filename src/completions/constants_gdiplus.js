@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../util';
 
 const penDashCap = 'Pen Dash Cap Type Constant';
 const penDashStyle = 'Pen Dash Style Constant';
@@ -1675,4 +1675,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'GDIPlusConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'GDIPlusConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

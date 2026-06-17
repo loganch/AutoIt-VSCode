@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../util';
 
 const items = [
   {
@@ -98,9 +98,12 @@ const items = [
   },
 ];
 
-export default fillCompletions(
+const completions = fillCompletions(
   items,
   CompletionItemKind.Constant,
   'Tab Style Constant',
   'TabConstants.au3',
 );
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };
