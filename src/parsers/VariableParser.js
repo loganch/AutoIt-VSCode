@@ -4,6 +4,30 @@
  */
 
 import VariablePatterns from '../utils/VariablePatterns.js';
+
+/**
+ * Split a string by commas that are not inside parentheses or brackets.
+ * Needed to correctly separate multi-declaration variables that have initializers
+ * containing function calls, e.g. `$a = Func(1, 2), $b = Other()`.
+ * @param {string} str
+ * @returns {string[]}
+ */
+function splitByTopLevelCommas(str) {
+  const parts = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (ch === '(' || ch === '[') depth++;
+    else if (ch === ')' || ch === ']') depth--;
+    else if (ch === ',' && depth === 0) {
+      parts.push(str.slice(start, i));
+      start = i + 1;
+    }
+  }
+  parts.push(str.slice(start));
+  return parts;
+}
 import {
   parseFunctionDeclarationLine,
   parseParameterNames,
@@ -90,6 +114,9 @@ class VariableParser {
       // Parse Dim declarations (context-dependent)
       this.parseDimDeclarations(cleanedLine, lineIndex);
 
+      // Parse bare assignments ($var = value, no scope keyword)
+      this.parseAssignments(cleanedLine, lineIndex);
+
       // Parse function parameters as variables
       this.parseFunctionParameters(line, lineIndex);
     });
@@ -102,40 +129,19 @@ class VariableParser {
    * @private
    */
   parseExplicitDeclarations(cleanedLine, lineIndex, keyword, type) {
-    // Pattern to match keyword followed by comma-separated variables
-    const pattern = new RegExp(`^\\s*${keyword}\\s+((\\$\\w+(?:\\s*,\\s*\\$\\w+)*))`, 'i');
-    const match = cleanedLine.match(pattern);
+    const headerPattern = new RegExp(`^\\s*${keyword}\\s+`, 'i');
+    const headerMatch = cleanedLine.match(headerPattern);
+    if (!headerMatch) return;
 
-    if (match) {
-      const currentFunction = this.getFunctionAtLine(lineIndex);
-      const variablesStr = match[1];
+    const currentFunction = this.getFunctionAtLine(lineIndex);
+    const afterKeyword = cleanedLine.slice(headerMatch[0].length);
 
-      // Split by comma and process each variable
-      const variables = variablesStr
-        .split(',')
-        .map(v => v.trim())
-        .filter(v => v);
-
-      // Find keyword position to search from there
-      const keywordMatch = cleanedLine.match(new RegExp(`^\\s*${keyword}`, 'i'));
-      let searchFrom = keywordMatch ? keywordMatch[0].length : 0;
-
-      variables.forEach(varName => {
-        // Find the column position of this variable starting after the keyword
-        const column = cleanedLine.indexOf(varName, searchFrom);
-        // Update search position for next variable
-        searchFrom = column + varName.length;
-
-        this.variables.push({
-          name: varName,
-          type,
-          scope: type === 'global' ? 'global' : 'function',
-          functionName: currentFunction?.name || null,
-          position: { line: lineIndex, column },
-          declarationKeyword: keyword,
-        });
-      });
-    }
+    this._pushDeclarationSegments(cleanedLine, afterKeyword, headerMatch[0].length, lineIndex, {
+      type,
+      scope: type === 'global' ? 'global' : 'function',
+      functionName: currentFunction?.name || null,
+      declarationKeyword: keyword,
+    });
   }
 
   /**
@@ -143,44 +149,75 @@ class VariableParser {
    * @private
    */
   parseDimDeclarations(cleanedLine, lineIndex) {
-    // Pattern to match Dim followed by comma-separated variables
-    const pattern = /^[ \t]*Dim\s+((\$\w+(?:\s*,\s*\$\w+)*))/i;
-    const match = cleanedLine.match(pattern);
+    const headerMatch = cleanedLine.match(/^[ \t]*Dim\s+/i);
+    if (!headerMatch) return;
 
-    if (match) {
-      const currentFunction = this.getFunctionAtLine(lineIndex);
-      const variablesStr = match[1];
+    const currentFunction = this.getFunctionAtLine(lineIndex);
+    const afterKeyword = cleanedLine.slice(headerMatch[0].length);
 
-      // Determine scope based on context
-      const isInFunction = !!currentFunction;
-      const scope = isInFunction ? 'function' : 'global';
+    this._pushDeclarationSegments(cleanedLine, afterKeyword, headerMatch[0].length, lineIndex, {
+      type: 'dim',
+      scope: currentFunction ? 'function' : 'global',
+      functionName: currentFunction?.name || null,
+      declarationKeyword: 'Dim',
+    });
+  }
 
-      // Split by comma and process each variable
-      const variables = variablesStr
-        .split(',')
-        .map(v => v.trim())
-        .filter(v => v);
+  /**
+   * Shared loop: split afterKeyword by top-level commas, extract each $var, push to this.variables.
+   * @private
+   */
+  _pushDeclarationSegments(cleanedLine, afterKeyword, searchFromOffset, lineIndex, varMeta) {
+    const segments = splitByTopLevelCommas(afterKeyword);
+    let searchFrom = searchFromOffset;
 
-      // Find Dim keyword position to search from there
-      const keywordMatch = cleanedLine.match(/^[ \t]*Dim/i);
-      let searchFrom = keywordMatch ? keywordMatch[0].length : 0;
+    segments.forEach(segment => {
+      const varMatch = segment.trimStart().match(/^\$\w+/);
+      if (!varMatch) return;
 
-      variables.forEach(varName => {
-        // Find the column position of this variable starting after the keyword
-        const column = cleanedLine.indexOf(varName, searchFrom);
-        // Update search position for next variable
-        searchFrom = column + varName.length;
+      const varName = varMatch[0];
+      const column = cleanedLine.indexOf(varName, searchFrom);
+      searchFrom = column + varName.length;
 
-        this.variables.push({
-          name: varName,
-          type: 'dim',
-          scope,
-          functionName: currentFunction?.name || null,
-          position: { line: lineIndex, column },
-          declarationKeyword: 'Dim',
-        });
+      this.variables.push({
+        name: varName,
+        position: { line: lineIndex, column },
+        ...varMeta,
       });
-    }
+    });
+  }
+
+  /**
+   * Parse bare variable assignments that have no scope keyword (e.g. `$var = value`).
+   * Script-level bare assignments are treated as global; ones inside a function are local.
+   * Only fires when `$` is the first non-whitespace character so lines that start with
+   * Local/Global/Static/Dim are never double-counted.
+   * @private
+   */
+  parseAssignments(cleanedLine, lineIndex) {
+    const match = cleanedLine.match(/^\s*(\$\w+)\s*=/);
+    if (!match) return;
+
+    const currentFunction = this.getFunctionAtLine(lineIndex);
+    const varName = match[1];
+    const functionName = currentFunction?.name || null;
+
+    // Only register the first assignment — subsequent ones are usages, not new declarations
+    const alreadyDeclared = this.variables.some(
+      v => v.name === varName && v.functionName === functionName,
+    );
+    if (alreadyDeclared) return;
+
+    const column = cleanedLine.indexOf(varName);
+
+    this.variables.push({
+      name: varName,
+      type: 'assignment',
+      scope: currentFunction ? 'function' : 'global',
+      functionName,
+      position: { line: lineIndex, column },
+      declarationKeyword: null,
+    });
   }
 
   /**
@@ -259,11 +296,14 @@ class VariableParser {
 
       // Function-scoped variables are only accessible within their function
       if (variable.scope === 'function') {
+        // Script-level declaration (no enclosing function) — visible at script level only
+        if (!currentFunction && variable.functionName === null) {
+          return variable.position.line <= targetLine;
+        }
         // Must be in same function and declared before target line
         if (currentFunction && variable.functionName === currentFunction.name) {
           return variable.position.line <= targetLine;
         }
-        // Not accessible if target is not in same function or no current function
         return false;
       }
 

@@ -154,4 +154,97 @@ describe('VariableParser', () => {
       expect(variables[1].position.column).toBe(COLUMN_SEVENTEEN); // After "$var1 ,  "
     });
   });
+
+  describe('multi-declaration with initializers', () => {
+    it('should parse all variables in Local multi-declaration with function-call initializers', () => {
+      const source = 'Local $result1 = Func1(), $result2 = Func2()';
+      const parser = new VariableParser(source);
+      const variables = parser.parseVariableDeclarations();
+
+      const locals = variables.filter(v => v.declarationKeyword === 'Local');
+      expect(locals).toHaveLength(EXPECTED_COUNT_TWO);
+      expect(locals[0].name).toBe('$result1');
+      expect(locals[1].name).toBe('$result2');
+    });
+
+    it('should parse all variables in Global multi-declaration with mixed initializers', () => {
+      const source = 'Global $a = 1, $b, $c = "test"';
+      const parser = new VariableParser(source);
+      const variables = parser.parseVariableDeclarations();
+
+      const globals = variables.filter(v => v.declarationKeyword === 'Global');
+      expect(globals).toHaveLength(EXPECTED_COUNT_THREE);
+      expect(globals[0].name).toBe('$a');
+      expect(globals[1].name).toBe('$b');
+      expect(globals[2].name).toBe('$c');
+    });
+
+    it('should parse all variables in Dim multi-declaration with initializers', () => {
+      const source = 'Dim $x = SomeFunc(1, 2), $y = 0';
+      const parser = new VariableParser(source);
+      const variables = parser.parseVariableDeclarations();
+
+      const dims = variables.filter(v => v.declarationKeyword === 'Dim');
+      expect(dims).toHaveLength(EXPECTED_COUNT_TWO);
+      expect(dims[0].name).toBe('$x');
+      expect(dims[1].name).toBe('$y');
+    });
+  });
+
+  describe('bare variable assignments (no scope keyword)', () => {
+    it('should parse a bare assignment at script level as global scope', () => {
+      const source = '$myVar = "hello"';
+      const parser = new VariableParser(source);
+      const variables = parser.parseVariableDeclarations();
+
+      const assignments = variables.filter(v => v.type === 'assignment');
+      expect(assignments).toHaveLength(1);
+      expect(assignments[0].name).toBe('$myVar');
+      expect(assignments[0].scope).toBe('global');
+      expect(assignments[0].declarationKeyword).toBeNull();
+    });
+
+    it('should parse a bare assignment inside a function as function scope', () => {
+      const source = 'Func MyFunc()\n$localVar = "test"\nEndFunc';
+      const parser = new VariableParser(source);
+      const variables = parser.parseVariableDeclarations();
+
+      const assignments = variables.filter(v => v.type === 'assignment');
+      expect(assignments).toHaveLength(1);
+      expect(assignments[0].name).toBe('$localVar');
+      expect(assignments[0].scope).toBe('function');
+      expect(assignments[0].functionName).toBe('MyFunc');
+    });
+
+    it('should not double-parse variables that also have an explicit declaration keyword', () => {
+      const source = 'Local $x = 1';
+      const parser = new VariableParser(source);
+      const variables = parser.parseVariableDeclarations();
+
+      // Local keyword produces one entry; bare-assignment parser must not produce a second
+      const named = variables.filter(v => v.name === '$x');
+      expect(named).toHaveLength(1);
+      expect(named[0].declarationKeyword).toBe('Local');
+    });
+
+    it('should make script-level bare-assignment variables visible via getVariablesAtLine', () => {
+      const source = '$counter = 0\nGlobal $flag = True';
+      const parser = new VariableParser(source);
+
+      const visible = parser.getVariablesAtLine(1);
+      const names = visible.map(v => v.name);
+      expect(names).toContain('$counter');
+      expect(names).toContain('$flag');
+    });
+
+    it('should make script-level Local multi-declaration visible via getVariablesAtLine', () => {
+      const source = 'Local $result1 = Func1(), $result2 = Func2()';
+      const parser = new VariableParser(source);
+
+      const visible = parser.getVariablesAtLine(0);
+      const names = visible.map(v => v.name);
+      expect(names).toContain('$result1');
+      expect(names).toContain('$result2');
+    });
+  });
 });
