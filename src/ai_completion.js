@@ -231,7 +231,8 @@ const getLocalFunctionCompletions = text => {
       foundFunctions[functionName] = true;
       const item = createNewCompletionItem(CompletionItemKind.Function, functionName);
       const { functionObject } = buildFunctionSignature(pattern, text, '');
-      if (functionObject.description) item.documentation = new MarkdownString(functionObject.description);
+      if (functionObject.description)
+        item.documentation = new MarkdownString(functionObject.description);
       functions.push(item);
     }
     pattern = functionPattern.exec(text);
