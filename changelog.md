@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Auto-insert #include on completion**: when accepting UDF or constant completions, the extension now automatically inserts the required `#include` directive at the top of your script (9750ce5, 65f73fc, f01bf17)
 - **Constants hover support**: expanded hover documentation to all constant modules for better inline documentation access (bd81904)
 - **Scope analysis utilities**: added utility functions for range handling and improved scope classification (1274bfd)
 - **Find All References**: Shift+F12 now lists references to user-defined functions and variables. Functions and global variables are searched workspace-wide; local variables (declared with `Local`/`Static`/`Dim` or as function parameters) are scoped to their enclosing function. Matching is case-insensitive and skips occurrences inside comments and strings, and honors the "include declaration" toggle.
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Code review findings**: addressed final code review findings including linting issues, whitespace regex patterns, and test guard improvements (451e26f)
 - **Empty Description in UDF headers**: hover/signature documentation no longer leaks the following `; Syntax ...` comment line when a standard UDF header's `; Description ...:` line is left blank (9099dba)
 - **Find All References scope**: ensure current document is included in reference search scope (64914bb)
 - **Shadowed variable references**: drop the in-scope declaration when local variables shadow outer scope declarations (6450bb2)
