@@ -690,11 +690,15 @@ const signatureToCompletion = (signatures, kind, detail) => {
     return [];
   }
 
+  const includeMatch = typeof detail === 'string' ? detail.match(/#include\s+<([^>]+)>/) : null;
+  const requiredInclude = includeMatch ? includeMatch[1] : undefined;
+
   return Object.entries(signatures).map(([key, signature]) => ({
     label: key,
     documentation: signature?.documentation || '',
     kind: kind || CompletionItemKind.Function,
     detail: detail || '',
+    ...(requiredInclude ? { requiredInclude } : {}),
   }));
 };
 
