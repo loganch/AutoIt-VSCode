@@ -24,7 +24,7 @@ jest.mock('vscode', () => ({
 
 jest.mock('../src/ai_config', () => ({ findFilepath: () => undefined }));
 
-import { signatureToCompletion } from '../src/util';
+import { signatureToCompletion, fillCompletions } from '../src/util';
 
 describe('signatureToCompletion requiredInclude', () => {
   test('stamps requiredInclude when detail contains #include <...>', () => {
@@ -68,5 +68,27 @@ describe('signatureToCompletion requiredInclude', () => {
     const result = signatureToCompletion(signatures, 3, detail);
 
     expect(result[0].requiredInclude).toBe('Debug.au3');
+  });
+});
+
+describe('fillCompletions requiredInclude', () => {
+  test('stamps requiredInclude when requiredScript is provided', () => {
+    const entries = [
+      { label: '$MB_OK', documentation: 'OK button' },
+      { label: '$MB_CANCEL', documentation: 'Cancel button' },
+    ];
+    const result = fillCompletions(entries, 13, '', 'MsgBoxConstants.au3');
+
+    expect(result).toHaveLength(2);
+    expect(result[0].requiredInclude).toBe('MsgBoxConstants.au3');
+    expect(result[1].requiredInclude).toBe('MsgBoxConstants.au3');
+  });
+
+  test('does not stamp requiredInclude when requiredScript is empty', () => {
+    const entries = [{ label: 'SomeKeyword', documentation: 'A keyword' }];
+    const result = fillCompletions(entries, 3, 'Keyword', '');
+
+    expect(result).toHaveLength(1);
+    expect(result[0].requiredInclude).toBeUndefined();
   });
 });

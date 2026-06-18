@@ -594,6 +594,7 @@ const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
         return kind === CompletionItemKind.Function && parenTriggerOn ? ['('] : [];
       },
       documentation: newDoc,
+      ...(requiredScript ? { requiredInclude: requiredScript } : {}),
     };
   });
 };
