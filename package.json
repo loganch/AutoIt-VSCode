@@ -527,6 +527,11 @@
           "default": true,
           "description": "Adds the ability to use '(' to select a function completion suggestion, which will add the function with open and closed parens, place the cursor between them and trigger signature help. Requires window reload to take full effect."
         },
+        "autoit.autoInsertInclude": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically insert the required #include <...> line when accepting a UDF function or constant completion that isn't yet included in the document."
+        },
         "autoit.workspaceSymbolMaxFiles": {
           "type": "number",
           "default": 500,

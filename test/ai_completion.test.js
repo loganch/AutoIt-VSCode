@@ -101,7 +101,10 @@ const mockCompletionItemKind = {
 // Set up mock before importing module
 jest.mock('vscode', () => {
   const mockPath = require('path');
-  const mockGetConfig = jest.fn(() => false);
+  const mockGetConfig = jest.fn(key => {
+    if (key === 'autoInsertInclude') return true;
+    return false;
+  });
   const mockWorkspace = {
     getConfiguration: jest.fn(() => ({
       get: mockGetConfig,
@@ -151,6 +154,11 @@ jest.mock('vscode', () => {
       constructor(line, character) {
         this.line = line;
         this.character = character;
+      }
+    },
+    TextEdit: class {
+      static insert(position, newText) {
+        return { position, newText, _isInsert: true };
       }
     },
     Uri: MockVSCodeUri,
@@ -457,5 +465,86 @@ describe('arraysMatch utility', () => {
     // Different includes, should rebuild
     provideCompletionItems(doc2, position);
     expect(mockGetIncludeData).toHaveBeenCalled();
+  });
+});
+
+describe('attachIncludeEdits integration', () => {
+  let provideCompletionItems;
+  let languages;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetModules();
+    applyMockImplementations();
+
+    ({ languages } = require('vscode'));
+
+    jest.doMock('../src/completions', () => [
+      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
+      { label: 'MsgBox', kind: 3 },
+    ]);
+
+    require('../src/ai_completion');
+
+    const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
+    if (provider) {
+      ({ provideCompletionItems } = provider);
+    }
+  });
+
+  test('attaches additionalTextEdits for missing include', async () => {
+    const doc = new MockTextDocument('Local $x = 1\nFunc Foo()\nEndFunc', DOC1_PATH);
+    const position = new MockPosition(0, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toHaveLength(1);
+    expect(arrayItem.additionalTextEdits[0].newText).toBe('#include <Array.au3>\n');
+    expect(arrayItem.additionalTextEdits[0].position.line).toBe(0);
+  });
+
+  test('does not attach edit when include already present', async () => {
+    const doc = new MockTextDocument(
+      '#include <Array.au3>\nLocal $x = 1\nFunc Foo()\nEndFunc',
+      DOC1_PATH,
+    );
+    const position = new MockPosition(1, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toBeUndefined();
+  });
+
+  test('inserts after last existing #include line', async () => {
+    const doc = new MockTextDocument(
+      '#include <MsgBoxConstants.au3>\n; comment\n#include <String.au3>\nLocal $x = 1',
+      DOC1_PATH,
+    );
+    const position = new MockPosition(3, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem.additionalTextEdits[0].position.line).toBe(3);
+  });
+
+  test('respects autoInsertInclude = false config', async () => {
+    const { workspace } = require('vscode');
+    workspace.getConfiguration.mockReturnValue({
+      get: jest.fn(() => false),
+    });
+
+    const doc = new MockTextDocument('Local $x = 1\nFunc Foo()\nEndFunc', DOC1_PATH);
+    const position = new MockPosition(0, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toBeUndefined();
   });
 });

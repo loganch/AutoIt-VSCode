@@ -23,6 +23,7 @@ import {
 import { DEFAULT_UDFS } from './constants';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
+import { attachIncludeEdits } from './utils/includeAutoInsert';
 
 // Per-document caches for include completions, keyed by document URI
 // Each entry: { files: string[], completions: CompletionItem[] }
@@ -447,13 +448,17 @@ const provideCompletionItems = async (document, position) => {
     completions = Array.isArray(mod) ? mod : mod.default;
   }
 
-  return [
+  const merged = [
     ...completions,
     ...variableCompletions, // Either scope-aware OR regex-based, never both
     ...localCompletions, // Only functions now
     ...includeCompletions,
     ...libraryCompletions,
   ];
+
+  const autoInsertEnabled = workspace.getConfiguration('autoit').get('autoInsertInclude', true);
+
+  return attachIncludeEdits(merged, document, autoInsertEnabled);
 };
 
 const completionFeature = languages.registerCompletionItemProvider(
