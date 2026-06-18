@@ -14,7 +14,7 @@ jest.mock('vscode', () => ({
 
 import { attachIncludeEdits } from '../../src/utils/includeAutoInsert';
 
-const makeDoc = (text) => ({
+const makeDoc = text => ({
   getText: () => text,
 });
 
@@ -35,9 +35,7 @@ describe('attachIncludeEdits', () => {
   });
 
   test('does not attach edit when include is already present (angle form)', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
     const doc = makeDoc('#include <Array.au3>\nLocal $x = 1');
 
     const result = attachIncludeEdits(items, doc, true);
@@ -46,9 +44,7 @@ describe('attachIncludeEdits', () => {
   });
 
   test('does not attach edit when include is already present (quoted form)', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
     const doc = makeDoc('#include "Array.au3"\nLocal $x = 1');
 
     const result = attachIncludeEdits(items, doc, true);
@@ -57,9 +53,7 @@ describe('attachIncludeEdits', () => {
   });
 
   test('matches include case-insensitively', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
     const doc = makeDoc('#include <array.au3>\nLocal $x = 1');
 
     const result = attachIncludeEdits(items, doc, true);
@@ -68,9 +62,7 @@ describe('attachIncludeEdits', () => {
   });
 
   test('matches include with stripped .au3 extension', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
     const doc = makeDoc('#include <Array>\nLocal $x = 1');
 
     const result = attachIncludeEdits(items, doc, true);
@@ -78,11 +70,20 @@ describe('attachIncludeEdits', () => {
     expect(result[0].additionalTextEdits).toBeUndefined();
   });
 
+  test('detects indented include as present', () => {
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
+    const doc = makeDoc('    #include <Array.au3>\nLocal $x = 1');
+
+    const result = attachIncludeEdits(items, doc, true);
+
+    expect(result[0].additionalTextEdits).toBeUndefined();
+  });
+
   test('inserts after last existing #include line', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
-    const doc = makeDoc('#include <MsgBoxConstants.au3>\n; comment\n#include <String.au3>\nLocal $x = 1');
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
+    const doc = makeDoc(
+      '#include <MsgBoxConstants.au3>\n; comment\n#include <String.au3>\nLocal $x = 1',
+    );
 
     const result = attachIncludeEdits(items, doc, true);
 
@@ -90,9 +91,7 @@ describe('attachIncludeEdits', () => {
   });
 
   test('inserts at line 0 when no existing includes', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
     const doc = makeDoc('Local $x = 1\nFunc Foo()\nEndFunc');
 
     const result = attachIncludeEdits(items, doc, true);
@@ -101,9 +100,7 @@ describe('attachIncludeEdits', () => {
   });
 
   test('returns items unchanged when enabled is false', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
     const doc = makeDoc('Local $x = 1');
 
     const result = attachIncludeEdits(items, doc, false);
@@ -154,9 +151,7 @@ describe('attachIncludeEdits', () => {
   });
 
   test('handles empty document text', () => {
-    const items = [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-    ];
+    const items = [{ label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' }];
     const doc = makeDoc('');
 
     const result = attachIncludeEdits(items, doc, true);

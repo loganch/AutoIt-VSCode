@@ -529,6 +529,8 @@ describe('attachIncludeEdits integration', () => {
     const completions = await provideCompletionItems(doc, position);
 
     const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toHaveLength(1);
     expect(arrayItem.additionalTextEdits[0].position.line).toBe(3);
   });
 

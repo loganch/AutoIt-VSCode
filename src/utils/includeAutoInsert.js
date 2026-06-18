@@ -6,8 +6,8 @@ const normalizeInclude = name => name.replace(/\.au3$/i, '').toLowerCase();
 
 const collectExistingIncludes = docText => {
   const existing = new Set();
-  const angled = /^#include\s+<([^>]+)>/gm;
-  const quoted = /^#include\s+"([^"]+)"/gm;
+  const angled = /^\s*#include\s+<([^>]+)>/gm;
+  const quoted = /^\s*#include\s+"([^"]+)"/gm;
 
   let match;
   while ((match = angled.exec(docText)) !== null) {
