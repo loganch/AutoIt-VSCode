@@ -175,11 +175,11 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Each feature re-derives language concepts (e.g. two include resolvers, two variable matchers); domain rules drift between features.
   - **Remedy:** ✓ Introduced `src/language/` — `include.js`, `functionSignatureParsing.js`, `variable.js`, `map.js`, `variableParser.js` — that features depend on and that owns the AutoIt semantics.
 
-- [ ] **F26. Anemic data files with transform logic in `util.js`** — Priority 2 (P1 × S2), Monitored, accidental
+- [x] **F26. Anemic data files with transform logic in `util.js`** — Priority 2 (P1 × S2), Monitored, accidental — *Resolved as a side effect of F1/F7/F23: `util.js` no longer exists, and `signatureToCompletion`/`signatureToHover`/`completionToHover`/`fillCompletions` already live in their own dedicated `src/completionTransforms.js`, imported directly by the data files (e.g. `src/completions/constants_avi.js:2`). This is remedy option 2 ("dedicated `completionTransforms.js`"); no further change needed.*
   - **Symptom:** The 80+ signature/completion files are pure data, but the transforms that turn them into VS Code items (`signatureToCompletion`, `signatureToHover`, `completionToHover`, `fillCompletions`) live in `util.js`, disconnected from the data (`src/util.js:571-704`).
   - **Source:** Data and behavior split across modules by accident.
   - **Consequence:** Adding a new completion "kind" means editing `util.js`, not the data module that defines the kind; the data files can't be understood in isolation.
-  - **Remedy:** Co-locate per-kind transforms with the data, or move all transforms into a dedicated `completionTransforms.js` next to the registries.
+  - **Remedy:** Co-locate per-kind transforms with the data, or move all transforms into a dedicated `completionTransforms.js` next to the registries. ✓ Already done.
 
 - [ ] **F27. Module names don't match concepts** — Priority 2 (P1 × S2), Monitored, accidental
   - **Symptom:** `ai_config.js` does config + path resolution + registry writes + token-color migration + install detection; `command_constants.js` holds timing constants, `commandsList.js` is a string list, `commands/commandUtils.js` is editor helpers — three "command" modules with unclear boundaries; the `ai_` prefix carries no domain meaning.
@@ -206,6 +206,6 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
 | Dependency Disorder     | 3 | 4.00 | Scheduled | accidental |
 | Domain Model Distortion | 4 | 2.00 | Monitored  | accidental |
 
-**Recommended focus:** Change Propagation (4.5) and Dependency Disorder (4.0) remain the highest average priority groups, though both are fully resolved. The remaining open findings are F26 (anemic data files — priority 2) and F27 (module naming — priority 2), both in Domain Model Distortion. All 26 resolved findings are verified with passing tests.
+**Recommended focus:** Change Propagation (4.5) and Dependency Disorder (4.0) remain the highest average priority groups, though both are fully resolved. The remaining open finding is F27 (module naming — priority 2), in Domain Model Distortion. All 27 resolved findings are verified with passing tests.
 
 A note on intent: nearly all findings are **accidental** — structural erosion from organic growth and half-finished refactors. The only intentional-without-payback items are the `util.js` backward-compat re-exports (F13); per the guide these are treated as accidental for prioritization since they have no linked ticket or documented payback plan.
