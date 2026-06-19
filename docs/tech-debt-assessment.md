@@ -169,11 +169,11 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
 
 ### R6 — Domain Model Distortion
 
-- [ ] **F25. No domain layer; AutoIt language concepts are scattered** — Priority 6 (P2 × S3), Scheduled, accidental
+- [x] **F25. No domain layer; AutoIt language concepts are scattered** — Priority 6 (P2 × S3), Scheduled, accidental — *Resolved: created `src/language/` domain layer with 5 modules: `variable.js` (merged `variableRegex.js` + `VariablePatterns.js`), `functionSignatureParsing.js` (moved from `utils/`), `include.js` (moved from `utils/IncludeResolver.js`), `map.js` (moved from `parsers/MapParser.js`), and `variableParser.js` (moved from `parsers/VariableParser.js`). All modules have zero VSCode dependencies. Deleted `src/parsers/` directory; updated 15 imports across source and test files. `language/` is enforced by the existing `import/no-restricted-paths` lint rule from F23. 623 tests pass; webpack builds clean.*
   - **Symptom:** The implicit domain ("the AutoIt language") — function signatures, variable declarations/scope, include resolution, maps — is spread across `util.js`, `parsers/`, `services/`, and the `ai_*` feature modules with no owning layer.
   - **Source:** The codebase was built feature-first (hover, completion, definition) without extracting a shared language model.
   - **Consequence:** Each feature re-derives language concepts (e.g. two include resolvers, two variable matchers); domain rules drift between features.
-  - **Remedy:** Introduce a `language/` (or `domain/`) layer — `includeResolver`, `functionSignature`, `variableScope`, `mapModel` — that features depend on and that owns the AutoIt semantics.
+  - **Remedy:** ✓ Introduced `src/language/` — `include.js`, `functionSignatureParsing.js`, `variable.js`, `map.js`, `variableParser.js` — that features depend on and that owns the AutoIt semantics.
 
 - [ ] **F26. Anemic data files with transform logic in `util.js`** — Priority 2 (P1 × S2), Monitored, accidental
   - **Symptom:** The 80+ signature/completion files are pure data, but the transforms that turn them into VS Code items (`signatureToCompletion`, `signatureToHover`, `completionToHover`, `fillCompletions`) live in `util.js`, disconnected from the data (`src/util.js:571-704`).
@@ -204,8 +204,8 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
 | Knowledge Duplication   | 7 | 2.86 | Monitored  | accidental (F13 re-exports intentional-but-no-payback) |
 | Accidental Complexity   | 6 | 2.67 | Monitored  | accidental |
 | Dependency Disorder     | 3 | 4.00 | Scheduled | accidental |
-| Domain Model Distortion | 4 | 4.00 | Scheduled | accidental |
+| Domain Model Distortion | 4 | 2.00 | Monitored  | accidental |
 
-**Recommended focus:** Change Propagation (4.5), Dependency Disorder (4.0), and Domain Model Distortion (4.0) — all three trace back to the same root: the incomplete flat→organized migration (F28) and the `util.js` God-hub (F1/F7/F23). The highest-leverage single action is **finishing the `util.js` split as part of completing the flat→organized migration (F28)**: it directly retires F1, F7, F13, F23, F26 and unblocks F25. The two highest-ROI quick wins independent of that are **collapsing the duplicate tracking services (F9)** and **consolidating include resolution (F10/F11)**, since those are self-contained and already diverging. The mixed module systems (F16) should be resolved alongside the migration to avoid paying interop friction twice.
+**Recommended focus:** Change Propagation (4.5) and Dependency Disorder (4.0) remain the highest average priority groups, though both are fully resolved. The remaining open findings are F26 (anemic data files — priority 2) and F27 (module naming — priority 2), both in Domain Model Distortion. All 26 resolved findings are verified with passing tests.
 
 A note on intent: nearly all findings are **accidental** — structural erosion from organic growth and half-finished refactors. The only intentional-without-payback items are the `util.js` backward-compat re-exports (F13); per the guide these are treated as accidental for prioritization since they have no linked ticket or documented payback plan.
