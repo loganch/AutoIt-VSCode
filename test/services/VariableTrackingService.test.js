@@ -85,7 +85,6 @@ Global $gMain = 1`;
 
     const existsSyncMock = /** @type {jest.Mock} */ (/** @type {unknown} */ (fs.existsSync));
     const readFileSyncMock = /** @type {jest.Mock} */ (/** @type {unknown} */ (fs.readFileSync));
-    const readFileMock = /** @type {jest.Mock} */ (/** @type {unknown} */ (fs.readFile));
 
     existsSyncMock.mockReturnValue(true);
     readFileSyncMock.mockImplementation(filePath => {
@@ -101,16 +100,14 @@ Global $gMain = 1`;
 
       return '';
     });
-    readFileMock.mockImplementation((filePath, _encoding, callback) => {
-      const baseName = getBaseName(filePath);
-
-      if (baseName === getBaseName(includePath)) {
-        callback(null, 'Global $gIncluded = 1');
-        return;
-      }
-
-      callback(null, '');
-    });
+    // Include fan-out now lives in TrackingServiceBase and reads via fs.promises.
+    fs.promises = {
+      readFile: jest.fn(filePath =>
+        getBaseName(filePath) === getBaseName(includePath)
+          ? Promise.resolve('Global $gIncluded = 1')
+          : Promise.resolve(''),
+      ),
+    };
 
     service.updateFile(mainPath, mainSource);
 

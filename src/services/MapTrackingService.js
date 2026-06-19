@@ -1,179 +1,23 @@
 import MapParser from '../parsers/MapParser.js';
-import IncludeResolver from '../utils/IncludeResolver.js';
-import updateFileDebounced from './debouncedFileUpdate.js';
-import fs from 'fs';
-import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../constants.js';
+import TrackingServiceBase from './TrackingServiceBase.js';
 
 /**
- * Singleton service for tracking Map variables across workspace
+ * Singleton service for tracking Map variables across workspace.
+ * Inherits singleton lifecycle, debouncing, and include fan-out from
+ * {@link TrackingServiceBase}; provides the Map-specific parser factory
+ * and key-merge strategy.
  */
-class MapTrackingService {
+class MapTrackingService extends TrackingServiceBase {
   /**
-   * @type {MapTrackingService | null}
-   */
-  static instance = null;
-
-  constructor(
-    workspaceRoot = '',
-    autoitIncludePaths = [],
-    maxIncludeDepth = DEFAULT_MAX_INCLUDE_DEPTH,
-  ) {
-    if (MapTrackingService.instance) {
-      return MapTrackingService.instance;
-    }
-
-    this.fileParsers = new Map(); // filePath -> MapParser
-    this.includeResolver = new IncludeResolver(workspaceRoot, autoitIncludePaths, maxIncludeDepth);
-    this.workspaceRoot = workspaceRoot;
-
-    // Debouncing state
-    this.pendingParses = new Map(); // filePath -> { source, timestamp }
-    this.parseDebounceMs = DEFAULT_PARSE_DEBOUNCE_MS;
-    this.ongoingParses = new Set(); // Track files currently being parsed
-
-    // Create debounced parse function per file
-    this.debouncedParseByFile = new Map(); // filePath -> debounced function
-
-    MapTrackingService.instance = this;
-  }
-
-  /**
-   * Get singleton instance
-   * @param {string} [workspaceRoot] - Only used on first call, ignored on subsequent calls unless updateConfiguration() is called
-   * @param {string[]} [autoitIncludePaths] - Only used on first call, ignored on subsequent calls unless updateConfiguration() is called
-   * @param {number} [maxIncludeDepth] - Only used on first call, ignored on subsequent calls unless updateConfiguration() is called
-   * @returns {MapTrackingService}
-   * @note Parameters are only used during initial instantiation. To update configuration
-   *       after initialization, use updateConfiguration() method.
-   */
-  static getInstance(workspaceRoot, autoitIncludePaths, maxIncludeDepth) {
-    if (!MapTrackingService.instance) {
-      MapTrackingService.instance = new MapTrackingService(
-        workspaceRoot,
-        autoitIncludePaths,
-        maxIncludeDepth,
-      );
-    } else if (
-      workspaceRoot !== undefined ||
-      autoitIncludePaths !== undefined ||
-      maxIncludeDepth !== undefined
-    ) {
-      // Warn if parameters provided don't match stored config
-      const { instance } = MapTrackingService;
-      const hasChanges =
-        (workspaceRoot !== undefined && workspaceRoot !== instance.workspaceRoot) ||
-        (autoitIncludePaths !== undefined &&
-          JSON.stringify(autoitIncludePaths) !==
-            JSON.stringify(instance.includeResolver.autoitIncludePaths)) ||
-        (maxIncludeDepth !== undefined && maxIncludeDepth !== instance.includeResolver.maxDepth);
-
-      if (hasChanges) {
-        console.warn(
-          '[MapTrackingService] getInstance called with different parameters than initial instance. ' +
-            'Use updateConfiguration() to modify singleton settings.',
-        );
-      }
-    }
-    return MapTrackingService.instance;
-  }
-
-  /**
-   * Update configuration for the singleton instance
-   * @param {string} workspaceRoot - New workspace root directory
-   * @param {string[]} autoitIncludePaths - New AutoIt include paths
-   * @param {number} maxIncludeDepth - New maximum include depth
-   */
-  updateConfiguration(workspaceRoot, autoitIncludePaths, maxIncludeDepth) {
-    this.workspaceRoot = workspaceRoot;
-    this.includeResolver = new IncludeResolver(workspaceRoot, autoitIncludePaths, maxIncludeDepth);
-    // Clear cached parsers to force re-parsing with new include paths
-    this.fileParsers.clear();
-  }
-
-  /**
-   * Reset singleton instance (for testing)
-   * @internal
-   */
-  static resetInstance() {
-    MapTrackingService.instance = null;
-  }
-
-  /**
-   * Update parsed data for a file (immediate, no debouncing)
-   * @param {string} filePath - Absolute file path
    * @param {string} source - File source code
+   * @returns {MapParser}
    */
-  updateFile(filePath, source) {
-    const parser = new MapParser(source);
-    this.fileParsers.set(filePath, parser);
+  createParser(source) {
+    return new MapParser(source);
   }
 
   /**
-   * Update file with debouncing
-   * @param {string} filePath - Absolute file path
-   * @param {string} source - File source code
-   */
-  updateFileDebounced(filePath, source) {
-    updateFileDebounced(this, filePath, source);
-  }
-
-  /**
-   * Update file immediately without debouncing (for file open)
-   * @param {string} filePath - Absolute file path
-   * @param {string} source - File source code
-   */
-  updateFileImmediate(filePath, source) {
-    // Cancel any pending debounced parse
-    if (this.debouncedParseByFile.has(filePath)) {
-      const debouncedParse = this.debouncedParseByFile.get(filePath);
-      if (debouncedParse.cancel) {
-        debouncedParse.cancel();
-      }
-    }
-
-    this._parseFile(filePath, source);
-  }
-
-  /**
-   * Internal method to parse file (called after debounce)
-   * @param {string} filePath - Absolute file path
-   * @param {string} source - File source code
-   * @private
-   */
-  _parseFile(filePath, source) {
-    // Prevent duplicate parsing
-    if (this.ongoingParses.has(filePath)) {
-      return;
-    }
-
-    this.ongoingParses.add(filePath);
-
-    try {
-      const parser = new MapParser(source);
-      this.fileParsers.set(filePath, parser);
-    } finally {
-      this.ongoingParses.delete(filePath);
-      this.pendingParses.delete(filePath);
-    }
-  }
-
-  /**
-   * Remove file from cache
-   * @param {string} filePath - Absolute file path
-   */
-  removeFile(filePath) {
-    this.fileParsers.delete(filePath);
-  }
-
-  /**
-   * Clear all cached data
-   */
-  clear() {
-    this.fileParsers.clear();
-  }
-
-  /**
-   * Get keys for a Map variable at a specific line in a file
+   * Get keys for a Map variable at a specific line in a file.
    * @param {string} filePath - Absolute file path
    * @param {string} mapName - Map variable name
    * @param {number} line - Line number
@@ -184,47 +28,25 @@ class MapTrackingService {
     if (!parser) {
       return { directKeys: [], functionKeys: [] };
     }
-
     return parser.getKeysForMapAtLine(mapName, line);
   }
 
   /**
-   * Get keys for a Map including keys from #include files
+   * Get keys for a Map including keys from #include files.
    * @param {string} filePath - Absolute file path
    * @param {string} mapName - Map variable name
    * @param {number} line - Line number
    * @returns {Promise<object>} Promise resolving to object with directKeys and functionKeys arrays
    */
   async getKeysForMapWithIncludes(filePath, mapName, line) {
-    // Get keys from current file
     const currentKeys = this.getKeysForMap(filePath, mapName, line);
+    const includedFiles = await this._ensureIncludedFilesParsed(filePath);
 
-    // Get keys from included files
-    const includedFiles = this.includeResolver.resolveAllIncludes(filePath);
     const allDirectKeys = new Set(currentKeys.directKeys);
     const allFunctionKeys = [...currentKeys.functionKeys];
 
     for (const includedFile of includedFiles) {
-      // Parse included file if not already cached
-      if (!this.fileParsers.has(includedFile)) {
-        try {
-          // Check if file exists using async access
-          await fs.promises.access(includedFile, fs.constants.F_OK);
-          const source = await fs.promises.readFile(includedFile, 'utf8');
-          this.updateFile(includedFile, source);
-        } catch (error) {
-          // Log read errors instead of silently continuing
-          console.warn(
-            `[MapTrackingService] Failed to read included file ${includedFile}:`,
-            error.message,
-          );
-          continue;
-        }
-      }
-
       const includedKeys = this.getKeysForMap(includedFile, mapName, Infinity);
-
-      // Merge keys
       includedKeys.directKeys.forEach(key => allDirectKeys.add(key));
       allFunctionKeys.push(...includedKeys.functionKeys);
     }
