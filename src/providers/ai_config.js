@@ -14,17 +14,21 @@ import meta from '../../package.json';
  * #209
  * @link https://github.com/microsoft/vscode/issues/201603
  */
-try {
-  const cConfig = workspace.getConfiguration('editor');
-  const dataNew = {};
-  let save = false;
+function migrateTokenColorDefaults() {
+  try {
+    const cConfig = workspace.getConfiguration('editor');
+    const dataNew = {};
+    let save = false;
 
-  // Safely read token color defaults from package.json (guard for packaging changes)
-  const cfgDefaults = meta?.contributes?.configurationDefaults?.['editor.tokenColorCustomizations'];
+    // Safely read token color defaults from package.json (guard for packaging changes)
+    const cfgDefaults =
+      meta?.contributes?.configurationDefaults?.['editor.tokenColorCustomizations'];
 
-  if (!cfgDefaults?.textMateRules?.length) {
-    // nothing to add, skip
-  } else {
+    if (!cfgDefaults?.textMateRules?.length) {
+      // nothing to add, skip
+      return;
+    }
+
     // convert default rules into an object with the scope as key
     const defaultRules = cfgDefaults.textMateRules.reduce((obj, item) => {
       obj[item.scope] = item;
@@ -64,10 +68,10 @@ try {
       // save global settings
       cConfig.update('tokenColorCustomizations', dataNew, true);
     }
+  } catch (error) {
+    // Log only to console to keep activation resilient without hiding diagnostics.
+    console.debug('[autoit] Failed to update tokenColorCustomizations defaults.', error);
   }
-} catch (error) {
-  // Log only to console to keep activation resilient without hiding diagnostics.
-  console.debug('[autoit] Failed to update tokenColorCustomizations defaults.', error);
 }
 
 const conf = {
@@ -411,6 +415,20 @@ workspace.onDidChangeConfiguration(({ affectsConfiguration }) => {
 
 getPaths();
 
+let initialized = false;
+
+/**
+ * Runs the token-color-customization migration, which writes global
+ * workspace config. Kept out of module load so merely importing this file
+ * (e.g. from a test) can't mutate the user's workspace settings — see F17
+ * in docs/tech-debt-assessment.md. Call explicitly from `activate`.
+ */
+function init() {
+  if (initialized) return;
+  initialized = true;
+  migrateTokenColorDefaults();
+}
+
 function addListener(listener) {
   listeners.set(++listenerId, listener);
   return listenerId;
@@ -426,6 +444,7 @@ function noEvents(value) {
 
 export default {
   config,
+  init,
   addListener,
   removeListener,
   noEvents,

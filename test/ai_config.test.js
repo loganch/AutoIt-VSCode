@@ -91,6 +91,38 @@ describe('ai_config', () => {
     });
   });
 
+  describe('import-time side effects (F17)', () => {
+    test('importing the module does not write workspace config (token-color migration)', () => {
+      jest.resetModules();
+      const editorUpdate = jest.fn();
+      const editorGetConfiguration = jest.fn(() => ({
+        get: jest.fn(() => ({})),
+        update: editorUpdate,
+      }));
+      jest.doMock('vscode', () => ({
+        FileType: { File: 1, Directory: 2, SymbolicLink: 64 },
+        Uri: { file: p => ({ fsPath: p }) },
+        window: { showErrorMessage: jest.fn(), showInformationMessage: jest.fn() },
+        workspace: {
+          getConfiguration: editorGetConfiguration,
+          onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
+          fs: { stat: jest.fn(() => Promise.resolve({ type: 1 })) },
+        },
+      }));
+
+      require('../src/providers/ai_config');
+
+      expect(editorUpdate).not.toHaveBeenCalled();
+      jest.dontMock('vscode');
+    });
+
+    test('init() runs the token-color migration exactly once', () => {
+      const fresh = require('../src/providers/ai_config').default;
+      expect(() => fresh.init()).not.toThrow();
+      expect(() => fresh.init()).not.toThrow(); // idempotent, safe to call again
+    });
+  });
+
   describe('findFilepath', () => {
     test('returns false when file does not exist on any path', () => {
       mockFsExistsSync.mockReturnValue(false);

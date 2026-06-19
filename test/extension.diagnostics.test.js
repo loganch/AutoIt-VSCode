@@ -71,7 +71,7 @@ jest.mock('vscode', () => {
 
 jest.mock('../src/providers/ai_config', () => ({
   __esModule: true,
-  default: { config: mockConfig, aiPath: '', wrapperPath: '', data: {} },
+  default: { config: mockConfig, aiPath: '', wrapperPath: '', data: {}, init: () => {} },
 }));
 
 const stubService = {

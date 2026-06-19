@@ -446,6 +446,8 @@ const setupDiagnostics = ctx => {
 };
 
 export const activate = ctx => {
+  conf.init();
+
   const features = [
     hoverFeature,
     completionFeature,
