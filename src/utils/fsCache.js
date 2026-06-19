@@ -42,6 +42,14 @@ export const isValidDocument = document => {
  */
 const includeCache = new Map();
 
+/** Cap on includeCache size; oldest entry is evicted once exceeded. */
+const MAX_INCLUDE_CACHE_SIZE = 200;
+
+/**
+ * Drops all cached include file contents. Exposed for `deactivate()` and tests.
+ */
+export const clearIncludeCache = () => includeCache.clear();
+
 /**
  * Grace period (ms) during which a cached include file is returned without an
  * fs.statSync call. Avoids 30+ synchronous stat syscalls per F12 on Windows
@@ -159,6 +167,10 @@ export const getIncludeText = filePath => {
   // File changed (or not cached yet): read and store.
   const content = safeReadFile(normalized);
   if (content) {
+    if (!includeCache.has(normalized) && includeCache.size >= MAX_INCLUDE_CACHE_SIZE) {
+      // ponytail: FIFO eviction (oldest insertion), not true LRU; upgrade if access patterns need it
+      includeCache.delete(includeCache.keys().next().value);
+    }
     includeCache.set(normalized, { mtimeMs, content, statCheckedAt: now });
   }
 

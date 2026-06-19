@@ -14,7 +14,12 @@ import referencesFeature from './providers/ai_references';
 
 import { registerCommands } from './registerCommands';
 import { formatterProvider } from './providers/ai_formatter';
-import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
+import {
+  clearDiagnosticsOwnedBy,
+  parseAu3CheckOutput,
+  resetDiagnosticTracking,
+} from './diagnosticUtils';
+import { clearIncludeCache } from './utils/fsCache';
 import { debugLog } from './debugLog';
 import conf from './providers/ai_config';
 import { warmDocument } from './services/symbolIndex';
@@ -484,4 +489,6 @@ export function deactivate() {
   updateTimers.forEach(timer => clearTimeout(timer));
   updateTimers.clear();
   lastCheckedVersions.clear();
+  clearIncludeCache();
+  resetDiagnosticTracking();
 }

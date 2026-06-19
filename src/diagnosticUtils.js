@@ -212,6 +212,14 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
 /** @type {Set<string>} */
 const trackedDiagnosticFileUris = new Set();
 
+/** Cap on trackedDiagnosticFileUris size; oldest entry is evicted once exceeded. */
+const MAX_TRACKED_DIAGNOSTIC_URIS = 500;
+
+/**
+ * Clears all tracked diagnostic file URIs. Exposed for `deactivate()` and tests.
+ */
+export const resetDiagnosticTracking = () => trackedDiagnosticFileUris.clear();
+
 /**
  * Register a file path (as string) whose diagnostics we set, so later cleanup can find it safely via public APIs.
  * @param {string} filePath
@@ -220,6 +228,10 @@ const trackDiagnosticFile = filePath => {
   if (!filePath) return;
   try {
     const uri = Uri.file(filePath).toString();
+    if (!trackedDiagnosticFileUris.has(uri) && trackedDiagnosticFileUris.size >= MAX_TRACKED_DIAGNOSTIC_URIS) {
+      // ponytail: FIFO eviction (oldest insertion); upgrade if access patterns need true LRU
+      trackedDiagnosticFileUris.delete(trackedDiagnosticFileUris.values().next().value);
+    }
     trackedDiagnosticFileUris.add(uri);
   } catch (error) {
     console.debug('[AutoIt][diagnostics] Failed to register tracked diagnostic URI.', error);
@@ -243,6 +255,7 @@ const filterDiagnosticsOnUriByOwner = (collection, uri, owner) => {
     });
     if (filtered.length === 0) {
       collection.delete(uri);
+      trackedDiagnosticFileUris.delete(uri.toString());
     } else if (filtered.length !== current.length) {
       collection.set(uri, filtered);
     }
