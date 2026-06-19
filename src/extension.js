@@ -209,31 +209,11 @@ const checkAutoItCode = async (document, diagnosticCollection) => {
   }
 };
 
-export const activate = ctx => {
-  const features = [
-    hoverFeature,
-    completionFeature,
-    symbolsFeature,
-    signaturesFeature,
-    signatureHoverProvider,
-    workspaceSymbolsFeature,
-    goToDefinitionFeature,
-    referencesFeature,
-  ];
-
-  // Only register formatter on Windows with valid paths
-  if (validateFormatterPaths()) {
-    features.push(formatterProvider);
-  }
-
-  ctx.subscriptions.push(...features);
-
-  ctx.subscriptions.push(languages.setLanguageConfiguration('autoit', languageConfiguration));
-
-  registerCommands(ctx);
-
-  ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
-
+/**
+ * Wires up Map/Variable tracking services and the document-lifecycle listeners
+ * that keep them in sync. Returns the services so config-change handling can update them.
+ */
+const setupDocumentTracking = ctx => {
   // Initialize MapTrackingService
   const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
   const autoitConfig = workspace.getConfiguration('autoit');
@@ -348,7 +328,14 @@ export const activate = ctx => {
     }
   });
 
-  // Handle configuration changes
+  return { mapTrackingService, variableTrackingService };
+};
+
+/**
+ * Keeps MapTrackingService/VariableTrackingService and the Au3Check version
+ * cache in sync with `autoit.*` configuration changes.
+ */
+const setupConfigSync = (ctx, mapTrackingService, variableTrackingService) => {
   ctx.subscriptions.push(
     workspace.onDidChangeConfiguration(event => {
       // Au3Check behavior depends on these settings, not just document content, so
@@ -399,57 +386,93 @@ export const activate = ctx => {
       }
     }),
   );
+};
 
-  if (process.platform === 'win32') {
-    const diagnosticCollection = languages.createDiagnosticCollection('autoit');
-    ctx.subscriptions.push(diagnosticCollection);
+/**
+ * Sets up the Au3Check diagnostic collection and the document-lifecycle
+ * listeners that trigger/clear it. Windows-only, matching validateCheckPath's platform.
+ */
+const setupDiagnostics = ctx => {
+  if (process.platform !== 'win32') return;
 
-    const diagnosticListeners = [];
-    diagnosticListeners.push(
-      workspace.onDidSaveTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
-    );
-    diagnosticListeners.push(
-      workspace.onDidOpenTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
-    );
-    diagnosticListeners.push(
-      workspace.onDidCloseTextDocument(document => {
-        // Drop the cached check version so a reopened document is re-checked
-        lastCheckedVersions.delete(document.uri.toString());
-        // First remove all diagnostics owned by the closing document (including in included files)
-        try {
-          clearDiagnosticsOwnedBy(diagnosticCollection, document.uri);
-        } catch (err) {
-          // Optional debug logging to help diagnose cleanup failures without breaking the extension
-          debugLog(
-            `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
-          );
-        }
-        // Then remove any remaining diagnostics specifically for the closed document
-        try {
-          diagnosticCollection.delete(document.uri);
-        } catch (err) {
-          // Optional debug logging for delete failures
-          debugLog(
-            `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
-          );
-        }
-      }),
-    );
-    diagnosticListeners.push(
-      window.onDidChangeActiveTextEditor(editor => {
-        if (editor) {
-          checkAutoItCode(editor.document, diagnosticCollection);
-        }
-      }),
-    );
+  const diagnosticCollection = languages.createDiagnosticCollection('autoit');
+  ctx.subscriptions.push(diagnosticCollection);
 
-    ctx.subscriptions.push(...diagnosticListeners);
+  const diagnosticListeners = [];
+  diagnosticListeners.push(
+    workspace.onDidSaveTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
+  );
+  diagnosticListeners.push(
+    workspace.onDidOpenTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
+  );
+  diagnosticListeners.push(
+    workspace.onDidCloseTextDocument(document => {
+      // Drop the cached check version so a reopened document is re-checked
+      lastCheckedVersions.delete(document.uri.toString());
+      // First remove all diagnostics owned by the closing document (including in included files)
+      try {
+        clearDiagnosticsOwnedBy(diagnosticCollection, document.uri);
+      } catch (err) {
+        // Optional debug logging to help diagnose cleanup failures without breaking the extension
+        debugLog(
+          `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
+        );
+      }
+      // Then remove any remaining diagnostics specifically for the closed document
+      try {
+        diagnosticCollection.delete(document.uri);
+      } catch (err) {
+        // Optional debug logging for delete failures
+        debugLog(
+          `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
+        );
+      }
+    }),
+  );
+  diagnosticListeners.push(
+    window.onDidChangeActiveTextEditor(editor => {
+      if (editor) {
+        checkAutoItCode(editor.document, diagnosticCollection);
+      }
+    }),
+  );
 
-    // Run diagnostic on document that's open when the extension loads
-    if (config.enableDiagnostics && window.activeTextEditor) {
-      checkAutoItCode(window.activeTextEditor.document, diagnosticCollection);
-    }
+  ctx.subscriptions.push(...diagnosticListeners);
+
+  // Run diagnostic on document that's open when the extension loads
+  if (config.enableDiagnostics && window.activeTextEditor) {
+    checkAutoItCode(window.activeTextEditor.document, diagnosticCollection);
   }
+};
+
+export const activate = ctx => {
+  const features = [
+    hoverFeature,
+    completionFeature,
+    symbolsFeature,
+    signaturesFeature,
+    signatureHoverProvider,
+    workspaceSymbolsFeature,
+    goToDefinitionFeature,
+    referencesFeature,
+  ];
+
+  // Only register formatter on Windows with valid paths
+  if (validateFormatterPaths()) {
+    features.push(formatterProvider);
+  }
+
+  ctx.subscriptions.push(...features);
+
+  ctx.subscriptions.push(languages.setLanguageConfiguration('autoit', languageConfiguration));
+
+  registerCommands(ctx);
+
+  ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
+
+  const { mapTrackingService, variableTrackingService } = setupDocumentTracking(ctx);
+  setupConfigSync(ctx, mapTrackingService, variableTrackingService);
+  setupDiagnostics(ctx);
 
   console.log('AutoIt is now active!');
 };

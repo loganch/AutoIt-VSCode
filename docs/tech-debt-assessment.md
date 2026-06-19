@@ -31,7 +31,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** "Config" no longer describes the module; the Proxy makes data flow hard to trace; side effects hide among helpers.
   - **Remedy:** Extract `pathResolver.js`, `autoItInstallDetector.js`, `smartHelpMigrator.js`; leave `ai_config.js` as a thin config facade.
 
-- [ ] **F3. `activate()` is a 277-line orchestrator handling 8+ concerns** — Priority 4 (P2 × S2), Scheduled, accidental
+- [x] **F3. `activate()` is a 277-line orchestrator handling 8+ concerns** — Priority 4 (P2 × S2), Scheduled, accidental — *Resolved: extracted `setupDocumentTracking(ctx)` (tracking services + open/change/save/close listeners), `setupConfigSync(ctx, mapTrackingService, variableTrackingService)` (config-change handling), and `setupDiagnostics(ctx)` (Au3Check diagnostic collection + listeners) in `src/extension.js`. `activate` now only composes feature registration, command registration, and these three helpers. 603 tests pass.*
   - **Symptom:** `activate` registers features + commands, warms the symbol index, wires 4 document-event handlers, handles config changes, and sets up diagnostics with 4 listeners (`src/extension.js:211-488`).
   - **Source:** Lifecycle wiring accreted in the entry point without extraction.
   - **Consequence:** Any lifecycle change requires editing a giant function; event-handler interactions are hard to reason about.
