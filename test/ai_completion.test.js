@@ -421,7 +421,7 @@ describe('ai_completion cache behavior', () => {
   });
 
   test('getLocalFunctionCompletions sets documentation from buildFunctionSignature description', async () => {
-    const { buildFunctionSignature } = require('../src/util');
+    const { buildFunctionSignature } = require('../src/utils/functionSignature');
     // mockReturnValueOnce (not mockReturnValue) keeps this override test-local;
     // the default mock takes over for any subsequent loop iteration
     buildFunctionSignature.mockReturnValueOnce({

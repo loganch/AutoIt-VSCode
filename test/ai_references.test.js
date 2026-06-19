@@ -195,23 +195,6 @@ jest.mock(
   { virtual: true },
 );
 
-// Mock util to provide the surface ai_symbols needs without triggering the
-// heavy ai_config load chain.
-//
-// NOTE: These values are deliberately hand-copied and MUST be kept in sync with
-// src/util.js. jest.requireActual('../src/util') was attempted to avoid this
-// duplication, but loading the real module evaluates ai_config at import time,
-// whose getPaths()/verifyPath() calls workspace.fs.stat (undefined under this
-// vscode mock) and throws "Cannot read properties of undefined (reading
-// 'stat')". Since even a partial requireActual pulls in those side effects, the
-// manual mock is retained. If any of these patterns/constants change in
-// src/util.js, update them here too.
-jest.mock('../src/util', () => ({
-  ...jest.requireActual('../src/utils/coreConstants'),
-  signatureToHover: signatures => signatures,
-  signatureToCompletion: signatures => signatures,
-}));
-
 // Mock the lazily-required definition provider so workspace tests can control
 // what declaration collectWorkspace resolves. The default implementation
 // delegates to the REAL provider so the local-variable includeDeclaration:false

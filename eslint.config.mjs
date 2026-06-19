@@ -43,6 +43,31 @@ export default [
       'import/no-cycle': 'error',
       'import/no-useless-path-segments': 'error',
 
+      // Layering rule (F23): data → domain helpers → features → infrastructure.
+      // Enforced below: the data layer (completions/, hovers/, signatures/) and
+      // parsers/ cannot import from providers/ (features), services/ (infra), or
+      // commands/ (orchestration). Both layers are currently clean, so this is a
+      // regression guard. Aspirational rules deferred to F24/F25 (need refactoring):
+      //   - utils/ should not import providers/ai_config (2 violations via findFilepath)
+      //   - features (providers/ai_*) should import services/ only via ai_config
+      'import/no-restricted-paths': [
+        'error',
+        {
+          zones: [
+            {
+              target: 'src/{completions,hovers,signatures}/**',
+              from: ['src/providers/**', 'src/services/**', 'src/commands/**'],
+              message: 'Data layer must not import features or infrastructure (F23 layering rule).',
+            },
+            {
+              target: 'src/parsers/**',
+              from: ['src/providers/**', 'src/services/**', 'src/commands/**'],
+              message: 'Parsers must not import features or infrastructure (F23 layering rule).',
+            },
+          ],
+        },
+      ],
+
       // Variables
       'no-shadow': 'error',
       'no-duplicate-imports': 'error',

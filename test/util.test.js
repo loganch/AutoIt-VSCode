@@ -24,7 +24,7 @@ jest.mock('vscode', () => ({
 
 jest.mock('../src/providers/ai_config', () => ({ findFilepath: () => undefined }));
 
-import { signatureToCompletion, fillCompletions } from '../src/util';
+import { signatureToCompletion, fillCompletions } from '../src/completionTransforms';
 
 describe('signatureToCompletion requiredInclude', () => {
   test('stamps requiredInclude when detail contains #include <...>', () => {

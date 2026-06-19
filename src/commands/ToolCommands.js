@@ -3,7 +3,7 @@ import { getActiveDocumentFileName } from './commandUtils';
 import { window } from 'vscode';
 import fs from 'fs';
 import { spawn } from 'child_process';
-import { getIncludeText } from '../util';
+import { getIncludeText } from '../utils/fsCache';
 import conf from '../providers/ai_config';
 import ProcessRunner from '../services/ProcessRunner';
 import ProcessManager from '../services/ProcessManager';

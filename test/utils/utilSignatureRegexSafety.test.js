@@ -31,7 +31,7 @@ jest.mock('../../src/providers/ai_config', () => ({
   },
 }));
 
-const { buildFunctionSignature, getParams } = require('../../src/util');
+const { buildFunctionSignature, getParams } = require('../../src/utils/functionSignature');
 const { REGEX_PATTERNS: patterns } = require('../../src/utils/regexPatterns');
 
 const EXPECTED_PARAMETER_COUNT = 2;

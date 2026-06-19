@@ -37,8 +37,7 @@ jest.mock('fs', () => ({
   existsSync: (...args) => mockExistsSync(...args),
 }));
 
-jest.mock('../../src/util', () => ({
-  findFilepath: (...args) => mockFindFilepath(...args),
+jest.mock('../../src/utils/fsCache', () => ({
   getIncludeText: (...args) => mockGetIncludeText(...args),
 }));
 
