@@ -4,6 +4,10 @@
  */
 
 import VariablePatterns from '../utils/VariablePatterns.js';
+import {
+  parseFunctionDeclarationLine,
+  parseParameterNames,
+} from '../utils/functionSignatureParsing.js';
 
 /**
  * Split a string by commas that are not inside parentheses or brackets.
@@ -28,10 +32,6 @@ function splitByTopLevelCommas(str) {
   parts.push(str.slice(start));
   return parts;
 }
-import {
-  parseFunctionDeclarationLine,
-  parseParameterNames,
-} from '../utils/functionSignatureParsing.js';
 
 class VariableParser {
   constructor(source, filePath = '') {

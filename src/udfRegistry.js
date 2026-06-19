@@ -61,20 +61,20 @@ import * as udf_visa from './signatures/udf_visa';
 import * as udf_winapi from './signatures/udf_winapi';
 import * as udf_winnet from './signatures/udf_winnet';
 import * as udf_word from './signatures/udf_word';
-import * as WinAPICom from './signatures/WinAPIEx/WinAPICom';
-import * as WinAPIDiag from './signatures/WinAPIEx/WinAPIDiag';
-import * as WinAPIDlg from './signatures/WinAPIEx/WinAPIDlg';
-import * as WinAPIFiles from './signatures/WinAPIEx/WinAPIFiles';
-import * as WinAPIGdi from './signatures/WinAPIEx/WinAPIGdi';
-import * as WinAPILocale from './signatures/WinAPIEx/WinAPILocale';
-import * as WinAPIMisc from './signatures/WinAPIEx/WinAPIMisc';
-import * as WinAPIProc from './signatures/WinAPIEx/WinAPIProc';
-import * as WinAPIReg from './signatures/WinAPIEx/WinAPIReg';
-import * as WinAPIRes from './signatures/WinAPIEx/WinAPIRes';
-import * as WinAPIShellEx from './signatures/WinAPIEx/WinAPIShellEx';
-import * as WinAPIShPath from './signatures/WinAPIEx/WinAPIShPath';
-import * as WinAPISys from './signatures/WinAPIEx/WinAPISys';
-import * as WinAPITheme from './signatures/WinAPIEx/WinAPITheme';
+import * as udf_winapi_com from './signatures/WinAPIEx/WinAPICom';
+import * as udf_winapi_diag from './signatures/WinAPIEx/WinAPIDiag';
+import * as udf_winapi_dlg from './signatures/WinAPIEx/WinAPIDlg';
+import * as udf_winapi_files from './signatures/WinAPIEx/WinAPIFiles';
+import * as udf_winapi_gdi from './signatures/WinAPIEx/WinAPIGdi';
+import * as udf_winapi_locale from './signatures/WinAPIEx/WinAPILocale';
+import * as udf_winapi_misc from './signatures/WinAPIEx/WinAPIMisc';
+import * as udf_winapi_proc from './signatures/WinAPIEx/WinAPIProc';
+import * as udf_winapi_reg from './signatures/WinAPIEx/WinAPIReg';
+import * as udf_winapi_res from './signatures/WinAPIEx/WinAPIRes';
+import * as udf_winapi_shellex from './signatures/WinAPIEx/WinAPIShellEx';
+import * as udf_winapi_shpath from './signatures/WinAPIEx/WinAPIShPath';
+import * as udf_winapi_sys from './signatures/WinAPIEx/WinAPISys';
+import * as udf_winapi_theme from './signatures/WinAPIEx/WinAPITheme';
 import * as sendKeys from './completions/send_keys';
 import * as aviConstants from './completions/constants_avi';
 import * as buttonConstants from './completions/constants_buttonconstants';
@@ -161,20 +161,20 @@ const modules = [
   udf_winapi,
   udf_winnet,
   udf_word,
-  WinAPICom,
-  WinAPIDiag,
-  WinAPIDlg,
-  WinAPIFiles,
-  WinAPIGdi,
-  WinAPILocale,
-  WinAPIMisc,
-  WinAPIProc,
-  WinAPIReg,
-  WinAPIRes,
-  WinAPIShellEx,
-  WinAPIShPath,
-  WinAPISys,
-  WinAPITheme,
+  udf_winapi_com,
+  udf_winapi_diag,
+  udf_winapi_dlg,
+  udf_winapi_files,
+  udf_winapi_gdi,
+  udf_winapi_locale,
+  udf_winapi_misc,
+  udf_winapi_proc,
+  udf_winapi_reg,
+  udf_winapi_res,
+  udf_winapi_shellex,
+  udf_winapi_shpath,
+  udf_winapi_sys,
+  udf_winapi_theme,
   sendKeys, // completions only — no hovers
   aviConstants,
   buttonConstants,
