@@ -4,10 +4,10 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/commands/commandUtils', () => jest.fn());
+jest.mock('../../src/commands/editorActions', () => jest.fn());
 
 import traceRemove from '../../src/commands/trace';
-import searchAndReplace from '../../src/commands/commandUtils';
+import searchAndReplace from '../../src/commands/editorActions';
 
 const REMOVED_TRACE_LINE_COUNT = 4;
 

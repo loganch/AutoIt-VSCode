@@ -1,5 +1,5 @@
 import { globalOutputChannel } from './ScriptCommands.js';
-import { getActiveDocumentFileName } from './commandUtils';
+import { getActiveDocumentFileName } from './editorActions';
 import { window } from 'vscode';
 import fs from 'fs';
 import { spawn } from 'child_process';

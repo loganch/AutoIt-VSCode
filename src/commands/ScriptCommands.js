@@ -9,7 +9,7 @@ import {
   showInformationMessage,
   showWarningMessage,
 } from '../providers/ai_showMessage';
-import { getActiveDocumentFileName } from './commandUtils';
+import { getActiveDocumentFileName } from './editorActions';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';
 

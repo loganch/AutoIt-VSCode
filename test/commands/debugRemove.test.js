@@ -4,10 +4,10 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/commands/commandUtils', () => jest.fn());
+jest.mock('../../src/commands/editorActions', () => jest.fn());
 
 import debugRemove from '../../src/commands/debugRemove';
-import searchAndReplace from '../../src/commands/commandUtils';
+import searchAndReplace from '../../src/commands/editorActions';
 
 const REMOVED_DEBUG_LINE_BATCH_ONE = 2;
 const REMOVED_DEBUG_LINE_BATCH_TWO = 1;

@@ -6,9 +6,9 @@ const EXPECTED_STATUS_MESSAGE_DURATION_MS = 1500;
 const EXPECTED_ERROR_MESSAGE_TIMEOUT_MS = 30000;
 const EXPECTED_KILL_SCRIPT_INFO_TIMEOUT_MS = 10000;
 
-describe('command_constants module', () => {
+describe('commandTimings module', () => {
   test('exports expected constant values', () => {
-    const constants = require('../src/command_constants.js');
+    const constants = require('../src/commandTimings.js');
 
     expect(constants.HOTKEY_LINE_DELAY_MS).toBe(EXPECTED_HOTKEY_LINE_DELAY_MS);
     expect(constants.KEYBINDING_DEBOUNCE_MS).toBe(EXPECTED_KEYBINDING_DEBOUNCE_MS);

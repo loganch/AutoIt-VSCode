@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import searchAndReplace from './commandUtils';
+import searchAndReplace from './editorActions';
 
 /**
  * Adds a trace statement to a given match in a text.

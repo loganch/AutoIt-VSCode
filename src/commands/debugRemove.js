@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import searchAndReplace from './commandUtils';
+import searchAndReplace from './editorActions';
 
 /**
  * Removes debug lines from an AutoIt Script.

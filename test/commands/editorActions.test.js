@@ -15,7 +15,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-const searchAndReplace = require('../../src/commands/commandUtils.js').default;
+const searchAndReplace = require('../../src/commands/editorActions.js').default;
 
 const MATCH_COUNT_TWO = 2;
 
