@@ -19,7 +19,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
 
 ### R1 — Cognitive Overload
 
-- [ ] **F1. `util.js` is a God module with 11 responsibilities and 105 importers** — Priority 6 (P2 × S3), Scheduled, accidental
+- [x] **F1. `util.js` is a God module with 11 responsibilities and 105 importers** — Priority 6 (P2 × S3), Scheduled, accidental — *Resolved: split into `utils/regexPatterns.js` (cached regex + escaping), `utils/variableRegex.js` (variable-declaration matching), `utils/fsCache.js` (validation + FS/include-content caching), `utils/includeResolution.js` (path/include resolution + line skipping), `utils/functionSignature.js` (signature/param parsing). `util.js` is now a 66-line barrel re-exporting these plus `completionTransforms` for the ~10 remaining consumers. 603 tests pass.*
   - **Symptom:** One 825-line file carries section-bannered concerns: markdown constants, variable-regex matching, cached regex, error handling, input validation, FS utils + include cache, path/include resolution, doc analysis, completion transforms, signature analysis, and backward-compat re-exports (`src/util.js:1-959`).
   - **Source:** Organic accretion plus an incomplete refactor — `util.js` re-exports `AI_CONSTANTS`/`AUTOIT_MODE` from `coreConstants` and `findFilepath` from `ai_config` "for backward compatibility" (`src/util.js:916-936`).
   - **Consequence:** Developers must scan 11 sections to find anything; changes to one concern risk colliding with another; the file is the default dump location for new helpers.
