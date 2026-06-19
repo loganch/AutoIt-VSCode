@@ -1,4 +1,5 @@
-import { Diagnostic, DiagnosticSeverity, Position, Range, Uri, window, workspace } from 'vscode';
+import { Diagnostic, DiagnosticSeverity, Position, Range, Uri, workspace } from 'vscode';
+import { debugLog } from './debugLog';
 
 /**
  * Returns the diagnostic severity based on the severity string.
@@ -247,21 +248,9 @@ const filterDiagnosticsOnUriByOwner = (collection, uri, owner) => {
     }
   } catch (err) {
     // Optional debug logging of cleanup failures without breaking the extension
-    try {
-      const cfg = workspace.getConfiguration('autoit');
-      const dbg = cfg?.get?.('debugLogging') === true;
-      const msg = `[AutoIt][diagnostics] Failed to filter diagnostics on ${uri?.toString?.() ?? String(uri)} for owner=${owner}: ${err?.message ?? err}`;
-      if (dbg) {
-        if (window?.createOutputChannel) {
-          const ch = window.createOutputChannel('AutoIt');
-          ch.appendLine(msg);
-        } else {
-          console.debug(msg);
-        }
-      }
-    } catch (loggingError) {
-      console.debug('[AutoIt][diagnostics] Failed to emit cleanup debug log.', loggingError);
-    }
+    debugLog(
+      `[AutoIt][diagnostics] Failed to filter diagnostics on ${uri?.toString?.() ?? String(uri)} for owner=${owner}: ${err?.message ?? err}`,
+    );
   }
 };
 
@@ -281,24 +270,9 @@ export const clearDiagnosticsOwnedBy = (collection, ownerUri) => {
     }
   } catch (err) {
     // Optional debug logging without breaking extension
-    try {
-      const cfg = workspace.getConfiguration('autoit');
-      const dbg = cfg?.get?.('debugLogging') === true;
-      const msg = `[AutoIt][diagnostics] Failed while iterating open documents during cleanup for owner=${owner}: ${err?.message ?? err}`;
-      if (dbg) {
-        if (window?.createOutputChannel) {
-          const ch = window.createOutputChannel('AutoIt');
-          ch.appendLine(msg);
-        } else {
-          console.debug(msg);
-        }
-      }
-    } catch (loggingError) {
-      console.debug(
-        '[AutoIt][diagnostics] Failed to emit open-docs cleanup debug log.',
-        loggingError,
-      );
-    }
+    debugLog(
+      `[AutoIt][diagnostics] Failed while iterating open documents during cleanup for owner=${owner}: ${err?.message ?? err}`,
+    );
   }
 
   // 2) Filter diagnostics for any URIs we previously set (tracked index), using only public API get/set/delete.
@@ -312,24 +286,9 @@ export const clearDiagnosticsOwnedBy = (collection, ownerUri) => {
     }
   } catch (err) {
     // Optional debug logging without breaking extension
-    try {
-      const cfg = workspace.getConfiguration('autoit');
-      const dbg = cfg?.get?.('debugLogging') === true;
-      const msg = `[AutoIt][diagnostics] Failed while iterating tracked URIs during cleanup for owner=${owner}: ${err?.message ?? err}`;
-      if (dbg) {
-        if (window?.createOutputChannel) {
-          const ch = window.createOutputChannel('AutoIt');
-          ch.appendLine(msg);
-        } else {
-          console.debug(msg);
-        }
-      }
-    } catch (loggingError) {
-      console.debug(
-        '[AutoIt][diagnostics] Failed to emit tracked-URIs cleanup debug log.',
-        loggingError,
-      );
-    }
+    debugLog(
+      `[AutoIt][diagnostics] Failed while iterating tracked URIs during cleanup for owner=${owner}: ${err?.message ?? err}`,
+    );
   }
 };
 

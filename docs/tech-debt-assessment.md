@@ -63,7 +63,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Renaming/moving any export forces a 105-file change; the "Maintaining API Compatibility" re-exports exist *because* this is already painful.
   - **Remedy:** Same split as F1; consumers import from the focused module that owns the symbol they need.
 
-- [ ] **F8. Wiring and boilerplate duplicated across `extension.js`/`diagnosticUtils.js`** — Priority 2 (P1 × S2), Monitored, accidental
+- [x] **F8. Wiring and boilerplate duplicated across `extension.js`/`diagnosticUtils.js`** — Priority 2 (P1 × S2), Monitored, accidental — *Resolved: extracted a `debugLog(msg)` helper (`src/debugLog.js`, TDD'd) replacing the ~5 copy-pasted debug-log blocks; extracted a `syncDocumentImmediate(filePath, text)` closure replacing the 3 duplicated map/variable update try/catch blocks; merged the two `onDidOpenTextDocument` registrations into one (warm + sync). Also retires F15.*
   - **Symptom:** `workspace.onDidOpenTextDocument` is registered twice (`src/extension.js:238` and `:285`); the `variableTrackingService.updateFileImmediate` try/catch is repeated 4× (`:289-295`, `:320-326`, `:354-360`); the `cfg?.get?.('debugLogging')` + `createOutputChannel` debug-log pattern repeats ~6× (`src/diagnosticUtils.js:248-333`, `src/extension.js:436-468`).
   - **Source:** Copy-paste wiring rather than helpers.
   - **Consequence:** Bug fixes (e.g. to debug logging) must be applied in N places; some handlers diverge.
@@ -107,7 +107,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Two independent state copies and two listeners for one setting; they could disagree.
   - **Remedy:** Centralize in one module (or read config live at call time) and drop the duplicate.
 
-- [ ] **F15. Debug-logging boilerplate duplicated ~6×** — Priority 2 (P1 × S2), Monitored, accidental
+- [x] **F15. Debug-logging boilerplate duplicated ~6×** — Priority 2 (P1 × S2), Monitored, accidental — *Resolved alongside F8: all sites now call the single `debugLog(msg)` helper in `src/debugLog.js`.*
   - **Symptom:** The `try { cfg?.get?.('debugLogging') … createOutputChannel … console.debug }` block appears ~4× in `diagnosticUtils.js` and ~2× in `extension.js` (`src/diagnosticUtils.js:248-333`, `src/extension.js:436-468`).
   - **Source:** Defensive logging copied each time it was needed.
   - **Consequence:** ~120 lines of near-identical scaffolding; changes require N edits.

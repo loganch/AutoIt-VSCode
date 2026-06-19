@@ -15,6 +15,7 @@ import referencesFeature from './ai_references';
 import { registerCommands } from './registerCommands';
 import { formatterProvider } from './ai_formatter';
 import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
+import { debugLog } from './debugLog';
 import conf from './ai_config';
 import { warmDocument } from './services/symbolIndex';
 import { ensureWarm } from './services/symbolWarmup';
@@ -233,14 +234,6 @@ export const activate = ctx => {
 
   ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
 
-  // Prioritized warming: index a freshly-opened .au3 document immediately so it
-  // is navigable without waiting for the background workspace pass.
-  ctx.subscriptions.push(
-    workspace.onDidOpenTextDocument(doc => {
-      if (doc.languageId === 'autoit') warmDocument(doc);
-    }),
-  );
-
   // Initialize MapTrackingService
   const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
   const autoitConfig = workspace.getConfiguration('autoit');
@@ -259,6 +252,20 @@ export const activate = ctx => {
     autoitIncludePaths,
     maxIncludeDepth,
   );
+
+  // Immediate (non-debounced) sync of a document into both tracking services.
+  // variableTrackingService can throw on malformed input; never let that abort
+  // the surrounding event handler or open-document scan.
+  const syncDocumentImmediate = (filePath, text) => {
+    mapTrackingService.updateFile(filePath, text);
+    try {
+      variableTrackingService.updateFileImmediate(filePath, text);
+    } catch (error) {
+      console.error(
+        `[AutoIt][extension] Failed to update variable tracking for file: ${filePath}. Error: ${error.message}`,
+      );
+    }
+  };
 
   // Track document changes with debouncing
   const onDocumentChange = document => {
@@ -281,19 +288,13 @@ export const activate = ctx => {
     updateTimers.set(filePath, timer);
   };
 
-  // Handle document open
+  // Handle document open: prioritized symbol-index warming (so the doc is
+  // navigable without waiting for the background pass) plus immediate tracking.
   ctx.subscriptions.push(
     workspace.onDidOpenTextDocument(document => {
-      if (document.languageId === 'autoit') {
-        mapTrackingService.updateFile(document.uri.fsPath, document.getText());
-        try {
-          variableTrackingService.updateFileImmediate(document.uri.fsPath, document.getText());
-        } catch (error) {
-          console.error(
-            `[AutoIt][extension] Failed to update variable tracking for file: ${document.uri.fsPath}. Error: ${error.message}`,
-          );
-        }
-      }
+      if (document.languageId !== 'autoit') return;
+      warmDocument(document);
+      syncDocumentImmediate(document.uri.fsPath, document.getText());
     }),
   );
 
@@ -316,14 +317,7 @@ export const activate = ctx => {
           updateTimers.delete(filePath);
         }
 
-        mapTrackingService.updateFile(filePath, document.getText());
-        try {
-          variableTrackingService.updateFileImmediate(filePath, document.getText());
-        } catch (error) {
-          console.error(
-            `[AutoIt][extension] Failed to update variable tracking for file: ${filePath}. Error: ${error.message}`,
-          );
-        }
+        syncDocumentImmediate(filePath, document.getText());
       }
     }),
   );
@@ -350,14 +344,7 @@ export const activate = ctx => {
   // Parse all open AutoIt documents
   workspace.textDocuments.forEach(document => {
     if (document.languageId === 'autoit') {
-      mapTrackingService.updateFile(document.uri.fsPath, document.getText());
-      try {
-        variableTrackingService.updateFileImmediate(document.uri.fsPath, document.getText());
-      } catch (error) {
-        console.error(
-          `[AutoIt][extension] Failed to update variable tracking for file: ${document.uri.fsPath}. Error: ${error.message}`,
-        );
-      }
+      syncDocumentImmediate(document.uri.fsPath, document.getText());
     }
   });
 
@@ -433,38 +420,18 @@ export const activate = ctx => {
           clearDiagnosticsOwnedBy(diagnosticCollection, document.uri);
         } catch (err) {
           // Optional debug logging to help diagnose cleanup failures without breaking the extension
-          try {
-            const cfg = workspace.getConfiguration('autoit');
-            const dbg = cfg?.get?.('debugLogging') === true;
-            const msg = `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
-            if (dbg) {
-              console.debug(msg);
-            }
-          } catch (loggingError) {
-            console.debug(
-              '[AutoIt][extension] Failed to emit debug log for clearDiagnosticsOwnedBy error.',
-              loggingError,
-            );
-          }
+          debugLog(
+            `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
+          );
         }
         // Then remove any remaining diagnostics specifically for the closed document
         try {
           diagnosticCollection.delete(document.uri);
         } catch (err) {
           // Optional debug logging for delete failures
-          try {
-            const cfg = workspace.getConfiguration('autoit');
-            const dbg = cfg?.get?.('debugLogging') === true;
-            const msg = `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
-            if (dbg) {
-              console.debug(msg);
-            }
-          } catch (loggingError) {
-            console.debug(
-              '[AutoIt][extension] Failed to emit debug log for diagnosticCollection.delete error.',
-              loggingError,
-            );
-          }
+          debugLog(
+            `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
+          );
         }
       }),
     );
