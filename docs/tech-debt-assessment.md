@@ -37,11 +37,11 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Any lifecycle change requires editing a giant function; event-handler interactions are hard to reason about.
   - **Remedy:** Extract `setupDocumentTracking(ctx)`, `setupDiagnostics(ctx)`, `setupConfigSync(ctx)` helpers; have `activate` only compose them.
 
-- [ ] **F4. Inconsistent naming and import placement in the parser layer** — Priority 1 (P1 × S1), Monitored, accidental
-  - **Symptom:** `hovers/index.js` mixes snake_case `udf_*` with camelCase `udfWinAPITheme`/`udfWinNet`/`udfWord` and a typo `udf_guiIPAdress` (`src/hovers/index.js:22,66-68`); `VariableParser.js` places an `import` block after a function definition (`src/parsers/VariableParser.js:15-34`).
-  - **Source:** Ad-hoc naming during the flat→organized migration.
-  - **Consequence:** Mild confusion locating/renaming imports; reads as untidy.
-  - **Remedy:** Standardize on one naming convention; move imports to file top.
+- [x] **F4. Inconsistent naming and import placement in the parser layer** — Priority 1 (P1 × S1), Monitored, accidental — *Resolved: moved imports to top of VariableParser.js (were after function definition at lines 15-30); standardized udfRegistry.js WinAPI* imports to snake_case udf_winapi_* pattern for consistency with other UDF imports. 603 tests pass.*
+  - **Symptom:** `VariableParser.js` places an `import` block after a function definition (`src/parsers/VariableParser.js:15-34`); `udfRegistry.js` mixes snake_case `udf_*` imports with PascalCase `WinAPI*` imports (lines 12-77).
+  - **Source:** Ad-hoc naming during the flat→organized migration; imports added incrementally.
+  - **Consequence:** Mild confusion locating/renaming imports; inconsistent code style.
+  - **Remedy:** ✓ Moved imports to file top in VariableParser.js; standardized naming in udfRegistry.js to use `udf_winapi_*` pattern throughout.
 
 ### R2 — Change Propagation
 
