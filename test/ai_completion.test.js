@@ -193,17 +193,25 @@ const applyMockImplementations = () => {
   });
 };
 
-jest.mock('../src/util', () => ({
+jest.mock('../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
+}));
+
+jest.mock('../src/utils/functionSignature', () => ({
   buildFunctionSignature: jest.fn(() => ({
     functionName: '',
     functionObject: { description: '', documentation: '' },
   })),
-  functionPattern: /Func\s+(?:volatile\s+)?(\w+)/i,
-  variablePattern: /\$(\w+)/g,
-  includePattern: /#include\s+"([^"]+)"/g,
-  libraryIncludePattern: /#include\s+<([^>]+)>/g,
   getIncludeData: (...args) => mockGetIncludeData(...args),
+}));
+
+jest.mock('../src/utils/regexPatterns', () => ({
+  REGEX_PATTERNS: {
+    functionPattern: /Func\s+(?:volatile\s+)?(\w+)/i,
+    variablePattern: /\$(\w+)/g,
+    includePattern: /#include\s+"([^"]+)"/g,
+    libraryIncludePattern: /#include\s+<([^>]+)>/g,
+  },
   setRegExpFlags: (pattern, flags) => new RegExp(pattern.source, flags),
 }));
 

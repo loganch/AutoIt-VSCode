@@ -50,11 +50,10 @@ jest.mock('../../src/providers/ai_config', () => ({
 const {
   getIncludePath,
   getIncludeScripts,
-  getIncludeText,
   isSkippableLine,
-  normalizePath,
-  setRegExpFlags,
-} = require('../../src/util');
+} = require('../../src/utils/includeResolution');
+const { getIncludeText, normalizePath } = require('../../src/utils/fsCache');
+const { setRegExpFlags } = require('../../src/utils/regexPatterns');
 
 describe('util module', () => {
   const fixturesDir = path.join(process.cwd(), 'fixtures');

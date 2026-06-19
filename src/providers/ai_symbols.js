@@ -8,14 +8,11 @@ import {
   window,
   workspace,
 } from 'vscode';
-import {
-  AI_CONSTANTS,
-  AUTOIT_MODE,
-  functionPattern,
-  isSkippableLine,
-  regionPattern,
-  variablePattern,
-} from '../util';
+import { AI_CONSTANTS, AUTOIT_MODE } from '../utils/coreConstants';
+import { isSkippableLine } from '../utils/includeResolution';
+import { REGEX_PATTERNS } from '../utils/regexPatterns';
+
+const { functionPattern, regionPattern, variablePattern } = REGEX_PATTERNS;
 import { rangeContainsRange as sharedRangeContainsRange } from '../utils/textUtils';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';

@@ -314,8 +314,13 @@ jest.mock('fs', () => {
   };
 });
 
-// Prepare a mutable util mock; we override implementations per test
-jest.mock('../src/util', () => {
+jest.mock('../src/utils/coreConstants', () => ({
+  AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
+}));
+
+// Prepare mutable mocks for the modules ai_definition imports from; we
+// override implementations per test
+jest.mock('../src/utils/includeResolution', () => {
   // Define paths and content locally within the mock to avoid Jest scoping issues
   const pathModule = require('path');
   const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
@@ -362,19 +367,8 @@ jest.mock('../src/util', () => {
     'EndFunc',
   ].join('\n');
 
-  // Use global to track calls since we can't access outer scope variables
-  global.getIncludeTextCallCounts = global.getIncludeTextCallCounts || {};
-
-  const mod = {
+  return {
     getIncludeScripts: jest.fn(() => []),
-    getIncludeText: jest.fn(p => {
-      const n = pathModule.normalize(p);
-      global.getIncludeTextCallCounts[n] = (global.getIncludeTextCallCounts[n] || 0) + 1;
-      if (n === pathModule.normalize(mockHelperPath)) return mockHelperContent;
-      if (n === pathModule.normalize(mockLibArrayPath)) return mockLibArrayContent;
-      if (n === pathModule.normalize(mockMainPath)) return mockMainContent;
-      return ''; // simulate missing
-    }),
     getIncludePath: jest.fn((base, inc) => {
       // simplistic resolver: "helper.au3" -> HELPER_PATH, <Array.au3> -> LIB_ARRAY_PATH
       if (inc.startsWith('<') && inc.endsWith('>')) return mockLibArrayPath;
@@ -385,23 +379,83 @@ jest.mock('../src/util', () => {
       }
       return pathModule.join(pathModule.dirname(base), inc.replace(/["<>]/g, ''));
     }),
-    normalizePath: jest.fn(p => pathModule.normalize(p)),
-    AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
-    // ai_definition's createVariableRegex now delegates to this shared builder.
-    // Mirror the real implementation (src/util.js) so variable-definition
-    // matching behaves identically under the mock. Use a PLAIN function (not
-    // jest.fn) so the global `resetMocks: true` jest config does not wipe its
-    // implementation between tests.
-    buildVariableRegex: variableName => {
-      const escaped = String(variableName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const keywords = ['Local', 'Global', 'Const'].join('|');
-      const pattern = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b'
-        .replace('{keywords}', keywords)
-        .replace('{escaped}', escaped);
-      return new RegExp(pattern, 'mi');
-    },
   };
-  return mod;
+});
+
+// ai_definition's createVariableRegex now delegates to this shared builder.
+// Mirror the real implementation (src/utils/variableRegex.js) so
+// variable-definition matching behaves identically under the mock. Use a
+// PLAIN function (not jest.fn) so the global `resetMocks: true` jest config
+// does not wipe its implementation between tests.
+jest.mock('../src/utils/variableRegex', () => ({
+  buildVariableRegex: variableName => {
+    const escaped = String(variableName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const keywords = ['Local', 'Global', 'Const'].join('|');
+    const pattern = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b'
+      .replace('{keywords}', keywords)
+      .replace('{escaped}', escaped);
+    return new RegExp(pattern, 'mi');
+  },
+}));
+
+jest.mock('../src/utils/fsCache', () => {
+  const pathModule = require('path');
+  const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
+  const mockHelperPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
+  const mockLibArrayPath = pathModule.join(process.cwd(), 'lib', 'Array.au3');
+
+  const mockMainContent = [
+    '#include "helper.au3"',
+    '#include <Array.au3>',
+    'Local $a, $b = 1, _',
+    '    $c',
+    'Global $Mixed_Name123 = 0',
+    '; function with volatile after name',
+    '    Func DoWork volatile($x, $y)',
+    '        Return $x + $y',
+    '    EndFunc',
+    '; function normal',
+    'Func NormalFunc($p)',
+    '    Return $p',
+    'EndFunc',
+    '; calls to included functions and variables',
+    'Local $result = HelperFunc($helperVar)',
+    'Local $libResult = LibFunc($Array_InLib)',
+  ].join('\n');
+
+  const mockHelperContent = [
+    '; nested include to test recursion (not existing to simulate missing readable)',
+    '#include "missing.au3"',
+    'Const $CONST_ONE = 1',
+    '    Local   $helperVar = 2',
+    '; volatile before name',
+    'Func volatile HelperFunc($v)',
+    '    Return $v',
+    'EndFunc',
+  ].join('\n');
+
+  const mockLibArrayContent = [
+    '; Fake Array.au3',
+    'Global $Array_InLib = 42',
+    'Func LibFunc($x)',
+    '  Return $x',
+    'EndFunc',
+  ].join('\n');
+
+  // Use global to track calls since we can't access outer scope variables
+  global.getIncludeTextCallCounts = global.getIncludeTextCallCounts || {};
+
+  return {
+    normalizePath: jest.fn(p => pathModule.normalize(p)),
+    getIncludeText: jest.fn(p => {
+      const n = pathModule.normalize(p);
+      global.getIncludeTextCallCounts[n] = (global.getIncludeTextCallCounts[n] || 0) + 1;
+      if (n === pathModule.normalize(mockHelperPath)) return mockHelperContent;
+      if (n === pathModule.normalize(mockLibArrayPath)) return mockLibArrayContent;
+      if (n === pathModule.normalize(mockMainPath)) return mockMainContent;
+      return ''; // simulate missing
+    }),
+  };
 });
 
 // Mock the symbol-index service so the fast path is deterministic and free of
@@ -424,7 +478,9 @@ jest.mock('../src/services/includeGraph', () => {
 const symbolIndex = require('../src/services/symbolIndex');
 const includeGraph = require('../src/services/includeGraph');
 
-const util = jest.mocked(require('../src/util')); // get the mock instance with proper typing
+// get the mock instances with proper typing
+const util = jest.mocked(require('../src/utils/includeResolution'));
+Object.assign(util, jest.mocked(require('../src/utils/fsCache')));
 
 // Import the module under test
 const { AutoItDefinitionProvider, definitionCache } = require('../src/providers/ai_definition.js');

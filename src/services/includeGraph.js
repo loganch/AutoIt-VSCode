@@ -1,6 +1,6 @@
 // src/services/includeGraph.js
 import { Uri } from 'vscode';
-import { getIncludePath } from '../util';
+import { getIncludePath } from '../utils/includeResolution';
 
 // uriString -> string[] of resolved include-target uriStrings
 const includeEdges = new Map();

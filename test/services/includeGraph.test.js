@@ -3,7 +3,7 @@ jest.mock('vscode', () => ({
   Uri: { file: p => ({ fsPath: p, toString: () => `file://${p}` }) },
 }));
 
-jest.mock('../../src/util', () => ({
+jest.mock('../../src/utils/includeResolution', () => ({
   getIncludePath: jest.fn(() => ''),
 }));
 

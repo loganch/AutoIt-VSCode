@@ -54,13 +54,21 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../src/util', () => ({
+jest.mock('../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
+}));
+
+jest.mock('../src/utils/functionSignature', () => ({
   buildFunctionSignature: mockBuildFunctionSignature,
-  functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/gim,
   getIncludeData: mockGetIncludeData,
-  includePattern: /#include\s+"([^"]+)"/gim,
-  libraryIncludePattern: /#include\s+<([^>]+)>/gim,
+}));
+
+jest.mock('../src/utils/regexPatterns', () => ({
+  REGEX_PATTERNS: {
+    functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/gim,
+    includePattern: /#include\s+"([^"]+)"/gim,
+    libraryIncludePattern: /#include\s+<([^>]+)>/gim,
+  },
 }));
 
 jest.mock('../src/providers/ai_config', () => ({

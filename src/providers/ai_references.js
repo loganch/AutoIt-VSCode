@@ -1,5 +1,5 @@
 import { Location, Position, Range, languages, window, workspace } from 'vscode';
-import { AUTOIT_MODE } from '../util';
+import { AUTOIT_MODE } from '../utils/coreConstants';
 import { AUTOIT_KEYWORDS } from '../signatures/keywords';
 import {
   blankStrings,

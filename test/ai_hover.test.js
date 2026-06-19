@@ -7,7 +7,7 @@ jest.mock('../src/hovers', () => ({
   },
 }));
 
-jest.mock('../src/util', () => ({
+jest.mock('../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
 }));
 

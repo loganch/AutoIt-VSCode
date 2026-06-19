@@ -3,7 +3,8 @@ const { window, Position, Uri } = require('vscode');
 const path = require('path');
 const fs = require('fs');
 const { showErrorMessage } = require('../providers/ai_showMessage');
-const { functionDefinitionRegex, setRegExpFlags } = require('../util');
+const { REGEX_PATTERNS, setRegExpFlags } = require('../utils/regexPatterns');
+const { functionDefinitionRegex } = REGEX_PATTERNS;
 
 import aiConfig from '../providers/ai_config';
 const { config, findFilepath } = aiConfig;

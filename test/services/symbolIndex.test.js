@@ -31,8 +31,10 @@ jest.mock('../../src/providers/ai_symbols', () => ({
 // provide a faithful isVariableDeclarationLine (the behavior under test) that
 // mirrors the real implementation in src/util.js. A plain function so the
 // global resetMocks does not wipe it.
-jest.mock('../../src/util', () => ({
+jest.mock('../../src/utils/includeResolution', () => ({
   getIncludePath: jest.fn(() => ''),
+}));
+jest.mock('../../src/utils/variableRegex', () => ({
   isVariableDeclarationLine: (lineText, variableName) => {
     if (typeof lineText !== 'string' || !variableName || typeof variableName !== 'string') {
       return false;

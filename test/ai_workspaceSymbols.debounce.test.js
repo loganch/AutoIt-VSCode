@@ -50,11 +50,13 @@ jest.mock('../src/providers/ai_symbols', () => ({
   provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
 }));
 
-// symbolIndex (imported transitively via ai_workspaceSymbols) imports getIncludePath
-// from util; mock it so the real util -> ai_config side-effect chain never loads.
-jest.mock('../src/util', () => ({
+// symbolIndex/includeGraph (imported transitively via ai_workspaceSymbols) import
+// getIncludePath/isVariableDeclarationLine; mock them so the real
+// includeResolution -> ai_config side-effect chain never loads.
+jest.mock('../src/utils/includeResolution', () => ({
   getIncludePath: jest.fn(() => ''),
-  // symbolIndex.indexDocument tags variable symbols via this helper.
+}));
+jest.mock('../src/utils/variableRegex', () => ({
   isVariableDeclarationLine: () => false,
 }));
 

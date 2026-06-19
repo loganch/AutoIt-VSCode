@@ -1,5 +1,5 @@
 import { Hover, languages } from 'vscode';
-import { AUTOIT_MODE } from '../util';
+import { AUTOIT_MODE } from '../utils/coreConstants';
 
 // Deferred until first hover so the ~70 signature modules don't load at activation.
 let hovers = null;

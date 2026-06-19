@@ -9,16 +9,19 @@ import {
 
 // Deferred until first completion so the ~70 completion modules don't load at activation.
 let completions = null;
+import { AUTOIT_MODE } from '../utils/coreConstants';
+import { buildFunctionSignature, getIncludeData } from '../utils/functionSignature';
 import {
-  AUTOIT_MODE,
-  buildFunctionSignature,
-  functionPattern as _functionPattern,
-  getIncludeData,
+  REGEX_PATTERNS,
+  setRegExpFlags,
+} from '../utils/regexPatterns';
+
+const {
+  functionPattern: _functionPattern,
   includePattern,
   libraryIncludePattern,
-  setRegExpFlags,
   variablePattern,
-} from '../util';
+} = REGEX_PATTERNS;
 import aiConfig from './ai_config';
 import { DEFAULT_UDFS } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';

@@ -6,14 +6,11 @@ import {
   SignatureInformation,
   languages,
 } from 'vscode';
-import {
-  AUTOIT_MODE,
-  buildFunctionSignature,
-  functionDefinitionRegex,
-  getIncludeData,
-  includePattern,
-  libraryIncludePattern,
-} from '../util';
+import { AUTOIT_MODE } from '../utils/coreConstants';
+import { buildFunctionSignature, getIncludeData } from '../utils/functionSignature';
+import { REGEX_PATTERNS } from '../utils/regexPatterns';
+
+const { functionDefinitionRegex, includePattern, libraryIncludePattern } = REGEX_PATTERNS;
 import aiConfig from './ai_config';
 import defaultSigs from '../signatures';
 import { DEFAULT_UDFS } from '../constants';

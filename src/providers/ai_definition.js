@@ -1,11 +1,8 @@
 import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
-import {
-  AUTOIT_MODE,
-  buildVariableRegex,
-  getIncludePath,
-  getIncludeScripts,
-  getIncludeText,
-} from '../util';
+import { AUTOIT_MODE } from '../utils/coreConstants';
+import { buildVariableRegex } from '../utils/variableRegex';
+import { getIncludePath, getIncludeScripts } from '../utils/includeResolution';
+import { getIncludeText } from '../utils/fsCache';
 import { lookupDefinition, noteFileContent } from '../services/symbolIndex';
 import { getIncludeSet, extractIncludeEdges, toUriString } from '../services/includeGraph';
 

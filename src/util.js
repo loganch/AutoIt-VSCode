@@ -1,5 +1,4 @@
 /// <reference types="vscode" />
-import { AI_CONSTANTS, AUTOIT_MODE } from './utils/coreConstants';
 
 // ============================================================================
 // EXPORTS (Maintaining API Compatibility)
@@ -26,17 +25,6 @@ export {
   setDetailAndDocumentation as setDetail,
 } from './completionTransforms';
 
-// AutoIt specific constants
-export { AI_CONSTANTS };
-export { AUTOIT_MODE };
-
-// Regex utilities
-export {
-  setRegExpFlags,
-  escapeRegexLiteral,
-  REGEX_PATTERNS as patterns,
-} from './utils/regexPatterns';
-
 // Variable declaration matching (shared with services/symbolIndex.js)
 export {
   VARIABLE_KEYWORDS,
@@ -55,12 +43,3 @@ export { isSkippableLine, getIncludePath, getIncludeScripts } from './utils/incl
 // Function signature analysis
 export { buildFunctionSignature, getParams, getIncludeData } from './utils/functionSignature';
 
-// Individual pattern exports for backward compatibility
-import { REGEX_PATTERNS } from './utils/regexPatterns';
-
-export const { includePattern } = REGEX_PATTERNS;
-export const { functionPattern } = REGEX_PATTERNS;
-export const { functionDefinitionRegex } = REGEX_PATTERNS;
-export const { variablePattern } = REGEX_PATTERNS;
-export const { regionPattern } = REGEX_PATTERNS;
-export const { libraryIncludePattern } = REGEX_PATTERNS;

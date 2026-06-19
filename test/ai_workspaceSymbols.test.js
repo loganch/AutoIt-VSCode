@@ -111,15 +111,26 @@ jest.mock('../src/constants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
 }));
 
-jest.mock('../src/util', () => ({
+jest.mock('../src/utils/coreConstants', () => ({
   AI_CONSTANTS: {},
   AUTOIT_MODE: { language: 'autoit' },
-  functionPattern: /func/i,
+}));
+
+jest.mock('../src/utils/regexPatterns', () => ({
+  REGEX_PATTERNS: {
+    functionPattern: /func/i,
+    regionPattern: /#region/i,
+    variablePattern: /\$\w+/g,
+  },
+}));
+
+jest.mock('../src/utils/includeResolution', () => ({
   isSkippableLine: jest.fn(() => false),
-  regionPattern: /#region/i,
-  variablePattern: /\$\w+/g,
   getIncludePath: jest.fn(() => ''),
-  // symbolIndex.indexDocument tags variable symbols via this helper.
+}));
+
+// symbolIndex.indexDocument tags variable symbols via this helper.
+jest.mock('../src/utils/variableRegex', () => ({
   isVariableDeclarationLine: () => false,
 }));
 

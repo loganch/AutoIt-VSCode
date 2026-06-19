@@ -33,8 +33,10 @@ jest.mock('../../src/providers/ai_symbols', () => ({
   __esModule: true,
   provideDocumentSymbols: jest.fn(() => Promise.resolve([])),
 }));
-jest.mock('../../src/util', () => ({
+jest.mock('../../src/utils/includeResolution', () => ({
   getIncludePath: jest.fn(() => ''),
+}));
+jest.mock('../../src/utils/variableRegex', () => ({
   isVariableDeclarationLine: () => false,
 }));
 
