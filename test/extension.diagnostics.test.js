@@ -69,7 +69,7 @@ jest.mock('vscode', () => {
   };
 });
 
-jest.mock('../src/ai_config', () => ({
+jest.mock('../src/providers/ai_config', () => ({
   __esModule: true,
   default: { config: mockConfig, aiPath: '', wrapperPath: '', data: {} },
 }));
@@ -91,18 +91,18 @@ jest.mock('../src/services/VariableTrackingService.js', () => stubService);
 // Feature providers are irrelevant here; stub them to keep activate() cheap.
 const stubFeature = { __esModule: true, default: { dispose: () => {} } };
 jest.mock('../src/languageConfiguration', () => stubFeature);
-jest.mock('../src/ai_hover', () => stubFeature);
-jest.mock('../src/ai_completion', () => stubFeature);
-jest.mock('../src/ai_symbols', () => stubFeature);
-jest.mock('../src/ai_workspaceSymbols', () => stubFeature);
-jest.mock('../src/ai_definition', () => stubFeature);
-jest.mock('../src/ai_references', () => stubFeature);
-jest.mock('../src/ai_signature', () => ({
+jest.mock('../src/providers/ai_hover', () => stubFeature);
+jest.mock('../src/providers/ai_completion', () => stubFeature);
+jest.mock('../src/providers/ai_symbols', () => stubFeature);
+jest.mock('../src/providers/ai_workspaceSymbols', () => stubFeature);
+jest.mock('../src/providers/ai_definition', () => stubFeature);
+jest.mock('../src/providers/ai_references', () => stubFeature);
+jest.mock('../src/providers/ai_signature', () => ({
   __esModule: true,
   default: { dispose: () => {} },
   signatureHoverProvider: { dispose: () => {} },
 }));
-jest.mock('../src/ai_formatter', () => ({
+jest.mock('../src/providers/ai_formatter', () => ({
   __esModule: true,
   formatterProvider: { dispose: () => {} },
 }));

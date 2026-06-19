@@ -17,7 +17,7 @@ jest.mock('fs', () => ({
   existsSync: (...args) => mockFsExistsSync(...args),
 }));
 
-jest.mock('../src/ai_config', () => ({
+jest.mock('../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     config: {
@@ -69,7 +69,7 @@ let formatterModule;
 let provider;
 
 beforeAll(() => {
-  formatterModule = require('../src/ai_formatter');
+  formatterModule = require('../src/providers/ai_formatter');
   // Capture before the global resetMocks:true runs (it runs before each test, not before beforeAll)
   provider = mockRegisterDocumentFormattingEditProvider.mock.calls[0]?.[1] ?? null;
 });

@@ -44,7 +44,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../src/ai_symbols', () => ({
+jest.mock('../src/providers/ai_symbols', () => ({
   __esModule: true,
   default: { dispose: jest.fn() },
   provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
@@ -65,7 +65,7 @@ jest.mock('../src/util', () => ({
  */
 function loadProvider() {
   jest.isolateModules(() => {
-    require('../src/ai_workspaceSymbols');
+    require('../src/providers/ai_workspaceSymbols');
   });
 
   const providerCalls = mockRegisterWorkspaceSymbolProvider.mock.calls;

@@ -2,11 +2,11 @@ import { globalOutputChannel } from './ScriptCommands.js';
 const { window, Position, Uri } = require('vscode');
 const path = require('path');
 const fs = require('fs');
-const { showErrorMessage } = require('../ai_showMessage');
-const { findFilepath, functionDefinitionRegex, setRegExpFlags } = require('../util');
+const { showErrorMessage } = require('../providers/ai_showMessage');
+const { functionDefinitionRegex, setRegExpFlags } = require('../util');
 
-import aiConfig from '../ai_config';
-const { config } = aiConfig;
+import aiConfig from '../providers/ai_config';
+const { config, findFilepath } = aiConfig;
 const aiOutCommon = globalOutputChannel;
 
 /** @type {number} Length of double underscore prefix for internal functions. */

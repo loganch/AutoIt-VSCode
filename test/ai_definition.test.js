@@ -427,7 +427,7 @@ const includeGraph = require('../src/services/includeGraph');
 const util = jest.mocked(require('../src/util')); // get the mock instance with proper typing
 
 // Import the module under test
-const { AutoItDefinitionProvider, definitionCache } = require('../src/ai_definition.js');
+const { AutoItDefinitionProvider, definitionCache } = require('../src/providers/ai_definition.js');
 const definitionProvider = AutoItDefinitionProvider;
 
 function makeDoc(text = MAIN_CONTENT, filePath = MAIN_PATH) {

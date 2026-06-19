@@ -19,11 +19,11 @@ import {
   libraryIncludePattern,
   setRegExpFlags,
   variablePattern,
-} from './util';
-import { DEFAULT_UDFS } from './constants';
-import MapTrackingService from './services/MapTrackingService.js';
-import VariableTrackingService from './services/VariableTrackingService.js';
-import { attachIncludeEdits } from './utils/includeAutoInsert';
+} from '../util';
+import { DEFAULT_UDFS } from '../constants';
+import MapTrackingService from '../services/MapTrackingService.js';
+import VariableTrackingService from '../services/VariableTrackingService.js';
+import { attachIncludeEdits } from '../utils/includeAutoInsert';
 
 // Per-document caches for include completions, keyed by document URI
 // Each entry: { files: string[], completions: CompletionItem[] }
@@ -444,7 +444,7 @@ const provideCompletionItems = async (document, position) => {
   const libraryCompletions = getLibraryFunctions(libraryIncludes, document);
 
   if (!completions) {
-    const mod = require('./completions');
+    const mod = require('../completions');
     completions = Array.isArray(mod) ? mod : mod.default;
   }
 

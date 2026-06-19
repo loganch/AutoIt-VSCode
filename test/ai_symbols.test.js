@@ -266,7 +266,7 @@ const mockVSCode = {
 jest.mock('vscode', () => mockVSCode, { virtual: true });
 
 // Import after mocking
-const { provideDocumentSymbols } = require('../src/ai_symbols');
+const { provideDocumentSymbols } = require('../src/providers/ai_symbols');
 
 describe('Map Symbol Generation', () => {
   let originalGetConfiguration;

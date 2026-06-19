@@ -1,7 +1,7 @@
 import { languages, workspace } from 'vscode';
-import { symbolsCache, indexDocument, removeDocument } from './services/symbolIndex';
-import { toUriString } from './services/includeGraph';
-import { ensureWarm } from './services/symbolWarmup';
+import { symbolsCache, indexDocument, removeDocument } from '../services/symbolIndex';
+import { toUriString } from '../services/includeGraph';
+import { ensureWarm } from '../services/symbolWarmup';
 
 // Debouncing state for search requests
 let searchDebounceTimer = null;

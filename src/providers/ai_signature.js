@@ -14,9 +14,9 @@ import {
   getIncludeData,
   includePattern,
   libraryIncludePattern,
-} from './util';
-import defaultSigs from './signatures';
-import { DEFAULT_UDFS } from './constants';
+} from '../util';
+import defaultSigs from '../signatures';
+import { DEFAULT_UDFS } from '../constants';
 
 const documentSignatureCache = new Map();
 const FUNCTION_NAME_PART_INDEX_FROM_END = 2;

@@ -1,7 +1,7 @@
 /// <reference types="vscode" />
 import fs from 'fs';
 import path from 'path';
-import aiConfig from './ai_config';
+import aiConfig from './providers/ai_config';
 import {
   AI_CONSTANTS,
   AUTOIT_MODE,
@@ -734,7 +734,6 @@ export { escapeRegexLiteral };
 export { getIncludeText };
 export { getIncludePath };
 export { getIncludeScripts };
-export { findFilepath }; // Re-export from aiConfig for backward compatibility
 
 // Function analysis
 export { buildFunctionSignature };

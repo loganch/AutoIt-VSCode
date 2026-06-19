@@ -28,7 +28,7 @@ describe('ai_hover module', () => {
   let registeredMode;
 
   beforeAll(() => {
-    hoverModule = require('../src/ai_hover');
+    hoverModule = require('../src/providers/ai_hover');
     registeredMode = mockRegisterHoverProvider.mock.calls[0]?.[0] ?? null;
     provider = mockRegisterHoverProvider.mock.calls[0]?.[1] ?? null;
   });

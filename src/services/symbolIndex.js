@@ -1,7 +1,7 @@
 // src/services/symbolIndex.js
 import { Location, SymbolInformation, SymbolKind, Uri, workspace } from 'vscode';
 import { isVariableDeclarationLine } from '../util';
-import { provideDocumentSymbols } from '../ai_symbols';
+import { provideDocumentSymbols } from '../providers/ai_symbols';
 import { toUriString, extractIncludeEdges, removeEdges } from './includeGraph';
 
 // uriString -> SymbolInformation[]

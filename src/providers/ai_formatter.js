@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
 import conf from './ai_config';
-import { FORMATTER } from './constants';
+import { FORMATTER } from '../constants';
 
 const RANDOM_SUFFIX_START_INDEX = 2;
 const RANDOM_SUFFIX_END_INDEX = 8;

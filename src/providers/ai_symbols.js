@@ -15,10 +15,10 @@ import {
   isSkippableLine,
   regionPattern,
   variablePattern,
-} from './util';
-import { rangeContainsRange as sharedRangeContainsRange } from './utils/textUtils';
-import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
-import MapTrackingService from './services/MapTrackingService.js';
+} from '../util';
+import { rangeContainsRange as sharedRangeContainsRange } from '../utils/textUtils';
+import { DEFAULT_MAX_INCLUDE_DEPTH } from '../constants';
+import MapTrackingService from '../services/MapTrackingService.js';
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;
 const commentStartRegex = /^\s*#(?:cs|comments-start)/;
 const continuationRegex = /\s_\b\s*(;.*)?\s*/;

@@ -41,7 +41,7 @@ jest.mock('child_process', () => ({
   execFile: jest.fn(),
 }));
 
-jest.mock('../src/ai_showMessage', () => ({
+jest.mock('../src/providers/ai_showMessage', () => ({
   showErrorMessage: jest.fn(),
 }));
 
@@ -49,7 +49,7 @@ let conf;
 
 describe('ai_config', () => {
   beforeAll(() => {
-    conf = require('../src/ai_config').default;
+    conf = require('../src/providers/ai_config').default;
   });
 
   beforeEach(() => {

@@ -126,7 +126,7 @@ jest.mock('../src/util', () => ({
 // The provider delegates per-file indexing to symbolIndex.indexDocument, which
 // pulls provideDocumentSymbols from ai_symbols. Mock it here so the indexer sees
 // the mock and the heavy real ai_symbols module never loads.
-jest.mock('../src/ai_symbols', () => ({
+jest.mock('../src/providers/ai_symbols', () => ({
   __esModule: true,
   default: { dispose: jest.fn() },
   provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
@@ -138,7 +138,7 @@ describe('ai_workspaceSymbols module', () => {
   let capturedWatcherArg;
 
   beforeAll(() => {
-    require('../src/ai_workspaceSymbols');
+    require('../src/providers/ai_workspaceSymbols');
     // Capture before resetMocks resets these
     capturedProviderArg =
       mockRegisterWorkspaceSymbolProvider.mock.calls.length > 0

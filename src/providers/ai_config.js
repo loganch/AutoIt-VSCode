@@ -4,7 +4,7 @@ import path from 'path';
 import { execFile } from 'child_process';
 import { showErrorMessage } from './ai_showMessage';
 
-const meta = require('../package.json');
+const meta = require('../../package.json');
 
 /**
  * Fix the output style of the extension

@@ -191,7 +191,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** A new developer can't predict where to look or where to add things from the names alone.
   - **Remedy:** Rename to match responsibility (`autoItPaths.js`, `commandTimings.js`, `commandRegistry.js`, `editorActions.js`); drop or define the `ai_` prefix.
 
-- [ ] **F28. Incomplete flat→organized migration** — Priority 6 (P2 × S3), Scheduled, accidental
+- [x] **F28. Incomplete flat→organized migration** — Priority 6 (P2 × S3), Scheduled, accidental — *Resolved: all 10 flat `ai_*.js` feature files moved into `src/providers/`; the only two outside consumers still reaching `findFilepath` through `util.js`'s compat re-export (`commands/UtilityCommands.js`, `commands/ToolCommands.js`) now import it directly from `providers/ai_config`, and the re-export was deleted from `util.js`. `AI_CONSTANTS`/`AUTOIT_MODE` re-exports remain (tracked separately under F13). 603 tests still pass.*
   - **Symptom:** Flat `ai_*.js` feature files (`ai_completion`, `ai_definition`, `ai_hover`, `ai_references`, `ai_signature`, `ai_symbols`, `ai_workspaceSymbols`, `ai_formatter`, `ai_commands`, `ai_config`) coexist with organized subdirectories (`commands/`, `services/`, `parsers/`, `utils/`, `completions/`, `hovers/`, `signatures/`) that partly replace them; `util.js` re-exports exist "for backward compatibility."
   - **Source:** A reorganization was started (new code goes in subdirs) but the flat files were never fully absorbed.
   - **Consequence:** New developers don't know whether to add to `ai_completion.js` or `completions/`; two mental models coexist; the split is the root cause behind F1, F5, F13, F23.

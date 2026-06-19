@@ -92,7 +92,7 @@ describe('ai_signature', () => {
   });
 
   beforeAll(() => {
-    signatureModule = require('../src/ai_signature');
+    signatureModule = require('../src/providers/ai_signature');
     hoverProvider = mockRegisterHoverProvider.mock.calls[0]?.[1] ?? null;
     signatureProvider = mockRegisterSignatureHelpProvider.mock.calls[0]?.[1] ?? null;
   });

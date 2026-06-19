@@ -42,7 +42,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/ai_config', () => ({
+jest.mock('../../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     findFilepath: jest.fn(() => ''),

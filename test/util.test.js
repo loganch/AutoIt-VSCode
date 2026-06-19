@@ -22,7 +22,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../src/ai_config', () => ({ findFilepath: () => undefined }));
+jest.mock('../src/providers/ai_config', () => ({ findFilepath: () => undefined }));
 
 import { signatureToCompletion, fillCompletions } from '../src/util';
 

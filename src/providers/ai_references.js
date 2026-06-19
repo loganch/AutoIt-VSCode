@@ -1,6 +1,6 @@
 import { Location, Position, Range, languages, window, workspace } from 'vscode';
-import { AUTOIT_MODE } from './util';
-import { AUTOIT_KEYWORDS } from './signatures/keywords';
+import { AUTOIT_MODE } from '../util';
+import { AUTOIT_KEYWORDS } from '../signatures/keywords';
 import {
   blankStrings,
   escapeRegex,
@@ -8,7 +8,7 @@ import {
   isLocalDeclaredInBody,
   stringMask,
   stripLineComment,
-} from './utils/textUtils.js';
+} from '../utils/textUtils.js';
 
 // Workspace scan budget (mirrors ai_workspaceSymbols.js defaults).
 const DEFAULT_MAX_FILES = 500;

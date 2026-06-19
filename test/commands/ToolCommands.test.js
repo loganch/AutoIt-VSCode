@@ -42,7 +42,7 @@ jest.mock('../../src/util', () => ({
   getIncludeText: (...args) => mockGetIncludeText(...args),
 }));
 
-jest.mock('../../src/ai_config', () => ({
+jest.mock('../../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     config: mockConfig,

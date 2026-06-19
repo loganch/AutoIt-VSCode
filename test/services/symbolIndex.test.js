@@ -23,7 +23,7 @@ jest.mock('vscode', () => ({
 
 // symbolIndex imports provideDocumentSymbols from ai_symbols and getIncludePath
 // from util; mock both so their real (vscode-heavy) module side-effects never load.
-jest.mock('../../src/ai_symbols', () => ({
+jest.mock('../../src/providers/ai_symbols', () => ({
   __esModule: true,
   provideDocumentSymbols: jest.fn(() => Promise.resolve([])),
 }));
@@ -96,7 +96,7 @@ describe('symbolIndex.lookupDefinition', () => {
 });
 
 describe('symbolIndex.indexDocument variable declaration tagging', () => {
-  const ai_symbols = require('../../src/ai_symbols');
+  const ai_symbols = require('../../src/providers/ai_symbols');
 
   beforeEach(() => index.__resetForTests());
 

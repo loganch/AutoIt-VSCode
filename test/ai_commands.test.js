@@ -9,7 +9,7 @@ jest.mock('vscode', () => ({
   window: mockWindow,
 }));
 
-jest.mock('../src/ai_config', () => ({
+jest.mock('../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     config: {
@@ -70,7 +70,7 @@ describe('ai_commands', () => {
     jest.clearAllMocks();
     mockKillScript.mockImplementation(arg => `killed:${arg}`);
     mockUtilityGetActiveDocumentFileName.mockImplementation(() => 'C:\\workspace\\active.au3');
-    aiCommands = require('../src/ai_commands');
+    aiCommands = require('../src/providers/ai_commands');
   });
 
   test('exports facade management and accessor functions', () => {
