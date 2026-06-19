@@ -133,11 +133,11 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Memory grows over a long session; leaked listeners/state survive extension reload; tests share state.
   - **Remedy:** Give caches max-size + eviction; expose `dispose()`/`reset()` and call from `deactivate`/tests.
 
-- [ ] **F19. `ai_config.updateIncludePaths` writes to the Windows registry** — Priority 2 (P1 × S1), Monitored, accidental
+- [x] **F19. `ai_config.updateIncludePaths` writes to the Windows registry** — Priority 2 (P1 × S1), Monitored, accidental — *Resolved: extracted `syncIncludePathsToRegistry(resolvedIncludePaths)` into `src/providers/registrySync.js`; `updateIncludePaths` now just computes the resolved paths and calls it. 609 tests pass.*
   - **Symptom:** `execFile('reg', ['add','HKCU\\Software\\AutoIt v3\\AutoIt', …])` is invoked from a config-update function (`src/ai_config.js:544-567`).
   - **Source:** Config module reaching into OS persistence to keep AutoIt's Include registry key in sync.
   - **Consequence:** A hidden, surprising side effect in a module callers treat as config; failures surface as user error dialogs; cross-cutting concern buried in the wrong layer.
-  - **Remedy:** Move registry sync to an explicit `syncIncludePathsToRegistry()` service called from a clearly marked lifecycle point.
+  - **Remedy:** Move registry sync to an explicit `syncIncludePathsToRegistry()` service called from a clearly marked lifecycle point. ✓ Done.
 
 - [ ] **F20. Monkey-patching VS Code `Diagnostic` objects with `_ownerUri`** — Priority 1 (P1 × S1), Monitored, accidental
   - **Symptom:** `Object.defineProperty(diagnosticToAdd, '_ownerUri', …)` attaches a custom property to framework `Diagnostic` instances (`src/diagnosticUtils.js:147-157`).

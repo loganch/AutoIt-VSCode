@@ -1,11 +1,11 @@
 import { FileType, Uri, window, workspace } from 'vscode';
 import fs from 'fs';
 import path from 'path';
-import { execFile } from 'child_process';
 import { showErrorMessage } from './ai_showMessage';
 import { detectAutoItPaths } from './autoItInstallDetector';
 import { resolveVariables, splitPath, fixPath } from './pathResolver';
 import { upgradeSmartHelpConfig } from './smartHelpMigrator';
+import { syncIncludePathsToRegistry } from './registrySync';
 
 import meta from '../../package.json';
 
@@ -365,31 +365,7 @@ function updateIncludePaths() {
       const trimmed = (typeof p === 'string' ? p : '').trim();
       return resolveVariables(trimmed || 'Include');
     });
-    const includePathsString = resolvedIncludePaths.join(';');
-    execFile(
-      'reg',
-      [
-        'add',
-        'HKCU\\Software\\AutoIt v3\\AutoIt',
-        '/v',
-        'Include',
-        '/t',
-        'REG_SZ',
-        '/d',
-        includePathsString,
-        '/f',
-      ],
-      (error, stdout, stderr) => {
-        if (error) {
-          window.showErrorMessage(`Error updating registry: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          window.showErrorMessage(`Registry stderr: ${stderr}`);
-        }
-        // Success: do not notify to reduce noise
-      },
-    );
+    syncIncludePathsToRegistry(resolvedIncludePaths);
   }
 }
 
