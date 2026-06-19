@@ -5,33 +5,11 @@
 
 import VariablePatterns from '../utils/VariablePatterns.js';
 import {
+  parseFunctionBoundaries,
   parseFunctionDeclarationLine,
   parseParameterNames,
+  splitTopLevel,
 } from '../utils/functionSignatureParsing.js';
-
-/**
- * Split a string by commas that are not inside parentheses or brackets.
- * Needed to correctly separate multi-declaration variables that have initializers
- * containing function calls, e.g. `$a = Func(1, 2), $b = Other()`.
- * @param {string} str
- * @returns {string[]}
- */
-function splitByTopLevelCommas(str) {
-  const parts = [];
-  let depth = 0;
-  let start = 0;
-  for (let i = 0; i < str.length; i++) {
-    const ch = str[i];
-    if (ch === '(' || ch === '[') depth++;
-    else if (ch === ')' || ch === ']') depth--;
-    else if (ch === ',' && depth === 0) {
-      parts.push(str.slice(start, i));
-      start = i + 1;
-    }
-  }
-  parts.push(str.slice(start));
-  return parts;
-}
 
 class VariableParser {
   constructor(source, filePath = '') {
@@ -44,38 +22,13 @@ class VariableParser {
   }
 
   /**
-   * Parse function boundaries and extract function names and parameters
-   * Reuses logic from MapParser.parseFunctionBoundaries()
+   * Parse function boundaries and extract function names and parameters.
+   * Delegates to the shared `parseFunctionBoundaries` helper with
+   * `ensureDollarPrefix` so parameters carry a leading `$`.
    * @returns {Array<{name: string, startLine: number, endLine: number, parameters: string[]}>}
    */
   parseFunctionBoundaries() {
-    this.functions = [];
-    const funcEndPattern = /^\s*EndFunc/i;
-
-    let currentFunc = null;
-
-    this.lines.forEach((line, index) => {
-      const funcDeclaration = parseFunctionDeclarationLine(line);
-      if (funcDeclaration) {
-        // Parse parameters from function signature
-        const parameters = parseParameterNames(funcDeclaration.paramsText, true);
-
-        currentFunc = {
-          name: funcDeclaration.functionName,
-          startLine: index,
-          endLine: -1,
-          parameters,
-        };
-      }
-
-      const funcEnd = line.match(funcEndPattern);
-      if (funcEnd && currentFunc) {
-        currentFunc.endLine = index;
-        this.functions.push(currentFunc);
-        currentFunc = null;
-      }
-    });
-
+    this.functions = parseFunctionBoundaries(this.lines, true);
     return this.functions;
   }
 
@@ -168,7 +121,7 @@ class VariableParser {
    * @private
    */
   _pushDeclarationSegments(cleanedLine, afterKeyword, searchFromOffset, lineIndex, varMeta) {
-    const segments = splitByTopLevelCommas(afterKeyword);
+    const segments = splitTopLevel(afterKeyword, ',');
     let searchFrom = searchFromOffset;
 
     segments.forEach(segment => {

@@ -248,4 +248,38 @@ const parseParameterNames = (paramsText, ensureDollarPrefix = false) => {
     .filter(Boolean);
 };
 
-export { parseFunctionDeclarationLine, parseParameterNames, splitTopLevel };
+const parseFunctionBoundaries = (lines, ensureDollarPrefix = false) => {
+  const funcEndPattern = /^\s*EndFunc/i;
+  const functions = [];
+  let currentFunc = null;
+
+  lines.forEach((line, index) => {
+    const funcDeclaration = parseFunctionDeclarationLine(line);
+    if (funcDeclaration) {
+      const parameters = parseParameterNames(funcDeclaration.paramsText, ensureDollarPrefix);
+      currentFunc = {
+        name: funcDeclaration.functionName,
+        startLine: index,
+        endLine: -1,
+        parameters,
+      };
+      return;
+    }
+
+    const funcEnd = line.match(funcEndPattern);
+    if (funcEnd && currentFunc) {
+      currentFunc.endLine = index;
+      functions.push(currentFunc);
+      currentFunc = null;
+    }
+  });
+
+  return functions;
+};
+
+export {
+  parseFunctionBoundaries,
+  parseFunctionDeclarationLine,
+  parseParameterNames,
+  splitTopLevel,
+};
