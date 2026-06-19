@@ -43,6 +43,7 @@ const {
   createDiagnosticRange,
   getDiagnosticSeverity,
   parseAu3CheckOutput,
+  setDiagnosticOwner,
   updateDiagnostics,
 } = require('../src/diagnosticUtils');
 
@@ -120,6 +121,8 @@ describe('diagnosticUtils', () => {
         source: 'au3check',
       }),
     );
+    // Ownership must not be exposed as an own property on the framework Diagnostic object.
+    expect(Object.prototype.hasOwnProperty.call(diagnostics[0], '_ownerUri')).toBe(false);
   });
 
   test('clearDiagnosticsOwnedBy removes only diagnostics from matching owner', () => {
@@ -127,8 +130,10 @@ describe('diagnosticUtils', () => {
     const docUri = { toString: () => 'file:///doc.au3' };
     mockWorkspace.textDocuments = [{ uri: docUri }];
 
-    const keep = { _ownerUri: 'file:///other.au3', message: 'keep' };
-    const remove = { _ownerUri: owner, message: 'remove' };
+    const keep = { message: 'keep' };
+    const remove = { message: 'remove' };
+    setDiagnosticOwner(keep, 'file:///other.au3');
+    setDiagnosticOwner(remove, owner);
 
     const collection = {
       delete: jest.fn(),

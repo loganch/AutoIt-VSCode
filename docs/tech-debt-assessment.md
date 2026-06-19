@@ -139,11 +139,11 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** A hidden, surprising side effect in a module callers treat as config; failures surface as user error dialogs; cross-cutting concern buried in the wrong layer.
   - **Remedy:** Move registry sync to an explicit `syncIncludePathsToRegistry()` service called from a clearly marked lifecycle point. ✓ Done.
 
-- [ ] **F20. Monkey-patching VS Code `Diagnostic` objects with `_ownerUri`** — Priority 1 (P1 × S1), Monitored, accidental
+- [x] **F20. Monkey-patching VS Code `Diagnostic` objects with `_ownerUri`** — Priority 1 (P1 × S1), Monitored, accidental — *Resolved: replaced the `Object.defineProperty`/direct-assignment monkey-patch with an external `WeakMap<Diagnostic, ownerUri>` (`diagnosticOwners`) plus `setDiagnosticOwner`/`getDiagnosticOwner` helpers; `filterDiagnosticsOnUriByOwner` now reads ownership via `getDiagnosticOwner(d)` instead of a `_ownerUri` property. Framework `Diagnostic` objects are no longer mutated. 609 tests pass.*
   - **Symptom:** `Object.defineProperty(diagnosticToAdd, '_ownerUri', …)` attaches a custom property to framework `Diagnostic` instances (`src/diagnosticUtils.js:147-157`).
   - **Source:** `DiagnosticCollection` has no public iteration, so ownership is stashed on the diagnostic itself.
   - **Consequence:** Relies on VS Code preserving custom props across API boundaries; fragile across VS Code versions.
-  - **Remedy:** Maintain an external `Map<Diagnostic, ownerUri>` (or `Map<uri, ownerUri>`) instead of mutating framework objects.
+  - **Remedy:** Maintain an external `Map<Diagnostic, ownerUri>` (or `Map<uri, ownerUri>`) instead of mutating framework objects. ✓ Done.
 
 - [ ] **F21. `CommandsFacade` redundant dynamic imports + triple `require(package.json)`** — Priority 1 (P1 × S1), Monitored, accidental
   - **Symptom:** `initialize()` dynamically imports 5 services, then `_setupEventListeners` dynamically imports `OutputChannelManager` again; `require('../package.json')` is called 3× in one method (`src/ai_commands.js:50-62,68,86,128`).

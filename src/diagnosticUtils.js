@@ -68,6 +68,26 @@ export const updateDiagnostics = (diagnostics, scriptPath, diagnosticToAdd) => {
   diagnostics.set(scriptPath, diagnosticArray);
 };
 
+/**
+ * External ownership map: avoids mutating framework Diagnostic objects with a custom property.
+ * @type {WeakMap<object, string>}
+ */
+const diagnosticOwners = new WeakMap();
+
+/**
+ * Record which owner URI created a diagnostic, for later cleanup via clearDiagnosticsOwnedBy.
+ * @param {object} diagnostic
+ * @param {string} ownerUri
+ */
+export const setDiagnosticOwner = (diagnostic, ownerUri) => diagnosticOwners.set(diagnostic, ownerUri);
+
+/**
+ * Look up the owner URI previously recorded for a diagnostic via setDiagnosticOwner.
+ * @param {object} diagnostic
+ * @returns {string|undefined}
+ */
+export const getDiagnosticOwner = diagnostic => diagnosticOwners.get(diagnostic);
+
 const OUTPUT_REGEXP =
   /"(?<scriptPath>.+)"\((?<line>\d{1,4}),(?<position>\d{1,4})\)\s:\s(?<severity>warning|error):\s(?<description>.+)\r/gm;
 
@@ -142,20 +162,9 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
     // Set proper human-readable source as per VS Code API guidelines
     diagnosticToAdd.source = 'au3check';
 
-    // Store ownership information using a custom property for cleanup purposes
-    // This allows clearDiagnosticsOwnedBy to identify diagnostics that belong to a specific owner
-    try {
-      Object.defineProperty(diagnosticToAdd, '_ownerUri', {
-        value: documentURI.toString(),
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      });
-    } catch (error) {
-      // Fallback assignment keeps owner tracking best-effort if defineProperty is restricted.
-      diagnosticToAdd._ownerUri = documentURI.toString();
-      console.debug('[AutoIt][diagnostics] Falling back to direct owner assignment.', error);
-    }
+    // Track ownership externally (not as a property on the framework Diagnostic object)
+    // so clearDiagnosticsOwnedBy can identify diagnostics that belong to a specific owner.
+    setDiagnosticOwner(diagnosticToAdd, documentURI.toString());
 
     // Use scriptPath by default to correctly attribute diagnostics to included files.
     // Fall back to documentURI only when AU3Check's path encoding likely corrupts the path:
@@ -250,8 +259,7 @@ const filterDiagnosticsOnUriByOwner = (collection, uri, owner) => {
     if (!current || current.length === 0) return;
     const filtered = current.filter(d => {
       if (!d) return false;
-      const ownerProp = /** @type {any} */ (d)['_ownerUri'];
-      return ownerProp !== owner;
+      return getDiagnosticOwner(d) !== owner;
     });
     if (filtered.length === 0) {
       collection.delete(uri);
