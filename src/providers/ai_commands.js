@@ -103,7 +103,7 @@ class CommandsFacade {
       );
 
       // Set up event listeners
-      this._setupEventListeners();
+      this._setupEventListeners(OutputChannelManager);
 
       this.isInitialized = true;
     } catch (error) {
@@ -116,11 +116,8 @@ class CommandsFacade {
    * Sets up event listeners for service coordination.
    * @private
    */
-  async _setupEventListeners() {
+  _setupEventListeners(OutputChannelManager) {
     try {
-      // Dynamically import OutputChannelManager for the event listener
-      const { default: OutputChannelManager } = await import('./services/OutputChannelManager.js');
-
       // Listen for config changes to update services
       conf.addListener(() => {
         if (this.services.processManager) {

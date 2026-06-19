@@ -145,11 +145,11 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Relies on VS Code preserving custom props across API boundaries; fragile across VS Code versions.
   - **Remedy:** Maintain an external `Map<Diagnostic, ownerUri>` (or `Map<uri, ownerUri>`) instead of mutating framework objects. ✓ Done.
 
-- [ ] **F21. `CommandsFacade` redundant dynamic imports + triple `require(package.json)`** — Priority 1 (P1 × S1), Monitored, accidental
+- [x] **F21. `CommandsFacade` redundant dynamic imports + triple `require(package.json)`** — Priority 1 (P1 × S1), Monitored, accidental — *Resolved: the triple `require(package.json)` was already gone (F16's ESM migration left a single top-level `import packageJson from '../../package.json'`). Fixed the remaining redundant dynamic import: `initialize()` now passes its already-imported `OutputChannelManager` into `_setupEventListeners(OutputChannelManager)` instead of re-importing it; `_setupEventListeners` is no longer `async` since it has no more awaits. 609 tests pass.*
   - **Symptom:** `initialize()` dynamically imports 5 services, then `_setupEventListeners` dynamically imports `OutputChannelManager` again; `require('../package.json')` is called 3× in one method (`src/ai_commands.js:50-62,68,86,128`).
   - **Source:** Facade assembled incrementally without consolidating imports.
   - **Consequence:** Minor wasted work and noise; cosmetic.
-  - **Remedy:** Import once at top; capture `package.json` metadata in a constant.
+  - **Remedy:** Import once at top; capture `package.json` metadata in a constant. ✓ Done.
 
 ### R5 — Dependency Disorder
 
