@@ -195,14 +195,23 @@ const applyMockImplementations = () => {
 
 jest.mock('../src/util', () => ({
   AUTOIT_MODE: { language: 'autoit' },
-  buildFunctionSignature: jest.fn(() => ({ functionName: '', functionObject: { description: '', documentation: '' } })),
+  buildFunctionSignature: jest.fn(() => ({
+    functionName: '',
+    functionObject: { description: '', documentation: '' },
+  })),
   functionPattern: /Func\s+(?:volatile\s+)?(\w+)/i,
   variablePattern: /\$(\w+)/g,
   includePattern: /#include\s+"([^"]+)"/g,
   libraryIncludePattern: /#include\s+<([^>]+)>/g,
-  findFilepath: (...args) => mockFindFilepath(...args),
   getIncludeData: (...args) => mockGetIncludeData(...args),
   setRegExpFlags: (pattern, flags) => new RegExp(pattern.source, flags),
+}));
+
+jest.mock('../src/providers/ai_config', () => ({
+  __esModule: true,
+  default: {
+    findFilepath: (...args) => mockFindFilepath(...args),
+  },
 }));
 
 jest.mock('../src/completions', () => []);

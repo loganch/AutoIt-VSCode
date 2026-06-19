@@ -9,14 +9,16 @@ import {
 import {
   AUTOIT_MODE,
   buildFunctionSignature,
-  findFilepath,
   functionDefinitionRegex,
   getIncludeData,
   includePattern,
   libraryIncludePattern,
 } from '../util';
+import aiConfig from './ai_config';
 import defaultSigs from '../signatures';
 import { DEFAULT_UDFS } from '../constants';
+
+const { findFilepath } = aiConfig;
 
 const documentSignatureCache = new Map();
 const FUNCTION_NAME_PART_INDEX_FROM_END = 2;

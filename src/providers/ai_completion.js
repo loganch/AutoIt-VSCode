@@ -13,17 +13,19 @@ import {
   AUTOIT_MODE,
   buildFunctionSignature,
   functionPattern as _functionPattern,
-  findFilepath,
   getIncludeData,
   includePattern,
   libraryIncludePattern,
   setRegExpFlags,
   variablePattern,
 } from '../util';
+import aiConfig from './ai_config';
 import { DEFAULT_UDFS } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';
 import VariableTrackingService from '../services/VariableTrackingService.js';
 import { attachIncludeEdits } from '../utils/includeAutoInsert';
+
+const { findFilepath } = aiConfig;
 
 // Per-document caches for include completions, keyed by document URI
 // Each entry: { files: string[], completions: CompletionItem[] }

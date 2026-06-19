@@ -57,11 +57,17 @@ jest.mock('vscode', () => ({
 jest.mock('../src/util', () => ({
   AUTOIT_MODE: { language: 'autoit' },
   buildFunctionSignature: mockBuildFunctionSignature,
-  findFilepath: mockFindFilepath,
   functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/gim,
   getIncludeData: mockGetIncludeData,
   includePattern: /#include\s+"([^"]+)"/gim,
   libraryIncludePattern: /#include\s+<([^>]+)>/gim,
+}));
+
+jest.mock('../src/providers/ai_config', () => ({
+  __esModule: true,
+  default: {
+    findFilepath: mockFindFilepath,
+  },
 }));
 
 jest.mock('../src/constants', () => ({
