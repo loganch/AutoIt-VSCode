@@ -1,0 +1,215 @@
+# Brooks-Lint — Tech Debt Assessment
+
+**Mode:** Tech Debt Assessment
+**Scope:** AutoIt-VSCode (whole project) — `src/` (~120 JS files, VS Code extension, pure JS + webpack/babel).
+
+> Note: the `_shared/` framework files (`common.md`, `decay-risks.md`, `source-coverage.md`) referenced by the brooks-debt skill were absent from the install, so this report uses the Iron Law (Symptom → Source → Consequence → Remedy), Pain × Spread scoring, and the Debt Summary Table as defined in the available `debt-guide.md`. The numeric Health Score formula from `common.md` is omitted.
+
+**Summary:** The codebase is mid-migration — a flat `ai_*.js` feature layout is being pulled into organized subdirectories (`commands/`, `services/`, `parsers/`, `utils/`, `completions/`, `hovers/`, `signatures/`), and CommonJS is being moved to ESM — but both migrations are ~half done. The dominant structural problem is `src/util.js`: an 825-line God module imported by **105 files** that simultaneously owns constants, regex, error handling, FS/cache plumbing, path/include resolution, completion transforms, and signature parsing, plus backward-compat re-exports. Around it sit two pairs of duplicated singletons (the tracking services, the parsers) and two parallel include-resolution implementations. Import-time side effects, module-level unbounded caches, a Windows-registry write buried in a config module, and worked-around circular dependencies round out the picture. Almost all of this is **accidental** debt from organic growth, not deliberate shortcuts.
+
+---
+
+## How to use this document
+
+Each finding has a checkbox. Work top-down within a risk group, or jump to the Debt Summary at the bottom to see which risks have the highest average priority. Priorities: 7–9 Critical (next sprint), 4–6 Scheduled (within quarter), 1–3 Monitored (log and watch). `Priority = Pain × Spread` (max 9).
+
+---
+
+## Findings
+
+### R1 — Cognitive Overload
+
+- [ ] **F1. `util.js` is a God module with 11 responsibilities and 105 importers** — Priority 6 (P2 × S3), Scheduled, accidental
+  - **Symptom:** One 825-line file carries section-bannered concerns: markdown constants, variable-regex matching, cached regex, error handling, input validation, FS utils + include cache, path/include resolution, doc analysis, completion transforms, signature analysis, and backward-compat re-exports (`src/util.js:1-959`).
+  - **Source:** Organic accretion plus an incomplete refactor — `util.js` re-exports `AI_CONSTANTS`/`AUTOIT_MODE` from `coreConstants` and `findFilepath` from `ai_config` "for backward compatibility" (`src/util.js:916-936`).
+  - **Consequence:** Developers must scan 11 sections to find anything; changes to one concern risk colliding with another; the file is the default dump location for new helpers.
+  - **Remedy:** Split into focused modules (`includeResolution.js`, `functionSignature.js`, `completionTransforms.js`, `fsCache.js`, `errorUtils.js`); keep `util.js` as a thin barrel only during transition.
+
+- [ ] **F2. `ai_config.js` mixes 9 responsibilities behind a "config" name** — Priority 4 (P2 × S2), Scheduled, accidental
+  - **Symptom:** 538 lines doing token-color migration, path splitting, VS Code variable resolution, registry-based install auto-detection, smartHelp config upgrade, path verification, a Proxy config object, a listener registry, and a Windows registry write (`src/ai_config.js:1-612`).
+  - **Source:** Configuration, path resolution, and OS integration grew together in one module.
+  - **Consequence:** "Config" no longer describes the module; the Proxy makes data flow hard to trace; side effects hide among helpers.
+  - **Remedy:** Extract `pathResolver.js`, `autoItInstallDetector.js`, `smartHelpMigrator.js`; leave `ai_config.js` as a thin config facade.
+
+- [ ] **F3. `activate()` is a 277-line orchestrator handling 8+ concerns** — Priority 4 (P2 × S2), Scheduled, accidental
+  - **Symptom:** `activate` registers features + commands, warms the symbol index, wires 4 document-event handlers, handles config changes, and sets up diagnostics with 4 listeners (`src/extension.js:211-488`).
+  - **Source:** Lifecycle wiring accreted in the entry point without extraction.
+  - **Consequence:** Any lifecycle change requires editing a giant function; event-handler interactions are hard to reason about.
+  - **Remedy:** Extract `setupDocumentTracking(ctx)`, `setupDiagnostics(ctx)`, `setupConfigSync(ctx)` helpers; have `activate` only compose them.
+
+- [ ] **F4. Inconsistent naming and import placement in the parser layer** — Priority 1 (P1 × S1), Monitored, accidental
+  - **Symptom:** `hovers/index.js` mixes snake_case `udf_*` with camelCase `udfWinAPITheme`/`udfWinNet`/`udfWord` and a typo `udf_guiIPAdress` (`src/hovers/index.js:22,66-68`); `VariableParser.js` places an `import` block after a function definition (`src/parsers/VariableParser.js:15-34`).
+  - **Source:** Ad-hoc naming during the flat→organized migration.
+  - **Consequence:** Mild confusion locating/renaming imports; reads as untidy.
+  - **Remedy:** Standardize on one naming convention; move imports to file top.
+
+### R2 — Change Propagation
+
+- [x] **F5. Adding a UDF requires editing two near-identical 80-line index files** — Priority 6 (P2 × S3), Scheduled, accidental — *Resolved: both registries now derive from a single module list in `src/udfRegistry.js`; the two `index.js` files are thin derivations.*
+  - **Symptom:** `completions/index.js` and `hovers/index.js` maintain parallel import lists of the same ~80 signature/completion modules, one importing `completions as X`, the other `hovers as X` (`src/completions/index.js:1-204`, `src/hovers/index.js:1-208`).
+  - **Source:** Each signature module exports both `completions` and `hovers`, and the two registries were built by duplication rather than a shared source of truth.
+  - **Consequence:** Every new UDF = edits to both index files plus the signature file; easy to register completions but forget hovers (silent gap).
+  - **Remedy:** Generate both registries from one module list (e.g. a single `udfModules.js` array, or auto-discover via a manifest); or have each signature module self-register.
+
+- [ ] **F6. Adding a command requires coordinated edits across 4 locations** — Priority 4 (P2 × S2), Scheduled, accidental
+  - **Symptom:** A new command must be added to the command module, `commandsList.js` (string), `ai_commands.js` (re-export), and `package.json` (command + menu + keybinding) (`src/commandsList.js:1-23`, `src/ai_commands.js:197-217`, `src/registerCommands.js:5-13`).
+  - **Source:** String-name indirection — `registerCommands` looks up functions by name via `Object.entries(aiCommands)` keyed on `commandsList`.
+  - **Consequence:** Easy to miss the re-export or the string list; the command silently fails to register.
+  - **Remedy:** Have each command module export its own command id + handler; let `registerCommands` iterate modules directly; derive `commandsList` from the manifest.
+
+- [ ] **F7. `util.js` blast radius: 105 importers ripple on any change** — Priority 6 (P2 × S3), Scheduled, accidental *(shares source with F1; distinct risk)*
+  - **Symptom:** 105 files import from `./util` — all 80+ signature/completion data files plus every feature module (`util.js` dependents grep).
+  - **Source:** `util.js` is the shared dependency hub for both the data layer and the feature layer.
+  - **Consequence:** Renaming/moving any export forces a 105-file change; the "Maintaining API Compatibility" re-exports exist *because* this is already painful.
+  - **Remedy:** Same split as F1; consumers import from the focused module that owns the symbol they need.
+
+- [ ] **F8. Wiring and boilerplate duplicated across `extension.js`/`diagnosticUtils.js`** — Priority 2 (P1 × S2), Monitored, accidental
+  - **Symptom:** `workspace.onDidOpenTextDocument` is registered twice (`src/extension.js:238` and `:285`); the `variableTrackingService.updateFileImmediate` try/catch is repeated 4× (`:289-295`, `:320-326`, `:354-360`); the `cfg?.get?.('debugLogging')` + `createOutputChannel` debug-log pattern repeats ~6× (`src/diagnosticUtils.js:248-333`, `src/extension.js:436-468`).
+  - **Source:** Copy-paste wiring rather than helpers.
+  - **Consequence:** Bug fixes (e.g. to debug logging) must be applied in N places; some handlers diverge.
+  - **Remedy:** Extract a `debugLog(msg, err)` helper and a single `trackDocumentLifecycle(ctx, services)` wiring function.
+
+### R3 — Knowledge Duplication
+
+- [ ] **F9. `MapTrackingService` and `VariableTrackingService` are duplicate singletons** — Priority 4 (P2 × S2), Scheduled, accidental
+  - **Symptom:** Two classes (~239 and ~315 lines) share identical `getInstance`/`updateConfiguration`/`resetInstance`/`updateFile`/`updateFileDebounced`/`updateFileImmediate`/`_parseFile`/`removeFile`/`clear` structure; `VariableTrackingService.js:3` states "Based on MapTrackingService.js structure" (`src/services/MapTrackingService.js`, `src/services/VariableTrackingService.js`).
+  - **Source:** Copy-paste of the singleton + debounce + include-merge scaffold.
+  - **Consequence:** They have already diverged — `VariableTrackingService` has `latestQueuedSource` re-queueing and proper `removeFile`/`clear` cancel logic that `MapTrackingService` lacks; fixes must be made twice.
+  - **Remedy:** Introduce a generic `TrackingService` base (parser factory + merge strategy); subclass for Map vs Variable.
+
+- [ ] **F10. `IncludeResolver` duplicates `util.js` include resolution** — Priority 4 (P2 × S2), Scheduled, accidental
+  - **Symptom:** `util.js` has `getIncludePath`/`getIncludeScripts` + 4 include regexes; `IncludeResolver` has `parseIncludes`/`resolveIncludePath`/`resolveAllIncludes` with its own combined regex `/^\s*#include\s+([<"])([^>"]+)[>"]/i` (`src/util.js:100-132,361-527`, `src/utils/IncludeResolver.js:22-129`).
+  - **Source:** Two independent implementations of the same AutoIt `#include` concept.
+  - **Consequence:** Edge-case behavior (quoting, spacing, comments) can diverge; a bug fixed in one isn't fixed in the other.
+  - **Remedy:** Make `IncludeResolver` the single implementation; have `util.js` delegate to it.
+
+- [ ] **F11. `DEFAULT_MAX_INCLUDE_DEPTH` defined twice** — Priority 1 (P1 × S1), Monitored, accidental
+  - **Symptom:** Value `3` defined in `src/constants.js:162` and re-defined locally in `src/utils/IncludeResolver.js:4` (which does not import it).
+  - **Source:** `IncludeResolver` was written self-contained.
+  - **Consequence:** Changing the canonical constant silently leaves `IncludeResolver` on the old depth.
+  - **Remedy:** Import the constant from `constants.js` in `IncludeResolver`.
+
+- [ ] **F12. `parseFunctionBoundaries` and `splitByTopLevelCommas` duplicated between parsers** — Priority 2 (P1 × S2), Monitored, accidental
+  - **Symptom:** `MapParser.parseFunctionBoundaries` and `VariableParser.parseFunctionBoundaries` are near-identical (`src/parsers/MapParser.js:124-154`, `src/parsers/VariableParser.js:51-80`); `VariableParser.splitByTopLevelCommas` re-implements `splitTopLevel` from `utils/functionSignatureParsing.js` that `MapParser` already imports (`src/parsers/VariableParser.js:15-30`).
+  - **Source:** Parser written by cloning the other.
+  - **Consequence:** Function-boundary parsing fixes apply twice; the comma-splitter risks diverging.
+  - **Remedy:** Extract a shared `parseFunctionBoundaries(lines)` helper and reuse `splitTopLevel`.
+
+- [ ] **F13. Constants and `REGEX_PATTERNS` scattered across 3 files** — Priority 6 (P2 × S3), Scheduled, accidental (backward-compat re-exports: intentional, no payback plan → treat as accidental)
+  - **Symptom:** `REGEX_PATTERNS` is defined frozen in `coreConstants.js:12` and rebuilt in `util.js:100` via spread; constants live in `constants.js`, `utils/coreConstants.js`, and inline in `util.js`; `util.js` re-exports `AI_CONSTANTS`/`AUTOIT_MODE` "for backward compatibility" (`src/util.js:916-917`).
+  - **Source:** An extract-constants refactor was started but consumers were not migrated off `util.js`.
+  - **Consequence:** No single source of truth for regex or constants; `util.js`'s `REGEX_PATTERNS` can drift from `coreConstants`' frozen base.
+  - **Remedy:** Migrate consumers to import constants/regex from `coreConstants` directly; remove the re-exports.
+
+- [ ] **F14. `parenTriggerOn` config-tracking state duplicated** — Priority 1 (P1 × S1), Monitored, accidental
+  - **Symptom:** `let parenTriggerOn` + a `workspace.onDidChangeConfiguration` listener exists in both `util.js:534-540` and `ai_completion.js:35-40`.
+  - **Source:** The completion module re-implemented config tracking instead of importing it.
+  - **Consequence:** Two independent state copies and two listeners for one setting; they could disagree.
+  - **Remedy:** Centralize in one module (or read config live at call time) and drop the duplicate.
+
+- [ ] **F15. Debug-logging boilerplate duplicated ~6×** — Priority 2 (P1 × S2), Monitored, accidental
+  - **Symptom:** The `try { cfg?.get?.('debugLogging') … createOutputChannel … console.debug }` block appears ~4× in `diagnosticUtils.js` and ~2× in `extension.js` (`src/diagnosticUtils.js:248-333`, `src/extension.js:436-468`).
+  - **Source:** Defensive logging copied each time it was needed.
+  - **Consequence:** ~120 lines of near-identical scaffolding; changes require N edits.
+  - **Remedy:** One `debugLog(scope, msg, err)` helper.
+
+### R4 — Accidental Complexity
+
+- [ ] **F16. Mixed module systems (CommonJS + ESM) across the codebase** — Priority 6 (P2 × S3), Scheduled, accidental
+  - **Symptom:** 8 files use `module.exports`, 15+ use `require()` (including `require('../package.json')`, `require('./completions')`, `require('vscode')` in some command files), while the rest use ESM `import`/`export`; several files mix both (e.g. `ai_commands.js`, `ai_completion.js`, `ai_config.js`, `ai_hover.js`, `ai_references.js`) (`src/command_constants.js:69`, `src/ai_completion.js:447`, `src/commands/DebugCommands.js:1`, `src/services/*.js`).
+  - **Source:** A CJS→ESM migration was started but not completed; webpack/babel makes both work, hiding the inconsistency.
+  - **Consequence:** Interop semantics (sync `require` vs hoisted `import`, default-interop differences) become an implicit coupling to the bundler; readers can't predict how a module will be consumed.
+  - **Remedy:** Finish the migration — convert `module.exports`/`require` to ESM; use dynamic `import()` for the lazy `completions`/`hovers` loads.
+
+- [ ] **F17. Import-time side effects mutate workspace state** — Priority 4 (P2 × S2), Scheduled, accidental
+  - **Symptom:** Importing `ai_config.js` runs a token-color-customization migration that *writes global workspace config*, calls `getPaths()`, and registers a config listener (`src/ai_config.js:14-68,571-591`); importing `util.js` registers a config listener (`src/util.js:536-540`).
+  - **Source:** Module load used as an initialization hook.
+  - **Consequence:** Merely importing these modules (e.g. in tests) mutates global VS Code state; import order matters; test isolation breaks.
+  - **Remedy:** Move side effects into explicit `init()` functions called from `activate`.
+
+- [ ] **F18. Module-level unbounded mutable global state** — Priority 2 (P1 × S2), Monitored, accidental
+  - **Symptom:** `util.js` `includeCache` Map (no cap, `src/util.js:222`), `diagnosticUtils.js` `trackedDiagnosticFileUris` Set (never cleared, `:212`), `ai_config.js` `listeners` Map / `aiPath` / `bNoEvents` / `showErrors` (`:84-90`), `ai_completion.js` `includeCache`/`libraryIncludeCache` (LRU-bounded, the exception).
+  - **Source:** Singletons-by-module-state without eviction.
+  - **Consequence:** Memory grows over a long session; leaked listeners/state survive extension reload; tests share state.
+  - **Remedy:** Give caches max-size + eviction; expose `dispose()`/`reset()` and call from `deactivate`/tests.
+
+- [ ] **F19. `ai_config.updateIncludePaths` writes to the Windows registry** — Priority 2 (P1 × S1), Monitored, accidental
+  - **Symptom:** `execFile('reg', ['add','HKCU\\Software\\AutoIt v3\\AutoIt', …])` is invoked from a config-update function (`src/ai_config.js:544-567`).
+  - **Source:** Config module reaching into OS persistence to keep AutoIt's Include registry key in sync.
+  - **Consequence:** A hidden, surprising side effect in a module callers treat as config; failures surface as user error dialogs; cross-cutting concern buried in the wrong layer.
+  - **Remedy:** Move registry sync to an explicit `syncIncludePathsToRegistry()` service called from a clearly marked lifecycle point.
+
+- [ ] **F20. Monkey-patching VS Code `Diagnostic` objects with `_ownerUri`** — Priority 1 (P1 × S1), Monitored, accidental
+  - **Symptom:** `Object.defineProperty(diagnosticToAdd, '_ownerUri', …)` attaches a custom property to framework `Diagnostic` instances (`src/diagnosticUtils.js:147-157`).
+  - **Source:** `DiagnosticCollection` has no public iteration, so ownership is stashed on the diagnostic itself.
+  - **Consequence:** Relies on VS Code preserving custom props across API boundaries; fragile across VS Code versions.
+  - **Remedy:** Maintain an external `Map<Diagnostic, ownerUri>` (or `Map<uri, ownerUri>`) instead of mutating framework objects.
+
+- [ ] **F21. `CommandsFacade` redundant dynamic imports + triple `require(package.json)`** — Priority 1 (P1 × S1), Monitored, accidental
+  - **Symptom:** `initialize()` dynamically imports 5 services, then `_setupEventListeners` dynamically imports `OutputChannelManager` again; `require('../package.json')` is called 3× in one method (`src/ai_commands.js:50-62,68,86,128`).
+  - **Source:** Facade assembled incrementally without consolidating imports.
+  - **Consequence:** Minor wasted work and noise; cosmetic.
+  - **Remedy:** Import once at top; capture `package.json` metadata in a constant.
+
+### R5 — Dependency Disorder
+
+- [ ] **F22. Circular dependencies worked around by code placement** — Priority 4 (P2 × S2), Scheduled, accidental
+  - **Symptom:** `ai_symbols ↔ symbolIndex` (symbolIndex imports `provideDocumentSymbols` from `ai_symbols`; `ai_symbols` imports from symbolIndex's neighbors) (`src/services/symbolIndex.js` imports `../ai_symbols`); `util.js` explicitly hosts `buildVariableRegex`/`isVariableDeclarationLine` solely to break the `ai_definition ↔ symbolIndex` cycle, documented in comment (`src/util.js:46-51`).
+  - **Source:** Feature modules and the symbol index depend on each other in both directions.
+  - **Consequence:** Logic is placed where it breaks the cycle rather than where it belongs; `util.js` carries variable-regex concerns only because of this cycle; future additions risk new cycles.
+  - **Remedy:** Extract the shared bits (variable patterns, symbol data) into a leaf module with no inbound feature deps; invert the ai_symbols↔symbolIndex edge via an interface/callback.
+
+- [ ] **F23. `util.js` has no clear layering position** — Priority 6 (P2 × S3), Scheduled, accidental *(shares source with F1; distinct risk)*
+  - **Symptom:** `util.js` is simultaneously utilities, constants, IO/cache, parsing, and a compatibility layer that re-exports from `ai_config` and `coreConstants`; it has 105 inbound edges from both data and feature layers.
+  - **Source:** No enforced layering rule; "util" became the sink for everything cross-cutting.
+  - **Consequence:** There is no consistent answer to "what depends on what?"; the data layer and feature layer both depend on a module that itself depends on `ai_config` (infrastructure), flattening the architecture.
+  - **Remedy:** After splitting (F1), establish a layering rule: data → domain helpers → features → VS Code; forbid features from importing infrastructure directly except via `ai_config`'s narrow public surface.
+
+- [ ] **F24. Domain logic misplaced in infrastructure modules** — Priority 2 (P1 × S2), Monitored, accidental
+  - **Symptom:** Au3Check parameter parsing (`runCheckProcess`) lives in `extension.js` (`:39-111`); signature/parameter domain logic (`buildFunctionSignature`, `getParams`) lives in `util.js` alongside FS/cache plumbing (`src/util.js:748-901`).
+  - **Source:** Domain logic dropped into whichever module was handy.
+  - **Consequence:** Domain rules are hard to locate and test in isolation; they're coupled to VS Code/FS concerns.
+  - **Remedy:** Move `runCheckProcess`/directive parsing into `diagnosticUtils` or a new `au3check.js`; move signature parsing into a `functionSignature.js` domain module.
+
+### R6 — Domain Model Distortion
+
+- [ ] **F25. No domain layer; AutoIt language concepts are scattered** — Priority 6 (P2 × S3), Scheduled, accidental
+  - **Symptom:** The implicit domain ("the AutoIt language") — function signatures, variable declarations/scope, include resolution, maps — is spread across `util.js`, `parsers/`, `services/`, and the `ai_*` feature modules with no owning layer.
+  - **Source:** The codebase was built feature-first (hover, completion, definition) without extracting a shared language model.
+  - **Consequence:** Each feature re-derives language concepts (e.g. two include resolvers, two variable matchers); domain rules drift between features.
+  - **Remedy:** Introduce a `language/` (or `domain/`) layer — `includeResolver`, `functionSignature`, `variableScope`, `mapModel` — that features depend on and that owns the AutoIt semantics.
+
+- [ ] **F26. Anemic data files with transform logic in `util.js`** — Priority 2 (P1 × S2), Monitored, accidental
+  - **Symptom:** The 80+ signature/completion files are pure data, but the transforms that turn them into VS Code items (`signatureToCompletion`, `signatureToHover`, `completionToHover`, `fillCompletions`) live in `util.js`, disconnected from the data (`src/util.js:571-704`).
+  - **Source:** Data and behavior split across modules by accident.
+  - **Consequence:** Adding a new completion "kind" means editing `util.js`, not the data module that defines the kind; the data files can't be understood in isolation.
+  - **Remedy:** Co-locate per-kind transforms with the data, or move all transforms into a dedicated `completionTransforms.js` next to the registries.
+
+- [ ] **F27. Module names don't match concepts** — Priority 2 (P1 × S2), Monitored, accidental
+  - **Symptom:** `ai_config.js` does config + path resolution + registry writes + token-color migration + install detection; `command_constants.js` holds timing constants, `commandsList.js` is a string list, `commands/commandUtils.js` is editor helpers — three "command" modules with unclear boundaries; the `ai_` prefix carries no domain meaning.
+  - **Source:** Naming didn't track responsibility drift.
+  - **Consequence:** A new developer can't predict where to look or where to add things from the names alone.
+  - **Remedy:** Rename to match responsibility (`autoItPaths.js`, `commandTimings.js`, `commandRegistry.js`, `editorActions.js`); drop or define the `ai_` prefix.
+
+- [ ] **F28. Incomplete flat→organized migration** — Priority 6 (P2 × S3), Scheduled, accidental
+  - **Symptom:** Flat `ai_*.js` feature files (`ai_completion`, `ai_definition`, `ai_hover`, `ai_references`, `ai_signature`, `ai_symbols`, `ai_workspaceSymbols`, `ai_formatter`, `ai_commands`, `ai_config`) coexist with organized subdirectories (`commands/`, `services/`, `parsers/`, `utils/`, `completions/`, `hovers/`, `signatures/`) that partly replace them; `util.js` re-exports exist "for backward compatibility."
+  - **Source:** A reorganization was started (new code goes in subdirs) but the flat files were never fully absorbed.
+  - **Consequence:** New developers don't know whether to add to `ai_completion.js` or `completions/`; two mental models coexist; the split is the root cause behind F1, F5, F13, F23.
+  - **Remedy:** Finish the migration — move each `ai_*` feature into its subdirectory, delete the flat file once consumers are updated, remove the backward-compat re-exports.
+
+---
+
+## Debt Summary
+
+| Risk | Findings | Avg Priority | Classification | Intent |
+|------|----------|-------------|----------------|--------|
+| Cognitive Overload      | 4 | 3.75 | Scheduled | accidental |
+| Change Propagation      | 4 | 4.50 | Scheduled | accidental |
+| Knowledge Duplication   | 7 | 2.86 | Monitored  | accidental (F13 re-exports intentional-but-no-payback) |
+| Accidental Complexity   | 6 | 2.67 | Monitored  | accidental |
+| Dependency Disorder     | 3 | 4.00 | Scheduled | accidental |
+| Domain Model Distortion | 4 | 4.00 | Scheduled | accidental |
+
+**Recommended focus:** Change Propagation (4.5), Dependency Disorder (4.0), and Domain Model Distortion (4.0) — all three trace back to the same root: the incomplete flat→organized migration (F28) and the `util.js` God-hub (F1/F7/F23). The highest-leverage single action is **finishing the `util.js` split as part of completing the flat→organized migration (F28)**: it directly retires F1, F7, F13, F23, F26 and unblocks F25. The two highest-ROI quick wins independent of that are **collapsing the duplicate tracking services (F9)** and **consolidating include resolution (F10/F11)**, since those are self-contained and already diverging. The mixed module systems (F16) should be resolved alongside the migration to avoid paying interop friction twice.
+
+A note on intent: nearly all findings are **accidental** — structural erosion from organic growth and half-finished refactors. The only intentional-without-payback items are the `util.js` backward-compat re-exports (F13); per the guide these are treated as accidental for prioritization since they have no linked ticket or documented payback plan.
