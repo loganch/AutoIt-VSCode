@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { completionToHover, fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const predefined = 'Tray predefined ID Constant';
 const stateValue = 'Tray menu/item state value Constant';

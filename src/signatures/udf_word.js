@@ -6,7 +6,7 @@ import {
   signatureToCompletion,
   signatureToHover,
   trueFalseHeader as tfHeader,
-} from '../util';
+} from '../completionTransforms';
 
 const include = '(Requires: `#include <Word.au3>`)';
 

@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { completionToHover, fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const penDashCap = 'Pen Dash Cap Type Constant';
 const penDashStyle = 'Pen Dash Style Constant';

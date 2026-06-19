@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { signatureToCompletion, signatureToHover } from '../util';
+import { signatureToCompletion, signatureToHover } from '../completionTransforms';
 
 const include = '(Requires: `#include <GUICtrlTab.au3>`)';
 

@@ -5,7 +5,7 @@ import {
   opt,
   signatureToCompletion,
   signatureToHover,
-} from '../util';
+} from '../completionTransforms';
 
 const include = '(Requires: `#include <WinNet.au3>`)';
 

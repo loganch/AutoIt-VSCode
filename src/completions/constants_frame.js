@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { completionToHover, fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const type = 'Frame Type Constant';
 const initial = 'Initial Frame State Constant';

@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { br, opt, signatureToHover, signatureToCompletion } from '../../util';
+import { br, opt, signatureToHover, signatureToCompletion } from '../../completionTransforms';
 
 const include = '`#include <WinAPITHeme.au3>`';
 

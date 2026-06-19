@@ -1,5 +1,5 @@
 import { CompletionItemKind, SnippetString } from 'vscode';
-import { fillCompletions } from '../util';
+import { fillCompletions } from '../completionTransforms';
 
 const items = [
   {

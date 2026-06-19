@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { completionToHover, fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const fontWeight = 'Font Weight Constant';
 const dialog = 'Font Dialog Constant';

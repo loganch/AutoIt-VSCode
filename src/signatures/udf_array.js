@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { br, defaultZero, opt, signatureToCompletion, signatureToHover } from '../util';
+import { br, defaultZero, opt, signatureToCompletion, signatureToHover } from '../completionTransforms';
 
 const include = '(Requires: `#include <Array.au3>`)';
 

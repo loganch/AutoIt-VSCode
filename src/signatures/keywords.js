@@ -1,5 +1,5 @@
 import { CompletionItemKind, SnippetString } from 'vscode';
-import { signatureToCompletion, signatureToHover } from '../util';
+import { signatureToCompletion, signatureToHover } from '../completionTransforms';
 
 const signatures = {
   And: {

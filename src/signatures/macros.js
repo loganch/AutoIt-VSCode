@@ -4,7 +4,7 @@
  */
 
 import { CompletionItemKind } from 'vscode';
-import { signatureToCompletion, signatureToHover } from '../util';
+import { signatureToCompletion, signatureToHover } from '../completionTransforms';
 
 const signatures = {
   '@AppDataCommonDir': {

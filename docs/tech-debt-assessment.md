@@ -57,7 +57,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Easy to miss the re-export or the string list; the command silently fails to register.
   - **Remedy:** Have each command module export its own command id + handler; let `registerCommands` iterate modules directly; derive `commandsList` from the manifest.
 
-- [ ] **F7. `util.js` blast radius: 105 importers ripple on any change** — Priority 6 (P2 × S3), Scheduled, accidental *(shares source with F1; distinct risk)*
+- [x] **F7. `util.js` blast radius: 105 importers ripple on any change** — Priority 6 (P2 × S3), Scheduled, accidental *(shares source with F1; distinct risk)* — *Resolved: extracted the completion/signature transforms + header constants into `completionTransforms.js` (and `handleError`/`safeExecute` into a leaf `errorUtils.js`); repointed the ~97 data files to import directly from `completionTransforms`. `util.js` importers dropped from ~107 to 8; it re-exports the transforms for the remaining feature modules. Also largely retires F26.*
   - **Symptom:** 105 files import from `./util` — all 80+ signature/completion data files plus every feature module (`util.js` dependents grep).
   - **Source:** `util.js` is the shared dependency hub for both the data layer and the feature layer.
   - **Consequence:** Renaming/moving any export forces a 105-file change; the "Maintaining API Compatibility" re-exports exist *because* this is already painful.

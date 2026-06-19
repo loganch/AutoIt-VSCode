@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { br, opt, signatureToCompletion, signatureToHover, valueFirstHeader } from '../util';
+import { br, opt, signatureToCompletion, signatureToHover, valueFirstHeader } from '../completionTransforms';
 
 const include = '`#include <Debug.au3>`';
 

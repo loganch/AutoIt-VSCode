@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { completionToHover, fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const multi = 'StringCompare/StringInStr/StringReplace Constant';
 const stringStripWS = 'StringStripWS Constant';
