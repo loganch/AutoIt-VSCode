@@ -1,8 +1,8 @@
-const { workspace, RelativePattern } = require('vscode');
-const fs = require('fs');
-const path = require('path');
-const { parse } = require('jsonc-parser');
-const { performance } = require('perf_hooks');
+import { workspace, RelativePattern } from 'vscode';
+import fs from 'fs';
+import path from 'path';
+import { parse } from 'jsonc-parser';
+import { performance } from 'perf_hooks';
 
 /**
  * @typedef {Object.<string, string>} KeybindingMap
@@ -308,4 +308,4 @@ class KeybindingService {
   }
 }
 
-module.exports = KeybindingService;
+export default KeybindingService;

@@ -39,36 +39,36 @@ describe('ai_hover module', () => {
     expect(hoverModule.default).toBeDefined();
   });
 
-  test('returns hover for known symbol', () => {
+  test('returns hover for known symbol', async () => {
     const document = {
       getWordRangeAtPosition: jest.fn(() => ({ start: 0, end: 6 })),
       getText: jest.fn(() => 'MyFunc'),
     };
 
-    const result = provider.provideHover(document, { line: 0, character: 0 });
+    const result = await provider.provideHover(document, { line: 0, character: 0 });
 
     expect(result).toBeDefined();
     expect(result.contents).toBe('My hover docs');
   });
 
-  test('returns null for unknown symbol', () => {
+  test('returns null for unknown symbol', async () => {
     const document = {
       getWordRangeAtPosition: jest.fn(() => ({ start: 0, end: 7 })),
       getText: jest.fn(() => 'Unknown'),
     };
 
-    const result = provider.provideHover(document, { line: 0, character: 0 });
+    const result = await provider.provideHover(document, { line: 0, character: 0 });
 
     expect(result).toBeNull();
   });
 
-  test('returns null when there is no word range', () => {
+  test('returns null when there is no word range', async () => {
     const document = {
       getWordRangeAtPosition: jest.fn(() => null),
       getText: jest.fn(),
     };
 
-    const result = provider.provideHover(document, { line: 0, character: 0 });
+    const result = await provider.provideHover(document, { line: 0, character: 0 });
 
     expect(result).toBeNull();
   });

@@ -1,12 +1,13 @@
+import { window, Position, Uri } from 'vscode';
+import path from 'path';
+import fs from 'fs';
 import { globalOutputChannel } from './ScriptCommands.js';
-const { window, Position, Uri } = require('vscode');
-const path = require('path');
-const fs = require('fs');
-const { showErrorMessage } = require('../providers/ai_showMessage');
-const { REGEX_PATTERNS, setRegExpFlags } = require('../utils/regexPatterns');
-const { functionDefinitionRegex } = REGEX_PATTERNS;
-
 import aiConfig from '../providers/ai_config';
+import { showErrorMessage } from '../providers/ai_showMessage';
+import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
+import packageJson from '../../package.json';
+
+const { functionDefinitionRegex } = REGEX_PATTERNS;
 const { config, findFilepath } = aiConfig;
 const aiOutCommon = globalOutputChannel;
 
@@ -39,7 +40,7 @@ const runners = {
     }
     return null;
   },
-  outputName: `extension-output-${require('../../package.json').publisher}.${require('../../package.json').name}-#`,
+  outputName: `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
 };
 
 /**

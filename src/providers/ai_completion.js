@@ -444,7 +444,7 @@ const provideCompletionItems = async (document, position) => {
   const libraryCompletions = getLibraryFunctions(libraryIncludes, document);
 
   if (!completions) {
-    const mod = require('../completions');
+    const mod = await import('../completions');
     completions = Array.isArray(mod) ? mod : mod.default;
   }
 

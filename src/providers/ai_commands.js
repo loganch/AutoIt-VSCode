@@ -10,6 +10,7 @@ import { commandsList as _commandsList, commandsPrefix } from '../commandsList';
 // getActiveDocumentFileName feeds the ProcessManager's output-name resolution.
 // Command id -> handler wiring lives in commandRegistry.js (see F6).
 import * as UtilityCommands from '../commands/UtilityCommands';
+import packageJson from '../../package.json';
 
 const { config } = conf;
 
@@ -58,7 +59,7 @@ class CommandsFacade {
       this.services.keybindingService = new KeybindingService({
         commandsList: _commandsList,
         commandsPrefix,
-        keybindingsDefaultRaw: require('../../package.json').contributes.keybindings,
+        keybindingsDefaultRaw: packageJson.contributes.keybindings,
       });
       this.keybindings = await this.services.keybindingService.initialize();
 
@@ -76,7 +77,7 @@ class CommandsFacade {
         this.config,
         outputChannel,
         UtilityCommands.getActiveDocumentFileName,
-        `extension-output-${require('../../package.json').publisher}.${require('../../package.json').name}-#`,
+        `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
       );
 
       // Initialize hotkey manager

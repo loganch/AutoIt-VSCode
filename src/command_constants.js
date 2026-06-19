@@ -66,7 +66,7 @@ const NO_BREAK_SPACE = '\u00A0';
  */
 const OUTPUT_NAME_TEMPLATE = 'extension-output-${publisher}.${name}-#';
 
-module.exports = {
+export {
   HOTKEY_LINE_DELAY_MS,
   KEYBINDING_DEBOUNCE_MS,
   SETTINGS_TIMEOUT_MS,

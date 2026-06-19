@@ -9,7 +9,7 @@ jest.mock('../../src/command_constants', () => ({
   NO_BREAK_SPACE: '\u00a0',
 }));
 
-const OutputChannelManager = require('../../src/services/OutputChannelManager');
+const OutputChannelManager = require('../../src/services/OutputChannelManager').default;
 
 const PROCESS_OUTPUT_CHANNEL_ID = 1234;
 

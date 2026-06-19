@@ -9,6 +9,7 @@ import {
   stringMask,
   stripLineComment,
 } from '../utils/textUtils.js';
+import { AutoItDefinitionProvider } from './ai_definition';
 
 // Workspace scan budget (mirrors ai_workspaceSymbols.js defaults).
 const DEFAULT_MAX_FILES = 500;
@@ -163,9 +164,8 @@ const AutoItReferenceProvider = {
 
   // Resolve the full declaration Location via the existing Go-to-Definition
   // provider (needed for the includeDeclaration filter, which matches BOTH uri
-  // and line). Lazy require avoids a circular import at module load.
+  // and line).
   resolveDeclaration(document, cursorPos) {
-    const { AutoItDefinitionProvider } = require('./ai_definition');
     try {
       return AutoItDefinitionProvider.provideDefinition(document, cursorPos);
     } catch {

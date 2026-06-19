@@ -5,9 +5,9 @@ import { AUTOIT_MODE } from '../utils/coreConstants';
 let hovers = null;
 
 const hoverFeature = languages.registerHoverProvider(AUTOIT_MODE, {
-  provideHover(document, position) {
+  async provideHover(document, position) {
     if (!hovers) {
-      hovers = require('../hovers').default;
+      hovers = (await import('../hovers')).default;
     }
 
     const wordRange = document.getWordRangeAtPosition(position);

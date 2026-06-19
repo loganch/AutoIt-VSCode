@@ -7,7 +7,7 @@ import { detectAutoItPaths } from './autoItInstallDetector';
 import { resolveVariables, splitPath, fixPath } from './pathResolver';
 import { upgradeSmartHelpConfig } from './smartHelpMigrator';
 
-const meta = require('../../package.json');
+import meta from '../../package.json';
 
 /**
  * Fix the output style of the extension

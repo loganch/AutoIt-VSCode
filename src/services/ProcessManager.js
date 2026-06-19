@@ -1,4 +1,5 @@
-const { EventEmitter } = require('events');
+import { EventEmitter } from 'events';
+import { window } from 'vscode';
 
 const MILLISECONDS_PER_SECOND = 1000;
 
@@ -84,7 +85,6 @@ class ProcessManager extends EventEmitter {
    */
   isAiOutVisible() {
     try {
-      const { window } = require('vscode');
       for (let i = 0; i < window.visibleTextEditors.length; i += 1) {
         const editor = window.visibleTextEditors[i];
         const { fileName } = editor.document;
@@ -238,4 +238,4 @@ class ProcessManager extends EventEmitter {
   }
 }
 
-module.exports = ProcessManager;
+export default ProcessManager;

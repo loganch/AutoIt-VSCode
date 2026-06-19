@@ -14,7 +14,7 @@ jest.mock('../../src/utils/pathValidation', () => ({
 const { spawn } = require('child_process');
 const { decode } = require('iconv-lite');
 const { validateFilePath, validateExecutablePath } = require('../../src/utils/pathValidation');
-const ProcessRunner = require('../../src/services/ProcessRunner');
+const ProcessRunner = require('../../src/services/ProcessRunner').default;
 
 const FIRST_PROCESS_ID = 1;
 const SECOND_EXIT_CODE = 2;

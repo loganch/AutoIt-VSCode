@@ -32,7 +32,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-const KeybindingService = require('../../src/services/KeybindingService.js');
+const KeybindingService = require('../../src/services/KeybindingService.js').default;
 
 describe('KeybindingService', () => {
   beforeEach(() => {

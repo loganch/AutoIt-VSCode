@@ -1,5 +1,6 @@
-const { window } = require('vscode');
-const { HOTKEY_LINE_DELAY_MS, NO_BREAK_SPACE } = require('../command_constants');
+import { window } from 'vscode';
+import { HOTKEY_LINE_DELAY_MS, NO_BREAK_SPACE } from '../command_constants';
+import { commandsPrefix } from '../commandsList';
 // Constants to avoid magic numbers when checking for CRLF endings
 const CRLF = '\r\n';
 const CRLF_LENGTH = 2;
@@ -365,7 +366,6 @@ class OutputChannelManager {
    * @returns {string} Formatted hotkey replacement message
    */
   generateHotkeyReplacementMessage() {
-    const { commandsPrefix } = require('../commandsList');
     let message = '+>Setting Hotkeys...--> Press ';
 
     if (this.keybindings[`${commandsPrefix}restartScript`]) {
@@ -444,4 +444,4 @@ class OutputChannelManager {
   }
 }
 
-module.exports = OutputChannelManager;
+export default OutputChannelManager;

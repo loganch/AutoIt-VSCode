@@ -1,5 +1,5 @@
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
 
 /**
  * Validates that a file path is safe and doesn't contain path traversal attempts.
@@ -101,8 +101,4 @@ function validateExecutablePath(execPath, allowedDir = null) {
   return validation;
 }
 
-module.exports = {
-  validateFilePath,
-  validateExecutablePath,
-  fileExists,
-};
+export { validateFilePath, validateExecutablePath, fileExists };

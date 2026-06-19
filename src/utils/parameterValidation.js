@@ -165,7 +165,4 @@ function validateParameterString(paramsString) {
   };
 }
 
-module.exports = {
-  validateParameter,
-  validateParameterString,
-};
+export { validateParameter, validateParameterString };

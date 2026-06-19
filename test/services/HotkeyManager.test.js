@@ -9,7 +9,7 @@ jest.mock('fs', () => ({
 
 const path = require('path');
 const fs = require('fs');
-const HotkeyManager = require('../../src/services/HotkeyManager');
+const HotkeyManager = require('../../src/services/HotkeyManager').default;
 
 const FIRST_PROCESS_ID = 1;
 const SECOND_PROCESS_ID = 2;
