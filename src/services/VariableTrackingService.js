@@ -1,4 +1,4 @@
-import VariableParser from '../parsers/VariableParser.js';
+import VariableParser from '../language/variableParser.js';
 import TrackingServiceBase from './TrackingServiceBase.js';
 
 /**

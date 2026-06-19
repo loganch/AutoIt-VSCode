@@ -1,4 +1,4 @@
-import IncludeResolver from '../utils/IncludeResolver.js';
+import IncludeResolver from '../language/include.js';
 import updateFileDebounced from './debouncedFileUpdate.js';
 import fs from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../constants.js';

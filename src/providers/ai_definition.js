@@ -1,6 +1,6 @@
 import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE } from '../utils/coreConstants';
-import { buildVariableRegex } from '../utils/variableRegex';
+import { buildVariableRegex } from '../language/variable';
 import { getIncludePath, getIncludeScripts } from '../utils/includeResolution';
 import { getIncludeText } from '../utils/fsCache';
 import { lookupDefinition, noteFileContent } from '../services/symbolIndex';
