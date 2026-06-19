@@ -15,9 +15,9 @@ export const escapeRegexLiteral = value => {
 // with patterns specific to include resolution and signature/header parsing.
 export const REGEX_PATTERNS = Object.freeze({
   ...CORE_REGEX_PATTERNS,
-  includePattern: /^#include\s"([^"]+)"/gm,
-  relativeInclude: /^\s*#include\s"([^"]+)"/gm,
-  libraryInclude: /^\s*#include\s<([^>]+)>/gm,
+  includePattern: /^#include\s+"([^"]+)"/gm,
+  relativeInclude: /^\s*#include\s+"([^"]+)"/gm,
+  libraryInclude: /^\s*#include\s+<([^>]+)>/gm,
   libraryIncludePattern: /^#include\s+<([\w.]+\.au3)>/gm,
   functionDefinitionRegex: /^[\t ]*(?:volatile[\t ]+)?Func[\t ]+((\w+)[\t ]*\((.*)\))/gim,
   hasAngleBrackets: /^<.+>$/,

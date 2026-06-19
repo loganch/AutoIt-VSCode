@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
-
-const DEFAULT_MAX_INCLUDE_DEPTH = 3;
+import { REGEX_PATTERNS } from './regexPatterns';
+import { DEFAULT_MAX_INCLUDE_DEPTH } from '../constants';
 
 /**
  * Resolves AutoIt #include directives to file paths
@@ -21,29 +21,21 @@ export default class IncludeResolver {
    */
   parseIncludes(source, _currentFile) {
     const includes = [];
-    const lines = source.split('\n');
 
-    // Matches: #include "file.au3" or #include <file.au3>
-    const includePattern = /^\s*#include\s+([<"])([^>"]+)[>"]/i;
-
-    lines.forEach((line, index) => {
-      // Skip comments
-      if (line.trim().startsWith(';')) return;
-
-      const match = line.match(includePattern);
-      if (match) {
-        const bracket = match[1];
-        const includePath = match[2];
-
-        includes.push({
-          type: bracket === '<' ? 'library' : 'relative',
-          path: includePath,
-          line: index,
-        });
+    const collect = (regex, type) => {
+      for (const match of source.matchAll(regex)) {
+        const line = source.slice(0, match.index).split('\n').length - 1;
+        includes.push({ type, path: match[1], line });
       }
-    });
+    };
 
-    return includes;
+    // Matches: #include "file.au3" or #include <file.au3> via the shared
+    // patterns used by includeResolution.js, so the two implementations
+    // can't silently diverge on edge cases (see F10 in tech-debt-assessment.md).
+    collect(REGEX_PATTERNS.relativeInclude, 'relative');
+    collect(REGEX_PATTERNS.libraryInclude, 'library');
+
+    return includes.sort((a, b) => a.line - b.line);
   }
 
   /**

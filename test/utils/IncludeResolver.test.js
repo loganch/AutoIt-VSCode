@@ -53,6 +53,15 @@ describe('IncludeResolver', () => {
       expect(includes[2].type).toBe('relative');
     });
 
+    it('should detect includes with multiple spaces after #include', () => {
+      const source = '#include  "config.au3"';
+      const resolver = new IncludeResolver('/workspace');
+      const includes = resolver.parseIncludes(source, '/workspace/main.au3');
+
+      expect(includes).toHaveLength(1);
+      expect(includes[0].path).toBe('config.au3');
+    });
+
     it('should ignore commented includes', () => {
       const source = `#include "real.au3"
 ; #include "commented.au3"`;

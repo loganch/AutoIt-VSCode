@@ -77,13 +77,13 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** They have already diverged — `VariableTrackingService` has `latestQueuedSource` re-queueing and proper `removeFile`/`clear` cancel logic that `MapTrackingService` lacks; fixes must be made twice.
   - **Remedy:** Introduce a generic `TrackingService` base (parser factory + merge strategy); subclass for Map vs Variable.
 
-- [ ] **F10. `IncludeResolver` duplicates `util.js` include resolution** — Priority 4 (P2 × S2), Scheduled, accidental
+- [x] **F10. `IncludeResolver` duplicates `util.js` include resolution** — Priority 4 (P2 × S2), Scheduled, accidental — *Resolved: `IncludeResolver.parseIncludes` now matches with the same `REGEX_PATTERNS.relativeInclude`/`libraryInclude` that `utils/includeResolution.js` uses (the patterns were tightened from `\s` to `\s+` to match `IncludeResolver`'s more permissive — and correct — behavior), so the `#include` matching rule lives in one place. The two resolution strategies (filesystem-only vs. VS Code document + `findFilepath`-aware) remain separate, since they serve genuinely different consumers (`TrackingServiceBase` vs. `ai_definition`/`functionSignature`), but can no longer drift on what counts as an include directive. Also retires F11 (`IncludeResolver` now imports `DEFAULT_MAX_INCLUDE_DEPTH` from `constants.js` instead of redefining it). 604 tests pass.*
   - **Symptom:** `util.js` has `getIncludePath`/`getIncludeScripts` + 4 include regexes; `IncludeResolver` has `parseIncludes`/`resolveIncludePath`/`resolveAllIncludes` with its own combined regex `/^\s*#include\s+([<"])([^>"]+)[>"]/i` (`src/util.js:100-132,361-527`, `src/utils/IncludeResolver.js:22-129`).
   - **Source:** Two independent implementations of the same AutoIt `#include` concept.
   - **Consequence:** Edge-case behavior (quoting, spacing, comments) can diverge; a bug fixed in one isn't fixed in the other.
   - **Remedy:** Make `IncludeResolver` the single implementation; have `util.js` delegate to it.
 
-- [ ] **F11. `DEFAULT_MAX_INCLUDE_DEPTH` defined twice** — Priority 1 (P1 × S1), Monitored, accidental
+- [x] **F11. `DEFAULT_MAX_INCLUDE_DEPTH` defined twice** — Priority 1 (P1 × S1), Monitored, accidental — *Resolved alongside F10: `IncludeResolver` now imports `DEFAULT_MAX_INCLUDE_DEPTH` from `constants.js` instead of redefining it locally.*
   - **Symptom:** Value `3` defined in `src/constants.js:162` and re-defined locally in `src/utils/IncludeResolver.js:4` (which does not import it).
   - **Source:** `IncludeResolver` was written self-contained.
   - **Consequence:** Changing the canonical constant silently leaves `IncludeResolver` on the old depth.
