@@ -1,4 +1,4 @@
-import VariableParser from '../../src/parsers/VariableParser.js';
+import VariableParser from '../../src/language/variableParser.js';
 
 const EXPECTED_COUNT_TWO = 2;
 const EXPECTED_COUNT_THREE = 3;

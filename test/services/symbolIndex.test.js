@@ -34,7 +34,7 @@ jest.mock('../../src/providers/ai_symbols', () => ({
 jest.mock('../../src/utils/includeResolution', () => ({
   getIncludePath: jest.fn(() => ''),
 }));
-jest.mock('../../src/utils/variableRegex', () => ({
+jest.mock('../../src/language/variable', () => ({
   isVariableDeclarationLine: (lineText, variableName) => {
     if (typeof lineText !== 'string' || !variableName || typeof variableName !== 'string') {
       return false;

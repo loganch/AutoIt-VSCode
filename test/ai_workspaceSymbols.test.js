@@ -130,7 +130,7 @@ jest.mock('../src/utils/includeResolution', () => ({
 }));
 
 // symbolIndex.indexDocument tags variable symbols via this helper.
-jest.mock('../src/utils/variableRegex', () => ({
+jest.mock('../src/language/variable', () => ({
   isVariableDeclarationLine: () => false,
 }));
 

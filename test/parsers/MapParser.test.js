@@ -1,4 +1,4 @@
-import MapParser from '../../src/parsers/MapParser.js';
+import MapParser from '../../src/language/map.js';
 
 const EXPECTED_COUNT_TWO = 2;
 const EXPECTED_COUNT_THREE = 3;

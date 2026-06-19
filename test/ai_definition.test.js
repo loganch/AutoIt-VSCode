@@ -387,7 +387,7 @@ jest.mock('../src/utils/includeResolution', () => {
 // variable-definition matching behaves identically under the mock. Use a
 // PLAIN function (not jest.fn) so the global `resetMocks: true` jest config
 // does not wipe its implementation between tests.
-jest.mock('../src/utils/variableRegex', () => ({
+jest.mock('../src/language/variable', () => ({
   buildVariableRegex: variableName => {
     const escaped = String(variableName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const keywords = ['Local', 'Global', 'Const'].join('|');

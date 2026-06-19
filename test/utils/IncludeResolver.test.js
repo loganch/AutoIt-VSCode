@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import IncludeResolver from '../../src/utils/IncludeResolver.js';
+import IncludeResolver from '../../src/language/include.js';
 
 // Normalize paths for cross-platform/case-insensitive Windows comparisons
 const norm = p =>
