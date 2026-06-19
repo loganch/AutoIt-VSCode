@@ -1,8 +1,6 @@
 import { languages, window, workspace } from 'vscode';
-import { basename, dirname, sep } from 'path';
 import { existsSync } from 'fs';
-import { execFile } from 'child_process';
-import { FORMATTER, DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
+import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import languageConfiguration from './languageConfiguration';
 import hoverFeature from './providers/ai_hover';
 import completionFeature from './providers/ai_completion';
@@ -26,6 +24,12 @@ import { warmDocument } from './services/symbolIndex';
 import { ensureWarm } from './services/symbolWarmup';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
+import {
+  runCheckProcess,
+  validateCheckPath,
+  handleCheckProcessError,
+  shouldIgnoreDiagnostics,
+} from './utils/au3check';
 
 const { config } = conf;
 
@@ -36,100 +40,6 @@ const DEBOUNCE_DELAY = 300; // ms
 // Last document.version successfully checked by Au3Check, keyed by URI string.
 // Used to skip redundant checks (e.g. on tab switch) when the document is unchanged.
 const lastCheckedVersions = new Map();
-
-/**
- * Runs the check process for the given document and returns the console output.
- * @param {import('vscode').TextDocument} document - The document to run the AU3Check process on.
- * @returns {Promise<string>} A promise that resolves with the console output of the check process.
- */
-const runCheckProcess = document => {
-  return new Promise((resolve, reject) => {
-    let consoleOutput = '';
-    // Start with empty params - let Au3Check use its own defaults
-    // Only add parameters from include paths and #AutoIt3Wrapper_AU3Check_Parameters directive
-    // See https://www.autoitscript.com/autoit3/docs/intro/au3check.htm
-    const params = [];
-
-    // Add -I for each include path
-    config.includePaths.forEach(path => {
-      params.push('-I', path);
-    });
-
-    // Parse #AutoIt3Wrapper_AU3Check_Parameters directive if present
-    const match = [
-      ...document.getText().matchAll(/^\s*#AutoIt3Wrapper_AU3Check_Parameters=(.*)$/gm),
-    ].pop();
-    if (match) {
-      // Extract the parameter string after the = sign
-      const paramString = match[1].trim();
-
-      // Parse standalone flags first: -q (quiet) and -d (must declare vars)
-      // These flags are safe because they don't alter the output format:
-      // - -q: suppresses info messages, keeps error/warning format
-      // - -d: enables additional checks, produces standard format errors
-      if (/(?:^|\s)-q\b/.test(paramString)) {
-        params.push('-q');
-      }
-      if (/(?:^|\s)-d\b/.test(paramString)) {
-        params.push('-d');
-      }
-      // Parse -w (warning) parameters: -w or -w- followed by a number
-      // Append all warning parameters from the directive
-      const warnRegex = /(-w-?)\s+([0-9]+)/g;
-      let regexMatch;
-      while ((regexMatch = warnRegex.exec(paramString)) !== null) {
-        const [, param, value] = regexMatch;
-        params.push(param, value);
-      }
-
-      // NOTE: -v (verbosity) parameters are intentionally NOT supported here
-      // Verbosity flags (-v 1, -v 2, -v 3) add extra output lines that would break
-      // the diagnostic parser which expects a specific format:
-      //   "file.au3"(line,col) : severity: message
-      // See diagnosticUtils.js OUTPUT_REGEXP for the expected format
-    }
-    const checkProcess = execFile(config.checkPath, [...params, document.fileName], {
-      cwd: dirname(document.fileName),
-    });
-
-    checkProcess.stdout.on('data', data => {
-      if (data.length === 0) {
-        return;
-      }
-      consoleOutput += data.toString();
-    });
-
-    checkProcess.stderr.on('data', data => {
-      if (!data || data.length === 0) {
-        return;
-      }
-      console.error(`[AutoIt][extension] Au3Check stderr: ${data.toString()}`);
-    });
-
-    checkProcess.on('error', error => {
-      reject(error);
-    });
-
-    checkProcess.on('close', () => {
-      resolve(consoleOutput);
-    });
-  });
-};
-
-const handleCheckProcessError = error => {
-  const message = error?.message ?? String(error);
-  window.showErrorMessage(`${config.checkPath} ${message}`);
-};
-
-const validateCheckPath = checkPath => {
-  if (!existsSync(checkPath)) {
-    window.showErrorMessage(
-      'Invalid Check Path! Please review AutoIt settings (Check Path in UI, autoit.checkPath in JSON)',
-    );
-    return false;
-  }
-  return true;
-};
 
 /**
  * Validates if the formatter can be used (Windows platform and valid paths)
@@ -152,28 +62,6 @@ const validateFormatterPaths = () => {
   }
 
   return true;
-};
-
-/**
- * Checks if a document should be ignored by diagnostics (AutoIt Tidy backup files)
- * @param {import('vscode').TextDocument} document - Document to check
- * @returns {boolean} True if document should be ignored
- */
-const shouldIgnoreDiagnostics = document => {
-  const filePath = document.uri.fsPath;
-  const fileName = basename(filePath);
-
-  // Ignore files in "BackUp" folder
-  if (filePath.includes(sep + FORMATTER.BACKUP_DIR_NAME + sep)) {
-    return true;
-  }
-
-  // Ignore *_old*.au3 files
-  if (FORMATTER.BACKUP_FILE_SUFFIX_PATTERN.test(fileName)) {
-    return true;
-  }
-
-  return false;
 };
 
 /**
@@ -205,12 +93,15 @@ const checkAutoItCode = async (document, diagnosticCollection) => {
   }
 
   try {
-    const consoleOutput = await runCheckProcess(document);
+    const consoleOutput = await runCheckProcess(document, {
+      checkPath: config.checkPath,
+      includePaths: config.includePaths,
+    });
     parseAu3CheckOutput(consoleOutput, diagnosticCollection, document.uri);
     // Cache only after a successful check so failures are retried next time
     lastCheckedVersions.set(versionKey, document.version);
   } catch (error) {
-    handleCheckProcessError(error);
+    handleCheckProcessError(config.checkPath, error);
   }
 };
 

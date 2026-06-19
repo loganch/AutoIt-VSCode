@@ -161,11 +161,11 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** There is no consistent answer to "what depends on what?"; the data layer and feature layer both depend on a module that itself depends on `ai_config` (infrastructure), flattening the architecture.
   - **Remedy:** After splitting (F1), establish a layering rule: data → domain helpers → features → VS Code; forbid features from importing infrastructure directly except via `ai_config`'s narrow public surface. ✓ `util.js` deleted; data + parser layer isolation enforced via `import/no-restricted-paths`; feature→infrastructure and utils→infrastructure rules documented as aspirational (deferred to F24/F25 domain-layer work).
 
-- [ ] **F24. Domain logic misplaced in infrastructure modules** — Priority 2 (P1 × S2), Monitored, accidental
-  - **Symptom:** Au3Check parameter parsing (`runCheckProcess`) lives in `extension.js` (`:39-111`); signature/parameter domain logic (`buildFunctionSignature`, `getParams`) lives in `util.js` alongside FS/cache plumbing (`src/util.js:748-901`).
-  - **Source:** Domain logic dropped into whichever module was handy.
-  - **Consequence:** Domain rules are hard to locate and test in isolation; they're coupled to VS Code/FS concerns.
-  - **Remedy:** Move `runCheckProcess`/directive parsing into `diagnosticUtils` or a new `au3check.js`; move signature parsing into a `functionSignature.js` domain module.
+- [x] **F24. Domain logic misplaced in infrastructure modules** — Priority 2 (P1 × S2), Monitored, accidental — *Resolved: extracted Au3Check domain logic into `src/utils/au3check.js` — `runCheckProcess` (process spawning + directive parameter parsing), `validateCheckPath` (path existence check), `handleCheckProcessError` (error formatting), `parseAu3CheckParameters` (pure function building CLI args from document text + include paths), and `shouldIgnoreDiagnostics` (backup-file filtering). `extension.js` retains only the VS Code lifecycle orchestration (`checkAutoItCode`, version cache, `setupDiagnostics`). The signature/parameter domain logic (`buildFunctionSignature`, `getParams`) was already in `utils/functionSignature.js` from F1. 623 tests pass; webpack build succeeds.*
+   - **Symptom:** Au3Check parameter parsing (`runCheckProcess`) lives in `extension.js` (`:39-111`); signature/parameter domain logic (`buildFunctionSignature`, `getParams`) lives in `util.js` alongside FS/cache plumbing (`src/util.js:748-901`).
+   - **Source:** Domain logic dropped into whichever module was handy.
+   - **Consequence:** Domain rules are hard to locate and test in isolation; they're coupled to VS Code/FS concerns.
+   - **Remedy:** ✓ Moved `runCheckProcess`/directive parsing/`validateCheckPath`/`shouldIgnoreDiagnostics` into `src/utils/au3check.js`; `buildFunctionSignature`/`getParams` already in `utils/functionSignature.js` (F1). `extension.js` keeps only lifecycle orchestration.
 
 ### R6 — Domain Model Distortion
 
