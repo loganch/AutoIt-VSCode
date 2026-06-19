@@ -213,6 +213,7 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 | `autoit.outputMaxHistoryLines`          | Number of output lines to keep                                                                   | `5000`                                                            |
 | **IntelliSense**                        |                                                                                                  |                                                                   |
 | `autoit.enableParenTriggerForFunctions` | Use `(` to select function completion, add parens, and trigger signature help. Requires reload.  | `true`                                                            |
+| `autoit.autoInsertInclude`              | Automatically insert required `#include` when accepting UDF or constant completions             | `true`                                                            |
 | **Code Authoring**                      |                                                                                                  |                                                                   |
 | `autoit.UDFCreator`                     | Author name for Insert Function Header command                                                   | `"Your Name"`                                                     |
 | **Map Intelligence**                    |                                                                                                  |                                                                   |
