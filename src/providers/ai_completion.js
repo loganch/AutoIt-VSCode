@@ -27,6 +27,7 @@ import { DEFAULT_UDFS } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';
 import VariableTrackingService from '../services/VariableTrackingService.js';
 import { attachIncludeEdits } from '../utils/includeAutoInsert';
+import { isParenTriggerOn } from '../completionTransforms';
 
 const { findFilepath } = aiConfig;
 
@@ -37,12 +38,6 @@ const libraryIncludeCache = new Map();
 const MAX_CACHE_SIZE = 50; // LRU cache limit
 
 const functionPattern = setRegExpFlags(_functionPattern, 'gim');
-let parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
-
-workspace.onDidChangeConfiguration(event => {
-  if (event.affectsConfiguration('autoit.enableParenTriggerForFunctions'))
-    parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
-});
 
 // Clean up cache when documents are closed
 workspace.onDidCloseTextDocument(document => {
@@ -65,7 +60,7 @@ const createNewCompletionItem = (kind, name, itemDetail = 'Document Function') =
 
   compItem.detail = kind === CompletionItemKind.Variable ? 'Variable' : itemDetail;
 
-  if (kind === CompletionItemKind.Function && parenTriggerOn) {
+  if (kind === CompletionItemKind.Function && isParenTriggerOn()) {
     compItem.commitCharacters = ['('];
   }
 

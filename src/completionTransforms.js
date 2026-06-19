@@ -29,6 +29,10 @@ workspace.onDidChangeConfiguration(event => {
   }
 });
 
+// Single source of truth for F14 (tech-debt): ai_completion.js reads this instead of
+// keeping its own copy of the setting + listener.
+export const isParenTriggerOn = () => parenTriggerOn;
+
 /**
  * Transforms an array of completion entries into VSCode CompletionItem objects with consistent
  * formatting and behavior. Adds include statements for UDF functions, configures commit characters

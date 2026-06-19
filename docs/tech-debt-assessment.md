@@ -101,7 +101,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** No single source of truth for regex or constants; `util.js`'s `REGEX_PATTERNS` can drift from `coreConstants`' frozen base.
   - **Remedy:** Migrate consumers to import constants/regex from `coreConstants` directly; remove the re-exports.
 
-- [ ] **F14. `parenTriggerOn` config-tracking state duplicated** — Priority 1 (P1 × S1), Monitored, accidental
+- [x] **F14. `parenTriggerOn` config-tracking state duplicated** — Priority 1 (P1 × S1), Monitored, accidental — *Resolved: `ai_completion.js` dropped its own `parenTriggerOn` state + listener and now calls `isParenTriggerOn()`, exported from `completionTransforms.js` (the sole owner of the setting + listener). 604 tests pass.*
   - **Symptom:** `let parenTriggerOn` + a `workspace.onDidChangeConfiguration` listener exists in both `util.js:534-540` and `ai_completion.js:35-40`.
   - **Source:** The completion module re-implemented config tracking instead of importing it.
   - **Consequence:** Two independent state copies and two listeners for one setting; they could disagree.
