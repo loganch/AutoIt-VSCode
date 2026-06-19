@@ -28,9 +28,13 @@ class MockTextDocument {
 
   lineAt(lineNo) {
     const start = this._lineOffsets[lineNo];
-    const end = lineNo + 1 < this._lineOffsets.length ? this._lineOffsets[lineNo + 1] - 1 : this._text.length;
+    const end =
+      lineNo + 1 < this._lineOffsets.length ? this._lineOffsets[lineNo + 1] - 1 : this._text.length;
     const text = this._text.substring(start, end);
-    return { text, range: new MockRange(new MockPosition(lineNo, 0), new MockPosition(lineNo, text.length)) };
+    return {
+      text,
+      range: new MockRange(new MockPosition(lineNo, 0), new MockPosition(lineNo, text.length)),
+    };
   }
 
   positionAt(offset) {

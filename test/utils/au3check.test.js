@@ -66,7 +66,7 @@ describe('parseAu3CheckParameters', () => {
 });
 
 describe('shouldIgnoreDiagnostics', () => {
-  const makeDoc = (fsPath) => ({
+  const makeDoc = fsPath => ({
     uri: { fsPath },
   });
 
@@ -75,7 +75,9 @@ describe('shouldIgnoreDiagnostics', () => {
   });
 
   test('returns true for files in BackUp folder', () => {
-    expect(shouldIgnoreDiagnostics(makeDoc(`C:${sep}project${sep}BackUp${sep}test.au3`))).toBe(true);
+    expect(shouldIgnoreDiagnostics(makeDoc(`C:${sep}project${sep}BackUp${sep}test.au3`))).toBe(
+      true,
+    );
   });
 
   test('returns true for *_old*.au3 backup files', () => {

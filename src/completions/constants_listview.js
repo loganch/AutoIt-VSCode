@@ -133,7 +133,12 @@ const items = [
   },
 ];
 
-const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'ListViewConstants.au3');
+const completions = fillCompletions(
+  items,
+  CompletionItemKind.Constant,
+  '',
+  'ListViewConstants.au3',
+);
 const hovers = completionToHover(completions);
 
 export { completions as default, hovers };

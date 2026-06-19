@@ -219,7 +219,9 @@ const { AutoItDefinitionProvider } = require('../src/providers/ai_definition');
 // Re-install the delegate every test; workspace tests override it as needed.
 beforeEach(() => {
   AutoItDefinitionProvider.provideDefinition.mockImplementation((...args) =>
-    jest.requireActual('../src/providers/ai_definition').AutoItDefinitionProvider.provideDefinition(...args),
+    jest
+      .requireActual('../src/providers/ai_definition')
+      .AutoItDefinitionProvider.provideDefinition(...args),
   );
 });
 
@@ -615,7 +617,9 @@ describe('provideReferences - workspace (functions & globals)', () => {
     vscode.workspace.findFiles.mockResolvedValue([{ fsPath: OTHER, toString: () => OTHER }]);
     vscode.workspace.openTextDocument.mockImplementation(uri => {
       const p = uri.fsPath || uri;
-      return Promise.resolve(new MockTextDocument(p === OTHER ? 'Func Other()\nEndFunc\n' : SRC, p));
+      return Promise.resolve(
+        new MockTextDocument(p === OTHER ? 'Func Other()\nEndFunc\n' : SRC, p),
+      );
     });
     vscode.workspace.getConfiguration.mockReturnValue({ get: (k, d) => d });
     const doc = new MockTextDocument(SRC, FILE_A);

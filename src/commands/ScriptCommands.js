@@ -4,7 +4,11 @@ import ProcessManager from '../services/ProcessManager';
 import OutputChannelManager from '../services/OutputChannelManager';
 import HotkeyManager from '../services/HotkeyManager';
 import conf from '../providers/ai_config';
-import { showErrorMessage, showInformationMessage, showWarningMessage } from '../providers/ai_showMessage';
+import {
+  showErrorMessage,
+  showInformationMessage,
+  showWarningMessage,
+} from '../providers/ai_showMessage';
 import { getActiveDocumentFileName } from './commandUtils';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';

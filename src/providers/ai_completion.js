@@ -11,10 +11,7 @@ import {
 let completions = null;
 import { AUTOIT_MODE } from '../utils/coreConstants';
 import { buildFunctionSignature, getIncludeData } from '../utils/functionSignature';
-import {
-  REGEX_PATTERNS,
-  setRegExpFlags,
-} from '../utils/regexPatterns';
+import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 
 const {
   functionPattern: _functionPattern,

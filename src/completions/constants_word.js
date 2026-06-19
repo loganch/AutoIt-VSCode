@@ -1,5 +1,10 @@
 import { CompletionItemKind } from 'vscode';
-import { completionToHover, descriptionHeader, fillCompletions, setDetail } from '../completionTransforms';
+import {
+  completionToHover,
+  descriptionHeader,
+  fillCompletions,
+  setDetail,
+} from '../completionTransforms';
 
 let items = [];
 

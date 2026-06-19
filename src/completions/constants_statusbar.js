@@ -203,7 +203,12 @@ const items = [
   },
 ];
 
-const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'StatusBarConstants.au3');
+const completions = fillCompletions(
+  items,
+  CompletionItemKind.Constant,
+  '',
+  'StatusBarConstants.au3',
+);
 const hovers = completionToHover(completions);
 
 export { completions as default, hovers };

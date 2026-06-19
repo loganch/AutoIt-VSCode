@@ -79,7 +79,8 @@ const diagnosticOwners = new WeakMap();
  * @param {object} diagnostic
  * @param {string} ownerUri
  */
-export const setDiagnosticOwner = (diagnostic, ownerUri) => diagnosticOwners.set(diagnostic, ownerUri);
+export const setDiagnosticOwner = (diagnostic, ownerUri) =>
+  diagnosticOwners.set(diagnostic, ownerUri);
 
 /**
  * Look up the owner URI previously recorded for a diagnostic via setDiagnosticOwner.
@@ -237,7 +238,10 @@ const trackDiagnosticFile = filePath => {
   if (!filePath) return;
   try {
     const uri = Uri.file(filePath).toString();
-    if (!trackedDiagnosticFileUris.has(uri) && trackedDiagnosticFileUris.size >= MAX_TRACKED_DIAGNOSTIC_URIS) {
+    if (
+      !trackedDiagnosticFileUris.has(uri) &&
+      trackedDiagnosticFileUris.size >= MAX_TRACKED_DIAGNOSTIC_URIS
+    ) {
       // ponytail: FIFO eviction (oldest insertion); upgrade if access patterns need true LRU
       trackedDiagnosticFileUris.delete(trackedDiagnosticFileUris.values().next().value);
     }

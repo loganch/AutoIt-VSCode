@@ -173,9 +173,8 @@ describe('ai_workspaceSymbols module', () => {
   });
 
   test('a workspace build populates the shared symbolIndex cache', async () => {
-    // eslint-disable-next-line global-require
     const { workspace } = require('vscode');
-    // eslint-disable-next-line global-require
+
     const symbolIndex = require('../src/services/symbolIndex');
     symbolIndex.__resetForTests();
 
