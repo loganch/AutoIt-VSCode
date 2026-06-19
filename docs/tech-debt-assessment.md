@@ -25,7 +25,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Developers must scan 11 sections to find anything; changes to one concern risk colliding with another; the file is the default dump location for new helpers.
   - **Remedy:** Split into focused modules (`includeResolution.js`, `functionSignature.js`, `completionTransforms.js`, `fsCache.js`, `errorUtils.js`); keep `util.js` as a thin barrel only during transition.
 
-- [ ] **F2. `ai_config.js` mixes 9 responsibilities behind a "config" name** — Priority 4 (P2 × S2), Scheduled, accidental
+- [x] **F2. `ai_config.js` mixes 9 responsibilities behind a "config" name** — Priority 4 (P2 × S2), Scheduled, accidental — *Resolved: extracted `autoItInstallDetector.js` (registry/Program-Files detection), `pathResolver.js` (`resolveVariables`/`splitPath`/`fixPath`), and `smartHelpMigrator.js` (`upgradeSmartHelpConfig`). `ai_config.js` keeps the token-color migration, the stateful path-verification/getPaths pipeline, the Proxy, the listener registry, and the registry write (tracked separately under F19) — those stay because they share mutable module state (`aiPath`, `conf`, `showErrors`) that isn't a good split boundary. 603 tests pass.*
   - **Symptom:** 538 lines doing token-color migration, path splitting, VS Code variable resolution, registry-based install auto-detection, smartHelp config upgrade, path verification, a Proxy config object, a listener registry, and a Windows registry write (`src/ai_config.js:1-612`).
   - **Source:** Configuration, path resolution, and OS integration grew together in one module.
   - **Consequence:** "Config" no longer describes the module; the Proxy makes data flow hard to trace; side effects hide among helpers.

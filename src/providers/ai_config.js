@@ -3,6 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { execFile } from 'child_process';
 import { showErrorMessage } from './ai_showMessage';
+import { detectAutoItPaths } from './autoItInstallDetector';
+import { resolveVariables, splitPath, fixPath } from './pathResolver';
+import { upgradeSmartHelpConfig } from './smartHelpMigrator';
 
 const meta = require('../../package.json');
 
@@ -89,188 +92,6 @@ const isWinOS = process.platform === 'win32';
 const MESSAGE_HIDE_DELAY_MS = 1000;
 let showErrors = false;
 
-/**
- * Resolves VS Code variables in a path string.
- * Supports: ${workspaceFolder}, ${workspaceFolderBasename}, ${cwd}, ${home}
- * @param {string} inputPath - path string that may contain VS Code variables
- * @returns {string} path with variables resolved
- */
-function resolveVariables(inputPath) {
-  if (!inputPath || typeof inputPath !== 'string') {
-    return inputPath;
-  }
-
-  let result = inputPath;
-
-  // Resolve ${workspaceFolder} - use first workspace folder or empty string
-  if (result.includes('${workspaceFolder}')) {
-    const { workspaceFolders } = workspace;
-    const wsFolder =
-      workspaceFolders && workspaceFolders.length > 0 ? workspaceFolders[0].uri.fsPath : '';
-    result = result.replace(/\$\{workspaceFolder\}/g, wsFolder);
-  }
-
-  // Resolve ${workspaceFolderBasename}
-  if (result.includes('${workspaceFolderBasename}')) {
-    const { workspaceFolders } = workspace;
-    const wsFolderBasename =
-      workspaceFolders && workspaceFolders.length > 0 ? workspaceFolders[0].name : '';
-    result = result.replace(/\$\{workspaceFolderBasename\}/g, wsFolderBasename);
-  }
-
-  // Resolve ${cwd} - current working directory
-  if (result.includes('${cwd}')) {
-    result = result.replace(/\$\{cwd\}/g, process.cwd());
-  }
-
-  // Resolve ${home} - user's home directory
-  if (result.includes('${home}')) {
-    result = result.replace(/\$\{home\}/g, process.env.HOME || process.env.USERPROFILE || '');
-  }
-
-  return result;
-}
-
-function detectAutoItPaths() {
-  if (!isWinOS) return [];
-
-  const potentialPaths = [
-    'C:\\Program Files (x86)\\AutoIt3',
-    'C:\\Program Files\\AutoIt3',
-    'C:\\AutoIt3',
-    process.env.PROGRAMFILES ? `${process.env.PROGRAMFILES}\\AutoIt3` : null,
-    process.env['PROGRAMFILES(X86)'] ? `${process.env['PROGRAMFILES(X86)']}\\AutoIt3` : null,
-  ].filter(Boolean);
-
-  // Check registry for AutoIt installation path
-  if (isWinOS) {
-    try {
-      const { execSync } = require('child_process');
-      try {
-        const regResult = execSync(
-          'reg query "HKLM\\SOFTWARE\\AutoIt v3\\AutoIt" /v InstallDir 2>nul',
-          { encoding: 'utf8' },
-        );
-        const match = regResult.match(/InstallDir\s+REG_SZ\s+(.+)/);
-        if (match && match[1]) {
-          potentialPaths.unshift(match[1].trim());
-        }
-      } catch (error) {
-        // Try 32-bit registry view
-        try {
-          const regResult32 = execSync(
-            'reg query "HKLM\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt" /v InstallDir 2>nul',
-            { encoding: 'utf8' },
-          );
-          const match32 = regResult32.match(/InstallDir\s+REG_SZ\s+(.+)/);
-          if (match32 && match32[1]) {
-            potentialPaths.unshift(match32[1].trim());
-          }
-        } catch (error32) {
-          // Registry queries failed in both views, keep using default paths.
-          console.debug(
-            '[autoit] Registry InstallDir lookup failed; using default install paths.',
-            {
-              error,
-              error32,
-            },
-          );
-        }
-      }
-    } catch (error) {
-      // execSync unavailable/blocked; continue with default paths.
-      console.debug(
-        '[autoit] Unable to run registry query command; using default install paths.',
-        error,
-      );
-    }
-  }
-
-  return potentialPaths.filter(p => {
-    try {
-      return p && fs.existsSync(path.join(p, 'AutoIt3.exe'));
-    } catch {
-      return false;
-    }
-  });
-}
-
-/**
- * Split a filesystem path into components.
- * Returns an object with raw path, directory (always trailing backslash unless empty),
- * filename, and whether the directory is relative.
- * @param {string} _path - input path string
- * @returns {{path:string,dir:string,file:string,isRelative:boolean}}
- */
-function splitPath(_path) {
-  const m = (_path || '').trim().match(/^(.*[\\/])?([^\\/]+)?$/) || [];
-  const parts = m.map(a => a || '');
-
-  return {
-    path: parts[0] || '',
-    dir: (parts[1] || '') + ((parts[1] || '') === '' ? '' : '\\'),
-    file: parts[2] || '',
-    isRelative: !!(parts[1] && !parts[1].match(/^[a-zA-Z]:[\\/]/)),
-  };
-}
-
-function upgradeSmartHelpConfig() {
-  const data = conf.data.smartHelp;
-  const inspect = conf.data.inspect('smartHelp');
-  const props = {
-    workspaceFolderLanguageValue: [null, true],
-    workspaceLanguageValue: [false, true],
-    globalLanguageValue: [true, true],
-    defaultLanguageValue: [null, true],
-    workspaceFolderValue: [],
-    workspaceValue: [false],
-    globalValue: [true],
-    defaultValue: [],
-  };
-
-  let ret = {};
-  let ConfigurationTarget;
-  let overrideInLanguage;
-  for (const i in props) {
-    if (inspect[i] !== undefined) {
-      [ConfigurationTarget, overrideInLanguage] = props[i];
-      break;
-    }
-  }
-  if (Array.isArray(data)) {
-    for (let i = 0; i < data.length; i++) {
-      ret[data[i][0]] = {
-        chmPath: data[i][1],
-        udfPath: data[i][2].split('|'),
-      };
-    }
-  }
-  if (!Object.keys(ret).length || typeof data === 'string') ret = undefined;
-
-  conf.data.update('smartHelp', ret, ConfigurationTarget, overrideInLanguage);
-}
-
-/**
- * Normalize and resolve a configured value against the detected aiPath and defaults.
- * Returns a filesystem path using backslashes.
- * @param {string} value - configured path value (may be file or dir)
- * @param {object} data - default path metadata (may include file, dir)
- * @returns {string} normalized path
- */
-function fixPath(value, data) {
-  const sPath = splitPath(value || '');
-  const { file } = data;
-  const { dir } = data;
-  if (sPath.file === '') sPath.file = file || '';
-
-  if (sPath.dir === '' || sPath.isRelative)
-    sPath.dir = aiPath.dir + sPath.dir + (!sPath.isRelative ? dir || '' : '');
-
-  if (file === undefined) sPath.file += '/';
-
-  return (sPath.dir + '/' + sPath.file).replace(/[\\/]+/g, '\\');
-}
-
 function showError(sPath, data, msgSuffix) {
   if (!msgSuffix) return;
 
@@ -332,7 +153,7 @@ function verifyPath(sPath, data, msgSuffix) {
 function updateFullPath(_path, data, msgSuffix) {
   // Resolve VS Code variables before processing the path
   const resolvedPath = resolveVariables(_path);
-  if (resolvedPath !== '') data.fullPath = fixPath(resolvedPath, data);
+  if (resolvedPath !== '') data.fullPath = fixPath(resolvedPath, data, aiPath);
 
   if (data.fullPath === undefined) data.fullPath = '';
 
@@ -493,7 +314,7 @@ function getPaths() {
     } else if (i === 'smartHelp') {
       if (Array.isArray(confValue))
         // convert array-based old config into new object-based
-        return upgradeSmartHelpConfig();
+        return upgradeSmartHelpConfig(conf.data);
 
       getPathsSmartHelp(defaultPath, confValue, i);
     } else if (Array.isArray(confValue)) {
@@ -511,7 +332,7 @@ function getPaths() {
         updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
       }
     } else {
-      defaultPath.fullPath = fixPath(confValue, defaultPath);
+      defaultPath.fullPath = fixPath(confValue, defaultPath, aiPath);
       verifyPath(confValue, defaultPath, i);
     }
   }
