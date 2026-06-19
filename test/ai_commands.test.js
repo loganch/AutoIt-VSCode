@@ -73,32 +73,6 @@ describe('ai_commands', () => {
     aiCommands = require('../src/ai_commands');
   });
 
-  test('re-exports command handlers from command modules', () => {
-    expect(typeof aiCommands.runScript).toBe('function');
-    expect(typeof aiCommands.compile).toBe('function');
-    expect(typeof aiCommands.debugMsgBox).toBe('function');
-    expect(typeof aiCommands.changeParams).toBe('function');
-    expect(typeof aiCommands.openInclude).toBe('function');
-    expect(typeof aiCommands.insertHeader).toBe('function');
-  });
-
-  test('killScriptOpened uses active document path when no argument passed', () => {
-    const result = aiCommands.killScriptOpened();
-
-    expect(mockUtilityGetActiveDocumentFileName).toHaveBeenCalledTimes(1);
-    expect(mockKillScript).toHaveBeenCalledWith('C:\\workspace\\active.au3');
-    expect(result).toBe('killed:C:\\workspace\\active.au3');
-  });
-
-  test('killScriptOpened prefers explicit file path argument', () => {
-    const explicitPath = 'C:\\workspace\\explicit.au3';
-    const result = aiCommands.killScriptOpened(explicitPath);
-
-    expect(mockUtilityGetActiveDocumentFileName).not.toHaveBeenCalled();
-    expect(mockKillScript).toHaveBeenCalledWith(explicitPath);
-    expect(result).toBe(`killed:${explicitPath}`);
-  });
-
   test('exports facade management and accessor functions', () => {
     expect(typeof aiCommands.initializeCommands).toBe('function');
     expect(typeof aiCommands.disposeCommands).toBe('function');

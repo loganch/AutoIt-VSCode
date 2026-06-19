@@ -51,7 +51,7 @@ Each finding has a checkbox. Work top-down within a risk group, or jump to the D
   - **Consequence:** Every new UDF = edits to both index files plus the signature file; easy to register completions but forget hovers (silent gap).
   - **Remedy:** Generate both registries from one module list (e.g. a single `udfModules.js` array, or auto-discover via a manifest); or have each signature module self-register.
 
-- [ ] **F6. Adding a command requires coordinated edits across 4 locations** — Priority 4 (P2 × S2), Scheduled, accidental
+- [x] **F6. Adding a command requires coordinated edits across 4 locations** — Priority 4 (P2 × S2), Scheduled, accidental — *Resolved: added `commandRegistry.js` (single id→handler map) which `registerCommands` iterates directly; removed the redundant per-command re-exports from `ai_commands.js`. A guard test (`commandRegistry.test.js`) asserts registry ids === `commandsList` === package.json contributions, so drift now fails loudly instead of silently. package.json stays a separate edit (VS Code reads it statically), so a new command = registry entry + `commandsList` id + package.json, all guarded.*
   - **Symptom:** A new command must be added to the command module, `commandsList.js` (string), `ai_commands.js` (re-export), and `package.json` (command + menu + keybinding) (`src/commandsList.js:1-23`, `src/ai_commands.js:197-217`, `src/registerCommands.js:5-13`).
   - **Source:** String-name indirection — `registerCommands` looks up functions by name via `Object.entries(aiCommands)` keyed on `commandsList`.
   - **Consequence:** Easy to miss the re-export or the string list; the command silently fails to register.

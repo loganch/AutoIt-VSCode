@@ -9,7 +9,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/util', () => ({
+jest.mock('../../src/completionTransforms', () => ({
   signatureToCompletion: jest.fn((signatures, kind) =>
     Object.keys(signatures).map(key => ({
       label: key,

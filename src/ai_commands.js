@@ -7,16 +7,9 @@ import { window } from 'vscode';
 import conf from './ai_config';
 import { commandsList as _commandsList, commandsPrefix } from './commandsList';
 
-// Import all command modules
-import * as ScriptCommands from './commands/ScriptCommands';
-import * as ToolCommands from './commands/ToolCommands';
-import * as DebugCommands from './commands/DebugCommands';
+// getActiveDocumentFileName feeds the ProcessManager's output-name resolution.
+// Command id -> handler wiring lives in commandRegistry.js (see F6).
 import * as UtilityCommands from './commands/UtilityCommands';
-
-// Import debug functions from original modules
-import { default as debugRemove } from './commands/debugRemove.js';
-import { default as functionTraceAdd } from './commands/functionTraceAdd.js';
-import { default as traceRemove } from './commands/trace.js';
 
 const { config } = conf;
 
@@ -192,33 +185,6 @@ class CommandsFacade {
 
 // Create singleton instance
 const commandsFacade = new CommandsFacade();
-
-// Export command functions with facade integration
-export const { runScript } = ScriptCommands;
-export const { killScript } = ScriptCommands;
-export const { restartScript } = ScriptCommands;
-
-export const { compile } = ToolCommands;
-export const { tidy } = ToolCommands;
-export const { check } = ToolCommands;
-export const { build } = ToolCommands;
-export const { launchHelp } = ToolCommands;
-export const { launchInfo } = ToolCommands;
-export const { launchKoda } = ToolCommands;
-
-export const { debugMsgBox } = DebugCommands;
-export const { debugConsole } = DebugCommands;
-
-export const { changeParams } = UtilityCommands;
-export const { openInclude } = UtilityCommands;
-export const { insertHeader } = UtilityCommands;
-
-// Re-export debug functions
-export { debugRemove, functionTraceAdd, traceRemove };
-
-export const killScriptOpened = (thisFile = null) => {
-  return killScript(thisFile || UtilityCommands.getActiveDocumentFileName());
-};
 
 // Export facade management functions
 export const initializeCommands = () => commandsFacade.initialize();

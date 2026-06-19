@@ -24,7 +24,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/util', () => ({
+jest.mock('../../src/completionTransforms', () => ({
   fillCompletions: jest.fn((items, kind, detail) =>
     items.map(item => ({
       ...item,
