@@ -1,11 +1,14 @@
 import { Hover, languages } from 'vscode';
 import { AUTOIT_MODE } from '../utils/coreConstants';
+import { isInComment } from '../utils/textUtils';
 
 // Deferred until first hover so the ~70 signature modules don't load at activation.
 let hovers = null;
 
 const hoverFeature = languages.registerHoverProvider(AUTOIT_MODE, {
   async provideHover(document, position) {
+    if (isInComment(document, position)) return null;
+
     if (!hovers) {
       hovers = (await import('../hovers')).default;
     }

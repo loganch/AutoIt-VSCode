@@ -9,6 +9,7 @@ import {
 import { AUTOIT_MODE } from '../utils/coreConstants';
 import { buildFunctionSignature, getIncludeData } from '../utils/functionSignature';
 import { REGEX_PATTERNS } from '../utils/regexPatterns';
+import { isInComment } from '../utils/textUtils';
 
 const { functionDefinitionRegex, includePattern, libraryIncludePattern } = REGEX_PATTERNS;
 import aiConfig from './ai_config';
@@ -233,6 +234,8 @@ function createSignatureInfo(foundSig) {
  */
 export const signatureHoverProvider = languages.registerHoverProvider(AUTOIT_MODE, {
   provideHover(document, position) {
+    if (isInComment(document, position)) return null;
+
     const hoveredPosition = document.getWordRangeAtPosition(position);
     if (!hoveredPosition) return null;
     const hoveredWord = document.getText(hoveredPosition);

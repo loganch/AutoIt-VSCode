@@ -158,6 +158,27 @@ describe('ai_signature', () => {
     expect(result).toBeNull();
   });
 
+  test('provideHover returns null when the hovered word is inside a comment, even for a defined local function', () => {
+    mockBuildFunctionSignature.mockImplementation(match => ({
+      functionName: match[2],
+      functionObject: { label: `${match[2]}()`, documentation: 'docs', params: {} },
+    }));
+
+    const commentLine = '; Syntax ........: _InRegion_B($firstParam)';
+    const text = `${commentLine}\nFunc _InRegion_B($firstParam)\nEndFunc\n`;
+    const document = {
+      uri: { toString: () => 'file:///comment-hover.au3' },
+      version: 1,
+      fileName: 'C:\\workspace\\test.au3',
+      getWordRangeAtPosition: jest.fn(() => ({ start: 19, end: 30 })),
+      getText: jest.fn(range => (range === undefined ? text : '_InRegion_B')),
+      lineAt: jest.fn(() => ({ text: commentLine, firstNonWhitespaceCharacterIndex: 0 })),
+    };
+
+    const result = hoverProvider.provideHover(document, { line: 0, character: 19 });
+    expect(result).toBeNull();
+  });
+
   describe('signature caching', () => {
     const position = { line: 0, character: 0 };
     const expectedReparseCalls = 2;

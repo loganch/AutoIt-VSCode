@@ -69,6 +69,27 @@ function findEnclosingFunctionInDocument(document, position) {
   return new Range(document.lineAt(startLine).range.start, document.lineAt(endLine).range.end);
 }
 
+// Block-comment markers: #cs/#ce or #comments-start/#comments-end (see comment.block.autoit in autoit.tmLanguage.json)
+const COMMENT_BLOCK_START = /^\s*#c(?:omments-start|s)\b/i;
+const COMMENT_BLOCK_END = /^\s*#c(?:omments-end|e)\b/i;
+
+function isInComment(document, position) {
+  const currentLine = document.lineAt(position.line);
+  if (currentLine.text.charAt(currentLine.firstNonWhitespaceCharacterIndex) === ';') return true;
+
+  let inBlock = false;
+  for (let i = 0; i < position.line; i++) {
+    const lineText = document.lineAt(i).text;
+    if (inBlock) {
+      if (COMMENT_BLOCK_END.test(lineText)) inBlock = false;
+    } else if (COMMENT_BLOCK_START.test(lineText)) {
+      inBlock = true;
+    }
+  }
+
+  return inBlock || COMMENT_BLOCK_START.test(currentLine.text);
+}
+
 function rangeContainsRange(outerRange, innerRange) {
   return (
     (outerRange.start.line < innerRange.start.line ||
@@ -96,6 +117,7 @@ export {
   blankStrings,
   escapeRegex,
   findEnclosingFunctionInDocument,
+  isInComment,
   isLocalDeclaredInBody,
   rangeContainsRange,
   stringMask,
