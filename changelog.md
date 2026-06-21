@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Completion caching**: cache library include completions per document to improve performance (76ff99f)
 - **Signature caching**: cache document signatures for faster signature help (10dc0c8)
 - Added `.kilo`, `.jest-cache`, and `package.json.backup` to ignore files (#244) (79f7ae9)
+- Prevented hovers from activating in function headers (#249)
 
 ## [1.5.0] - 2026-04-07
 

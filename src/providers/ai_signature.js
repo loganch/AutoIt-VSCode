@@ -237,6 +237,12 @@ export const signatureHoverProvider = languages.registerHoverProvider(AUTOIT_MOD
     if (!hoveredPosition) return null;
     const hoveredWord = document.getText(hoveredPosition);
 
+    const line = document.lineAt(position.line);
+    const firstChar = line.text.charAt(line.firstNonWhitespaceCharacterIndex);
+    
+    // Only provide a hover if line isn't a comment line.
+    if (firstChar === ";") return null;
+
     const matchedSignature = getDocumentSignatures(document)[hoveredWord];
 
     if (!matchedSignature || !matchedSignature.label) return null;
