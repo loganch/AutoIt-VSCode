@@ -42,7 +42,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/ai_config', () => ({
+jest.mock('../../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     findFilepath: jest.fn(() => ''),
@@ -51,14 +51,17 @@ jest.mock('../../src/ai_config', () => ({
 
 import hovers from '../../src/hovers';
 
+const MINIMUM_HOVER_ENTRIES = 100;
+const KEY_SAMPLE_SIZE = 20;
+
 describe('hovers/index', () => {
   it('exports a lowercase-keyed hover map', () => {
     expect(hovers).toBeDefined();
     expect(typeof hovers).toBe('object');
 
     const keys = Object.keys(hovers);
-    expect(keys.length).toBeGreaterThan(100);
-    keys.slice(0, 20).forEach(key => {
+    expect(keys.length).toBeGreaterThan(MINIMUM_HOVER_ENTRIES);
+    keys.slice(0, KEY_SAMPLE_SIZE).forEach(key => {
       expect(key).toBe(key.toLowerCase());
     });
   });
@@ -67,5 +70,6 @@ describe('hovers/index', () => {
     expect(hovers.abs).toBeDefined();
     expect(hovers['#include']).toBeDefined();
     expect(hovers._arrayadd).toBeDefined();
+    expect(hovers['$dts_updown']).toBeDefined();
   });
 });

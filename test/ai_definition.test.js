@@ -314,8 +314,13 @@ jest.mock('fs', () => {
   };
 });
 
-// Prepare a mutable util mock; we override implementations per test
-jest.mock('../src/util', () => {
+jest.mock('../src/utils/coreConstants', () => ({
+  AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
+}));
+
+// Prepare mutable mocks for the modules ai_definition imports from; we
+// override implementations per test
+jest.mock('../src/utils/includeResolution', () => {
   // Define paths and content locally within the mock to avoid Jest scoping issues
   const pathModule = require('path');
   const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
@@ -362,19 +367,8 @@ jest.mock('../src/util', () => {
     'EndFunc',
   ].join('\n');
 
-  // Use global to track calls since we can't access outer scope variables
-  global.getIncludeTextCallCounts = global.getIncludeTextCallCounts || {};
-
-  const mod = {
+  return {
     getIncludeScripts: jest.fn(() => []),
-    getIncludeText: jest.fn(p => {
-      const n = pathModule.normalize(p);
-      global.getIncludeTextCallCounts[n] = (global.getIncludeTextCallCounts[n] || 0) + 1;
-      if (n === pathModule.normalize(mockHelperPath)) return mockHelperContent;
-      if (n === pathModule.normalize(mockLibArrayPath)) return mockLibArrayContent;
-      if (n === pathModule.normalize(mockMainPath)) return mockMainContent;
-      return ''; // simulate missing
-    }),
     getIncludePath: jest.fn((base, inc) => {
       // simplistic resolver: "helper.au3" -> HELPER_PATH, <Array.au3> -> LIB_ARRAY_PATH
       if (inc.startsWith('<') && inc.endsWith('>')) return mockLibArrayPath;
@@ -385,16 +379,111 @@ jest.mock('../src/util', () => {
       }
       return pathModule.join(pathModule.dirname(base), inc.replace(/["<>]/g, ''));
     }),
-    normalizePath: jest.fn(p => pathModule.normalize(p)),
-    AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
   };
-  return mod;
 });
 
-const util = jest.mocked(require('../src/util')); // get the mock instance with proper typing
+// ai_definition's createVariableRegex now delegates to this shared builder.
+// Mirror the real implementation (src/utils/variableRegex.js) so
+// variable-definition matching behaves identically under the mock. Use a
+// PLAIN function (not jest.fn) so the global `resetMocks: true` jest config
+// does not wipe its implementation between tests.
+jest.mock('../src/language/variable', () => ({
+  buildVariableRegex: variableName => {
+    const escaped = String(variableName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const keywords = ['Local', 'Global', 'Const'].join('|');
+    const pattern = '^[ \\t]*(?:(?:{keywords})[ \\t]+(?:.*,[ \\t]*)?)?({escaped})\\b'
+      .replace('{keywords}', keywords)
+      .replace('{escaped}', escaped);
+    return new RegExp(pattern, 'mi');
+  },
+}));
+
+jest.mock('../src/utils/fsCache', () => {
+  const pathModule = require('path');
+  const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
+  const mockHelperPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
+  const mockLibArrayPath = pathModule.join(process.cwd(), 'lib', 'Array.au3');
+
+  const mockMainContent = [
+    '#include "helper.au3"',
+    '#include <Array.au3>',
+    'Local $a, $b = 1, _',
+    '    $c',
+    'Global $Mixed_Name123 = 0',
+    '; function with volatile after name',
+    '    Func DoWork volatile($x, $y)',
+    '        Return $x + $y',
+    '    EndFunc',
+    '; function normal',
+    'Func NormalFunc($p)',
+    '    Return $p',
+    'EndFunc',
+    '; calls to included functions and variables',
+    'Local $result = HelperFunc($helperVar)',
+    'Local $libResult = LibFunc($Array_InLib)',
+  ].join('\n');
+
+  const mockHelperContent = [
+    '; nested include to test recursion (not existing to simulate missing readable)',
+    '#include "missing.au3"',
+    'Const $CONST_ONE = 1',
+    '    Local   $helperVar = 2',
+    '; volatile before name',
+    'Func volatile HelperFunc($v)',
+    '    Return $v',
+    'EndFunc',
+  ].join('\n');
+
+  const mockLibArrayContent = [
+    '; Fake Array.au3',
+    'Global $Array_InLib = 42',
+    'Func LibFunc($x)',
+    '  Return $x',
+    'EndFunc',
+  ].join('\n');
+
+  // Use global to track calls since we can't access outer scope variables
+  global.getIncludeTextCallCounts = global.getIncludeTextCallCounts || {};
+
+  return {
+    normalizePath: jest.fn(p => pathModule.normalize(p)),
+    getIncludeText: jest.fn(p => {
+      const n = pathModule.normalize(p);
+      global.getIncludeTextCallCounts[n] = (global.getIncludeTextCallCounts[n] || 0) + 1;
+      if (n === pathModule.normalize(mockHelperPath)) return mockHelperContent;
+      if (n === pathModule.normalize(mockLibArrayPath)) return mockLibArrayContent;
+      if (n === pathModule.normalize(mockMainPath)) return mockMainContent;
+      return ''; // simulate missing
+    }),
+  };
+});
+
+// Mock the symbol-index service so the fast path is deterministic and free of
+// fs / real-index behavior. With these defaults (lookupDefinition -> []), the
+// fast path is a no-op and every existing test falls through to the scan path.
+jest.mock('../src/services/symbolIndex', () => ({
+  lookupDefinition: jest.fn(() => []),
+  noteFileContent: jest.fn(),
+}));
+jest.mock('../src/services/includeGraph', () => {
+  const CASE_INSENSITIVE_FS = process.platform === 'win32' || process.platform === 'darwin';
+  return {
+    getIncludeSet: jest.fn(() => new Set()),
+    extractIncludeEdges: jest.fn(() => []),
+    // Mirror the real canonical-key normalizer so the fast-path filter and the
+    // mocked include-set land in the same key space.
+    toUriString: jest.fn(fsPath => `file://${CASE_INSENSITIVE_FS ? fsPath.toLowerCase() : fsPath}`),
+  };
+});
+const symbolIndex = require('../src/services/symbolIndex');
+const includeGraph = require('../src/services/includeGraph');
+
+// get the mock instances with proper typing
+const util = jest.mocked(require('../src/utils/includeResolution'));
+Object.assign(util, jest.mocked(require('../src/utils/fsCache')));
 
 // Import the module under test
-const { AutoItDefinitionProvider, definitionCache } = require('../src/ai_definition.js');
+const { AutoItDefinitionProvider, definitionCache } = require('../src/providers/ai_definition.js');
 const definitionProvider = AutoItDefinitionProvider;
 
 function makeDoc(text = MAIN_CONTENT, filePath = MAIN_PATH) {
@@ -1266,5 +1355,141 @@ describe('ai_definition: performance and timeout boundaries', () => {
 
     // Second lookup should be faster or equal (caching benefit)
     expect(secondLookupTime).toBeLessThanOrEqual(firstLookupTime + CACHE_LOOKUP_TOLERANCE_MS); // Allow 5ms tolerance
+  });
+});
+
+describe('ai_definition: index fast path', () => {
+  // The mock document's uri is { fsPath }, which has no toString override, so
+  // document.uri.toString() yields the default object string. We build the
+  // include set against that same value (doc.uri.toString()) so the fast path
+  // is self-consistent.
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    definitionCache.clear();
+    mockState.reset();
+    mockState.clearCache();
+    global.getIncludeTextCallCounts = mockState.callCounts;
+    global.__UNREADABLE_LIB__ = false;
+
+    // Restore default fast-path no-op behavior (overridden per-test below).
+    symbolIndex.lookupDefinition.mockReturnValue([]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set());
+    includeGraph.extractIncludeEdges.mockReturnValue([]);
+
+    // util mocks return nothing for the include scan so a rejected fast-path
+    // match falls through to a null result.
+    util.getIncludeScripts.mockImplementation(() => []);
+    util.getIncludeText.mockImplementation(() => '');
+  });
+
+  // A document with no local DoWork definition so the same-document scan misses
+  // and the index fast path runs.
+  const NO_LOCAL_DEF = ['; calls only', 'Local $r = DoWork()'].join('\n');
+
+  it('resolves a function via the warm index when its file is in the include set', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    // Candidate locations carry a real Uri with .fsPath (as vscode Locations do);
+    // the in-scope filter compares them via toUriString.
+    const helperFsPath = '/proj/helper.au3';
+    const mainKey = includeGraph.toUriString(doc.uri.fsPath);
+    const helperKey = includeGraph.toUriString(helperFsPath);
+    const helperLoc = { uri: { fsPath: helperFsPath, toString: () => helperKey }, range: {} };
+
+    symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
+    includeGraph.extractIncludeEdges.mockReturnValue([helperKey]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+    const loc = Array.isArray(result) ? result[0] : result;
+    expect(loc).toBeTruthy();
+    expect(loc.uri.fsPath).toBe(helperFsPath);
+  });
+
+  it('performs ZERO getIncludeText reads when resolving via the warm index', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    const helperFsPath = '/proj/helper.au3';
+    const mainKey = includeGraph.toUriString(doc.uri.fsPath);
+    const helperKey = includeGraph.toUriString(helperFsPath);
+    const helperLoc = { uri: { fsPath: helperFsPath, toString: () => helperKey }, range: {} };
+
+    symbolIndex.lookupDefinition.mockReturnValue([{ name: 'DoWork', location: helperLoc }]);
+    includeGraph.extractIncludeEdges.mockReturnValue([helperKey]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainKey, helperKey]));
+
+    // Arm the include-graph scan so that IF the fast path failed to
+    // short-circuit, the scan WOULD read a file (getIncludeText) and find a
+    // DoWork definition. This makes the not.toHaveBeenCalled() assertion below
+    // load-bearing: it can only pass because the warm-index fast path returns
+    // before the scan runs.
+    util.getIncludeScripts.mockImplementation(() => [HELPER_PATH]);
+    util.getIncludePath.mockImplementation(() => HELPER_PATH);
+    util.getIncludeText.mockImplementation(() => 'Func DoWork()\nEndFunc');
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+
+    const loc = Array.isArray(result) ? result[0] : result;
+    expect(util.getIncludeText).not.toHaveBeenCalled(); // ZERO file-content reads
+    expect(loc.uri.fsPath).toBe(helperFsPath); // resolved via the IN-MEMORY index, not the scan
+  });
+
+  it('rejects an index match whose file is not in the include set', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    const mainUri = doc.uri.toString();
+    const strangerUri = 'file:///other/stranger.au3';
+
+    symbolIndex.lookupDefinition.mockReturnValue([
+      { name: 'DoWork', location: { uri: { toString: () => strangerUri }, range: {} } },
+    ]);
+    includeGraph.extractIncludeEdges.mockReturnValue([]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainUri])); // stranger NOT included
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+    // Fast path filters out the stranger; falls through to the include scan
+    // which (util mocks return no match) yields null.
+    expect(result).toBeNull();
+  });
+
+  it('returns an array of locations when multiple in-scope matches exist', () => {
+    const doc = new MockTextDocument(NO_LOCAL_DEF, MAIN_PATH);
+    const mainKey = includeGraph.toUriString(doc.uri.fsPath);
+    const aFsPath = '/proj/a.au3';
+    const bFsPath = '/proj/b.au3';
+    const aKey = includeGraph.toUriString(aFsPath);
+    const bKey = includeGraph.toUriString(bFsPath);
+
+    symbolIndex.lookupDefinition.mockReturnValue([
+      { name: 'DoWork', location: { uri: { fsPath: aFsPath, toString: () => aKey }, range: {} } },
+      { name: 'DoWork', location: { uri: { fsPath: bFsPath, toString: () => bKey }, range: {} } },
+    ]);
+    includeGraph.extractIncludeEdges.mockReturnValue([aKey, bKey]);
+    includeGraph.getIncludeSet.mockReturnValue(new Set([mainKey, aKey, bKey]));
+
+    const position = posAtFirst(doc, 'DoWork');
+    const result = definitionProvider.provideDefinition(doc, position);
+    const expectedPaths = [aFsPath, bFsPath];
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(expectedPaths.length);
+    expect(result.map(loc => loc.uri.fsPath).sort()).toEqual(expectedPaths);
+  });
+
+  it('forwards isVariable=true to lookupDefinition for a $variable lookup', () => {
+    // The document references $myVar but never declares it, so the same-document
+    // scan misses and the index fast path runs.
+    const NO_LOCAL_VAR = ['; uses an externally-declared variable', 'ConsoleWrite($myVar)'].join(
+      '\n',
+    );
+    const doc = new MockTextDocument(NO_LOCAL_VAR, MAIN_PATH);
+
+    // Return [] so the fast path falls through; we only assert the forwarding call.
+    symbolIndex.lookupDefinition.mockReturnValue([]);
+
+    const position = posAtFirst(doc, '$myVar');
+    definitionProvider.provideDefinition(doc, position);
+
+    expect(symbolIndex.lookupDefinition).toHaveBeenCalledWith('$myVar', true);
   });
 });

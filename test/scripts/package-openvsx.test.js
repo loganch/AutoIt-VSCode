@@ -22,6 +22,9 @@ const {
   packageForOpenVSX,
 } = require('../../scripts/package-openvsx.js');
 
+const FIRST_CALL_INDEX = 1;
+const SECOND_CALL_INDEX = 2;
+
 describe('scripts/package-openvsx', () => {
   let logSpy;
   let errorSpy;
@@ -75,7 +78,7 @@ describe('scripts/package-openvsx', () => {
 
     packageForOpenVSX();
 
-    expect(fs.copyFileSync).toHaveBeenNthCalledWith(1, packageJsonPath, backupPath);
+    expect(fs.copyFileSync).toHaveBeenNthCalledWith(FIRST_CALL_INDEX, packageJsonPath, backupPath);
     expect(fs.writeFileSync).toHaveBeenCalledWith(
       packageJsonPath,
       expect.stringContaining('"publisher": "loganch"'),
@@ -83,18 +86,18 @@ describe('scripts/package-openvsx', () => {
     );
 
     expect(execSync).toHaveBeenNthCalledWith(
-      1,
+      FIRST_CALL_INDEX,
       'npm run vscode:prepublish',
       expect.objectContaining({ cwd: rootDir, stdio: 'inherit' }),
     );
 
     expect(execSync).toHaveBeenNthCalledWith(
-      2,
+      SECOND_CALL_INDEX,
       'npx @vscode/vsce package --out autoit-1.4.0-openvsx.vsix',
       expect.objectContaining({ cwd: rootDir, stdio: 'inherit' }),
     );
 
-    expect(fs.copyFileSync).toHaveBeenNthCalledWith(2, backupPath, packageJsonPath);
+    expect(fs.copyFileSync).toHaveBeenNthCalledWith(SECOND_CALL_INDEX, backupPath, packageJsonPath);
     expect(fs.unlinkSync).toHaveBeenCalledWith(backupPath);
     expect(process.exitCode).toBe(0);
   });

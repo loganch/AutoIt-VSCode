@@ -35,14 +35,8 @@ jest.mock('fs', () => ({
   existsSync: (...args) => mockExistsSync(...args),
 }));
 
-jest.mock('../../src/ai_showMessage', () => ({
+jest.mock('../../src/providers/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
-}));
-
-jest.mock('../../src/util', () => ({
-  findFilepath: (...args) => mockFindFilepath(...args),
-  functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/i,
-  setRegExpFlags: (...args) => mockSetRegExpFlags(...args),
 }));
 
 jest.mock('../../src/commands/ScriptCommands.js', () => ({
@@ -51,7 +45,7 @@ jest.mock('../../src/commands/ScriptCommands.js', () => ({
   },
 }));
 
-jest.mock('../../src/ai_config', () => ({
+jest.mock('../../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     config: {

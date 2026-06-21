@@ -1,7 +1,13 @@
+/** @type {jest.Mock} */
 const mockRegisterHoverProvider = jest.fn(() => ({ dispose: jest.fn() }));
+/** @type {jest.Mock} */
 const mockRegisterSignatureHelpProvider = jest.fn(() => ({ dispose: jest.fn() }));
+/** @type {jest.Mock} */
 const mockFindFilepath = jest.fn(() => false);
+/** @type {jest.Mock} */
 const mockGetIncludeData = jest.fn(() => ({}));
+/** @type {jest.Mock} */
+const mockBuildFunctionSignature = jest.fn();
 
 class MockMarkdownString {
   constructor(value) {
@@ -43,19 +49,33 @@ jest.mock('vscode', () => ({
   SignatureHelp: MockSignatureHelp,
   SignatureInformation: MockSignatureInformation,
   languages: {
-    registerHoverProvider: (...args) => mockRegisterHoverProvider(...args),
-    registerSignatureHelpProvider: (...args) => mockRegisterSignatureHelpProvider(...args),
+    registerHoverProvider: mockRegisterHoverProvider,
+    registerSignatureHelpProvider: mockRegisterSignatureHelpProvider,
   },
 }));
 
-jest.mock('../src/util', () => ({
+jest.mock('../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
-  buildFunctionSignature: jest.fn(),
-  findFilepath: (...args) => mockFindFilepath(...args),
-  functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/gim,
-  getIncludeData: (...args) => mockGetIncludeData(...args),
-  includePattern: /#include\s+"([^"]+)"/gim,
-  libraryIncludePattern: /#include\s+<([^>]+)>/gim,
+}));
+
+jest.mock('../src/utils/functionSignature', () => ({
+  buildFunctionSignature: mockBuildFunctionSignature,
+  getIncludeData: mockGetIncludeData,
+}));
+
+jest.mock('../src/utils/regexPatterns', () => ({
+  REGEX_PATTERNS: {
+    functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/gim,
+    includePattern: /#include\s+"([^"]+)"/gim,
+    libraryIncludePattern: /#include\s+<([^>]+)>/gim,
+  },
+}));
+
+jest.mock('../src/providers/ai_config', () => ({
+  __esModule: true,
+  default: {
+    findFilepath: mockFindFilepath,
+  },
 }));
 
 jest.mock('../src/constants', () => ({
@@ -81,8 +101,12 @@ describe('ai_signature', () => {
   let signatureProvider;
   let hoverProvider;
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   beforeAll(() => {
-    signatureModule = require('../src/ai_signature');
+    signatureModule = require('../src/providers/ai_signature');
     hoverProvider = mockRegisterHoverProvider.mock.calls[0]?.[1] ?? null;
     signatureProvider = mockRegisterSignatureHelpProvider.mock.calls[0]?.[1] ?? null;
   });
@@ -132,5 +156,142 @@ describe('ai_signature', () => {
 
     const result = hoverProvider.provideHover(document, { line: 0, character: 0 });
     expect(result).toBeNull();
+  });
+
+  describe('signature caching', () => {
+    const position = { line: 0, character: 0 };
+    const expectedReparseCalls = 2;
+
+    const createDoc = ({ uri, version, text, word }) => ({
+      uri: { toString: () => uri },
+      version,
+      fileName: uri,
+      getText: jest.fn(range => (range === undefined ? text : word)),
+      getWordRangeAtPosition: jest.fn(() => ({ start: 0, end: word.length })),
+      lineAt: jest.fn(() => ({ text: '' })),
+    });
+
+    const libSignature = name => ({
+      label: `${name}()`,
+      documentation: `${name} docs\rIncluded from MyLib.au3`,
+      params: {},
+    });
+
+    const mockLocalFunctionParsing = () => {
+      mockBuildFunctionSignature.mockImplementation(match => ({
+        functionName: match[2],
+        functionObject: {
+          label: `${match[2]}()`,
+          documentation: `${match[2]} docs\rLocal function`,
+          params: {},
+        },
+      }));
+      return mockBuildFunctionSignature;
+    };
+
+    test('parses library includes once for repeated hovers on an unchanged document', () => {
+      mockFindFilepath.mockImplementation(() => '/lib/MyLib.au3');
+      mockGetIncludeData.mockImplementation(() => ({ LibFunc: libSignature('LibFunc') }));
+
+      const doc = createDoc({
+        uri: 'file:///caching-repeated-hover.au3',
+        version: 1,
+        text: '#include <MyLib.au3>\n',
+        word: 'LibFunc',
+      });
+
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(mockGetIncludeData).toHaveBeenCalledTimes(1);
+    });
+
+    test('parses local functions once for repeated hovers on an unchanged document', () => {
+      const buildFunctionSignature = mockLocalFunctionParsing();
+
+      const doc = createDoc({
+        uri: 'file:///caching-local-functions.au3',
+        version: 1,
+        text: 'Func MyLocal($a)\nEndFunc\n',
+        word: 'MyLocal',
+      });
+
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(hoverProvider.provideHover(doc, position)).not.toBeNull();
+      expect(buildFunctionSignature).toHaveBeenCalledTimes(1);
+    });
+
+    test('re-parses local functions when the document version changes', () => {
+      const buildFunctionSignature = mockLocalFunctionParsing();
+      const uri = 'file:///caching-version-bump.au3';
+
+      const docV1 = createDoc({
+        uri,
+        version: 1,
+        text: 'Func FirstFunc()\nEndFunc\n',
+        word: 'FirstFunc',
+      });
+      expect(hoverProvider.provideHover(docV1, position)).not.toBeNull();
+      expect(buildFunctionSignature).toHaveBeenCalledTimes(1);
+
+      buildFunctionSignature.mockClear();
+
+      const docV2 = createDoc({
+        uri,
+        version: 2,
+        text: 'Func FirstFunc()\nEndFunc\nFunc SecondFunc()\nEndFunc\n',
+        word: 'SecondFunc',
+      });
+      expect(hoverProvider.provideHover(docV2, position)).not.toBeNull();
+      expect(buildFunctionSignature).toHaveBeenCalledTimes(expectedReparseCalls);
+    });
+
+    test('reuses include data across version changes when the include list is unchanged', () => {
+      mockFindFilepath.mockImplementation(() => '/lib/MyLib.au3');
+      mockGetIncludeData.mockImplementation(() => ({ LibFunc: libSignature('LibFunc') }));
+      const uri = 'file:///caching-stable-includes.au3';
+
+      const docV1 = createDoc({
+        uri,
+        version: 1,
+        text: '#include <MyLib.au3>\n',
+        word: 'LibFunc',
+      });
+      expect(hoverProvider.provideHover(docV1, position)).not.toBeNull();
+
+      const docV2 = createDoc({
+        uri,
+        version: 2,
+        text: '#include <MyLib.au3>\n; a new comment\n',
+        word: 'LibFunc',
+      });
+      expect(hoverProvider.provideHover(docV2, position)).not.toBeNull();
+      expect(mockGetIncludeData).toHaveBeenCalledTimes(1);
+    });
+
+    test('re-parses includes when the include list changes', () => {
+      mockFindFilepath.mockImplementation(fileName => `/lib/${fileName}`);
+      mockGetIncludeData.mockImplementation(fullPath =>
+        fullPath.includes('OtherLib')
+          ? { OtherFunc: libSignature('OtherFunc') }
+          : { LibFunc: libSignature('LibFunc') },
+      );
+      const uri = 'file:///caching-changed-includes.au3';
+
+      const docV1 = createDoc({
+        uri,
+        version: 1,
+        text: '#include <MyLib.au3>\n',
+        word: 'LibFunc',
+      });
+      expect(hoverProvider.provideHover(docV1, position)).not.toBeNull();
+
+      const docV2 = createDoc({
+        uri,
+        version: 2,
+        text: '#include <MyLib.au3>\n#include <OtherLib.au3>\n',
+        word: 'OtherFunc',
+      });
+      expect(hoverProvider.provideHover(docV2, position)).not.toBeNull();
+    });
   });
 });

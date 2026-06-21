@@ -1,35 +1,24 @@
 describe('webpack.config.js', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-
   afterEach(() => {
-    if (originalNodeEnv === undefined) {
-      delete process.env.NODE_ENV;
-    } else {
-      process.env.NODE_ENV = originalNodeEnv;
-    }
     jest.resetModules();
   });
 
-  function loadConfigWithEnv(nodeEnv) {
-    if (nodeEnv === undefined) {
-      delete process.env.NODE_ENV;
-    } else {
-      process.env.NODE_ENV = nodeEnv;
-    }
+  function loadConfig(mode = 'development') {
     jest.resetModules();
-    return require('../../webpack.config.js');
+    const configFactory = require('../../webpack.config.js');
+    return configFactory({}, { mode });
   }
 
   it('uses development mode and inline source maps by default', () => {
-    const config = loadConfigWithEnv(undefined);
+    const config = loadConfig('development');
 
     expect(config.mode).toBe('development');
     expect(config.devtool).toBe('inline-source-map');
     expect(config.target).toBe('node');
   });
 
-  it('uses production mode and source-map when NODE_ENV=production', () => {
-    const config = loadConfigWithEnv('production');
+  it('uses production mode and source-map when mode=production', () => {
+    const config = loadConfig('production');
 
     expect(config.mode).toBe('production');
     expect(config.devtool).toBe('source-map');
@@ -37,7 +26,7 @@ describe('webpack.config.js', () => {
   });
 
   it('defines expected externals and babel-loader configuration', () => {
-    const config = loadConfigWithEnv('development');
+    const config = loadConfig('development');
 
     expect(config.externals).toMatchObject({
       vscode: 'commonjs vscode',

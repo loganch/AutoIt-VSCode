@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const items = [
   {
@@ -53,9 +53,12 @@ const items = [
   },
 ];
 
-export default fillCompletions(
+const completions = fillCompletions(
   items,
   CompletionItemKind.Constant,
   'Combo Style Constant',
   'ComboConstants.au3',
 );
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

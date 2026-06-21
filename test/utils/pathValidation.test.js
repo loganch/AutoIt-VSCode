@@ -5,6 +5,8 @@ const {
   fileExists,
 } = require('../../src/utils/pathValidation');
 
+const NON_STRING_PATH_INPUT = 123;
+
 describe('pathValidation', () => {
   describe('validateFilePath', () => {
     it('should validate a normal file path', () => {
@@ -60,7 +62,7 @@ describe('pathValidation', () => {
 
     it('should reject non-string paths', () => {
       // @ts-ignore
-      expect(validateFilePath(123).valid).toBe(false);
+      expect(validateFilePath(NON_STRING_PATH_INPUT).valid).toBe(false);
       // @ts-ignore
       expect(validateFilePath({}).valid).toBe(false);
       // @ts-ignore

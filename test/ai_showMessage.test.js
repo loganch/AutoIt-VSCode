@@ -6,6 +6,8 @@ jest.mock('vscode', () => ({
   },
 }));
 
+const MESSAGE_TIMEOUT_MS = 10;
+
 describe('ai_showMessage', () => {
   beforeEach(() => {
     jest.resetModules();
@@ -18,7 +20,7 @@ describe('ai_showMessage', () => {
   });
 
   it('exports message helpers and messages object', () => {
-    const mod = require('../src/ai_showMessage');
+    const mod = require('../src/providers/ai_showMessage');
 
     expect(typeof mod.showInformationMessage).toBe('function');
     expect(typeof mod.showErrorMessage).toBe('function');
@@ -27,7 +29,7 @@ describe('ai_showMessage', () => {
   });
 
   it('returns a handle with hide, isHidden, and message promise', async () => {
-    const mod = require('../src/ai_showMessage');
+    const mod = require('../src/providers/ai_showMessage');
     const handle = mod.showInformationMessage('Hello world');
 
     expect(handle.isHidden).toBe(false);
@@ -39,10 +41,10 @@ describe('ai_showMessage', () => {
   });
 
   it('supports timeout option and hides message after the timeout', () => {
-    const mod = require('../src/ai_showMessage');
-    const handle = mod.showErrorMessage('Boom', { timeout: 10 });
+    const mod = require('../src/providers/ai_showMessage');
+    const handle = mod.showErrorMessage('Boom', { timeout: MESSAGE_TIMEOUT_MS });
 
-    jest.advanceTimersByTime(10);
+    jest.advanceTimersByTime(MESSAGE_TIMEOUT_MS);
 
     expect(handle.isHidden).toBe(true);
   });

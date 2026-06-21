@@ -1,4 +1,5 @@
-import { Diagnostic, DiagnosticSeverity, Position, Range, Uri, window, workspace } from 'vscode';
+import { Diagnostic, DiagnosticSeverity, Position, Range, Uri, workspace } from 'vscode';
+import { debugLog } from './debugLog';
 
 /**
  * Returns the diagnostic severity based on the severity string.
@@ -66,6 +67,27 @@ export const updateDiagnostics = (diagnostics, scriptPath, diagnosticToAdd) => {
   diagnosticArray.push(diagnosticToAdd);
   diagnostics.set(scriptPath, diagnosticArray);
 };
+
+/**
+ * External ownership map: avoids mutating framework Diagnostic objects with a custom property.
+ * @type {WeakMap<object, string>}
+ */
+const diagnosticOwners = new WeakMap();
+
+/**
+ * Record which owner URI created a diagnostic, for later cleanup via clearDiagnosticsOwnedBy.
+ * @param {object} diagnostic
+ * @param {string} ownerUri
+ */
+export const setDiagnosticOwner = (diagnostic, ownerUri) =>
+  diagnosticOwners.set(diagnostic, ownerUri);
+
+/**
+ * Look up the owner URI previously recorded for a diagnostic via setDiagnosticOwner.
+ * @param {object} diagnostic
+ * @returns {string|undefined}
+ */
+export const getDiagnosticOwner = diagnostic => diagnosticOwners.get(diagnostic);
 
 const OUTPUT_REGEXP =
   /"(?<scriptPath>.+)"\((?<line>\d{1,4}),(?<position>\d{1,4})\)\s:\s(?<severity>warning|error):\s(?<description>.+)\r/gm;
@@ -141,20 +163,9 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
     // Set proper human-readable source as per VS Code API guidelines
     diagnosticToAdd.source = 'au3check';
 
-    // Store ownership information using a custom property for cleanup purposes
-    // This allows clearDiagnosticsOwnedBy to identify diagnostics that belong to a specific owner
-    try {
-      Object.defineProperty(diagnosticToAdd, '_ownerUri', {
-        value: documentURI.toString(),
-        enumerable: false,
-        writable: true,
-        configurable: true,
-      });
-    } catch (error) {
-      // Fallback assignment keeps owner tracking best-effort if defineProperty is restricted.
-      diagnosticToAdd._ownerUri = documentURI.toString();
-      console.debug('[AutoIt][diagnostics] Falling back to direct owner assignment.', error);
-    }
+    // Track ownership externally (not as a property on the framework Diagnostic object)
+    // so clearDiagnosticsOwnedBy can identify diagnostics that belong to a specific owner.
+    setDiagnosticOwner(diagnosticToAdd, documentURI.toString());
 
     // Use scriptPath by default to correctly attribute diagnostics to included files.
     // Fall back to documentURI only when AU3Check's path encoding likely corrupts the path:
@@ -211,6 +222,14 @@ export const parseAu3CheckOutput = (output, collection, documentURI) => {
 /** @type {Set<string>} */
 const trackedDiagnosticFileUris = new Set();
 
+/** Cap on trackedDiagnosticFileUris size; oldest entry is evicted once exceeded. */
+const MAX_TRACKED_DIAGNOSTIC_URIS = 500;
+
+/**
+ * Clears all tracked diagnostic file URIs. Exposed for `deactivate()` and tests.
+ */
+export const resetDiagnosticTracking = () => trackedDiagnosticFileUris.clear();
+
 /**
  * Register a file path (as string) whose diagnostics we set, so later cleanup can find it safely via public APIs.
  * @param {string} filePath
@@ -219,6 +238,13 @@ const trackDiagnosticFile = filePath => {
   if (!filePath) return;
   try {
     const uri = Uri.file(filePath).toString();
+    if (
+      !trackedDiagnosticFileUris.has(uri) &&
+      trackedDiagnosticFileUris.size >= MAX_TRACKED_DIAGNOSTIC_URIS
+    ) {
+      // ponytail: FIFO eviction (oldest insertion); upgrade if access patterns need true LRU
+      trackedDiagnosticFileUris.delete(trackedDiagnosticFileUris.values().next().value);
+    }
     trackedDiagnosticFileUris.add(uri);
   } catch (error) {
     console.debug('[AutoIt][diagnostics] Failed to register tracked diagnostic URI.', error);
@@ -237,31 +263,19 @@ const filterDiagnosticsOnUriByOwner = (collection, uri, owner) => {
     if (!current || current.length === 0) return;
     const filtered = current.filter(d => {
       if (!d) return false;
-      const ownerProp = /** @type {any} */ (d)['_ownerUri'];
-      return ownerProp !== owner;
+      return getDiagnosticOwner(d) !== owner;
     });
     if (filtered.length === 0) {
       collection.delete(uri);
+      trackedDiagnosticFileUris.delete(uri.toString());
     } else if (filtered.length !== current.length) {
       collection.set(uri, filtered);
     }
   } catch (err) {
     // Optional debug logging of cleanup failures without breaking the extension
-    try {
-      const cfg = workspace.getConfiguration('autoit');
-      const dbg = cfg?.get?.('debugLogging') === true;
-      const msg = `[AutoIt][diagnostics] Failed to filter diagnostics on ${uri?.toString?.() ?? String(uri)} for owner=${owner}: ${err?.message ?? err}`;
-      if (dbg) {
-        if (window?.createOutputChannel) {
-          const ch = window.createOutputChannel('AutoIt');
-          ch.appendLine(msg);
-        } else {
-          console.debug(msg);
-        }
-      }
-    } catch (loggingError) {
-      console.debug('[AutoIt][diagnostics] Failed to emit cleanup debug log.', loggingError);
-    }
+    debugLog(
+      `[AutoIt][diagnostics] Failed to filter diagnostics on ${uri?.toString?.() ?? String(uri)} for owner=${owner}: ${err?.message ?? err}`,
+    );
   }
 };
 
@@ -281,24 +295,9 @@ export const clearDiagnosticsOwnedBy = (collection, ownerUri) => {
     }
   } catch (err) {
     // Optional debug logging without breaking extension
-    try {
-      const cfg = workspace.getConfiguration('autoit');
-      const dbg = cfg?.get?.('debugLogging') === true;
-      const msg = `[AutoIt][diagnostics] Failed while iterating open documents during cleanup for owner=${owner}: ${err?.message ?? err}`;
-      if (dbg) {
-        if (window?.createOutputChannel) {
-          const ch = window.createOutputChannel('AutoIt');
-          ch.appendLine(msg);
-        } else {
-          console.debug(msg);
-        }
-      }
-    } catch (loggingError) {
-      console.debug(
-        '[AutoIt][diagnostics] Failed to emit open-docs cleanup debug log.',
-        loggingError,
-      );
-    }
+    debugLog(
+      `[AutoIt][diagnostics] Failed while iterating open documents during cleanup for owner=${owner}: ${err?.message ?? err}`,
+    );
   }
 
   // 2) Filter diagnostics for any URIs we previously set (tracked index), using only public API get/set/delete.
@@ -312,24 +311,9 @@ export const clearDiagnosticsOwnedBy = (collection, ownerUri) => {
     }
   } catch (err) {
     // Optional debug logging without breaking extension
-    try {
-      const cfg = workspace.getConfiguration('autoit');
-      const dbg = cfg?.get?.('debugLogging') === true;
-      const msg = `[AutoIt][diagnostics] Failed while iterating tracked URIs during cleanup for owner=${owner}: ${err?.message ?? err}`;
-      if (dbg) {
-        if (window?.createOutputChannel) {
-          const ch = window.createOutputChannel('AutoIt');
-          ch.appendLine(msg);
-        } else {
-          console.debug(msg);
-        }
-      }
-    } catch (loggingError) {
-      console.debug(
-        '[AutoIt][diagnostics] Failed to emit tracked-URIs cleanup debug log.',
-        loggingError,
-      );
-    }
+    debugLog(
+      `[AutoIt][diagnostics] Failed while iterating tracked URIs during cleanup for owner=${owner}: ${err?.message ?? err}`,
+    );
   }
 };
 

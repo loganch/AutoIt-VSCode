@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const fontWeight = 'Font Weight Constant';
 const dialog = 'Font Dialog Constant';
@@ -403,4 +403,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'FontConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'FontConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

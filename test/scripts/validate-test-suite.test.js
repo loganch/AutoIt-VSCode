@@ -10,6 +10,30 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const { TestSuiteValidator } = require('../../scripts/validate-test-suite.js');
 
+const DEFAULT_RUNS = 5;
+const DEFAULT_TIMEOUT_MS = 45000;
+const SHORT_TIMEOUT_MS = 100;
+const SHORT_TIMEOUT_WITH_BUFFER_MS = 5100;
+const FAILURE_TIMEOUT_MS = 120;
+const SUMMARY_RUNS = 3;
+const START_TIME_MS = 1000;
+const END_TIME_MS = 1300;
+const FAILURE_START_TIME_MS = 500;
+const FAILURE_END_TIME_MS = 850;
+const SUMMARY_END_TIME_MS = 4000;
+const SUCCESS_EXECUTION_TIME_MS = 300;
+const FAILURE_EXECUTION_TIME_MS = 350;
+const SUMMARY_TOTAL_EXECUTION_TIME_MS = 3000;
+const AVERAGE_EXECUTION_TIME_MS = 200;
+const MIN_EXECUTION_TIME_MS = 100;
+const MAX_EXECUTION_TIME_MS = 300;
+const AVERAGE_MEMORY_DELTA_MB = 10;
+const PASS_RATE_PERCENT = 66.666;
+const DECIMAL_PRECISION = 2;
+const SECOND_RUN_INDEX = 2;
+const SUCCESSFUL_RUNS = 2;
+const FAILED_RUNS = 1;
+
 describe('TestSuiteValidator', () => {
   let logSpy;
   let errorSpy;
@@ -28,25 +52,25 @@ describe('TestSuiteValidator', () => {
   it('applies default options in constructor', () => {
     const validator = new TestSuiteValidator();
 
-    expect(validator.runs).toBe(5);
-    expect(validator.timeout).toBe(45000);
+    expect(validator.runs).toBe(DEFAULT_RUNS);
+    expect(validator.timeout).toBe(DEFAULT_TIMEOUT_MS);
     expect(validator.outputFile).toBe('validation-results.json');
     expect(validator.results).toEqual([]);
   });
 
   it('captures successful test run result', () => {
-    const validator = new TestSuiteValidator({ timeout: 100 });
+    const validator = new TestSuiteValidator({ timeout: SHORT_TIMEOUT_MS });
     jest
       .spyOn(process, 'memoryUsage')
       .mockReturnValueOnce({ heapUsed: 100, heapTotal: 200, external: 50, rss: 1000 })
       .mockReturnValueOnce({ heapUsed: 150, heapTotal: 260, external: 60, rss: 1200 });
-    jest.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(1300);
+    jest.spyOn(Date, 'now').mockReturnValueOnce(START_TIME_MS).mockReturnValueOnce(END_TIME_MS);
     execSync.mockReturnValue('ok');
 
     const result = validator.runSingleTest(1);
 
     expect(result.status).toBe('PASSED');
-    expect(result.executionTime).toBe(300);
+    expect(result.executionTime).toBe(SUCCESS_EXECUTION_TIME_MS);
     expect(result.memoryDelta).toEqual({
       heapUsed: 50,
       heapTotal: 60,
@@ -54,17 +78,20 @@ describe('TestSuiteValidator', () => {
       rss: 200,
     });
     expect(execSync).toHaveBeenCalledWith(
-      'npx jest --testTimeout=100 --runInBand --verbose --no-coverage',
-      expect.objectContaining({ timeout: 5100 }),
+      `npx jest --testTimeout=${SHORT_TIMEOUT_MS} --runInBand --verbose --no-coverage`,
+      expect.objectContaining({ timeout: SHORT_TIMEOUT_WITH_BUFFER_MS }),
     );
   });
 
   it('captures failed test run result', () => {
-    const validator = new TestSuiteValidator({ timeout: 120 });
+    const validator = new TestSuiteValidator({ timeout: FAILURE_TIMEOUT_MS });
     jest
       .spyOn(process, 'memoryUsage')
       .mockReturnValue({ heapUsed: 0, heapTotal: 0, external: 0, rss: 0 });
-    jest.spyOn(Date, 'now').mockReturnValueOnce(500).mockReturnValueOnce(850);
+    jest
+      .spyOn(Date, 'now')
+      .mockReturnValueOnce(FAILURE_START_TIME_MS)
+      .mockReturnValueOnce(FAILURE_END_TIME_MS);
 
     const error = new Error('failed run');
     error.status = 1;
@@ -74,10 +101,10 @@ describe('TestSuiteValidator', () => {
       throw error;
     });
 
-    const result = validator.runSingleTest(2);
+    const result = validator.runSingleTest(SECOND_RUN_INDEX);
 
     expect(result.status).toBe('FAILED');
-    expect(result.executionTime).toBe(350);
+    expect(result.executionTime).toBe(FAILURE_EXECUTION_TIME_MS);
     expect(result.error).toEqual(
       expect.objectContaining({
         message: 'failed run',
@@ -89,8 +116,8 @@ describe('TestSuiteValidator', () => {
   });
 
   it('analyzes aggregate results and writes summary output', () => {
-    const validator = new TestSuiteValidator({ runs: 3, outputFile: 'summary.json' });
-    validator.startTime = 1000;
+    const validator = new TestSuiteValidator({ runs: SUMMARY_RUNS, outputFile: 'summary.json' });
+    validator.startTime = START_TIME_MS;
     validator.results = [
       {
         run: 1,
@@ -111,20 +138,20 @@ describe('TestSuiteValidator', () => {
       },
     ];
 
-    jest.spyOn(Date, 'now').mockReturnValue(4000);
+    jest.spyOn(Date, 'now').mockReturnValue(SUMMARY_END_TIME_MS);
     jest.spyOn(validator, 'printSummary').mockImplementation(() => {});
 
     const summary = validator.analyzeResults();
 
-    expect(summary.totalRuns).toBe(3);
-    expect(summary.passedRuns).toBe(2);
-    expect(summary.failedRuns).toBe(1);
-    expect(summary.passRate).toBeCloseTo(66.666, 2);
-    expect(summary.totalExecutionTime).toBe(3000);
-    expect(summary.averageExecutionTime).toBe(200);
-    expect(summary.minExecutionTime).toBe(100);
-    expect(summary.maxExecutionTime).toBe(300);
-    expect(summary.averageMemoryDelta).toBe(10);
+    expect(summary.totalRuns).toBe(SUMMARY_RUNS);
+    expect(summary.passedRuns).toBe(SUCCESSFUL_RUNS);
+    expect(summary.failedRuns).toBe(FAILED_RUNS);
+    expect(summary.passRate).toBeCloseTo(PASS_RATE_PERCENT, DECIMAL_PRECISION);
+    expect(summary.totalExecutionTime).toBe(SUMMARY_TOTAL_EXECUTION_TIME_MS);
+    expect(summary.averageExecutionTime).toBe(AVERAGE_EXECUTION_TIME_MS);
+    expect(summary.minExecutionTime).toBe(MIN_EXECUTION_TIME_MS);
+    expect(summary.maxExecutionTime).toBe(MAX_EXECUTION_TIME_MS);
+    expect(summary.averageMemoryDelta).toBe(AVERAGE_MEMORY_DELTA_MB);
     expect(summary.isReliable).toBe(false);
     expect(summary.isPerformant).toBe(true);
 

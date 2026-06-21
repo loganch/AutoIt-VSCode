@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const xlAutoFilterOperator = 'XlAutoFilterOperator Enumeration Constant';
 const constant = 'Constant Enumeration Constant';
@@ -1072,4 +1072,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'ExcelConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'ExcelConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

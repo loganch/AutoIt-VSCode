@@ -1,22 +1,35 @@
 import { languages, window, workspace } from 'vscode';
-import { basename, dirname, sep } from 'path';
 import { existsSync } from 'fs';
-import { execFile } from 'child_process';
-import { FORMATTER, DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
+import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import languageConfiguration from './languageConfiguration';
-import hoverFeature from './ai_hover';
-import completionFeature from './ai_completion';
-import symbolsFeature from './ai_symbols';
-import signaturesFeature, { signatureHoverProvider } from './ai_signature';
-import workspaceSymbolsFeature from './ai_workspaceSymbols';
-import goToDefinitionFeature from './ai_definition';
+import hoverFeature from './providers/ai_hover';
+import completionFeature from './providers/ai_completion';
+import symbolsFeature from './providers/ai_symbols';
+import signaturesFeature, { signatureHoverProvider } from './providers/ai_signature';
+import workspaceSymbolsFeature from './providers/ai_workspaceSymbols';
+import goToDefinitionFeature from './providers/ai_definition';
+import referencesFeature from './providers/ai_references';
 
 import { registerCommands } from './registerCommands';
-import { formatterProvider } from './ai_formatter';
-import { clearDiagnosticsOwnedBy, parseAu3CheckOutput } from './diagnosticUtils';
-import conf from './ai_config';
+import { formatterProvider } from './providers/ai_formatter';
+import {
+  clearDiagnosticsOwnedBy,
+  parseAu3CheckOutput,
+  resetDiagnosticTracking,
+} from './diagnosticUtils';
+import { clearIncludeCache } from './utils/fsCache';
+import { debugLog } from './debugLog';
+import conf from './providers/ai_config';
+import { warmDocument } from './services/symbolIndex';
+import { ensureWarm } from './services/symbolWarmup';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
+import {
+  runCheckProcess,
+  validateCheckPath,
+  handleCheckProcessError,
+  shouldIgnoreDiagnostics,
+} from './utils/au3check';
 
 const { config } = conf;
 
@@ -24,99 +37,9 @@ const { config } = conf;
 const updateTimers = new Map();
 const DEBOUNCE_DELAY = 300; // ms
 
-/**
- * Runs the check process for the given document and returns the console output.
- * @param {import('vscode').TextDocument} document - The document to run the AU3Check process on.
- * @returns {Promise<string>} A promise that resolves with the console output of the check process.
- */
-const runCheckProcess = document => {
-  return new Promise((resolve, reject) => {
-    let consoleOutput = '';
-    // Start with empty params - let Au3Check use its own defaults
-    // Only add parameters from include paths and #AutoIt3Wrapper_AU3Check_Parameters directive
-    // See https://www.autoitscript.com/autoit3/docs/intro/au3check.htm
-    const params = [];
-
-    // Add -I for each include path
-    config.includePaths.forEach(path => {
-      params.push('-I', path);
-    });
-
-    // Parse #AutoIt3Wrapper_AU3Check_Parameters directive if present
-    const match = [
-      ...document.getText().matchAll(/^\s*#AutoIt3Wrapper_AU3Check_Parameters=(.*)$/gm),
-    ].pop();
-    if (match) {
-      // Extract the parameter string after the = sign
-      const paramString = match[1].trim();
-
-      // Parse standalone flags first: -q (quiet) and -d (must declare vars)
-      // These flags are safe because they don't alter the output format:
-      // - -q: suppresses info messages, keeps error/warning format
-      // - -d: enables additional checks, produces standard format errors
-      if (/(?:^|\s)-q\b/.test(paramString)) {
-        params.push('-q');
-      }
-      if (/(?:^|\s)-d\b/.test(paramString)) {
-        params.push('-d');
-      }
-      // Parse -w (warning) parameters: -w or -w- followed by a number
-      // Append all warning parameters from the directive
-      const warnRegex = /(-w-?)\s+([0-9]+)/g;
-      let regexMatch;
-      while ((regexMatch = warnRegex.exec(paramString)) !== null) {
-        const [, param, value] = regexMatch;
-        params.push(param, value);
-      }
-
-      // NOTE: -v (verbosity) parameters are intentionally NOT supported here
-      // Verbosity flags (-v 1, -v 2, -v 3) add extra output lines that would break
-      // the diagnostic parser which expects a specific format:
-      //   "file.au3"(line,col) : severity: message
-      // See diagnosticUtils.js OUTPUT_REGEXP for the expected format
-    }
-    const checkProcess = execFile(config.checkPath, [...params, document.fileName], {
-      cwd: dirname(document.fileName),
-    });
-
-    checkProcess.stdout.on('data', data => {
-      if (data.length === 0) {
-        return;
-      }
-      consoleOutput += data.toString();
-    });
-
-    checkProcess.stderr.on('data', data => {
-      if (!data || data.length === 0) {
-        return;
-      }
-      console.error(`[AutoIt][extension] Au3Check stderr: ${data.toString()}`);
-    });
-
-    checkProcess.on('error', error => {
-      reject(error);
-    });
-
-    checkProcess.on('close', () => {
-      resolve(consoleOutput);
-    });
-  });
-};
-
-const handleCheckProcessError = error => {
-  const message = error?.message ?? String(error);
-  window.showErrorMessage(`${config.checkPath} ${message}`);
-};
-
-const validateCheckPath = checkPath => {
-  if (!existsSync(checkPath)) {
-    window.showErrorMessage(
-      'Invalid Check Path! Please review AutoIt settings (Check Path in UI, autoit.checkPath in JSON)',
-    );
-    return false;
-  }
-  return true;
-};
+// Last document.version successfully checked by Au3Check, keyed by URI string.
+// Used to skip redundant checks (e.g. on tab switch) when the document is unchanged.
+const lastCheckedVersions = new Map();
 
 /**
  * Validates if the formatter can be used (Windows platform and valid paths)
@@ -142,28 +65,6 @@ const validateFormatterPaths = () => {
 };
 
 /**
- * Checks if a document should be ignored by diagnostics (AutoIt Tidy backup files)
- * @param {import('vscode').TextDocument} document - Document to check
- * @returns {boolean} True if document should be ignored
- */
-const shouldIgnoreDiagnostics = document => {
-  const filePath = document.uri.fsPath;
-  const fileName = basename(filePath);
-
-  // Ignore files in "BackUp" folder
-  if (filePath.includes(sep + FORMATTER.BACKUP_DIR_NAME + sep)) {
-    return true;
-  }
-
-  // Ignore *_old*.au3 files
-  if (FORMATTER.BACKUP_FILE_SUFFIX_PATTERN.test(fileName)) {
-    return true;
-  }
-
-  return false;
-};
-
-/**
  * Checks the AutoIt code in the given document and updates the diagnostic collection.
  * @param {import('vscode').TextDocument} document - The document to check.
  * @param {import('vscode').DiagnosticCollection} diagnosticCollection - The diagnostic collection to update.
@@ -185,36 +86,30 @@ const checkAutoItCode = async (document, diagnosticCollection) => {
   const { checkPath } = config;
   if (!validateCheckPath(checkPath)) return;
 
+  // Skip if this exact document version was already checked (e.g. tab switch with no edits)
+  const versionKey = document.uri.toString();
+  if (lastCheckedVersions.get(versionKey) === document.version) {
+    return;
+  }
+
   try {
-    const consoleOutput = await runCheckProcess(document);
+    const consoleOutput = await runCheckProcess(document, {
+      checkPath: config.checkPath,
+      includePaths: config.includePaths,
+    });
     parseAu3CheckOutput(consoleOutput, diagnosticCollection, document.uri);
+    // Cache only after a successful check so failures are retried next time
+    lastCheckedVersions.set(versionKey, document.version);
   } catch (error) {
-    handleCheckProcessError(error);
+    handleCheckProcessError(config.checkPath, error);
   }
 };
 
-export const activate = ctx => {
-  const features = [
-    hoverFeature,
-    completionFeature,
-    symbolsFeature,
-    signaturesFeature,
-    signatureHoverProvider,
-    workspaceSymbolsFeature,
-    goToDefinitionFeature,
-  ];
-
-  // Only register formatter on Windows with valid paths
-  if (validateFormatterPaths()) {
-    features.push(formatterProvider);
-  }
-
-  ctx.subscriptions.push(...features);
-
-  ctx.subscriptions.push(languages.setLanguageConfiguration('autoit', languageConfiguration));
-
-  registerCommands(ctx);
-
+/**
+ * Wires up Map/Variable tracking services and the document-lifecycle listeners
+ * that keep them in sync. Returns the services so config-change handling can update them.
+ */
+const setupDocumentTracking = ctx => {
   // Initialize MapTrackingService
   const workspaceRoot = workspace.workspaceFolders?.[0]?.uri.fsPath || '';
   const autoitConfig = workspace.getConfiguration('autoit');
@@ -233,6 +128,20 @@ export const activate = ctx => {
     autoitIncludePaths,
     maxIncludeDepth,
   );
+
+  // Immediate (non-debounced) sync of a document into both tracking services.
+  // variableTrackingService can throw on malformed input; never let that abort
+  // the surrounding event handler or open-document scan.
+  const syncDocumentImmediate = (filePath, text) => {
+    mapTrackingService.updateFile(filePath, text);
+    try {
+      variableTrackingService.updateFileImmediate(filePath, text);
+    } catch (error) {
+      console.error(
+        `[AutoIt][extension] Failed to update variable tracking for file: ${filePath}. Error: ${error.message}`,
+      );
+    }
+  };
 
   // Track document changes with debouncing
   const onDocumentChange = document => {
@@ -255,19 +164,13 @@ export const activate = ctx => {
     updateTimers.set(filePath, timer);
   };
 
-  // Handle document open
+  // Handle document open: prioritized symbol-index warming (so the doc is
+  // navigable without waiting for the background pass) plus immediate tracking.
   ctx.subscriptions.push(
     workspace.onDidOpenTextDocument(document => {
-      if (document.languageId === 'autoit') {
-        mapTrackingService.updateFile(document.uri.fsPath, document.getText());
-        try {
-          variableTrackingService.updateFileImmediate(document.uri.fsPath, document.getText());
-        } catch (error) {
-          console.error(
-            `[AutoIt][extension] Failed to update variable tracking for file: ${document.uri.fsPath}. Error: ${error.message}`,
-          );
-        }
-      }
+      if (document.languageId !== 'autoit') return;
+      warmDocument(document);
+      syncDocumentImmediate(document.uri.fsPath, document.getText());
     }),
   );
 
@@ -290,14 +193,7 @@ export const activate = ctx => {
           updateTimers.delete(filePath);
         }
 
-        mapTrackingService.updateFile(filePath, document.getText());
-        try {
-          variableTrackingService.updateFileImmediate(filePath, document.getText());
-        } catch (error) {
-          console.error(
-            `[AutoIt][extension] Failed to update variable tracking for file: ${filePath}. Error: ${error.message}`,
-          );
-        }
+        syncDocumentImmediate(filePath, document.getText());
       }
     }),
   );
@@ -324,20 +220,31 @@ export const activate = ctx => {
   // Parse all open AutoIt documents
   workspace.textDocuments.forEach(document => {
     if (document.languageId === 'autoit') {
-      mapTrackingService.updateFile(document.uri.fsPath, document.getText());
-      try {
-        variableTrackingService.updateFileImmediate(document.uri.fsPath, document.getText());
-      } catch (error) {
-        console.error(
-          `[AutoIt][extension] Failed to update variable tracking for file: ${document.uri.fsPath}. Error: ${error.message}`,
-        );
-      }
+      syncDocumentImmediate(document.uri.fsPath, document.getText());
     }
   });
 
-  // Handle configuration changes
+  return { mapTrackingService, variableTrackingService };
+};
+
+/**
+ * Keeps MapTrackingService/VariableTrackingService and the Au3Check version
+ * cache in sync with `autoit.*` configuration changes.
+ */
+const setupConfigSync = (ctx, mapTrackingService, variableTrackingService) => {
   ctx.subscriptions.push(
     workspace.onDidChangeConfiguration(event => {
+      // Au3Check behavior depends on these settings, not just document content, so
+      // invalidate the version cache to force fresh diagnostics when they change.
+      // Otherwise stale Problems output persists until the document is edited or reopened.
+      if (
+        event.affectsConfiguration('autoit.includePaths') ||
+        event.affectsConfiguration('autoit.checkPath') ||
+        event.affectsConfiguration('autoit.enableDiagnostics')
+      ) {
+        lastCheckedVersions.clear();
+      }
+
       if (
         event.affectsConfiguration('autoit.includePaths') ||
         event.affectsConfiguration('autoit.maps.includeDepth')
@@ -375,64 +282,95 @@ export const activate = ctx => {
       }
     }),
   );
+};
 
-  if (process.platform === 'win32') {
-    const diagnosticCollection = languages.createDiagnosticCollection('autoit');
-    ctx.subscriptions.push(diagnosticCollection);
+/**
+ * Sets up the Au3Check diagnostic collection and the document-lifecycle
+ * listeners that trigger/clear it. Windows-only, matching validateCheckPath's platform.
+ */
+const setupDiagnostics = ctx => {
+  if (process.platform !== 'win32') return;
 
-    workspace.onDidSaveTextDocument(document => checkAutoItCode(document, diagnosticCollection));
-    workspace.onDidOpenTextDocument(document => checkAutoItCode(document, diagnosticCollection));
+  const diagnosticCollection = languages.createDiagnosticCollection('autoit');
+  ctx.subscriptions.push(diagnosticCollection);
+
+  const diagnosticListeners = [];
+  diagnosticListeners.push(
+    workspace.onDidSaveTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
+  );
+  diagnosticListeners.push(
+    workspace.onDidOpenTextDocument(document => checkAutoItCode(document, diagnosticCollection)),
+  );
+  diagnosticListeners.push(
     workspace.onDidCloseTextDocument(document => {
+      // Drop the cached check version so a reopened document is re-checked
+      lastCheckedVersions.delete(document.uri.toString());
       // First remove all diagnostics owned by the closing document (including in included files)
       try {
         clearDiagnosticsOwnedBy(diagnosticCollection, document.uri);
       } catch (err) {
         // Optional debug logging to help diagnose cleanup failures without breaking the extension
-        try {
-          const cfg = workspace.getConfiguration('autoit');
-          const dbg = cfg?.get?.('debugLogging') === true;
-          const msg = `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
-          if (dbg) {
-            console.debug(msg);
-          }
-        } catch (loggingError) {
-          console.debug(
-            '[AutoIt][extension] Failed to emit debug log for clearDiagnosticsOwnedBy error.',
-            loggingError,
-          );
-        }
+        debugLog(
+          `[AutoIt][extension] clearDiagnosticsOwnedBy failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
+        );
       }
       // Then remove any remaining diagnostics specifically for the closed document
       try {
         diagnosticCollection.delete(document.uri);
       } catch (err) {
         // Optional debug logging for delete failures
-        try {
-          const cfg = workspace.getConfiguration('autoit');
-          const dbg = cfg?.get?.('debugLogging') === true;
-          const msg = `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`;
-          if (dbg) {
-            console.debug(msg);
-          }
-        } catch (loggingError) {
-          console.debug(
-            '[AutoIt][extension] Failed to emit debug log for diagnosticCollection.delete error.',
-            loggingError,
-          );
-        }
+        debugLog(
+          `[AutoIt][extension] diagnosticCollection.delete failed during document close for ${document?.uri?.toString?.() ?? document?.fileName ?? 'unknown'}: ${err?.message ?? err}`,
+        );
       }
-    });
+    }),
+  );
+  diagnosticListeners.push(
     window.onDidChangeActiveTextEditor(editor => {
       if (editor) {
         checkAutoItCode(editor.document, diagnosticCollection);
       }
-    });
+    }),
+  );
 
-    // Run diagnostic on document that's open when the extension loads
-    if (config.enableDiagnostics && window.activeTextEditor) {
-      checkAutoItCode(window.activeTextEditor.document, diagnosticCollection);
-    }
+  ctx.subscriptions.push(...diagnosticListeners);
+
+  // Run diagnostic on document that's open when the extension loads
+  if (config.enableDiagnostics && window.activeTextEditor) {
+    checkAutoItCode(window.activeTextEditor.document, diagnosticCollection);
   }
+};
+
+export const activate = ctx => {
+  conf.init();
+
+  const features = [
+    hoverFeature,
+    completionFeature,
+    symbolsFeature,
+    signaturesFeature,
+    signatureHoverProvider,
+    workspaceSymbolsFeature,
+    goToDefinitionFeature,
+    referencesFeature,
+  ];
+
+  // Only register formatter on Windows with valid paths
+  if (validateFormatterPaths()) {
+    features.push(formatterProvider);
+  }
+
+  ctx.subscriptions.push(...features);
+
+  ctx.subscriptions.push(languages.setLanguageConfiguration('autoit', languageConfiguration));
+
+  registerCommands(ctx);
+
+  ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
+
+  const { mapTrackingService, variableTrackingService } = setupDocumentTracking(ctx);
+  setupConfigSync(ctx, mapTrackingService, variableTrackingService);
+  setupDiagnostics(ctx);
 
   console.log('AutoIt is now active!');
 };
@@ -441,4 +379,7 @@ export function deactivate() {
   // Clear all pending debounce timers
   updateTimers.forEach(timer => clearTimeout(timer));
   updateTimers.clear();
+  lastCheckedVersions.clear();
+  clearIncludeCache();
+  resetDiagnosticTracking();
 }

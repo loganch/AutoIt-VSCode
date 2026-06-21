@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { signatureToCompletion, signatureToHover, opt } from '../../util';
+import { signatureToCompletion, signatureToHover, opt } from '../../completionTransforms';
 
 const include = '(Requires: `#include <WinAPIShPath.au3>`)';
 

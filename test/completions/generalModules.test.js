@@ -46,7 +46,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/ai_config', () => ({
+jest.mock('../../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     findFilepath: jest.fn(() => ''),
@@ -55,9 +55,11 @@ jest.mock('../../src/ai_config', () => ({
 
 const resolveDefault = moduleExports => moduleExports.default ?? moduleExports;
 
+const MINIMUM_COMPLETION_ITEMS = 100;
+
 describe('general completion modules', () => {
-  test('mainFunctions exports function completions', () => {
-    const items = resolveDefault(require('../../src/completions/mainFunctions.js'));
+  test('main function signatures export function completions', () => {
+    const items = require('../../src/signatures/functions.js').completions;
 
     expect(Array.isArray(items)).toBe(true);
     expect(items.length).toBeGreaterThan(0);
@@ -69,8 +71,8 @@ describe('general completion modules', () => {
     );
   });
 
-  test('udf_WinAPITheme exports function completions', () => {
-    const items = resolveDefault(require('../../src/completions/udf_WinAPITheme.js'));
+  test('WinAPITheme signatures export function completions', () => {
+    const items = require('../../src/signatures/WinAPIEx/WinAPITheme.js').completions;
 
     expect(Array.isArray(items)).toBe(true);
     expect(items.length).toBeGreaterThan(0);
@@ -104,10 +106,12 @@ describe('general completion modules', () => {
     const items = resolveDefault(require('../../src/completions/index.js'));
 
     expect(Array.isArray(items)).toBe(true);
-    expect(items.length).toBeGreaterThan(100);
+    expect(items.length).toBeGreaterThan(MINIMUM_COMPLETION_ITEMS);
 
     const labels = items.map(item => item.label);
     expect(labels).toContain('#AutoIt3Wrapper_testing');
     expect(labels.some(label => String(label).toLowerCase().includes('winapi'))).toBe(true);
+    expect(labels).toContain('_MemGlobalAlloc');
+    expect(labels).toContain('_ProcessGetName');
   });
 });

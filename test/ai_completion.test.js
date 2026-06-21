@@ -9,6 +9,7 @@ const path = require('path');
 const DOC1_PATH = path.join(process.cwd(), 'test', 'fixtures', 'doc1.au3');
 const DOC2_PATH = path.join(process.cwd(), 'test', 'fixtures', 'doc2.au3');
 const INCLUDE_PATH = path.join(process.cwd(), 'test', 'fixtures', 'include.au3');
+const LIBRARY_PATH = path.join(process.cwd(), 'test', 'fixtures', 'MyLib.au3');
 const VARIABLE_LINE_INDEX = 4;
 const COMMENT_CHAR_INDEX = 5;
 const FUNCTION_DECLARATION_CHAR_INDEX = 10;
@@ -100,7 +101,10 @@ const mockCompletionItemKind = {
 // Set up mock before importing module
 jest.mock('vscode', () => {
   const mockPath = require('path');
-  const mockGetConfig = jest.fn(() => false);
+  const mockGetConfig = jest.fn(key => {
+    if (key === 'autoInsertInclude') return true;
+    return false;
+  });
   const mockWorkspace = {
     getConfiguration: jest.fn(() => ({
       get: mockGetConfig,
@@ -131,6 +135,11 @@ jest.mock('vscode', () => {
         this.detail = '';
       }
     },
+    MarkdownString: class {
+      constructor(value) {
+        this.value = value;
+      }
+    },
     CompletionItemKind: {
       Function: 3,
       Variable: 6,
@@ -147,6 +156,11 @@ jest.mock('vscode', () => {
         this.character = character;
       }
     },
+    TextEdit: class {
+      static insert(position, newText) {
+        return { position, newText, _isInsert: true };
+      }
+    },
     Uri: MockVSCodeUri,
     languages: {
       registerCompletionItemProvider: jest.fn(() => ({ dispose: jest.fn() })),
@@ -156,31 +170,60 @@ jest.mock('vscode', () => {
 });
 
 // Mock util functions
-const mockFindFilepath = jest.fn(file => {
-  if (file === 'include.au3') return INCLUDE_PATH;
-  return null;
-});
+// NOTE: jest config sets resetMocks: true, which wipes implementations before
+// each test — implementations are (re)applied via applyMockImplementations()
+const mockFindFilepath = jest.fn();
+const mockGetIncludeData = jest.fn();
 
-const mockGetIncludeData = jest.fn((file, _doc) => {
-  if (file === 'include.au3' || file === INCLUDE_PATH) {
-    return { IncludedFunc: {} };
-  }
-  return null;
-});
+const applyMockImplementations = () => {
+  mockFindFilepath.mockImplementation(file => {
+    if (file === 'include.au3') return INCLUDE_PATH;
+    if (file === 'MyLib.au3') return LIBRARY_PATH;
+    return null;
+  });
 
-jest.mock('../src/util', () => ({
+  mockGetIncludeData.mockImplementation(file => {
+    if (file === 'include.au3' || file === INCLUDE_PATH) {
+      return { IncludedFunc: {} };
+    }
+    if (file === LIBRARY_PATH) {
+      return { LibraryFunc: {} };
+    }
+    return null;
+  });
+};
+
+jest.mock('../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
-  functionPattern: /Func\s+(?:volatile\s+)?(\w+)/i,
-  variablePattern: /\$(\w+)/g,
-  includePattern: /#include\s+"([^"]+)"/g,
-  libraryIncludePattern: /#include\s+<([^>]+)>/g,
-  findFilepath: (...args) => mockFindFilepath(...args),
+}));
+
+jest.mock('../src/utils/functionSignature', () => ({
+  buildFunctionSignature: jest.fn(() => ({
+    functionName: '',
+    functionObject: { description: '', documentation: '' },
+  })),
   getIncludeData: (...args) => mockGetIncludeData(...args),
+}));
+
+jest.mock('../src/utils/regexPatterns', () => ({
+  REGEX_PATTERNS: {
+    functionPattern: /Func\s+(?:volatile\s+)?(\w+)/i,
+    variablePattern: /\$(\w+)/g,
+    includePattern: /#include\s+"([^"]+)"/g,
+    libraryIncludePattern: /#include\s+<([^>]+)>/g,
+  },
   setRegExpFlags: (pattern, flags) => new RegExp(pattern.source, flags),
 }));
 
+jest.mock('../src/providers/ai_config', () => ({
+  __esModule: true,
+  default: {
+    findFilepath: (...args) => mockFindFilepath(...args),
+  },
+}));
+
 jest.mock('../src/completions', () => []);
-jest.mock('../src/constants', () => []);
+jest.mock('../src/constants', () => ({ DEFAULT_UDFS: [] }));
 
 describe('ai_completion cache behavior', () => {
   let provideCompletionItems;
@@ -190,12 +233,13 @@ describe('ai_completion cache behavior', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    applyMockImplementations();
 
     // Get vscode mock
     ({ languages, workspace } = require('vscode'));
 
     // Re-import to get fresh module state
-    require('../src/ai_completion');
+    require('../src/providers/ai_completion');
 
     // Extract the provider function
     const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
@@ -286,6 +330,58 @@ describe('ai_completion cache behavior', () => {
     }
   });
 
+  test('caches library include completions per document', async () => {
+    const doc = new MockTextDocument('#include <MyLib.au3>\nLocal $a = 1', DOC1_PATH);
+    const position = new MockPosition(1, 0);
+
+    // First call should parse the library include
+    await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, doc);
+
+    // Second call with same document should use cache
+    mockGetIncludeData.mockClear();
+    const completions = await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).not.toHaveBeenCalled();
+
+    // Cached completions still returned
+    const libraryFuncs = completions.filter(c => c.label === 'LibraryFunc');
+    expect(libraryFuncs.length).toBe(1);
+  });
+
+  test('invalidates library cache when library includes change', async () => {
+    const doc = new MockTextDocument('#include <MyLib.au3>\nLocal $a = 1', DOC1_PATH);
+    const position = new MockPosition(1, 0);
+
+    await provideCompletionItems(doc, position);
+    mockGetIncludeData.mockClear();
+
+    // Same library includes: cache hit
+    await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).not.toHaveBeenCalled();
+
+    // Different library includes: rebuild
+    const modifiedDoc = new MockTextDocument('#include <OtherLib.au3>\nLocal $a = 1', DOC1_PATH);
+    await provideCompletionItems(modifiedDoc, position);
+    expect(mockFindFilepath).toHaveBeenCalledWith('OtherLib.au3');
+  });
+
+  test('cleans up library cache on document close', async () => {
+    const closeListener = workspace.onDidCloseTextDocument.mock.calls[0]?.[0];
+    expect(closeListener).toBeDefined();
+
+    const doc = new MockTextDocument('#include <MyLib.au3>\nLocal $a = 1', DOC1_PATH, 'autoit');
+    const position = new MockPosition(1, 0);
+
+    await provideCompletionItems(doc, position);
+    mockGetIncludeData.mockClear();
+
+    closeListener(doc);
+
+    // Next call should rebuild (cache was cleared)
+    await provideCompletionItems(doc, position);
+    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, doc);
+  });
+
   test('returns correct completion types', async () => {
     const doc = new MockTextDocument(DOC1_CONTENT, DOC1_PATH);
     const position = new MockPosition(VARIABLE_LINE_INDEX, 1); // Position at start of variable line
@@ -323,6 +419,28 @@ describe('ai_completion cache behavior', () => {
     const completions = await provideCompletionItems(doc, position);
     expect(completions).toBeNull();
   });
+
+  test('getLocalFunctionCompletions sets documentation from buildFunctionSignature description', async () => {
+    const { buildFunctionSignature } = require('../src/utils/functionSignature');
+    // mockReturnValueOnce (not mockReturnValue) keeps this override test-local;
+    // the default mock takes over for any subsequent loop iteration
+    buildFunctionSignature.mockReturnValueOnce({
+      functionName: 'DoThing',
+      functionObject: {
+        description: 'Does the thing',
+        documentation: 'Does the thing\rtest.au3',
+      },
+    });
+
+    const doc = new MockTextDocument('Func DoThing()\nEndFunc\nLocal $x = 1', '/test.au3');
+    // Line 2 (Local) avoids the early-exit guard that returns null on Func declaration lines
+    const position = new MockPosition(2, 0);
+
+    const result = await provideCompletionItems(doc, position);
+    const funcItem = result?.find(item => item.label === 'DoThing');
+    expect(funcItem).toBeDefined();
+    expect(funcItem.documentation?.value).toBe('Does the thing');
+  });
 });
 
 describe('arraysMatch utility', () => {
@@ -332,12 +450,13 @@ describe('arraysMatch utility', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    applyMockImplementations();
 
     // Get vscode mock
     ({ languages } = require('vscode'));
 
     // Access internal function through module
-    require('../src/ai_completion');
+    require('../src/providers/ai_completion');
     // Note: arraysMatch is not exported, so we test it indirectly through cache behavior
 
     // Extract the provider function
@@ -363,5 +482,88 @@ describe('arraysMatch utility', () => {
     // Different includes, should rebuild
     provideCompletionItems(doc2, position);
     expect(mockGetIncludeData).toHaveBeenCalled();
+  });
+});
+
+describe('attachIncludeEdits integration', () => {
+  let provideCompletionItems;
+  let languages;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetModules();
+    applyMockImplementations();
+
+    ({ languages } = require('vscode'));
+
+    jest.doMock('../src/completions', () => [
+      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
+      { label: 'MsgBox', kind: 3 },
+    ]);
+
+    require('../src/providers/ai_completion');
+
+    const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
+    if (provider) {
+      ({ provideCompletionItems } = provider);
+    }
+  });
+
+  test('attaches additionalTextEdits for missing include', async () => {
+    const doc = new MockTextDocument('Local $x = 1\nFunc Foo()\nEndFunc', DOC1_PATH);
+    const position = new MockPosition(0, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toHaveLength(1);
+    expect(arrayItem.additionalTextEdits[0].newText).toBe('#include <Array.au3>\n');
+    expect(arrayItem.additionalTextEdits[0].position.line).toBe(0);
+  });
+
+  test('does not attach edit when include already present', async () => {
+    const doc = new MockTextDocument(
+      '#include <Array.au3>\nLocal $x = 1\nFunc Foo()\nEndFunc',
+      DOC1_PATH,
+    );
+    const position = new MockPosition(1, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toBeUndefined();
+  });
+
+  test('inserts after last existing #include line', async () => {
+    const doc = new MockTextDocument(
+      '#include <MsgBoxConstants.au3>\n; comment\n#include <String.au3>\nLocal $x = 1',
+      DOC1_PATH,
+    );
+    const position = new MockPosition(3, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toHaveLength(1);
+    expect(arrayItem.additionalTextEdits[0].position.line).toBe(3);
+  });
+
+  test('respects autoInsertInclude = false config', async () => {
+    const { workspace } = require('vscode');
+    workspace.getConfiguration.mockReturnValue({
+      get: jest.fn(() => false),
+    });
+
+    const doc = new MockTextDocument('Local $x = 1\nFunc Foo()\nEndFunc', DOC1_PATH);
+    const position = new MockPosition(0, 0);
+
+    const completions = await provideCompletionItems(doc, position);
+
+    const arrayItem = completions.find(c => c.label === '_ArrayDisplay');
+    expect(arrayItem).toBeDefined();
+    expect(arrayItem.additionalTextEdits).toBeUndefined();
   });
 });

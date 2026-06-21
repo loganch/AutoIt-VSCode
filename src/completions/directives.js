@@ -1,5 +1,5 @@
 import { CompletionItemKind, SnippetString } from 'vscode';
-import { completionToHover, fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 /** Directives used by AutoIt3Wrapper.exe */
 const wrapperDirectives = [

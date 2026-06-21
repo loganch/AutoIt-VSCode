@@ -2,20 +2,32 @@ jest.mock('vscode', () => ({
   CompletionItemKind: {
     Function: 'function',
   },
+  MarkdownString: class MarkdownString {
+    constructor(value = '') {
+      this.value = value;
+    }
+  },
 }));
 
-jest.mock('../../src/util', () => ({
-  fillCompletions: jest.fn((items, kind, detail, includeFile) =>
-    items.map(item => ({
-      ...item,
+jest.mock('../../src/completionTransforms', () => ({
+  signatureToCompletion: jest.fn((signatures, kind) =>
+    Object.keys(signatures).map(key => ({
+      label: key,
       kind,
-      detail,
-      includeFile,
+      detail: 'Debug UDF',
+      includeFile: 'Debug.au3',
+      documentation: { value: signatures[key].documentation },
     })),
+  ),
+  signatureToHover: jest.fn(signatures =>
+    Object.keys(signatures).reduce((acc, key) => {
+      acc[key.toLowerCase()] = signatures[key].documentation;
+      return acc;
+    }, {}),
   ),
 }));
 
-import functions from '../../src/completions/udf_debug';
+import { completions as functions } from '../../src/signatures/udf_debug';
 
 describe('udf_debug completions', () => {
   it('exports a completion array', () => {

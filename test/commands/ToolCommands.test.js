@@ -37,12 +37,11 @@ jest.mock('fs', () => ({
   existsSync: (...args) => mockExistsSync(...args),
 }));
 
-jest.mock('../../src/util', () => ({
-  findFilepath: (...args) => mockFindFilepath(...args),
+jest.mock('../../src/utils/fsCache', () => ({
   getIncludeText: (...args) => mockGetIncludeText(...args),
 }));
 
-jest.mock('../../src/ai_config', () => ({
+jest.mock('../../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     config: mockConfig,

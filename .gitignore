@@ -6,4 +6,8 @@ dist/
 *.vsix
 .qodo
 .jest-cache
+coverage/
 .kilo
+
+# Claude Code local files (plans, settings)
+.claude/

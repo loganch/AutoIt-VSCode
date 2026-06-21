@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import IncludeResolver from '../../src/utils/IncludeResolver.js';
+import IncludeResolver from '../../src/language/include.js';
 
 // Normalize paths for cross-platform/case-insensitive Windows comparisons
 const norm = p =>
@@ -51,6 +51,15 @@ describe('IncludeResolver', () => {
       expect(includes[0].type).toBe('relative');
       expect(includes[1].type).toBe('library');
       expect(includes[2].type).toBe('relative');
+    });
+
+    it('should detect includes with multiple spaces after #include', () => {
+      const source = '#include  "config.au3"';
+      const resolver = new IncludeResolver('/workspace');
+      const includes = resolver.parseIncludes(source, '/workspace/main.au3');
+
+      expect(includes).toHaveLength(1);
+      expect(includes[0].path).toBe('config.au3');
     });
 
     it('should ignore commented includes', () => {

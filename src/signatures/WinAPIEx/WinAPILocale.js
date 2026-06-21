@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { signatureToCompletion, signatureToHover, br, opt } from '../../util';
+import { signatureToCompletion, signatureToHover, br, opt } from '../../completionTransforms';
 
 const include = '(Requires: `#include <WinAPILocale.au3>`)';
 

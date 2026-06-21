@@ -1,4 +1,4 @@
-const { window, Position } = require('vscode');
+import { window, Position } from 'vscode';
 
 /**
  * Configuration for debug code templates.

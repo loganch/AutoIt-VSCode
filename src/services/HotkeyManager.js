@@ -1,6 +1,5 @@
-const fs = require('fs').promises;
-const fsSync = require('fs');
-const path = require('path');
+import fsSync, { promises as fs } from 'fs';
+import path from 'path';
 
 /**
  * Service for managing AutoIt3Wrapper hotkey conflicts with comprehensive functionality
@@ -233,4 +232,4 @@ class HotkeyManager {
   }
 }
 
-module.exports = HotkeyManager;
+export default HotkeyManager;

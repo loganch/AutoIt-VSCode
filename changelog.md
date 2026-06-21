@@ -7,12 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Auto-insert #include on completion**: when accepting UDF or constant completions, the extension now automatically inserts the required `#include` directive at the top of your script (9750ce5, 65f73fc, f01bf17)
+- **Constants hover support**: expanded hover documentation to all constant modules for better inline documentation access (bd81904)
+- **Scope analysis utilities**: added utility functions for range handling and improved scope classification (1274bfd)
+- **Find All References**: Shift+F12 now lists references to user-defined functions and variables. Functions and global variables are searched workspace-wide; local variables (declared with `Local`/`Static`/`Dim` or as function parameters) are scoped to their enclosing function. Matching is case-insensitive and skips occurrences inside comments and strings, and honors the "include declaration" toggle.
+- **Ternary operator scopes**: syntax highlighting now recognizes ternary operator tokens for improved colorization (#251)
+
 ### Fixed
 
+- **Code review findings**: addressed final code review findings including linting issues, whitespace regex patterns, and test guard improvements (451e26f)
+- **Empty Description in UDF headers**: hover/signature documentation no longer leaks the following `; Syntax ...` comment line when a standard UDF header's `; Description ...:` line is left blank (9099dba)
+- **Find All References scope**: ensure current document is included in reference search scope (64914bb)
+- **Shadowed variable references**: drop the in-scope declaration when local variables shadow outer scope declarations (6450bb2)
+- **Hover description regex**: corrected line-ending pattern in the function-description RegExp so hover docs display correctly on both CRLF and LF files (#248) (c96895c)
+- **Symbol outline hierarchy**: fixed nesting of symbols under innermost ancestor range to restore region→function and nested-region nesting in outline view (#245) (b88a849)
+- **Au3Check result caching**: cache Au3Check results and invalidate diagnostics when configuration changes (cad393e)
+- **Completion error handling**: improved error handling in getLibraryFunctions for include data retrieval (eac3bc4)
+- **Signature provider robustness**: guard include path handling in signature provider and hardened include parsing (0e76789, 10dc0c8)
 - Fixed changelog comparison link for version 1.5.0 release (9cfd868)
 
 ### Changed
 
+- **Code organization**: reorganized utility functions and constants for better structure and maintainability (b7ce257)
+- **Code review cleanup**: addressed code review findings from brooks-lint audit, including function and module renaming (55b9e3d)
+- **Function declaration colorations**: TextMate grammar now colorizes additional token types inside function declarations: keywords/booleans, numbers, assignments, brackets, commas/dots/concatenation operators, and logical operators (#246) (042f18d–e786c7d)
+- **Activation performance**: defer completion and hover metadata loading to lazy initialization on first use, reducing activation work (adccd73)
+- **Workspace symbol performance**: implement debounce handling and caching for provideWorkspaceSymbols to improve responsiveness on large projects (40b22aa)
+- **Go to Definition performance**: F12 now resolves through a warm, incrementally maintained symbol index instead of rescanning the include graph on every press, fixing multi-second delays on large workspaces (#241). Definitions remain scoped to files reachable via `#include`. The index is warmed in the background at activation and self-heals on cold lookups.
+- **Completion caching**: cache library include completions per document to improve performance (76ff99f)
+- **Signature caching**: cache document signatures for faster signature help (10dc0c8)
 - Added `.kilo`, `.jest-cache`, and `package.json.backup` to ignore files (#244) (79f7ae9)
 
 ## [1.5.0] - 2026-04-07

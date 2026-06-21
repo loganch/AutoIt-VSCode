@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { fillCompletions } from '../util';
+import { completionToHover, fillCompletions } from '../completionTransforms';
 
 const style = 'Style Constant';
 const message = 'Message Constant';
@@ -404,4 +404,7 @@ const items = [
   },
 ];
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'EditConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'EditConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

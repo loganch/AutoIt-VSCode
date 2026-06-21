@@ -4,7 +4,9 @@ jest.mock('vscode', () => ({
   },
 }));
 
-const ProcessManager = require('../../src/services/ProcessManager');
+const ProcessManager = require('../../src/services/ProcessManager').default;
+
+const FINISHED_TIMEOUT_SECONDS = 5;
 
 describe('ProcessManager', () => {
   let manager;
@@ -18,7 +20,7 @@ describe('ProcessManager', () => {
     };
     mockGetActiveFileName = jest.fn(() => 'C:\\scripts\\active.au3');
     manager = new ProcessManager(
-      { multiOutputFinishedTimeout: 5, multiOutputMaxFinished: 3 },
+      { multiOutputFinishedTimeout: FINISHED_TIMEOUT_SECONDS, multiOutputMaxFinished: 3 },
       mockOutputChannel,
       mockGetActiveFileName,
       'TestOutput',
@@ -31,7 +33,7 @@ describe('ProcessManager', () => {
     });
 
     it('stores config, outputChannel, outputName', () => {
-      expect(manager.config.multiOutputFinishedTimeout).toBe(5);
+      expect(manager.config.multiOutputFinishedTimeout).toBe(FINISHED_TIMEOUT_SECONDS);
       expect(manager.outputChannel).toBe(mockOutputChannel);
       expect(manager.outputName).toBe('TestOutput');
     });

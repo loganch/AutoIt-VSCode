@@ -1,5 +1,5 @@
 import { CompletionItemKind, SnippetString } from 'vscode';
-import { signatureToCompletion, signatureToHover } from '../util';
+import { signatureToCompletion, signatureToHover } from '../completionTransforms';
 
 const signatures = {
   And: {
@@ -215,5 +215,6 @@ const signatures = {
 
 const hovers = signatureToHover(signatures);
 const completions = signatureToCompletion(signatures, CompletionItemKind.Keyword, 'Keyword');
+const AUTOIT_KEYWORDS = new Set(Object.keys(signatures).map(k => k.toLowerCase()));
 
-export { signatures as default, hovers, completions };
+export { signatures as default, hovers, completions, AUTOIT_KEYWORDS };

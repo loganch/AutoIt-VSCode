@@ -1,4 +1,4 @@
-import VariablePatterns from '../../src/utils/VariablePatterns.js';
+import { VariablePatterns } from '../../src/language/variable.js';
 
 describe('VariablePatterns', () => {
   let patterns;

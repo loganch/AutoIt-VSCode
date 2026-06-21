@@ -20,6 +20,14 @@ module.exports = {
   Uri: {
     file: p => ({ fsPath: p, toString: () => p }),
   },
+  SymbolKind: {
+    Function: 11,
+    Namespace: 2,
+    Constant: 13,
+    Enum: 9,
+    Variable: 12,
+    Key: 19,
+  },
   workspace: {
     getConfiguration: jest.fn(),
     findFiles: jest.fn(),

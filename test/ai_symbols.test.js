@@ -13,11 +13,32 @@ const EXPECTED_MULTIPLE_MAP_COUNT = 3;
 // Mock VSCode classes
 class MockUri {
   constructor(fsPath) {
-    this.fsPath = fsPath;
+    const normalized = path.normalize(fsPath);
+    this.scheme = 'file';
+    this.authority = '';
+    this.path = normalized;
+    this.query = '';
+    this.fragment = '';
+    this.fsPath = normalized;
   }
 
   toString() {
     return this.fsPath;
+  }
+
+  with(change = {}) {
+    return new MockUri(change.fsPath || change.path || this.fsPath);
+  }
+
+  toJSON() {
+    return {
+      scheme: this.scheme,
+      authority: this.authority,
+      path: this.path,
+      query: this.query,
+      fragment: this.fragment,
+      fsPath: this.fsPath,
+    };
   }
 
   static file(p) {
@@ -33,9 +54,32 @@ class MockPosition {
 }
 
 class MockRange {
-  constructor(startLine, startChar, endLine, endChar) {
-    this.start = new MockPosition(startLine, startChar);
+  constructor(startOrLine, startOrChar, endLine, endChar) {
+    if (
+      typeof startOrLine === 'object' &&
+      startOrLine !== null &&
+      typeof startOrChar === 'object' &&
+      startOrChar !== null
+    ) {
+      this.start = startOrLine;
+      this.end = startOrChar;
+      return;
+    }
+
+    this.start = new MockPosition(startOrLine, startOrChar);
     this.end = new MockPosition(endLine, endChar);
+  }
+
+  contains(otherRange) {
+    const startsBeforeOrAt =
+      this.start.line < otherRange.start.line ||
+      (this.start.line === otherRange.start.line &&
+        this.start.character <= otherRange.start.character);
+    const endsAfterOrAt =
+      this.end.line > otherRange.end.line ||
+      (this.end.line === otherRange.end.line && this.end.character >= otherRange.end.character);
+
+    return startsBeforeOrAt && endsAfterOrAt;
   }
 }
 
@@ -44,8 +88,10 @@ class MockTextLine {
     this.text = text;
     this.lineNumber = lineNumber;
     this.range = new MockRange(lineNumber, 0, lineNumber, text.length);
+    this.rangeIncludingLineBreak = new MockRange(lineNumber, 0, lineNumber, text.length + 1);
     const firstNonWS = text.search(/\S/);
     this.firstNonWhitespaceCharacterIndex = firstNonWS === -1 ? 0 : firstNonWS;
+    this.isEmptyOrWhitespace = firstNonWS === -1;
   }
 }
 
@@ -53,7 +99,14 @@ class MockTextDocument {
   constructor(text, filePath, languageId = 'autoit') {
     this._text = text;
     this.uri = MockUri.file(filePath);
+    this.fileName = filePath;
+    this.isUntitled = false;
     this.languageId = languageId;
+    this.version = 1;
+    this.isDirty = false;
+    this.isClosed = false;
+    this.encoding = 'utf8';
+    this.eol = 1;
     this._lines = text.split(/\r?\n/);
   }
 
@@ -86,6 +139,22 @@ class MockTextDocument {
     }
 
     return new MockPosition(line, remaining);
+  }
+
+  validateRange(range) {
+    return range;
+  }
+
+  validatePosition(position) {
+    return position;
+  }
+
+  getWordRangeAtPosition() {
+    return undefined;
+  }
+
+  save() {
+    return Promise.resolve(true);
   }
 
   get lineCount() {
@@ -197,7 +266,7 @@ const mockVSCode = {
 jest.mock('vscode', () => mockVSCode, { virtual: true });
 
 // Import after mocking
-const { provideDocumentSymbols } = require('../src/ai_symbols');
+const { provideDocumentSymbols } = require('../src/providers/ai_symbols');
 
 describe('Map Symbol Generation', () => {
   let originalGetConfiguration;
@@ -431,6 +500,69 @@ $mData.key = "value"`;
     });
   });
 
+  describe('Outline hierarchy (range-based nesting)', () => {
+    it('should nest functions and nested regions inside their containing region', async () => {
+      // Reproduction from issue #245
+      const source = `#Region A
+Func _InRegion_A()
+EndFunc
+#Region B
+Func _InRegion_B()
+EndFunc
+#EndRegion
+#EndRegion`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      // Region A must be a top-level symbol
+      const regionA = symbols.find(s => s.kind === SymbolKind.Namespace && s.name === 'A');
+      expect(regionA).toBeDefined();
+
+      // Region A contains function _InRegion_A and nested region B
+      const childNames = regionA.children.map(c => c.name);
+      expect(childNames).toContain('_InRegion_A');
+      expect(childNames).toContain('B');
+
+      // Nested region B contains function _InRegion_B
+      const regionB = regionA.children.find(c => c.name === 'B');
+      expect(regionB).toBeDefined();
+      expect(regionB.children.map(c => c.name)).toContain('_InRegion_B');
+
+      // The nested region B should not also appear at the top level
+      expect(symbols.some(s => s.name === 'B')).toBe(false);
+    });
+
+    it('should keep multiple variables declared on one line as siblings', async () => {
+      const source = `Local $a = 1, $b = 2`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      const aSymbol = symbols.find(s => s.name === '$a');
+      const bSymbol = symbols.find(s => s.name === '$b');
+      expect(aSymbol).toBeDefined();
+      expect(bSymbol).toBeDefined();
+      // $b must not become a child of $a (equal line ranges are siblings)
+      expect(aSymbol.children.some(c => c.name === '$b')).toBe(false);
+    });
+
+    it('should nest variables inside their containing function', async () => {
+      const source = `Func TestFunc()
+    Local $insideFunc = 1
+EndFunc`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      const funcSymbol = symbols.find(s => s.kind === SymbolKind.Function);
+      expect(funcSymbol).toBeDefined();
+      expect(funcSymbol.children.map(c => c.name)).toContain('$insideFunc');
+      // Variable must not leak to top level
+      expect(symbols.some(s => s.name === '$insideFunc')).toBe(false);
+    });
+  });
+
   describe('Configuration', () => {
     it('should not show Map keys when Map intelligence is disabled', async () => {
       // Override configuration for this test only
@@ -453,6 +585,61 @@ $mUser.name = "John"`;
       expect(Array.isArray(symbols)).toBe(true);
 
       // Configuration will be restored by afterEach
+    });
+
+    it('should hide variable symbols when showVariablesInGoToSymbol is false', async () => {
+      // @ts-ignore - test override needs a section-aware mock signature.
+      mockVSCode.workspace.getConfiguration = jest.fn(section => ({
+        get: jest.fn((key, defaultValue) => {
+          if (section === 'autoit.maps' && key === 'enableIntelligence') return false;
+          if (key === 'showVariablesInGoToSymbol') return false;
+          if (key === 'showRegionsInGoToSymbol') return true;
+          if (key === 'symbolMaxLines') return SYMBOL_MAX_LINES;
+          return defaultValue;
+        }),
+      }));
+
+      const source = `Local $topLevel = 1
+Func TestFunc()
+    Local $insideFunc = 2
+EndFunc`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      const variableSymbols = symbols.filter(s => s.kind === SymbolKind.Variable);
+      expect(variableSymbols).toHaveLength(0);
+
+      const funcSymbol = symbols.find(s => s.kind === SymbolKind.Function);
+      expect(funcSymbol).toBeDefined();
+    });
+
+    it('should hide region symbols when showRegionsInGoToSymbol is false', async () => {
+      // @ts-ignore - test override needs a section-aware mock signature.
+      mockVSCode.workspace.getConfiguration = jest.fn(section => ({
+        get: jest.fn((key, defaultValue) => {
+          if (section === 'autoit.maps' && key === 'enableIntelligence') return false;
+          if (key === 'showVariablesInGoToSymbol') return true;
+          if (key === 'showRegionsInGoToSymbol') return false;
+          if (key === 'symbolMaxLines') return SYMBOL_MAX_LINES;
+          return defaultValue;
+        }),
+      }));
+
+      const source = `#Region Test Region
+    Func TestFunc()
+    EndFunc
+    #EndRegion`;
+
+      const doc = new MockTextDocument(source, path.join(process.cwd(), 'test.au3'));
+      const symbols = await provideDocumentSymbols(doc);
+
+      const regionSymbols = symbols.filter(s => s.kind === SymbolKind.Namespace);
+      expect(regionSymbols).toHaveLength(0);
+
+      const functionSymbols = symbols.filter(s => s.kind === SymbolKind.Function);
+      expect(functionSymbols).toHaveLength(1);
+      expect(functionSymbols[0].name).toBe('TestFunc');
     });
   });
 });

@@ -1,5 +1,10 @@
 import { CompletionItemKind } from 'vscode';
-import { descriptionHeader, fillCompletions, setDetail } from '../util';
+import {
+  completionToHover,
+  descriptionHeader,
+  fillCompletions,
+  setDetail,
+} from '../completionTransforms';
 
 let items = [];
 
@@ -493,4 +498,7 @@ items = items.concat(
   WdBreakType,
 );
 
-export default fillCompletions(items, CompletionItemKind.Constant, '', 'WordConstants.au3');
+const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'WordConstants.au3');
+const hovers = completionToHover(completions);
+
+export { completions as default, hovers };

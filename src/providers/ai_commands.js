@@ -1,0 +1,194 @@
+/**
+ * @fileoverview Main commands module for AutoIt VSCode extension
+ * @module ai_commands
+ */
+
+import { window } from 'vscode';
+import conf from './ai_config';
+import { commandsList as _commandsList, commandsPrefix } from '../commandsList';
+
+// getActiveDocumentFileName feeds the ProcessManager's output-name resolution.
+// Command id -> handler wiring lives in commandRegistry.js (see F6).
+import * as UtilityCommands from '../commands/UtilityCommands';
+import packageJson from '../../package.json';
+
+const { config } = conf;
+
+/**
+ * Main facade class for AutoIt VSCode extension commands.
+ * Provides dependency injection, service orchestration, and unified command interface.
+ */
+class CommandsFacade {
+  /**
+   * Creates a new CommandsFacade instance with all services initialized.
+   */
+  constructor() {
+    this.config = config;
+    this.isInitialized = false;
+    this.services = {};
+    this.keybindings = null;
+  }
+
+  /**
+   * Initializes all services and sets up dependencies.
+   * This method should be called before using any commands.
+   * @returns {Promise<void>}
+   */
+  async initialize() {
+    if (this.isInitialized) {
+      return;
+    }
+
+    try {
+      // Dynamically import all services
+      const [
+        { default: KeybindingService },
+        { default: OutputChannelManager },
+        { default: ProcessManager },
+        { default: HotkeyManager },
+        { default: ProcessRunner },
+      ] = await Promise.all([
+        import('./services/KeybindingService.js'),
+        import('./services/OutputChannelManager.js'),
+        import('./services/ProcessManager.js'),
+        import('./services/HotkeyManager.js'),
+        import('./services/ProcessRunner.js'),
+      ]);
+
+      // Initialize keybinding service first
+      this.services.keybindingService = new KeybindingService({
+        commandsList: _commandsList,
+        commandsPrefix,
+        keybindingsDefaultRaw: packageJson.contributes.keybindings,
+      });
+      this.keybindings = await this.services.keybindingService.initialize();
+
+      // Create output channel
+      const outputChannel = OutputChannelManager.createGlobalOutputChannel(
+        'AutoIt (global)',
+        'vscode-autoit-output',
+      );
+
+      // Store global output channel as singleton
+      this.services.globalOutputChannel = outputChannel;
+
+      // Initialize process manager
+      this.services.processManager = new ProcessManager(
+        this.config,
+        outputChannel,
+        UtilityCommands.getActiveDocumentFileName,
+        `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
+      );
+
+      // Initialize hotkey manager
+      this.services.hotkeyManager = new HotkeyManager(this.config);
+
+      // Initialize output channel manager
+      this.services.outputChannelManager = new OutputChannelManager(
+        this.services.globalOutputChannel,
+        this.config,
+        this.keybindings,
+        this.services.hotkeyManager,
+        this.services.processManager,
+      );
+
+      // Initialize process runner with all dependencies
+      this.services.processRunner = new ProcessRunner(
+        this.config,
+        this.services.processManager,
+        this.services.outputChannelManager,
+        this.services.hotkeyManager,
+        UtilityCommands.getActiveDocumentFileName,
+        this.services.globalOutputChannel,
+      );
+
+      // Set up event listeners
+      this._setupEventListeners(OutputChannelManager);
+
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('Failed to initialize CommandsFacade:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sets up event listeners for service coordination.
+   * @private
+   */
+  _setupEventListeners(OutputChannelManager) {
+    try {
+      // Listen for config changes to update services
+      conf.addListener(() => {
+        if (this.services.processManager) {
+          this.services.processManager.cleanup();
+        }
+      });
+
+      // Listen for visible text editor changes to trim output
+      window.onDidChangeVisibleTextEditors(() => {
+        OutputChannelManager.trimOutputLines(
+          this.services.processManager,
+          this.services.globalOutputChannel,
+        );
+      });
+    } catch (error) {
+      console.error('Error setting up event listeners:', error);
+    }
+  }
+
+  /**
+   * Disposes of all services and cleans up resources.
+   * This method should be called when the extension is deactivated.
+   * @returns {Promise<void>}
+   */
+  async dispose() {
+    try {
+      if (this.services.hotkeyManager) {
+        await this.services.hotkeyManager.cleanup();
+      }
+
+      if (this.services.keybindingService) {
+        this.services.keybindingService.dispose();
+      }
+
+      if (this.services.processManager) {
+        this.services.processManager.clearFinishedRunners();
+      }
+
+      this.services = {};
+      this.keybindings = null;
+      this.isInitialized = false;
+    } catch (error) {
+      console.error('Error during CommandsFacade disposal:', error);
+    }
+  }
+
+  /**
+   * Gets the keybindings map.
+   * @returns {Object|null} Keybindings map or null if not initialized
+   */
+  getKeybindings() {
+    return this.keybindings;
+  }
+
+  /**
+   * Gets the process manager instance.
+   * @returns {Object|null} Process manager or null if not initialized
+   */
+  getProcessManager() {
+    return this.services.processManager || null;
+  }
+}
+
+// Create singleton instance
+const commandsFacade = new CommandsFacade();
+
+// Export facade management functions
+export const initializeCommands = () => commandsFacade.initialize();
+export const disposeCommands = () => commandsFacade.dispose();
+export const getCommandsFacade = () => commandsFacade;
+
+// Export service accessors for advanced usage
+export const getProcessManager = () => commandsFacade.getProcessManager();
+export const getKeybindings = () => commandsFacade.getKeybindings();

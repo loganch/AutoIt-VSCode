@@ -1,0 +1,1002 @@
+
+> autoit@1.5.0 test
+> jest
+
+jest-haste-map: duplicate manual mock found: vscode
+  The following files share their name; please delete one of them:
+    * <rootDir>\test\__mocks__\vscode.js
+    * <rootDir>\.claude\worktrees\agent-a95cf3b72db56b341\test\__mocks__\vscode.js
+
+PASS test/extension.diagnostics.test.js
+  ● Console
+
+    console.log
+      AutoIt is now active!
+
+      at log (src/extension.js:477:11)
+
+    console.error
+      AutoIt: symbol index warm-up failed TypeError: _vscode.workspace.findFiles is not a function
+          at findFiles (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:20:44)
+          at builder (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:79:17)
+          at processTicksAndRejections (node:internal/process/task_queues:105:5)
+
+      84 |       warmState = 'cold';
+      85 |       warmPromise = null;
+    > 86 |       console.error('AutoIt: symbol index warm-up failed', err);
+         |               ^
+      87 |     });
+      88 |   return warmPromise;
+      89 | }
+
+      at error (src/services/symbolWarmup.js:86:15)
+
+    console.log
+      AutoIt is now active!
+
+      at log (src/extension.js:477:11)
+
+    console.error
+      AutoIt: symbol index warm-up failed TypeError: _vscode.workspace.findFiles is not a function
+          at findFiles (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:20:44)
+          at builder (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:79:17)
+
+      84 |       warmState = 'cold';
+      85 |       warmPromise = null;
+    > 86 |       console.error('AutoIt: symbol index warm-up failed', err);
+         |               ^
+      87 |     });
+      88 |   return warmPromise;
+      89 | }
+
+      at error (src/services/symbolWarmup.js:86:15)
+
+    console.log
+      AutoIt is now active!
+
+      at log (src/extension.js:477:11)
+
+    console.error
+      AutoIt: symbol index warm-up failed TypeError: _vscode.workspace.findFiles is not a function
+          at findFiles (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:20:44)
+          at builder (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:79:17)
+
+      84 |       warmState = 'cold';
+      85 |       warmPromise = null;
+    > 86 |       console.error('AutoIt: symbol index warm-up failed', err);
+         |               ^
+      87 |     });
+      88 |   return warmPromise;
+      89 | }
+
+      at error (src/services/symbolWarmup.js:86:15)
+
+    console.log
+      AutoIt is now active!
+
+      at log (src/extension.js:477:11)
+
+    console.error
+      AutoIt: symbol index warm-up failed TypeError: _vscode.workspace.findFiles is not a function
+          at findFiles (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:20:44)
+          at builder (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:79:17)
+
+      84 |       warmState = 'cold';
+      85 |       warmPromise = null;
+    > 86 |       console.error('AutoIt: symbol index warm-up failed', err);
+         |               ^
+      87 |     });
+      88 |   return warmPromise;
+      89 | }
+
+      at error (src/services/symbolWarmup.js:86:15)
+
+    console.log
+      AutoIt is now active!
+
+      at log (src/extension.js:477:11)
+
+    console.error
+      AutoIt: symbol index warm-up failed TypeError: _vscode.workspace.findFiles is not a function
+          at findFiles (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:20:44)
+          at builder (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:79:17)
+
+      84 |       warmState = 'cold';
+      85 |       warmPromise = null;
+    > 86 |       console.error('AutoIt: symbol index warm-up failed', err);
+         |               ^
+      87 |     });
+      88 |   return warmPromise;
+      89 | }
+
+      at error (src/services/symbolWarmup.js:86:15)
+
+PASS test/scripts/eslint-config.test.js
+PASS test/completions/generalModules.test.js
+PASS test/ai_symbols.test.js
+  ● Console
+
+    console.debug
+      [autoit] Failed to update tokenColorCustomizations defaults. TypeError: cConfig.update is not a function
+          at Object.update (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:65:15)
+          at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+          at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+          at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+          at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+          at Object.require (C:\dev\AutoIt-VSCode\src\utils\includeResolution.js:2:1)
+          at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+          at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+          at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+          at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+          at Object.require (C:\dev\AutoIt-VSCode\src\util.js:53:1)
+          at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+          at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+          at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+          at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+          at Object.require (C:\dev\AutoIt-VSCode\src\providers\ai_symbols.js:11:1)
+          at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+          at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+          at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+          at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+          at Object.require (C:\dev\AutoIt-VSCode\test\ai_symbols.test.js:269:36)
+          at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+          at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+          at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:77:13)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      at Object.debug (src/providers/ai_config.js:70:11)
+
+PASS test/ai_workspaceSymbols.debounce.test.js
+  ● Console
+
+    console.error
+      AutoIt: symbol index warm-up failed TypeError: Cannot read properties of undefined (reading 'get')
+          at get (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:17:27)
+          at builder (C:\dev\AutoIt-VSCode\src\services\symbolWarmup.js:79:17)
+          at runNextTicks (node:internal/process/task_queues:65:5)
+          at listOnTimeout (node:internal/timers:549:9)
+          at processTimers (node:internal/timers:523:7)
+          at Timeout._onTimeout (C:\dev\AutoIt-VSCode\src\providers\ai_workspaceSymbols.js:63:9)
+
+      84 |       warmState = 'cold';
+      85 |       warmPromise = null;
+    > 86 |       console.error('AutoIt: symbol index warm-up failed', err);
+         |               ^
+      87 |     });
+      88 |   return warmPromise;
+      89 | }
+
+      at error (src/services/symbolWarmup.js:86:15)
+      at Timeout._onTimeout (src/providers/ai_workspaceSymbols.js:63:9)
+
+PASS test/ai_workspaceSymbols.test.js
+PASS test/ai_completion.test.js
+PASS test/ai_definition.test.js
+  ● Console
+
+    console.log
+      ✅ All expected symbols found in fixtures
+
+      at log (test/ai_definition.test.js:497:13)
+
+    console.log
+      📁 Cross-platform path test: test\fixtures\main.au3 (platform: win32)
+
+      at log (test/ai_definition.test.js:517:11)
+
+    console.log
+      ✅ All expected symbols found in fixtures
+
+      at log (test/ai_definition.test.js:497:13)
+
+    console.log
+      📁 Cross-platform path test: test\fixtures\main.au3 (platform: win32)
+
+      at log (test/ai_definition.test.js:517:11)
+
+    console.log
+      ✅ All expected symbols found in fixtures
+
+      at log (test/ai_definition.test.js:497:13)
+
+    console.log
+      📁 Cross-platform path test: test\fixtures\main.au3 (platform: win32)
+
+      at log (test/ai_definition.test.js:517:11)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:655:40)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:655:40)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:660:39)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:660:39)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:699:37)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:699:37)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:715:45)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:715:45)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:763:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:763:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:783:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:783:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:800:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:800:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:816:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:816:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:861:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:861:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:882:34)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:882:34)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:965:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:965:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:1109:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:1109:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:1143:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:1143:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:1175:36)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:1175:36)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:1221:38)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:1221:38)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:1259:38)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:1259:38)
+
+    console.error
+      AutoIt: definition index fast path failed TypeError: Cannot read properties of undefined (reading 'length')
+          at Object.length [as provideDefinition] (C:\dev\AutoIt-VSCode\src\providers\ai_definition.js:172:24)
+          at Object.provideDefinition (C:\dev\AutoIt-VSCode\test\ai_definition.test.js:1285:37)
+          at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+          at new Promise (<anonymous>)
+          at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+          at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+          at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+          at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+          at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+          at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+          at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+          at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+          at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+
+      196 |         // Unexpected: the in-memory fast path should not throw. Log and fall through
+      197 |         // to the include-graph scan so F12 still works.
+    > 198 |         console.error('AutoIt: definition index fast path failed', err);
+          |                 ^
+      199 |       }
+      200 |
+      201 |       // Search include files
+
+      at Object.error [as provideDefinition] (src/providers/ai_definition.js:198:17)
+      at Object.provideDefinition (test/ai_definition.test.js:1285:37)
+
+PASS test/signatures/signatureModules.test.js
+PASS test/signatures/index.test.js
+PASS test/hovers/index.test.js
+PASS test/ai_references.test.js
+PASS test/commands/UtilityCommands.test.js
+PASS test/services/OutputChannelManager.test.js
+PASS test/completions/constantsModules.test.js
+PASS test/ai_config.test.js
+  ● Console
+
+    console.debug
+      [autoit] Registry InstallDir lookup failed; using default install paths. {
+        error: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:24:31)
+            at getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:271:39)
+            at Object.getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:412:1)
+            at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+            at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+            at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+            at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+            at Object.require (C:\dev\AutoIt-VSCode\test\ai_config.test.js:52:12)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusHook (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:281:40)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:95:7)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34),
+        error32: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:35:35)
+            at getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:271:39)
+            at Object.getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:412:1)
+            at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+            at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+            at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+            at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+            at Object.require (C:\dev\AutoIt-VSCode\test\ai_config.test.js:52:12)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusHook (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:281:40)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:95:7)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+      }
+
+      at debug (src/providers/autoItInstallDetector.js:45:15)
+
+    console.debug
+      [autoit] Registry InstallDir lookup failed; using default install paths. {
+        error: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:24:31)
+            at getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:302:46)
+            at Object.getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:412:1)
+            at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+            at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+            at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+            at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+            at Object.require (C:\dev\AutoIt-VSCode\test\ai_config.test.js:52:12)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusHook (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:281:40)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:95:7)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34),
+        error32: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:35:35)
+            at getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:302:46)
+            at Object.getPaths (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:412:1)
+            at Runtime._execModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1439:24)
+            at Runtime._loadModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1022:12)
+            at Runtime.requireModule (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:882:12)
+            at Runtime.requireModuleOrMock (C:\dev\AutoIt-VSCode\node_modules\jest-runtime\build\index.js:1048:21)
+            at Object.require (C:\dev\AutoIt-VSCode\test\ai_config.test.js:52:12)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusHook (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:281:40)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:95:7)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+      }
+
+      at debug (src/providers/autoItInstallDetector.js:45:15)
+
+    console.debug
+      [autoit] Registry InstallDir lookup failed; using default install paths. {
+        error: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:24:31)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:207:42)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\test\ai_config.test.js:97:27)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+            at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34),
+        error32: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:35:35)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:207:42)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\test\ai_config.test.js:97:27)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+            at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+      }
+
+      at debug (src/providers/autoItInstallDetector.js:45:15)
+
+    console.debug
+      [autoit] Registry InstallDir lookup failed; using default install paths. {
+        error: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:24:31)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:207:42)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\test\ai_config.test.js:108:27)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+            at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34),
+        error32: TypeError: (0 , _child_process.execSync) is not a function
+            at detectAutoItPaths (C:\dev\AutoIt-VSCode\src\providers\autoItInstallDetector.js:35:35)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\src\providers\ai_config.js:207:42)
+            at Object.findFilepath (C:\dev\AutoIt-VSCode\test\ai_config.test.js:108:27)
+            at Promise.then.completed (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:298:28)
+            at new Promise (<anonymous>)
+            at callAsyncCircusFn (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\utils.js:231:10)
+            at _callCircusTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:316:40)
+            at _runTest (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:252:3)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:126:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at _runTestsForDescribeBlock (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:121:9)
+            at run (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\run.js:71:3)
+            at runAndTransformResultsToJestFormat (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapterInit.js:122:21)
+            at jestAdapter (C:\dev\AutoIt-VSCode\node_modules\jest-circus\build\legacy-code-todo-rewrite\jestAdapter.js:79:19)
+            at runTestInternal (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:367:16)
+            at runTest (C:\dev\AutoIt-VSCode\node_modules\jest-runner\build\runTest.js:444:34)
+      }
+
+      at debug (src/providers/autoItInstallDetector.js:45:15)
+
+PASS test/constants.test.js
+PASS test/services/symbolIndex.test.js
+PASS test/services/MapTrackingService.test.js
+PASS test/parsers/MapParser.test.js
+PASS test/parsers/VariableParser.test.js
+PASS test/security/parameterValidation.test.js
+PASS test/utils/utilSignatureRegexSafety.test.js
+PASS test/command_constants.test.js
+PASS test/ai_signature.test.js
+PASS test/utils/IncludeResolver.test.js
+PASS test/services/ProcessRunner.test.js
+PASS test/services/HotkeyManager.test.js
+  ● Console
+
+    console.log
+      HotkeyManager: Disabling hotkeys for process 7. Active processes: 1
+
+      at HotkeyManager.log [as disable] (src/services/HotkeyManager.js:137:15)
+
+    console.log
+      HotkeyManager: Modified AutoIt3Wrapper.ini at C:\AutoIt\AutoIt3Wrapper.ini
+
+      at HotkeyManager.log [as disable] (src/services/HotkeyManager.js:145:19)
+
+    console.log
+      HotkeyManager: Disabling hotkeys for process 1. Active processes: 1
+
+      at HotkeyManager.log [as disable] (src/services/HotkeyManager.js:137:15)
+
+    console.log
+      HotkeyManager: Modified AutoIt3Wrapper.ini at C:\AutoIt\AutoIt3Wrapper.ini
+
+      at HotkeyManager.log [as disable] (src/services/HotkeyManager.js:145:19)
+
+    console.log
+      HotkeyManager: Disabling hotkeys for process 2. Active processes: 2
+
+      at HotkeyManager.log [as disable] (src/services/HotkeyManager.js:137:15)
+
+    console.log
+      HotkeyManager: Disabling hotkeys for process 3. Active processes: 1
+
+      at HotkeyManager.log [as disable] (src/services/HotkeyManager.js:137:15)
+
+    console.log
+      HotkeyManager: Modified AutoIt3Wrapper.ini at C:\AutoIt\AutoIt3Wrapper.ini
+
+      at HotkeyManager.log [as disable] (src/services/HotkeyManager.js:145:19)
+
+    console.log
+      HotkeyManager: Resetting hotkeys for process 3. Active processes: 1
+
+      at HotkeyManager.log [as reset] (src/services/HotkeyManager.js:176:15)
+
+    console.log
+      HotkeyManager: Restored AutoIt3Wrapper.ini at C:\AutoIt\AutoIt3Wrapper.ini
+
+      at HotkeyManager.log [as reset] (src/services/HotkeyManager.js:194:19)
+
+    console.log
+      HotkeyManager: Resetting hotkeys for process all. Active processes: 0
+
+      at HotkeyManager.log [as reset] (src/services/HotkeyManager.js:176:15)
+
+    console.log
+      HotkeyManager: Removed AutoIt3Wrapper.ini at C:\AutoIt\AutoIt3Wrapper.ini
+
+      at HotkeyManager.log [as reset] (src/services/HotkeyManager.js:191:19)
+
+PASS test/services/ProcessManager.test.js
+PASS test/services/KeybindingService.test.js
+PASS test/commands/ScriptCommands.test.js
+PASS test/commandsList.test.js
+PASS test/services/symbolWarmup.test.js
+PASS test/scripts/package-all.test.js
+PASS test/ai_showMessage.test.js
+PASS test/utils/includeAutoInsert.test.js
+PASS test/completions/udf_debug.test.js
+PASS test/extension.test.js
+PASS test/commandRegistry.test.js
+PASS test/utils/pathValidation.test.js
+PASS test/services/VariableTrackingService.test.js
+PASS test/debugLog.test.js
+PASS test/ai_hover.test.js
+PASS test/utils/VariablePatterns.test.js
+PASS test/scripts/validate-test-suite.test.js
+PASS test/scripts/flaky-test-detector.test.js
+PASS test/ai_formatter.test.js
+  ● Console
+
+    console.log
+      [AutoIt Formatter] Starting document formatting
+
+      at Object.log [as provideDocumentFormattingEdits] (src/providers/ai_formatter.js:24:13)
+
+    console.log
+      [AutoIt Formatter] Starting document formatting
+
+      at Object.log [as provideDocumentFormattingEdits] (src/providers/ai_formatter.js:24:13)
+
+    console.log
+      [AutoIt Formatter] Starting document formatting
+
+      at Object.log [as provideDocumentFormattingEdits] (src/providers/ai_formatter.js:24:13)
+
+    console.log
+      [AutoIt Formatter] Starting document formatting
+
+      at Object.log [as provideDocumentFormattingEdits] (src/providers/ai_formatter.js:24:13)
+
+PASS test/syntax/function-declaration-grammar.test.js
+PASS test/scripts/package-openvsx.test.js
+PASS test/diagnosticUtils.test.js
+PASS test/ai_commands.test.js
+PASS test/scripts/quick-flaky-check.test.js
+PASS test/commands/ToolCommands.test.js
+PASS test/commands/DebugCommands.test.js
+PASS test/utils/util.test.js
+PASS test/signatures/macros.test.js
+PASS test/services/includeGraph.test.js
+PASS test/scripts/webpack-config.test.js
+PASS test/registerCommands.test.js
+PASS test/completions/send_keys.test.js
+PASS test/commands/commandUtils.test.js
+PASS test/commands/debugRemove.test.js
+PASS test/languageConfiguration.test.js
+PASS test/commands/trace.test.js
+PASS test/util.test.js
+PASS test/scopeAnalysis.test.js
+PASS test/commands/functionTraceAdd.test.js
+
+Test Suites: 67 passed, 67 total
+Tests:       603 passed, 603 total
+Snapshots:   0 total
+Time:        6.845 s
+Ran all test suites.

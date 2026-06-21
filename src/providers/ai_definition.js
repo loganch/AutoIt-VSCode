@@ -1,0 +1,412 @@
+import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
+import { AUTOIT_MODE } from '../utils/coreConstants';
+import { buildVariableRegex } from '../language/variable';
+import { getIncludePath, getIncludeScripts } from '../utils/includeResolution';
+import { getIncludeText } from '../utils/fsCache';
+import { lookupDefinition, noteFileContent } from '../services/symbolIndex';
+import { getIncludeSet, extractIncludeEdges, toUriString } from '../services/includeGraph';
+
+// Constants for better maintainability
+const REGEX_FLAGS = 'mi';
+const FUNCTION_KEYWORD = 'Func';
+const VOLATILE_KEYWORD = 'volatile';
+
+// Regex patterns. The variable-definition pattern lives in ./util
+// (buildVariableRegex) as the single source of truth shared with the warm
+// symbol index; createVariableRegex below delegates to it.
+const FUNCTION_PATTERN_A_TEMPLATE =
+  '^[ \\t]*{funcKeyword}[ \\t]+(?:{volatile}[ \\t]+)?({escaped})[ \\t]*\\(';
+const FUNCTION_PATTERN_B_TEMPLATE =
+  '^[ \\t]*{funcKeyword}[ \\t]+({escaped})[ \\t]+{volatile}[ \\t]*\\(';
+
+// Custom Error Classes
+class DefinitionProviderError extends Error {
+  constructor(message, cause = null) {
+    super(message);
+    this.name = 'DefinitionProviderError';
+    this.cause = cause;
+  }
+}
+
+class ValidationError extends DefinitionProviderError {
+  constructor(message, cause = null) {
+    super(message, cause);
+    this.name = 'ValidationError';
+  }
+}
+
+class RegexError extends DefinitionProviderError {
+  constructor(message, cause = null) {
+    super(message, cause);
+    this.name = 'RegexError';
+  }
+}
+
+const AutoItDefinitionProvider = {
+  /**
+   * Escapes special regex characters in a string
+   * @param {string} string - The string to escape
+   * @returns {string} The escaped string
+   */
+  escapeRegex(string) {
+    if (typeof string !== 'string') {
+      throw new ValidationError('Input must be a string for regex escaping');
+    }
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  },
+
+  /**
+   * Creates a regex pattern for variable definitions
+   * @param {string} variableName - The variable name to create regex for
+   * @returns {RegExp} The compiled regex for variable matching
+   */
+  createVariableRegex(variableName) {
+    try {
+      if (!variableName || typeof variableName !== 'string') {
+        throw new ValidationError('Variable name must be a non-empty string');
+      }
+
+      // Delegate to the shared builder (single source of truth, also used by
+      // the warm symbol index). Same pattern + flags as before.
+      return buildVariableRegex(variableName);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw new RegexError(
+        `Failed to create variable regex for "${variableName}": ${error.message}`,
+        error,
+      );
+    }
+  },
+
+  /**
+   * Creates a regex pattern for function definitions
+   * @param {string} functionName - The function name to create regex for
+   * @returns {RegExp} The compiled regex for function matching
+   */
+  createFunctionRegex(functionName) {
+    try {
+      if (!functionName || typeof functionName !== 'string') {
+        throw new ValidationError('Function name must be a non-empty string');
+      }
+
+      const escaped = this.escapeRegex(functionName);
+      const patternA = FUNCTION_PATTERN_A_TEMPLATE.replace('{funcKeyword}', FUNCTION_KEYWORD)
+        .replace('{volatile}', VOLATILE_KEYWORD)
+        .replace('{escaped}', escaped);
+
+      const patternB = FUNCTION_PATTERN_B_TEMPLATE.replace('{funcKeyword}', FUNCTION_KEYWORD)
+        .replace('{volatile}', VOLATILE_KEYWORD)
+        .replace('{escaped}', escaped);
+
+      const combined = `(?:${patternA})|(?:${patternB})`;
+      return new RegExp(combined, REGEX_FLAGS);
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        throw error;
+      }
+      throw new RegexError(
+        `Failed to create function regex for "${functionName}": ${error.message}`,
+        error,
+      );
+    }
+  },
+
+  /**
+   * Finds the definition of a word in a document and returns its location.
+   * @param {import("vscode").TextDocument} document - The document in which to search for the word definition.
+   * @param {Position} position - The position of the word for which to find the definition.
+   * @returns {Location|null} - The location of the word definition, or null if not found.
+   */
+  provideDefinition(document, position) {
+    try {
+      // Input validation
+      if (!document || !position || typeof document.getText !== 'function') {
+        throw new ValidationError('Invalid document or position provided');
+      }
+      const lookupRange = document.getWordRangeAtPosition(position);
+      if (!lookupRange) return null;
+      const lookupText = document.getText(lookupRange);
+      if (typeof lookupText !== 'string' || lookupText.trim().length === 0) return null;
+
+      // Return cached result when available (cache is invalidated on every document edit)
+      const cacheKey = `${document.uri.toString()}::${lookupText}`;
+      if (definitionCache.has(cacheKey)) {
+        return definitionCache.get(cacheKey);
+      }
+
+      const documentText = document.getText();
+      if (typeof documentText !== 'string' || documentText.length === 0) return null;
+
+      // Build regex for the symbol
+      const definitionRegex = this.determineRegex(lookupText);
+      if (!definitionRegex) return null;
+
+      // First attempt: search in current document
+      const match = definitionRegex.exec(documentText);
+      if (match && typeof match.index === 'number') {
+        // Capture group for symbol if present; compute the exact symbol index
+        let symbolOffsetInMatch = 0;
+        if (match[1]) {
+          const idxIn0 = match[0].indexOf(match[1]);
+          if (idxIn0 >= 0) symbolOffsetInMatch = idxIn0;
+        }
+        const absoluteIndex = match.index + symbolOffsetInMatch;
+        const pos = document.positionAt(absoluteIndex);
+        const range = new Range(pos, pos);
+        const locationResult = new Location(document.uri, range);
+        definitionCache.set(cacheKey, locationResult);
+        return locationResult;
+      }
+
+      // Index fast path: look up the symbol in the warm index, then keep only
+      // definitions whose file is reachable via #include from this document. Pure
+      // in-memory (no file-content reads); falls through to the scan on miss/error.
+      try {
+        const isVariable = lookupText.startsWith('$');
+        const candidates = lookupDefinition(lookupText, isVariable);
+        if (candidates.length > 0) {
+          // Use the canonical (case-normalized) key so edge keys and candidate
+          // location keys share one space on case-insensitive filesystems.
+          const docUriString = toUriString(document.uri.fsPath);
+          // Parse the active document's includes live so unsaved edits are honored.
+          // (This also refreshes the service's edge map for this document as a side effect.)
+          const liveEdges = extractIncludeEdges(docUriString, documentText, document);
+          const includeSet = getIncludeSet(docUriString, liveEdges);
+          const inScope = candidates
+            .map(entry => entry.location)
+            .filter(
+              loc =>
+                loc && loc.uri && loc.uri.fsPath && includeSet.has(toUriString(loc.uri.fsPath)),
+            );
+          if (inScope.length === 1) {
+            definitionCache.set(cacheKey, inScope[0]);
+            return inScope[0];
+          }
+          if (inScope.length > 1) {
+            definitionCache.set(cacheKey, inScope);
+            return inScope; // VS Code renders a peek list
+          }
+        }
+      } catch (err) {
+        // Unexpected: the in-memory fast path should not throw. Log and fall through
+        // to the include-graph scan so F12 still works.
+        console.error('AutoIt: definition index fast path failed', err);
+      }
+
+      // Search include files
+      const includeResult = this.findDefinitionInIncludeFiles(
+        documentText,
+        definitionRegex,
+        document,
+        lookupText,
+      );
+      if (includeResult && includeResult.found) {
+        const { scriptPath, found } = includeResult;
+        const pos = new Position(found.line, found.character);
+        const range = new Range(pos, pos);
+        const includeLocation = new Location(Uri.file(scriptPath), range);
+        definitionCache.set(cacheKey, includeLocation);
+        return includeLocation;
+      }
+
+      definitionCache.set(cacheKey, null);
+      return null;
+    } catch (err) {
+      // Provide user-friendly error messages while categorizing errors internally
+      let userMessage = 'Definition lookup failed';
+      if (err instanceof ValidationError) {
+        userMessage = 'Invalid input provided for definition lookup';
+      } else if (err instanceof RegexError) {
+        userMessage = 'Pattern matching failed during definition lookup';
+      } else if (err instanceof DefinitionProviderError) {
+        userMessage = err.message;
+      }
+
+      window.showErrorMessage(`provideDefinition error: ${userMessage}`);
+      return null;
+    }
+  },
+
+  /**
+   * Determines the regex for a given lookup string.
+   * Chooses variable or function regex and compiles with appropriate flags.
+   * @param {string} lookup - The lookup string.
+   * @returns {RegExp} The regex for the lookup string.
+   */
+  determineRegex(lookup) {
+    try {
+      if (!lookup || typeof lookup !== 'string') {
+        throw new ValidationError('Lookup string must be a non-empty string');
+      }
+
+      if (lookup.startsWith('$')) {
+        // Variables: use the variable regex helper
+        return this.createVariableRegex(lookup);
+      }
+
+      // Functions: use the function regex helper
+      return this.createFunctionRegex(lookup);
+    } catch (error) {
+      // Provide user-friendly error message while preserving error details
+      let userMessage = 'Failed to create search pattern';
+      if (error instanceof ValidationError || error instanceof RegexError) {
+        userMessage = error.message;
+      }
+
+      window.showErrorMessage(`determineRegex error: ${userMessage}`);
+      return null;
+    }
+  },
+
+  /**
+   * Searches the included scripts in a document for a definition matching a regular expression.
+   * Always returns either null or a structured object describing the match.
+   * @param {string} docText - The text of the document.
+   * @param {RegExp} defRegex - The regular expression to search for.
+   * @param {import("vscode").TextDocument} document - The document being searched.
+   * @param {string} lookupText - The original symbol text being looked up.
+   * @returns {object|null}
+   */
+  findDefinitionInIncludeFiles(docText, defRegex, document, lookupText) {
+    try {
+      // Input validation
+      if (!docText || typeof docText !== 'string') {
+        throw new ValidationError('Document text must be a non-empty string');
+      }
+      if (!defRegex || !(defRegex instanceof RegExp)) {
+        throw new ValidationError('Definition regex must be a valid RegExp');
+      }
+      if (!document) {
+        throw new ValidationError('Document must be provided');
+      }
+      if (!lookupText || typeof lookupText !== 'string') {
+        throw new ValidationError('Lookup text must be a non-empty string');
+      }
+
+      const scriptsToSearch = [];
+      const mockResult = getIncludeScripts(document, docText, scriptsToSearch);
+      // Handle both mock (returns array) and real function (populates by reference)
+      const scripts = Array.isArray(mockResult) ? mockResult : scriptsToSearch;
+
+      for (const script of scripts) {
+        let scriptPath;
+        try {
+          // Check if script is already a full path (for mocked tests) or needs to be resolved
+          if (
+            script &&
+            (script.includes('/') || script.includes('\\') || script.endsWith('.au3'))
+          ) {
+            scriptPath = script; // Already a path
+          } else {
+            scriptPath = getIncludePath(script, document);
+          }
+        } catch (e) {
+          window.showInformationMessage(
+            `getIncludePath failed for script: ${script}, error: ${e.message}`,
+          );
+          continue;
+        }
+
+        let scriptContent = '';
+        try {
+          scriptContent = getIncludeText(scriptPath) || '';
+        } catch (e) {
+          window.showInformationMessage(
+            `getIncludeText failed for path: ${scriptPath}, error: ${e.message}`,
+          );
+          continue;
+        }
+        if (!scriptContent || scriptContent.trim().length === 0) continue;
+
+        // Opportunistic fill: index this just-read file into the warm index so
+        // the next nearby navigation is warm and library files get indexed on
+        // first use. Fire-and-forget; never throws and never alters this scan.
+        noteFileContent(scriptPath, scriptContent);
+
+        // Reset regex lastIndex to ensure fresh search
+        if (defRegex && typeof defRegex.lastIndex === 'number') {
+          defRegex.lastIndex = 0;
+        }
+
+        const m = defRegex ? defRegex.exec(scriptContent) : null;
+        if (!m || typeof m.index !== 'number') {
+          continue;
+        }
+        const [fullMatch, firstGroup, secondGroup] = m;
+
+        // Determine the capture for the symbol name
+        let capture = null;
+        if (lookupText && lookupText.startsWith('$')) {
+          capture = firstGroup || null;
+        } else if (firstGroup) {
+          // function name capture may be in group 1 (pattern A) or 2 (pattern B)
+          capture = firstGroup;
+        } else if (secondGroup) {
+          capture = secondGroup;
+        }
+
+        const symbol = capture || lookupText || '';
+        const idx = capture ? m.index + fullMatch.indexOf(capture) : m.index;
+        const length = capture?.length ?? fullMatch?.length ?? 0;
+
+        // Compute line and character
+        const prefix = scriptContent.slice(0, idx);
+        const lines = prefix.split('\n');
+        const line = lines.length - 1;
+        const character = lines[lines.length - 1].length;
+
+        return {
+          scriptPath,
+          scriptContent,
+          found: {
+            index: idx,
+            length,
+            line,
+            character,
+            symbol,
+          },
+          prefixLength: 0,
+        };
+      }
+
+      return null;
+    } catch (err) {
+      // Provide user-friendly error message while categorizing errors
+      let userMessage = 'Include file search failed';
+      if (err instanceof ValidationError) {
+        userMessage = 'Invalid parameters provided for include file search';
+      } else if (err instanceof DefinitionProviderError) {
+        userMessage = err.message;
+      }
+
+      window.showErrorMessage(`findDefinitionInIncludeFiles error: ${userMessage}`);
+      return null;
+    }
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Definition result cache
+// Key:   `${document.uri.toString()}::${lookupText}`
+// Value: Location | Location[] | null
+// Entries are evicted the moment the document is edited, so results never go
+// stale.  The cache only pays off for repeated F12 on the same symbol without
+// any intervening edit (common during code navigation).
+// ---------------------------------------------------------------------------
+const definitionCache = new Map();
+
+workspace.onDidChangeTextDocument(event => {
+  const prefix = event.document.uri.toString() + '::';
+  for (const key of definitionCache.keys()) {
+    if (key.startsWith(prefix)) {
+      definitionCache.delete(key);
+    }
+  }
+});
+
+const defProvider = languages.registerDefinitionProvider(AUTOIT_MODE, AutoItDefinitionProvider);
+
+export default defProvider;
+export { AutoItDefinitionProvider, definitionCache };

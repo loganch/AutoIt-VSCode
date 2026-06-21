@@ -1,9 +1,10 @@
 # AutoIt for Visual Studio Code
 
-[![Version](https://img.shields.io/visual-studio-marketplace/v/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
-[![Rating](https://img.shields.io/visual-studio-marketplace/r/Damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
-[![GitHub Stars](https://img.shields.io/github/stars/loganch/AutoIt-VSCode?style=social)](https://github.com/loganch/AutoIt-VSCode)
+[![Version](https://badgen.net/vs-marketplace/v/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![Installs](https://badgen.net/vs-marketplace/i/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![Downloads](https://badgen.net/vs-marketplace/d/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![Rating](https://badgen.net/vs-marketplace/rating/damien.autoit)](https://marketplace.visualstudio.com/items?itemName=Damien.autoit)
+[![GitHub Repo Stars](https://img.shields.io/github/stars/loganch/AutoIt-VSCode)](https://github.com/loganch/AutoIt-VSCode)
 
 A comprehensive AutoIt language extension for Visual Studio Code, providing syntax highlighting, IntelliSense, diagnostics, and integrated script execution.
 
@@ -174,6 +175,8 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 
 ### All Configuration Options
 
+<!-- markdownlint-disable MD033 -->
+
 <details>
 <summary>Click to expand full configuration table</summary>
 
@@ -210,12 +213,15 @@ Configure the extension via `File → Preferences → Settings` or `Ctrl+,`, the
 | `autoit.outputMaxHistoryLines`          | Number of output lines to keep                                                                   | `5000`                                                            |
 | **IntelliSense**                        |                                                                                                  |                                                                   |
 | `autoit.enableParenTriggerForFunctions` | Use `(` to select function completion, add parens, and trigger signature help. Requires reload.  | `true`                                                            |
+| `autoit.autoInsertInclude`              | Automatically insert required `#include` when accepting UDF or constant completions             | `true`                                                            |
 | **Code Authoring**                      |                                                                                                  |                                                                   |
 | `autoit.UDFCreator`                     | Author name for Insert Function Header command                                                   | `"Your Name"`                                                     |
 | **Map Intelligence**                    |                                                                                                  |                                                                   |
 | `autoit.maps.enableIntelligence`        | Enable/disable Map completions                                                                   | `true`                                                            |
 | `autoit.maps.includeDepth`              | Max include depth for cross-file tracking                                                        | `3`                                                               |
 | `autoit.maps.showFunctionKeys`          | Show keys added by functions                                                                     | `true`                                                            |
+
+<!-- markdownlint-enable MD033 -->
 
 </details>
 
@@ -326,9 +332,7 @@ Please follow the existing code style and include tests for new features.
 
 ## Contributors
 
-<a href="https://github.com/loganch/autoit-vscode/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=loganch/autoit-vscode" />
-</a>
+[![Contributors](https://contrib.rocks/image?repo=loganch/autoit-vscode)](https://github.com/loganch/autoit-vscode/graphs/contributors)
 
 Made with [contrib.rocks](https://contrib.rocks).
 

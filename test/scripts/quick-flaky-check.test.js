@@ -5,6 +5,10 @@ jest.mock('child_process', () => ({
 const { execSync } = require('child_process');
 const { QuickFlakyCheck } = require('../../scripts/quick-flaky-check.js');
 
+const DEFAULT_RUNS = 3;
+const DEFAULT_TIMEOUT_MS = 15000;
+const EXEC_SYNC_TIMEOUT_MS = 17000;
+
 describe('QuickFlakyCheck', () => {
   let logSpy;
 
@@ -20,8 +24,8 @@ describe('QuickFlakyCheck', () => {
   it('uses default run and timeout values', () => {
     const checker = new QuickFlakyCheck();
 
-    expect(checker.runs).toBe(3);
-    expect(checker.timeout).toBe(15000);
+    expect(checker.runs).toBe(DEFAULT_RUNS);
+    expect(checker.timeout).toBe(DEFAULT_TIMEOUT_MS);
   });
 
   it('returns true when all runs pass', () => {
@@ -30,10 +34,10 @@ describe('QuickFlakyCheck', () => {
     const result = checker.runQuickCheck();
 
     expect(result).toBe(true);
-    expect(execSync).toHaveBeenCalledTimes(3);
+    expect(execSync).toHaveBeenCalledTimes(DEFAULT_RUNS);
     expect(execSync).toHaveBeenCalledWith(
-      'npx jest --testTimeout=15000 --runInBand --silent --no-coverage',
-      expect.objectContaining({ timeout: 17000, encoding: 'utf8' }),
+      `npx jest --testTimeout=${DEFAULT_TIMEOUT_MS} --runInBand --silent --no-coverage`,
+      expect.objectContaining({ timeout: EXEC_SYNC_TIMEOUT_MS, encoding: 'utf8' }),
     );
   });
 

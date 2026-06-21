@@ -9,7 +9,7 @@ jest.mock('vscode', () => ({
   window: mockWindow,
 }));
 
-jest.mock('../src/ai_config', () => ({
+jest.mock('../src/providers/ai_config', () => ({
   __esModule: true,
   default: {
     config: {
@@ -70,33 +70,7 @@ describe('ai_commands', () => {
     jest.clearAllMocks();
     mockKillScript.mockImplementation(arg => `killed:${arg}`);
     mockUtilityGetActiveDocumentFileName.mockImplementation(() => 'C:\\workspace\\active.au3');
-    aiCommands = require('../src/ai_commands');
-  });
-
-  test('re-exports command handlers from command modules', () => {
-    expect(typeof aiCommands.runScript).toBe('function');
-    expect(typeof aiCommands.compile).toBe('function');
-    expect(typeof aiCommands.debugMsgBox).toBe('function');
-    expect(typeof aiCommands.changeParams).toBe('function');
-    expect(typeof aiCommands.openInclude).toBe('function');
-    expect(typeof aiCommands.insertHeader).toBe('function');
-  });
-
-  test('killScriptOpened uses active document path when no argument passed', () => {
-    const result = aiCommands.killScriptOpened();
-
-    expect(mockUtilityGetActiveDocumentFileName).toHaveBeenCalledTimes(1);
-    expect(mockKillScript).toHaveBeenCalledWith('C:\\workspace\\active.au3');
-    expect(result).toBe('killed:C:\\workspace\\active.au3');
-  });
-
-  test('killScriptOpened prefers explicit file path argument', () => {
-    const explicitPath = 'C:\\workspace\\explicit.au3';
-    const result = aiCommands.killScriptOpened(explicitPath);
-
-    expect(mockUtilityGetActiveDocumentFileName).not.toHaveBeenCalled();
-    expect(mockKillScript).toHaveBeenCalledWith(explicitPath);
-    expect(result).toBe(`killed:${explicitPath}`);
+    aiCommands = require('../src/providers/ai_commands');
   });
 
   test('exports facade management and accessor functions', () => {

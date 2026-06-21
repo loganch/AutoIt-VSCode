@@ -9,7 +9,13 @@ jest.mock('fs', () => ({
 
 const path = require('path');
 const fs = require('fs');
-const HotkeyManager = require('../../src/services/HotkeyManager');
+const HotkeyManager = require('../../src/services/HotkeyManager').default;
+
+const FIRST_PROCESS_ID = 1;
+const SECOND_PROCESS_ID = 2;
+const THIRD_PROCESS_ID = 3;
+const PRIMARY_TEST_PROCESS_ID = 7;
+const TWO_ACTIVE_PROCESSES = 2;
 
 describe('HotkeyManager', () => {
   let manager;
@@ -73,9 +79,9 @@ describe('HotkeyManager', () => {
     );
     fs.promises.writeFile.mockResolvedValue();
 
-    const id = await manager.disable(7);
+    const id = await manager.disable(PRIMARY_TEST_PROCESS_ID);
 
-    expect(id).toBe(7);
+    expect(id).toBe(PRIMARY_TEST_PROCESS_ID);
     expect(manager.getActiveCount()).toBe(1);
     expect(fs.promises.writeFile).toHaveBeenCalled();
   });
@@ -85,12 +91,12 @@ describe('HotkeyManager', () => {
     fs.promises.readFile.mockResolvedValue('[Other]\r\n');
     fs.promises.writeFile.mockResolvedValue();
 
-    await manager.disable(1);
+    await manager.disable(FIRST_PROCESS_ID);
     fs.promises.writeFile.mockClear();
 
-    await manager.disable(2);
+    await manager.disable(SECOND_PROCESS_ID);
 
-    expect(manager.getActiveCount()).toBe(2);
+    expect(manager.getActiveCount()).toBe(TWO_ACTIVE_PROCESSES);
     expect(fs.promises.writeFile).not.toHaveBeenCalled();
   });
 
@@ -99,10 +105,10 @@ describe('HotkeyManager', () => {
     fs.promises.readFile.mockResolvedValue('[Other]\r\nSciTE_STOPEXECUTE=abc\r\n');
     fs.promises.writeFile.mockResolvedValue();
 
-    await manager.disable(3);
+    await manager.disable(THIRD_PROCESS_ID);
     fs.promises.writeFile.mockClear();
 
-    await manager.reset(3);
+    await manager.reset(THIRD_PROCESS_ID);
 
     expect(manager.getActiveCount()).toBe(0);
     expect(fs.promises.writeFile).toHaveBeenCalledWith(

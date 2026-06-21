@@ -1,7 +1,7 @@
-const { spawn } = require('child_process');
-const path = require('path');
-const { decode } = require('iconv-lite');
-const { validateFilePath, validateExecutablePath } = require('../utils/pathValidation');
+import { spawn } from 'child_process';
+import path from 'path';
+import { decode } from 'iconv-lite';
+import { validateFilePath, validateExecutablePath } from '../utils/pathValidation';
 
 const MILLISECONDS_TO_SECONDS = 1000;
 const EXIT_CODE_SPAWN_FAILURE = -2;
@@ -357,4 +357,4 @@ class ProcessRunner {
   }
 }
 
-module.exports = ProcessRunner;
+export default ProcessRunner;

@@ -41,7 +41,7 @@ jest.mock('child_process', () => ({
   execFile: jest.fn(),
 }));
 
-jest.mock('../src/ai_showMessage', () => ({
+jest.mock('../src/providers/ai_showMessage', () => ({
   showErrorMessage: jest.fn(),
 }));
 
@@ -49,7 +49,7 @@ let conf;
 
 describe('ai_config', () => {
   beforeAll(() => {
-    conf = require('../src/ai_config').default;
+    conf = require('../src/providers/ai_config').default;
   });
 
   beforeEach(() => {
@@ -88,6 +88,38 @@ describe('ai_config', () => {
     test('can be called with truthy value without throwing', () => {
       expect(() => conf.noEvents(true)).not.toThrow();
       expect(() => conf.noEvents(false)).not.toThrow();
+    });
+  });
+
+  describe('import-time side effects (F17)', () => {
+    test('importing the module does not write workspace config (token-color migration)', () => {
+      jest.resetModules();
+      const editorUpdate = jest.fn();
+      const editorGetConfiguration = jest.fn(() => ({
+        get: jest.fn(() => ({})),
+        update: editorUpdate,
+      }));
+      jest.doMock('vscode', () => ({
+        FileType: { File: 1, Directory: 2, SymbolicLink: 64 },
+        Uri: { file: p => ({ fsPath: p }) },
+        window: { showErrorMessage: jest.fn(), showInformationMessage: jest.fn() },
+        workspace: {
+          getConfiguration: editorGetConfiguration,
+          onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
+          fs: { stat: jest.fn(() => Promise.resolve({ type: 1 })) },
+        },
+      }));
+
+      require('../src/providers/ai_config');
+
+      expect(editorUpdate).not.toHaveBeenCalled();
+      jest.dontMock('vscode');
+    });
+
+    test('init() runs the token-color migration exactly once', () => {
+      const fresh = require('../src/providers/ai_config').default;
+      expect(() => fresh.init()).not.toThrow();
+      expect(() => fresh.init()).not.toThrow(); // idempotent, safe to call again
     });
   });
 

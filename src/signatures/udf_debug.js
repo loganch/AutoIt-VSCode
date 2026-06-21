@@ -1,4 +1,11 @@
-import { br, opt, signatureToHover, valueFirstHeader } from '../util';
+import { CompletionItemKind } from 'vscode';
+import {
+  br,
+  opt,
+  signatureToCompletion,
+  signatureToHover,
+  valueFirstHeader,
+} from '../completionTransforms';
 
 const include = '`#include <Debug.au3>`';
 
@@ -196,5 +203,6 @@ const signatures = {
 };
 
 const hovers = signatureToHover(signatures);
+const completions = signatureToCompletion(signatures, CompletionItemKind.Function, include);
 
-export { signatures as default, hovers };
+export { signatures as default, hovers, completions };
