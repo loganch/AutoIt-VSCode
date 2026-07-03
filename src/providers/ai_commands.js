@@ -48,11 +48,11 @@ class CommandsFacade {
         { default: HotkeyManager },
         { default: ProcessRunner },
       ] = await Promise.all([
-        import('./services/KeybindingService.js'),
-        import('./services/OutputChannelManager.js'),
-        import('./services/ProcessManager.js'),
-        import('./services/HotkeyManager.js'),
-        import('./services/ProcessRunner.js'),
+        import('../services/KeybindingService.js'),
+        import('../services/OutputChannelManager.js'),
+        import('../services/ProcessManager.js'),
+        import('../services/HotkeyManager.js'),
+        import('../services/ProcessRunner.js'),
       ]);
 
       // Initialize keybinding service first
