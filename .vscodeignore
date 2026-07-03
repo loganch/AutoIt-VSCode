@@ -11,3 +11,12 @@ node_modules
 .kilo/**
 .jest-cache/**
 package.json.backup
+.claude/**
+.codegraph/**
+.planning/**
+.serena/**
+.superpowers/**
+coverage/**
+docs/**
+scripts/**
+*.vsix
