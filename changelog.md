@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-07-03
+
 ### Added
 
 - **Auto-insert #include on completion**: when accepting UDF or constant completions, the extension now automatically inserts the required `#include` directive at the top of your script (9750ce5, 65f73fc, f01bf17)
@@ -17,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Tools/Debug command loading**: corrected lazy-import paths for the service modules in the commands facade, which broke after the F27 module rename (c18266b)
 - **Hovers inside comments**: hover tooltips (both built-in docs and user-defined function signatures) no longer pop up over `;` line comments or `#cs`/`#ce` (`#comments-start`/`#comments-end`) block comments (#249) (5a1d5b7)
 - **Code review findings**: addressed final code review findings including linting issues, whitespace regex patterns, and test guard improvements (451e26f)
 - **Empty Description in UDF headers**: hover/signature documentation no longer leaks the following `; Syntax ...` comment line when a standard UDF header's `; Description ...:` line is left blank (9099dba)
@@ -540,7 +543,8 @@ The IntelliSense release!
 - Added the ability to generate a debug MsgBox for a highlighted variable or macro with Ctrl+Shift+D.
 - Added icon, banner color and description for marketplace.
 
-[Unreleased]: https://github.com/loganch/AutoIt-VSCode/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/loganch/AutoIt-VSCode/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/loganch/AutoIt-VSCode/compare/v1.2.0...v1.3.0
