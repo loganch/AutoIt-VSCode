@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Hovers inside comments**: hover tooltips (both built-in docs and user-defined function signatures) no longer pop up over `;` line comments or `#cs`/`#ce` (`#comments-start`/`#comments-end`) block comments (#249) (5a1d5b7)
 - **Code review findings**: addressed final code review findings including linting issues, whitespace regex patterns, and test guard improvements (451e26f)
 - **Empty Description in UDF headers**: hover/signature documentation no longer leaks the following `; Syntax ...` comment line when a standard UDF header's `; Description ...:` line is left blank (9099dba)
 - **Find All References scope**: ensure current document is included in reference search scope (64914bb)
@@ -30,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Tech debt cleanup (F1-F27)**: brooks-lint audit fixes — split up `util.js` and other god modules, removed circular dependencies and dead/duplicate code, capped unbounded caches, finished the CommonJS-to-ESM migration, and consolidated source into a `language/` domain layer (941bbc7–acc0c74)
 - **Code organization**: reorganized utility functions and constants for better structure and maintainability (b7ce257)
 - **Code review cleanup**: addressed code review findings from brooks-lint audit, including function and module renaming (55b9e3d)
 - **Function declaration colorations**: TextMate grammar now colorizes additional token types inside function declarations: keywords/booleans, numbers, assignments, brackets, commas/dots/concatenation operators, and logical operators (#246) (042f18d–e786c7d)
