@@ -20,7 +20,9 @@ export const debugLog = msg => {
     } else {
       console.debug(msg);
     }
-  } catch {
-    // Swallow: debug logging is best-effort and must never mask the real error.
+  } catch (err) {
+    // Best-effort: debug logging must never mask the real error, but the
+    // failure itself is still worth surfacing at debug level.
+    console.debug('debugLog failed:', err);
   }
 };
