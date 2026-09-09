@@ -49,7 +49,8 @@ export function detectAutoItPaths() {
     }
   }
 
-  return potentialPaths.filter(p => {
+  // Dedupe: env-var defaults can repeat the hardcoded paths above.
+  return [...new Set(potentialPaths)].filter(p => {
     try {
       return p && fs.existsSync(path.join(p, 'AutoIt3.exe'));
     } catch {
