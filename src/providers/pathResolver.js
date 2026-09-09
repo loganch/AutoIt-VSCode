@@ -48,10 +48,12 @@ export function resolveVariables(inputPath) {
 export function splitPath(_path) {
   const m = (_path || '').trim().match(/^(.*[\\/])?([^\\/]+)?$/) || [];
   const parts = m.map(a => a || '');
+  const rawDir = parts[1] || '';
 
   return {
     path: parts[0] || '',
-    dir: (parts[1] || '') + ((parts[1] || '') === '' ? '' : '\\'),
+    // Always exactly one trailing separator (the match already includes one).
+    dir: rawDir === '' ? '' : `${rawDir.replace(/[\\/]+$/, '')}\\`,
     file: parts[2] || '',
     isRelative: !!(parts[1] && !parts[1].match(/^[a-zA-Z]:[\\/]/)),
   };
