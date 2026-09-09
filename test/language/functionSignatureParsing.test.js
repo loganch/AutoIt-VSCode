@@ -47,10 +47,7 @@ describe('splitTopLevel', () => {
   });
 
   test('handles doubled-quote escapes inside strings', () => {
-    expect(splitTopLevel('"He said ""hi, there""", $b')).toEqual([
-      '"He said ""hi, there"""',
-      '$b',
-    ]);
+    expect(splitTopLevel('"He said ""hi, there""", $b')).toEqual(['"He said ""hi, there"""', '$b']);
     expect(splitTopLevel("'Don''t, panic', $b")).toEqual(["'Don''t, panic'", '$b']);
   });
 
@@ -163,13 +160,7 @@ describe('parseFunctionBoundaries', () => {
   });
 
   test('extracts multiple functions', () => {
-    const lines = [
-      'Func First()',
-      'EndFunc',
-      'Local $x = 1',
-      'Func Second($p)',
-      'EndFunc',
-    ];
+    const lines = ['Func First()', 'EndFunc', 'Local $x = 1', 'Func Second($p)', 'EndFunc'];
     const result = parseFunctionBoundaries(lines);
     expect(result).toHaveLength(2);
     expect(result[0]).toMatchObject({ name: 'First', startLine: 0, endLine: 1 });
