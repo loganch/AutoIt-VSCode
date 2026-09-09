@@ -128,6 +128,15 @@ export default [
     },
   },
   {
+    // Test files assert against literal expected values by design; forcing
+    // named constants for them hurts spec readability.
+    files: ['test/**/*.js'],
+    rules: {
+      'no-magic-numbers': 'off',
+    },
+  },
+
+  {
     ignores: ['dist/', 'node_modules/', '*.min.js'],
   },
 ];
