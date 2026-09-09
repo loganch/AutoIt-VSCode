@@ -1,6 +1,7 @@
 // src/services/symbolWarmup.js
 import { window, workspace } from 'vscode';
 import { indexDocument } from './symbolIndex';
+import { debugLog } from '../debugLog';
 
 const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
 const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
@@ -43,8 +44,9 @@ async function buildWorkspaceIndex(token) {
         try {
           const doc = await workspace.openTextDocument(file);
           await indexDocument(doc);
-        } catch {
-          // Skip files that can't be opened
+        } catch (err) {
+          // Skip files that can't be opened, but record why when debug logging is on.
+          debugLog(`symbolWarmup: skipping ${file.fsPath}: ${err?.message ?? err}`);
         }
       }),
     );
