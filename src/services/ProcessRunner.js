@@ -43,6 +43,7 @@ class ProcessRunner {
    * @param {string[]} args - Command line arguments
    * @param {boolean} bAiOutReuse - Whether to reuse output panels
    * @returns {Promise<ChildProcess>} The spawned process
+   * @throws {Error} If path validation fails or the process fails to spawn
    */
   async run(cmdPath, args = [], bAiOutReuse = true) {
     try {
@@ -143,7 +144,7 @@ class ProcessRunner {
       // Handle spawn errors
       if (!runner.pid) {
         exit(EXIT_CODE_SPAWN_FAILURE, 'wrong path?');
-        return runner;
+        throw new Error(`Failed to spawn process: ${cmdPath}`);
       }
 
       return runner;
