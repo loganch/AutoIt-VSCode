@@ -69,7 +69,6 @@ describe('OutputChannelManager', () => {
     expect(manager).toBeInstanceOf(OutputChannelManager);
     expect(manager.globalOutputChannel).toBe(globalChannel);
     expect(manager.config).toBe(config);
-    expect(manager.strategies.global).toBeDefined();
     expect(manager.strategies.process).toBeDefined();
     expect(manager.strategies.multi).toBeDefined();
   });

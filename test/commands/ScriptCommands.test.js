@@ -38,6 +38,7 @@ const processRunnerInstance = {
 
 const outputChannelManagerInstance = {
   createProxyOutputChannel: jest.fn(() => mockGlobalOutputChannel),
+  createProcessOutputChannel: jest.fn(() => mockGlobalOutputChannel),
 };
 
 const mockConfig = {

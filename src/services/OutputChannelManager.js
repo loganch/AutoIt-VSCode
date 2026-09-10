@@ -21,38 +21,9 @@ const _cachedOutputChannels = {};
  */
 
 /**
- * Strategy pattern implementation for different output formatting modes
- */
-class OutputFormattingStrategy {
-  /**
-   * Format output lines according to the strategy
-   * @param {string[]} _lines - Lines to format
-   * @param {Object} _context - Formatting context
-   * @returns {string[]} Formatted lines
-   */
-
-  format(_lines, _context) {
-    throw new Error('Strategy must implement format method');
-  }
-}
-
-/**
- * Global output formatting strategy - shows timestamps for all lines
- */
-class GlobalFormattingStrategy extends OutputFormattingStrategy {
-  format(lines, context) {
-    const { time, isNewLine } = context;
-    if (isNewLine && lines.length > 0 && lines[0] !== '') {
-      lines[0] = time + NO_BREAK_SPACE + lines[0];
-    }
-    return lines;
-  }
-}
-
-/**
  * Process-specific output formatting strategy - shows timestamps only for process output
  */
-class ProcessFormattingStrategy extends OutputFormattingStrategy {
+class ProcessFormattingStrategy {
   format(lines, context) {
     const { time, isNewLineProcess, config } = context;
     if (config.outputShowTime === 'Process' || config.outputShowTime === 'All') {
@@ -72,7 +43,7 @@ class ProcessFormattingStrategy extends OutputFormattingStrategy {
 /**
  * Multi-output formatting strategy - includes process ID prefixes
  */
-class MultiFormattingStrategy extends OutputFormattingStrategy {
+class MultiFormattingStrategy {
   format(lines, context) {
     const { prefixId, prefixEmpty, time, isNewLine, lastId, id, config } = context;
 
@@ -153,7 +124,6 @@ class OutputChannelManager {
 
     // Strategy pattern implementations
     this.strategies = {
-      global: new GlobalFormattingStrategy(),
       process: new ProcessFormattingStrategy(),
       multi: new MultiFormattingStrategy(),
     };
@@ -207,6 +177,19 @@ class OutputChannelManager {
   static createProcessOutputChannel(processId, fileName, languageId) {
     const name = `AutoIt #${processId} (${fileName})`;
     return window.createOutputChannel(name, languageId);
+  }
+
+  /**
+   * Instance delegate for {@link OutputChannelManager.createProcessOutputChannel}
+   * so collaborators holding an injected manager call it through the instance
+   * instead of reaching through `.constructor`.
+   * @param {number} processId - Process ID
+   * @param {string} fileName - Associated file name
+   * @param {string} languageId - Language ID for syntax highlighting
+   * @returns {Object} VS Code output channel
+   */
+  createProcessOutputChannel(processId, fileName, languageId) {
+    return OutputChannelManager.createProcessOutputChannel(processId, fileName, languageId);
   }
 
   /**
