@@ -168,28 +168,14 @@ class OutputChannelManager {
 
   /**
    * Factory method to create a process-specific output channel.
-   * @static
-   * @param {number} processId - Process ID
-   * @param {string} fileName - Associated file name
-   * @param {string} languageId - Language ID for syntax highlighting
-   * @returns {Object} VS Code output channel
-   */
-  static createProcessOutputChannel(processId, fileName, languageId) {
-    const name = `AutoIt #${processId} (${fileName})`;
-    return window.createOutputChannel(name, languageId);
-  }
-
-  /**
-   * Instance delegate for {@link OutputChannelManager.createProcessOutputChannel}
-   * so collaborators holding an injected manager call it through the instance
-   * instead of reaching through `.constructor`.
    * @param {number} processId - Process ID
    * @param {string} fileName - Associated file name
    * @param {string} languageId - Language ID for syntax highlighting
    * @returns {Object} VS Code output channel
    */
   createProcessOutputChannel(processId, fileName, languageId) {
-    return OutputChannelManager.createProcessOutputChannel(processId, fileName, languageId);
+    const name = `AutoIt #${processId} (${fileName})`;
+    return window.createOutputChannel(name, languageId);
   }
 
   /**

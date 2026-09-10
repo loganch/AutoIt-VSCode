@@ -86,11 +86,12 @@ describe('OutputChannelManager', () => {
   it('creates process output channels with id in the name', () => {
     const { window } = require('vscode');
 
-    OutputChannelManager.createProcessOutputChannel(
-      PROCESS_OUTPUT_CHANNEL_ID,
-      'demo.au3',
-      'autoit',
+    const manager = new OutputChannelManager(
+      { append: jest.fn(), appendLine: jest.fn(), show: jest.fn(), hide: jest.fn(), clear: jest.fn(), dispose: jest.fn() },
+      {},
     );
+
+    manager.createProcessOutputChannel(PROCESS_OUTPUT_CHANNEL_ID, 'demo.au3', 'autoit');
 
     expect(window.createOutputChannel).toHaveBeenCalledWith(
       `AutoIt #${PROCESS_OUTPUT_CHANNEL_ID} (demo.au3)`,
