@@ -1,5 +1,6 @@
 import fsSync, { promises as fs } from 'fs';
 import path from 'path';
+import { debugLog } from '../debugLog';
 
 /**
  * Service for managing AutoIt3Wrapper hotkey conflicts with comprehensive functionality
@@ -21,41 +22,21 @@ class HotkeyManager {
    * @param {Object} config - Configuration object containing wrapperPath and other settings.
    */
   constructor(config) {
-    /**
-     * Regular expression to match hotkey entries in AutoIt3Wrapper.ini
-     * @type {RegExp}
-     */
+    // Matches hotkey entries in AutoIt3Wrapper.ini
     this.regex = /(SciTE_(STOPEXECUTE|RESTART)\s*=).*/gi;
 
-    /**
-     * Reference to the process environment variables.
-     * @type {Object}
-     */
     this.env = process.env;
 
-    /**
-     * Map to track running scripts for reference counting.
-     * Key: process ID, Value: process ID (used as a Set).
-     * @type {Map<number, number>}
-     */
-    this.count = new Map();
+    // Process IDs with hotkeys currently disabled (reference counting)
+    this.count = new Set();
 
-    /**
-     * Original INI file data for restoration.
-     * @type {string|null}
-     */
+    // Original INI file data for restoration
     this.iniDataOrig = null;
 
-    /**
-     * Path to the AutoIt3Wrapper.ini file.
-     * @type {string|null}
-     */
+    // Path to the AutoIt3Wrapper.ini file
     this.iniPath = null;
 
-    /**
-     * Safety timer to prevent permanent hotkey disabling.
-     * @type {NodeJS.Timeout|null}
-     */
+    // Safety timer to prevent permanent hotkey disabling
     this.timer = null;
 
     /**
@@ -74,17 +55,19 @@ class HotkeyManager {
   _getIniPath() {
     if (
       this.env.SCITE_USERHOME &&
-      fsSync.existsSync(`${this.env.SCITE_USERHOME}\\AutoIt3Wrapper`)
+      fsSync.existsSync(path.join(this.env.SCITE_USERHOME, 'AutoIt3Wrapper'))
     ) {
-      return `${this.env.SCITE_USERHOME}\\AutoIt3Wrapper\\AutoIt3Wrapper.ini`;
+      return path.join(this.env.SCITE_USERHOME, 'AutoIt3Wrapper', 'AutoIt3Wrapper.ini');
     }
-    if (this.env.SCITE_HOME && fsSync.existsSync(`${this.env.SCITE_HOME}/AutoIt3Wrapper`)) {
-      return `${this.env.SCITE_HOME}\\AutoIt3Wrapper\\AutoIt3Wrapper.ini`;
+    if (
+      this.env.SCITE_HOME &&
+      fsSync.existsSync(path.join(this.env.SCITE_HOME, 'AutoIt3Wrapper'))
+    ) {
+      return path.join(this.env.SCITE_HOME, 'AutoIt3Wrapper', 'AutoIt3Wrapper.ini');
     }
-    if (fsSync.existsSync(`${path.dirname(this.config.wrapperPath)}\\AutoIt3Wrapper.ini`)) {
-      return `${path.dirname(this.config.wrapperPath)}\\AutoIt3Wrapper.ini`;
-    }
-    return `${path.dirname(this.config.wrapperPath)}\\AutoIt3Wrapper.ini`;
+    // Default: next to the wrapper executable. The caller's try/catch around
+    // fs.readFile handles a missing INI, so no existence pre-check is needed.
+    return path.join(path.dirname(this.config.wrapperPath), 'AutoIt3Wrapper.ini');
   }
 
   /**
@@ -116,7 +99,7 @@ class HotkeyManager {
         iniData.substring(otherIndex + OTHER_SECTION_LENGTH);
     } catch (error) {
       this.iniDataOrig = null;
-      console.error(`Error reading AutoIt3Wrapper.ini: ${error.message}`);
+      debugLog(`Error reading AutoIt3Wrapper.ini: ${error.message}`);
     }
 
     return { iniPath: this.iniPath, iniData };
@@ -130,37 +113,32 @@ class HotkeyManager {
    * @returns {Promise<number>} The process ID.
    */
   async disable(id) {
-    try {
-      clearTimeout(this.timer);
-      this.count.set(id, id);
-      console.log(
-        `HotkeyManager: Disabling hotkeys for process ${id}. Active processes: ${this.count.size}`,
-      );
+    clearTimeout(this.timer);
+    this.count.add(id);
+    debugLog(
+      `HotkeyManager: Disabling hotkeys for process ${id}. Active processes: ${this.count.size}`,
+    );
 
-      if (this.count.size === 1) {
-        const { iniPath: _iniPath, iniData: _iniData } = await this._getFileData();
-        try {
-          await fs.writeFile(_iniPath, _iniData, 'utf-8');
-          console.log(`HotkeyManager: Modified AutoIt3Wrapper.ini at ${_iniPath}`);
-        } catch (error) {
-          console.error(`Error writing AutoIt3Wrapper.ini: ${error.message}`);
-          // Clean up on failure
-          this.count.delete(id);
-          throw error;
-        }
+    if (this.count.size === 1) {
+      const { iniPath: _iniPath, iniData: _iniData } = await this._getFileData();
+      try {
+        await fs.writeFile(_iniPath, _iniData, 'utf-8');
+        debugLog(`HotkeyManager: Modified AutoIt3Wrapper.ini at ${_iniPath}`);
+      } catch (error) {
+        debugLog(`Error writing AutoIt3Wrapper.ini: ${error.message}`);
+        // Clean up on failure
+        this.count.delete(id);
+        throw error;
       }
-
-      // Safety timer - should never fire unless something went wrong
-      this.timer = setTimeout(() => {
-        console.warn('HotkeyManager: Safety timer triggered - forcing reset');
-        this._forceReset();
-      }, SAFE_TIMER_MS);
-
-      return id;
-    } catch (error) {
-      console.error(`HotkeyManager: Error in disable for process ${id}: ${error.message}`);
-      throw error;
     }
+
+    // Safety timer - should never fire unless something went wrong
+    this.timer = setTimeout(() => {
+      console.warn('HotkeyManager: Safety timer triggered - forcing reset');
+      this._forceReset();
+    }, SAFE_TIMER_MS);
+
+    return id;
   }
 
   /**
@@ -170,34 +148,29 @@ class HotkeyManager {
    * @returns {Promise<void>}
    */
   async reset(id) {
+    clearTimeout(this.timer);
+    debugLog(
+      `HotkeyManager: Resetting hotkeys for process ${id || 'all'}. Active processes: ${this.count.size}`,
+    );
+
+    if (id) {
+      this.count.delete(id);
+    } else {
+      this.count.clear();
+    }
+
+    if (!this.iniPath || (id && this.count.size)) return;
+
     try {
-      clearTimeout(this.timer);
-      console.log(
-        `HotkeyManager: Resetting hotkeys for process ${id || 'all'}. Active processes: ${this.count.size}`,
-      );
-
-      if (id) {
-        this.count.delete(id);
+      if (this.iniDataOrig === null) {
+        await fs.rm(this.iniPath);
+        debugLog(`HotkeyManager: Removed AutoIt3Wrapper.ini at ${this.iniPath}`);
       } else {
-        this.count.clear();
-      }
-
-      if (!this.iniPath || (id && this.count.size)) return;
-
-      try {
-        if (this.iniDataOrig === null) {
-          await fs.rm(this.iniPath);
-          console.log(`HotkeyManager: Removed AutoIt3Wrapper.ini at ${this.iniPath}`);
-        } else {
-          await fs.writeFile(this.iniPath, this.iniDataOrig, 'utf-8');
-          console.log(`HotkeyManager: Restored AutoIt3Wrapper.ini at ${this.iniPath}`);
-        }
-      } catch (error) {
-        console.error(`Error restoring AutoIt3Wrapper.ini: ${error.message}`);
+        await fs.writeFile(this.iniPath, this.iniDataOrig, 'utf-8');
+        debugLog(`HotkeyManager: Restored AutoIt3Wrapper.ini at ${this.iniPath}`);
       }
     } catch (error) {
-      console.error(`HotkeyManager: Error in reset for process ${id || 'all'}: ${error.message}`);
-      throw error;
+      debugLog(`Error restoring AutoIt3Wrapper.ini: ${error.message}`);
     }
   }
 
@@ -220,7 +193,7 @@ class HotkeyManager {
   async cleanup() {
     clearTimeout(this.timer);
     await this._forceReset();
-    console.log('HotkeyManager: Cleanup completed');
+    debugLog('HotkeyManager: Cleanup completed');
   }
 
   /**
