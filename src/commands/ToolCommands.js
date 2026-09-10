@@ -31,14 +31,14 @@ const outputChannelManager = new OutputChannelManager(
   hotkeyManager,
   processManager,
 );
-const processRunner = new ProcessRunner(
+const processRunner = new ProcessRunner({
   config,
   processManager,
   outputChannelManager,
   hotkeyManager,
   getActiveDocumentFileName,
   globalOutputChannel,
-);
+});
 
 /**
  * Compiles the AutoIt script using AutoIt3Wrapper.

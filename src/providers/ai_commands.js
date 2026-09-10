@@ -93,14 +93,14 @@ class CommandsFacade {
       );
 
       // Initialize process runner with all dependencies
-      this.services.processRunner = new ProcessRunner(
-        this.config,
-        this.services.processManager,
-        this.services.outputChannelManager,
-        this.services.hotkeyManager,
-        UtilityCommands.getActiveDocumentFileName,
-        this.services.globalOutputChannel,
-      );
+      this.services.processRunner = new ProcessRunner({
+        config: this.config,
+        processManager: this.services.processManager,
+        outputChannelManager: this.services.outputChannelManager,
+        hotkeyManager: this.services.hotkeyManager,
+        getActiveDocumentFileName: UtilityCommands.getActiveDocumentFileName,
+        globalOutputChannel: this.services.globalOutputChannel,
+      });
 
       // Set up event listeners
       this._setupEventListeners(OutputChannelManager);

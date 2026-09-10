@@ -74,14 +74,14 @@ describe('ProcessRunner', () => {
     };
     getActiveDocumentFileName = jest.fn(() => 'C:\\scripts\\demo.au3');
     globalOutputChannel = createChannel();
-    runner = new ProcessRunner(
+    runner = new ProcessRunner({
       config,
       processManager,
       outputChannelManager,
       hotkeyManager,
       getActiveDocumentFileName,
       globalOutputChannel,
-    );
+    });
   });
 
   it('creates a void output channel', () => {

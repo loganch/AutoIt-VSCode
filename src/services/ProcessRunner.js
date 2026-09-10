@@ -13,21 +13,22 @@ const EXIT_CODE_SPAWN_FAILURE = -2;
 class ProcessRunner {
   /**
    * Creates a new ProcessRunner instance.
-   * @param {Object} config - Configuration object from ai_config
-   * @param {import('./ProcessManager').default} processManager - Tracks running processes
-   * @param {import('./OutputChannelManager').default} outputChannelManager - Creates output channels
-   * @param {import('./HotkeyManager').default} hotkeyManager - Manages AutoIt3Wrapper hotkeys
-   * @param {Function} getActiveDocumentFileName - Function to get the active document filename
-   * @param {Object} globalOutputChannel - Global output channel singleton
+   * @param {Object} options
+   * @param {Object} options.config - Configuration object from ai_config
+   * @param {import('./ProcessManager').default} options.processManager - Tracks running processes
+   * @param {import('./OutputChannelManager').default} options.outputChannelManager - Creates output channels
+   * @param {import('./HotkeyManager').default} options.hotkeyManager - Manages AutoIt3Wrapper hotkeys
+   * @param {Function} options.getActiveDocumentFileName - Function to get the active document filename
+   * @param {Object} options.globalOutputChannel - Global output channel singleton
    */
-  constructor(
+  constructor({
     config,
     processManager,
     outputChannelManager,
     hotkeyManager,
     getActiveDocumentFileName,
     globalOutputChannel,
-  ) {
+  }) {
     this.config = config;
     this.processManager = processManager;
     this.outputChannelManager = outputChannelManager;

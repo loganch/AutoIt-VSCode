@@ -48,14 +48,14 @@ const outputChannelManager = new OutputChannelManager(
   processManager, // 5th param: runners (was missing)
 );
 
-const processRunner = new ProcessRunner(
+const processRunner = new ProcessRunner({
   config,
   processManager,
   outputChannelManager,
   hotkeyManager,
   getActiveDocumentFileName,
   globalOutputChannel, // Use the singleton instead of creating a new one
-);
+});
 
 /**
  * Runs the active AutoIt script
