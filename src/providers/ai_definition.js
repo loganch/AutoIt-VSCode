@@ -20,29 +20,6 @@ const FUNCTION_PATTERN_A_TEMPLATE =
 const FUNCTION_PATTERN_B_TEMPLATE =
   '^[ \\t]*{funcKeyword}[ \\t]+({escaped})[ \\t]+{volatile}[ \\t]*\\(';
 
-// Custom Error Classes
-class DefinitionProviderError extends Error {
-  constructor(message, cause = null) {
-    super(message);
-    this.name = 'DefinitionProviderError';
-    this.cause = cause;
-  }
-}
-
-class ValidationError extends DefinitionProviderError {
-  constructor(message, cause = null) {
-    super(message, cause);
-    this.name = 'ValidationError';
-  }
-}
-
-class RegexError extends DefinitionProviderError {
-  constructor(message, cause = null) {
-    super(message, cause);
-    this.name = 'RegexError';
-  }
-}
-
 const AutoItDefinitionProvider = {
   /**
    * Escapes special regex characters in a string
@@ -51,7 +28,7 @@ const AutoItDefinitionProvider = {
    */
   escapeRegex(string) {
     if (typeof string !== 'string') {
-      throw new ValidationError('Input must be a string for regex escaping');
+      throw new Error('Input must be a string for regex escaping');
     }
     return escapeRegexLiteral(string);
   },
@@ -62,22 +39,18 @@ const AutoItDefinitionProvider = {
    * @returns {RegExp} The compiled regex for variable matching
    */
   createVariableRegex(variableName) {
-    try {
-      if (!variableName || typeof variableName !== 'string') {
-        throw new ValidationError('Variable name must be a non-empty string');
-      }
+    if (!variableName || typeof variableName !== 'string') {
+      throw new Error('Variable name must be a non-empty string');
+    }
 
+    try {
       // Delegate to the shared builder (single source of truth, also used by
       // the warm symbol index). Same pattern + flags as before.
       return buildVariableRegex(variableName);
     } catch (error) {
-      if (error instanceof ValidationError) {
-        throw error;
-      }
-      throw new RegexError(
-        `Failed to create variable regex for "${variableName}": ${error.message}`,
-        error,
-      );
+      throw new Error(`Failed to create variable regex for "${variableName}": ${error.message}`, {
+        cause: error,
+      });
     }
   },
 
@@ -87,11 +60,11 @@ const AutoItDefinitionProvider = {
    * @returns {RegExp} The compiled regex for function matching
    */
   createFunctionRegex(functionName) {
-    try {
-      if (!functionName || typeof functionName !== 'string') {
-        throw new ValidationError('Function name must be a non-empty string');
-      }
+    if (!functionName || typeof functionName !== 'string') {
+      throw new Error('Function name must be a non-empty string');
+    }
 
+    try {
       const escaped = this.escapeRegex(functionName);
       const patternA = FUNCTION_PATTERN_A_TEMPLATE.replace('{funcKeyword}', FUNCTION_KEYWORD)
         .replace('{volatile}', VOLATILE_KEYWORD)
@@ -104,13 +77,9 @@ const AutoItDefinitionProvider = {
       const combined = `(?:${patternA})|(?:${patternB})`;
       return new RegExp(combined, REGEX_FLAGS);
     } catch (error) {
-      if (error instanceof ValidationError) {
-        throw error;
-      }
-      throw new RegexError(
-        `Failed to create function regex for "${functionName}": ${error.message}`,
-        error,
-      );
+      throw new Error(`Failed to create function regex for "${functionName}": ${error.message}`, {
+        cause: error,
+      });
     }
   },
 
@@ -124,7 +93,7 @@ const AutoItDefinitionProvider = {
     try {
       // Input validation
       if (!document || !position || typeof document.getText !== 'function') {
-        throw new ValidationError('Invalid document or position provided');
+        throw new Error('Invalid document or position provided');
       }
       const lookupRange = document.getWordRangeAtPosition(position);
       if (!lookupRange) return null;
@@ -215,17 +184,9 @@ const AutoItDefinitionProvider = {
       definitionCache.set(cacheKey, null);
       return null;
     } catch (err) {
-      // Provide user-friendly error messages while categorizing errors internally
-      let userMessage = 'Definition lookup failed';
-      if (err instanceof ValidationError) {
-        userMessage = 'Invalid input provided for definition lookup';
-      } else if (err instanceof RegexError) {
-        userMessage = 'Pattern matching failed during definition lookup';
-      } else if (err instanceof DefinitionProviderError) {
-        userMessage = err.message;
-      }
-
-      window.showErrorMessage(`provideDefinition error: ${userMessage}`);
+      // Every throw site in this file already builds a descriptive message,
+      // so it doubles as the user-facing text at this one toast boundary.
+      window.showErrorMessage(`provideDefinition error: ${err.message}`);
       return null;
     }
   },
@@ -239,7 +200,7 @@ const AutoItDefinitionProvider = {
   determineRegex(lookup) {
     try {
       if (!lookup || typeof lookup !== 'string') {
-        throw new ValidationError('Lookup string must be a non-empty string');
+        throw new Error('Lookup string must be a non-empty string');
       }
 
       if (lookup.startsWith('$')) {
@@ -271,16 +232,16 @@ const AutoItDefinitionProvider = {
     try {
       // Input validation
       if (!docText || typeof docText !== 'string') {
-        throw new ValidationError('Document text must be a non-empty string');
+        throw new Error('Document text must be a non-empty string');
       }
       if (!defRegex || !(defRegex instanceof RegExp)) {
-        throw new ValidationError('Definition regex must be a valid RegExp');
+        throw new Error('Definition regex must be a valid RegExp');
       }
       if (!document) {
-        throw new ValidationError('Document must be provided');
+        throw new Error('Document must be provided');
       }
       if (!lookupText || typeof lookupText !== 'string') {
-        throw new ValidationError('Lookup text must be a non-empty string');
+        throw new Error('Lookup text must be a non-empty string');
       }
 
       const scriptsToSearch = [];
