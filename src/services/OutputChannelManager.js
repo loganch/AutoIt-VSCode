@@ -255,6 +255,34 @@ class OutputChannelManager {
       }
     };
 
+    const stripHotkeyFailureLines = lines => {
+      for (let i = 0; i < lines.length; i++) {
+        if (hotkeyFailedMsgFound) continue;
+        for (let r = 0; r < this.hotkeyFailedMsg.length; r++) {
+          const line = lines[i].replace(this.hotkeyFailedMsg[r], '');
+          if (line === lines[i]) continue;
+          if (hotkeyFailedMsgFound) {
+            lines.splice(i, 1);
+          } else {
+            this.aWrapperHotkey.reset(id);
+            lines[i] = this.generateHotkeyReplacementMessage();
+            hotkeyFailedMsgFound = true;
+          }
+          if (++i >= lines.length) break;
+        }
+      }
+    };
+
+    const bufferPartialLine = (lines, prop, isFlush, proxy) => {
+      prevLine = !isFlush && prop === 'append' ? lines[lines.length - 1] : '';
+      if (prevLine) {
+        if (lines.length > 1) lines[lines.length - 1] = '';
+        else lines.pop();
+
+        prevLineTimer = setTimeout(() => proxy.flush(), HOTKEY_LINE_DELAY_MS);
+      }
+    };
+
     const get = (aiOut, prop, proxy) => {
       try {
         const isFlush = prop === 'flush';
@@ -285,30 +313,8 @@ class OutputChannelManager {
           const lines = prop === 'append' ? text.split(/\r?\n/) : [text];
           lines[0] = prevLine + lines[0];
 
-          // Filter hotkey failure messages
-          for (let i = 0; i < lines.length; i++) {
-            if (hotkeyFailedMsgFound) continue;
-            for (let r = 0; r < this.hotkeyFailedMsg.length; r++) {
-              const line = lines[i].replace(this.hotkeyFailedMsg[r], '');
-              if (line === lines[i]) continue;
-              if (hotkeyFailedMsgFound) {
-                lines.splice(i, 1);
-              } else {
-                this.aWrapperHotkey.reset(id);
-                lines[i] = this.generateHotkeyReplacementMessage();
-                hotkeyFailedMsgFound = true;
-              }
-              if (++i >= lines.length) break;
-            }
-          }
-
-          prevLine = !isFlush && prop === 'append' ? lines[lines.length - 1] : '';
-          if (prevLine) {
-            if (lines.length > 1) lines[lines.length - 1] = '';
-            else lines.pop();
-
-            prevLineTimer = setTimeout(() => proxy.flush(), HOTKEY_LINE_DELAY_MS);
-          }
+          stripHotkeyFailureLines(lines);
+          bufferPartialLine(lines, prop, isFlush, proxy);
           if (lines.length) outputText(aiOut, prop, lines);
         };
 
