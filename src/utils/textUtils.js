@@ -1,6 +1,11 @@
 import { Range } from 'vscode';
 import { escapeRegexLiteral } from './regexPatterns';
 
+/**
+ * Strips a trailing `;` line comment from a line of AutoIt code, respecting quoted strings.
+ * @param {string} line - Source line to strip
+ * @returns {string} The line with any trailing comment removed
+ */
 function stripLineComment(line) {
   let inSingle = false;
   let inDouble = false;
@@ -13,6 +18,11 @@ function stripLineComment(line) {
   return line;
 }
 
+/**
+ * Builds a boolean mask marking which characters of a line fall inside a quoted string.
+ * @param {string} line - Source line to analyze
+ * @returns {boolean[]} Mask array the same length as `line`; true where the character is inside a string
+ */
 function stringMask(line) {
   const mask = new Array(line.length).fill(false);
   let inSingle = false;
@@ -32,6 +42,11 @@ function stringMask(line) {
   return mask;
 }
 
+/**
+ * Replaces the contents of quoted strings in a line with spaces, preserving length and layout.
+ * @param {string} line - Source line to blank
+ * @returns {string} The line with string contents replaced by spaces
+ */
 function blankStrings(line) {
   const mask = stringMask(line);
   return line
@@ -40,6 +55,12 @@ function blankStrings(line) {
     .join('');
 }
 
+/**
+ * Finds the Func/EndFunc block enclosing a given position in a document.
+ * @param {import('vscode').TextDocument} document - Document to search
+ * @param {import('vscode').Position} position - Position to find the enclosing function for
+ * @returns {import('vscode').Range|null} Range spanning the enclosing function, or null if none is found
+ */
 function findEnclosingFunctionInDocument(document, position) {
   const funcStartRe = /^\s*(?:volatile\s+)?Func\b/i;
   const funcEndRe = /^\s*EndFunc\b/i;
@@ -70,6 +91,12 @@ function findEnclosingFunctionInDocument(document, position) {
 const COMMENT_BLOCK_START = /^\s*#c(?:omments-start|s)\b/i;
 const COMMENT_BLOCK_END = /^\s*#c(?:omments-end|e)\b/i;
 
+/**
+ * Determines whether a position falls inside a line comment or #cs/#ce block comment.
+ * @param {import('vscode').TextDocument} document - Document to check
+ * @param {import('vscode').Position} position - Position to test
+ * @returns {boolean} True if the position is inside a comment
+ */
 function isInComment(document, position) {
   const currentLine = document.lineAt(position.line);
   if (currentLine.text.charAt(currentLine.firstNonWhitespaceCharacterIndex) === ';') return true;
@@ -87,6 +114,12 @@ function isInComment(document, position) {
   return inBlock || COMMENT_BLOCK_START.test(currentLine.text);
 }
 
+/**
+ * Checks whether one range fully contains another.
+ * @param {import('vscode').Range} outerRange - Candidate containing range
+ * @param {import('vscode').Range} innerRange - Candidate contained range
+ * @returns {boolean} True if `innerRange` lies entirely within `outerRange`
+ */
 function rangeContainsRange(outerRange, innerRange) {
   return (
     (outerRange.start.line < innerRange.start.line ||
@@ -98,6 +131,13 @@ function rangeContainsRange(outerRange, innerRange) {
   );
 }
 
+/**
+ * Checks whether a variable name is declared Local/Static/Dim or appears as a function parameter
+ * within a function body's source text.
+ * @param {string} bodyText - Source text of the function body
+ * @param {string} name - Variable name to look for
+ * @returns {boolean} True if the name is declared or is a parameter in `bodyText`
+ */
 function isLocalDeclaredInBody(bodyText, name) {
   const escaped = escapeRegexLiteral(name);
   const codeOnly = bodyText
