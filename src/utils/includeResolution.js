@@ -112,20 +112,19 @@ export const getIncludeScripts = (document, docText, scriptsToSearch) => {
     return;
   }
 
-  // Maintain visited set for circular dependency protection
-  // @ts-ignore - Adding custom property for tracking
-  let visited = scriptsToSearch.__visitedSet;
-  if (!visited) {
-    visited = new Set();
-    // @ts-ignore - Adding custom property for tracking
-    Object.defineProperty(scriptsToSearch, '__visitedSet', {
-      value: visited,
-      enumerable: false,
-      configurable: true,
-      writable: false,
-    });
-  }
+  collectIncludeScripts(document, docText, scriptsToSearch, new Set());
+};
 
+/**
+ * Recursive worker for getIncludeScripts. Takes the circular-dependency tracking set as an
+ * explicit parameter instead of smuggling it as hidden state on the out-parameter array.
+ *
+ * @param {import('vscode').TextDocument} document
+ * @param {string} docText
+ * @param {string[]} scriptsToSearch
+ * @param {Set<string>} visited
+ */
+const collectIncludeScripts = (document, docText, scriptsToSearch, visited) => {
   /**
    * Process individual include with enhanced error handling
    * @param {string} includePath - Path to process
@@ -168,7 +167,7 @@ export const getIncludeScripts = (document, docText, scriptsToSearch) => {
     // Recursive processing
     const includeContent = getIncludeText(normalized);
     if (includeContent) {
-      getIncludeScripts(document, includeContent, scriptsToSearch);
+      collectIncludeScripts(document, includeContent, scriptsToSearch, visited);
     }
   };
 
