@@ -1,4 +1,5 @@
-import { window, workspace } from 'vscode';
+import { workspace } from 'vscode';
+import { handleError } from '../errorUtils';
 
 /**
  * Configuration store: holds the `autoit` workspace configuration, the
@@ -78,7 +79,7 @@ function notifyListeners() {
     try {
       listener();
     } catch (er) {
-      window.showErrorMessage(er);
+      handleError('configuration listener', er, true);
     }
   });
 }
