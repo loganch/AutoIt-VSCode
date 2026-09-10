@@ -86,9 +86,9 @@ const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
  * @param {string} doc - Documentation text to append to existing documentation with italic formatting
  * @returns {Array} New array with modified completion items, or empty array if input is invalid
  */
-const setDetailAndDocumentation = (array, detail, doc) => {
+const setDetail = (array, detail, doc) => {
   if (!Array.isArray(array)) {
-    handleError('setDetailAndDocumentation', 'Invalid array provided', false, { array });
+    handleError('setDetail', 'Invalid array provided', false, { array });
     return [];
   }
 
@@ -188,8 +188,7 @@ export {
   br,
   defaultZero,
   fillCompletions,
-  setDetailAndDocumentation,
-  setDetailAndDocumentation as setDetail,
+  setDetail,
   signatureToHover,
   completionToHover,
   signatureToCompletion,
