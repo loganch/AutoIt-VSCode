@@ -1,9 +1,9 @@
 import { window, Position, Uri } from 'vscode';
 import path from 'path';
 import fs from 'fs';
-import aiConfig from '../providers/ai_config';
-import { findFilepath } from '../providers/pathResolution';
-import { showErrorMessage } from '../providers/ai_showMessage';
+import aiConfig from '../config/ai_config';
+import { findFilepath } from '../config/pathResolution';
+import { showErrorMessage } from '../config/ai_showMessage';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import OutputChannelManager from '../services/OutputChannelManager';
 import { globalOutputChannel, processManager } from '../services/commandServiceStack';

@@ -2,7 +2,7 @@ import { Position, Range, TextEdit, Uri, languages, window, workspace } from 'vs
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import path from 'path';
-import conf from './ai_config';
+import conf from '../config/ai_config';
 import { FORMATTER } from '../constants';
 import { debugLog } from '../debugLog';
 import { validateFilePath, validateExecutablePath } from '../utils/pathValidation';

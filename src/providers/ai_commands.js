@@ -4,7 +4,7 @@
  */
 
 import { window } from 'vscode';
-import conf from './ai_config';
+import conf from '../config/ai_config';
 import { commandsList as _commandsList, commandsPrefix } from '../commandsList';
 
 // getActiveDocumentFileName feeds the ProcessManager's output-name resolution.

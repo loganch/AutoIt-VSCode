@@ -11,7 +11,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-const { syncIncludePathsToRegistry } = require('../src/providers/registrySync');
+const { syncIncludePathsToRegistry } = require('../src/config/registrySync');
 
 describe('syncIncludePathsToRegistry', () => {
   beforeEach(() => {

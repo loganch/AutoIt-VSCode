@@ -9,7 +9,7 @@ jest.mock('vscode', () => ({
   window: mockWindow,
 }));
 
-jest.mock('../src/providers/ai_config', () => ({
+jest.mock('../src/config/ai_config', () => ({
   __esModule: true,
   default: {
     config: {

@@ -65,14 +65,14 @@ jest.mock('../../src/services/ProcessManager', () => MockProcessManager);
 jest.mock('../../src/services/OutputChannelManager', () => MockOutputChannelManager);
 jest.mock('../../src/services/HotkeyManager', () => MockHotkeyManager);
 
-jest.mock('../../src/providers/ai_config', () => ({
+jest.mock('../../src/config/ai_config', () => ({
   __esModule: true,
   default: {
     config: mockConfig,
   },
 }));
 
-jest.mock('../../src/providers/ai_showMessage', () => ({
+jest.mock('../../src/config/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
   showInformationMessage: (...args) => mockShowInformationMessage(...args),
   showWarningMessage: (...args) => mockShowWarningMessage(...args),

@@ -35,7 +35,7 @@ jest.mock('fs', () => ({
   existsSync: (...args) => mockExistsSync(...args),
 }));
 
-jest.mock('../../src/providers/ai_showMessage', () => ({
+jest.mock('../../src/config/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
 }));
 
@@ -69,7 +69,7 @@ jest.mock('../../src/services/commandServiceStack', () => {
   };
 });
 
-jest.mock('../../src/providers/ai_config', () => ({
+jest.mock('../../src/config/ai_config', () => ({
   __esModule: true,
   default: {
     config: {
@@ -81,7 +81,7 @@ jest.mock('../../src/providers/ai_config', () => ({
   },
 }));
 
-jest.mock('../../src/providers/pathResolution', () => ({
+jest.mock('../../src/config/pathResolution', () => ({
   __esModule: true,
   findFilepath: (...args) => mockFindFilepath(...args),
 }));

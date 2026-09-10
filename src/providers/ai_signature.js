@@ -12,7 +12,7 @@ import { REGEX_PATTERNS } from '../utils/regexPatterns';
 import { isInComment } from '../utils/textUtils';
 
 const { functionDefinitionRegex, includePattern, libraryIncludePattern } = REGEX_PATTERNS;
-import { findFilepath } from './pathResolution';
+import { findFilepath } from '../config/pathResolution';
 import defaultSigs from '../signatures';
 import { DEFAULT_UDFS } from '../constants';
 

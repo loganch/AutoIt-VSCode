@@ -17,7 +17,7 @@ jest.mock('fs', () => ({
   existsSync: (...args) => mockFsExistsSync(...args),
 }));
 
-jest.mock('../src/providers/ai_config', () => ({
+jest.mock('../src/config/ai_config', () => ({
   __esModule: true,
   default: {
     config: {

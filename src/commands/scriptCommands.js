@@ -1,10 +1,10 @@
 import { window } from 'vscode';
-import conf from '../providers/ai_config';
+import conf from '../config/ai_config';
 import {
   showErrorMessage,
   showInformationMessage,
   showWarningMessage,
-} from '../providers/ai_showMessage';
+} from '../config/ai_showMessage';
 import { getActiveDocumentFileName } from './editorActions';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';

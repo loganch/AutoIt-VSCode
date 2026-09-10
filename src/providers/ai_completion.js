@@ -19,7 +19,7 @@ const {
   libraryIncludePattern,
   variablePattern,
 } = REGEX_PATTERNS;
-import { findFilepath } from './pathResolution';
+import { findFilepath } from '../config/pathResolution';
 import { DEFAULT_UDFS } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';
 import VariableTrackingService from '../services/VariableTrackingService.js';

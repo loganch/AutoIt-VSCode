@@ -1,5 +1,5 @@
 import path from 'path';
-import { findFilepath } from '../providers/pathResolution';
+import { findFilepath } from '../config/pathResolution';
 import { safeExecute } from '../errorUtils';
 import { REGEX_PATTERNS } from './regexPatterns';
 import { validateString, isValidDocument } from './validation';

@@ -41,7 +41,7 @@ jest.mock('child_process', () => ({
   execFile: jest.fn(),
 }));
 
-jest.mock('../src/providers/ai_showMessage', () => ({
+jest.mock('../src/config/ai_showMessage', () => ({
   showErrorMessage: jest.fn(),
 }));
 
@@ -49,7 +49,7 @@ let conf;
 
 describe('ai_config', () => {
   beforeAll(() => {
-    conf = require('../src/providers/ai_config').default;
+    conf = require('../src/config/ai_config').default;
   });
 
   beforeEach(() => {
@@ -110,14 +110,14 @@ describe('ai_config', () => {
         },
       }));
 
-      require('../src/providers/ai_config');
+      require('../src/config/ai_config');
 
       expect(editorUpdate).not.toHaveBeenCalled();
       jest.dontMock('vscode');
     });
 
     test('init() runs the token-color migration exactly once', () => {
-      const fresh = require('../src/providers/ai_config').default;
+      const fresh = require('../src/config/ai_config').default;
       expect(() => fresh.init()).not.toThrow();
       expect(() => fresh.init()).not.toThrow(); // idempotent, safe to call again
     });

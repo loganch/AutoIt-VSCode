@@ -2,7 +2,7 @@ import ProcessRunner from './ProcessRunner';
 import ProcessManager from './ProcessManager';
 import OutputChannelManager from './OutputChannelManager';
 import HotkeyManager from './HotkeyManager';
-import conf from '../providers/ai_config';
+import conf from '../config/ai_config';
 import { getActiveDocumentFileName } from '../commands/editorActions';
 import packageJson from '../../package.json';
 

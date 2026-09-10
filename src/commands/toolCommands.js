@@ -4,8 +4,8 @@ import fs from 'fs';
 import { spawn } from 'child_process';
 import { getIncludeText } from '../utils/fsCache';
 import { escapeRegexLiteral } from '../utils/regexPatterns';
-import conf from '../providers/ai_config';
-import { findFilepath } from '../providers/pathResolution';
+import conf from '../config/ai_config';
+import { findFilepath } from '../config/pathResolution';
 import { processRunner } from '../services/commandServiceStack';
 import { validateExecutablePath } from '../utils/pathValidation';
 

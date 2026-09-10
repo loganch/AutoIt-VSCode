@@ -42,14 +42,14 @@ jest.mock('../../src/utils/fsCache', () => ({
   safeFileExists: (...args) => mockExistsSync(...args),
 }));
 
-jest.mock('../../src/providers/ai_config', () => ({
+jest.mock('../../src/config/ai_config', () => ({
   __esModule: true,
   default: {
     config: mockConfig,
   },
 }));
 
-jest.mock('../../src/providers/pathResolution', () => ({
+jest.mock('../../src/config/pathResolution', () => ({
   __esModule: true,
   findFilepath: (...args) => mockFindFilepath(...args),
 }));

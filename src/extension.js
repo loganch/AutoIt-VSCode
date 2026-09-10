@@ -19,7 +19,7 @@ import {
 } from './diagnosticUtils';
 import { clearIncludeCache } from './utils/fsCache';
 import { debugLog } from './debugLog';
-import conf from './providers/ai_config';
+import conf from './config/ai_config';
 import { warmDocument } from './services/symbolIndex';
 import { ensureWarm } from './services/symbolWarmup';
 import MapTrackingService from './services/MapTrackingService.js';
