@@ -331,15 +331,20 @@ jest.mock('../src/utils/includeResolution', () => {
 
   return {
     getIncludeScripts: jest.fn(() => []),
-    getIncludePath: jest.fn((base, inc) => {
-      // simplistic resolver: "helper.au3" -> HELPER_PATH, <Array.au3> -> LIB_ARRAY_PATH
-      if (inc.startsWith('<') && inc.endsWith('>')) return mockLibArrayPath;
-      if (inc.startsWith('"') && inc.endsWith('"')) {
-        const name = inc.slice(1, -1);
+    getIncludePath: jest.fn((fileOrPath, document) => {
+      // Mirror the real contract (fileOrPath, document): absolute paths pass
+      // through normalized; quoted/angled includes map to fixtures; anything
+      // else resolves relative to the document.
+      const raw = typeof fileOrPath === 'string' ? fileOrPath : '';
+      if (pathModule.isAbsolute(raw)) return pathModule.normalize(raw);
+      if (raw.startsWith('<') && raw.endsWith('>')) return mockLibArrayPath;
+      if (raw.startsWith('"') && raw.endsWith('"')) {
+        const name = raw.slice(1, -1);
         if (name.toLowerCase() === 'helper.au3') return mockHelperPath;
         if (name.toLowerCase() === 'missing.au3') return mockMissingPath;
       }
-      return pathModule.join(pathModule.dirname(base), inc.replace(/["<>]/g, ''));
+      const docPath = document?.uri?.fsPath || document?.fileName || '';
+      return pathModule.join(pathModule.dirname(docPath), raw.replace(/["<>]/g, ''));
     }),
   };
 });
@@ -443,6 +448,35 @@ const includeGraph = require('../src/services/includeGraph');
 // get the mock instances with proper typing
 const util = jest.mocked(require('../src/utils/includeResolution'));
 Object.assign(util, jest.mocked(require('../src/utils/fsCache')));
+
+// Default include-resolution implementation mirroring the real contract in
+// src/utils/includeResolution.js: absolute paths pass through normalized,
+// quoted/angled includes map to fixtures, anything else resolves relative to
+// the document. The global `resetMocks: true` jest config wipes jest.fn
+// implementations before every test, so this is re-applied in the top-level
+// beforeEach below; per-describe overrides (which run after) still win.
+const defaultGetIncludePath = (fileOrPath, document) => {
+  const raw = typeof fileOrPath === 'string' ? fileOrPath : '';
+  if (path.isAbsolute(raw)) return path.normalize(raw);
+  if (raw.startsWith('<') && raw.endsWith('>')) return LIB_ARRAY_PATH;
+  if (raw.startsWith('"') && raw.endsWith('"')) {
+    const name = raw.slice(1, -1);
+    if (name.toLowerCase() === 'helper.au3') return HELPER_PATH;
+    if (name.toLowerCase() === 'missing.au3') return MISSING_PATH;
+  }
+  const docPath = document?.uri?.fsPath || document?.fileName || '';
+  return path.join(path.dirname(docPath), raw.replace(/["<>]/g, ''));
+};
+
+beforeEach(() => {
+  util.getIncludePath.mockImplementation(defaultGetIncludePath);
+  // Keep the warm-index fast path a deterministic no-op (the scan path is
+  // what these tests exercise); fast-path-specific tests override these.
+  symbolIndex.lookupDefinition.mockReturnValue([]);
+  symbolIndex.noteFileContent.mockReturnValue(undefined);
+  includeGraph.getIncludeSet.mockReturnValue(new Set());
+  includeGraph.extractIncludeEdges.mockReturnValue([]);
+});
 
 // Import the module under test
 const { AutoItDefinitionProvider, definitionCache } = require('../src/providers/ai_definition.js');
@@ -584,19 +618,23 @@ function createUtilMocks(options = {}) {
       return getContentWithCloning(content);
     }),
 
-    getIncludeScripts: jest.fn(() => {
-      // Cache the scripts list for reuse
+    getIncludeScripts: jest.fn((document, docText, scriptsToSearch) => {
+      // Honor the real contract: populate the caller's array by reference
+      // and return void (mirrors src/utils/includeResolution.js).
       const cacheKey = 'includeScripts';
+      let scripts;
       if (config.useCache && mockState.hasCachedContent(cacheKey)) {
-        return mockState.getCachedContent(cacheKey);
+        scripts = mockState.getCachedContent(cacheKey);
+      } else {
+        scripts = config.includeScripts.map(normalizeP);
+        if (config.useCache) {
+          mockState.setCachedContent(cacheKey, scripts);
+        }
       }
 
-      const scripts = config.includeScripts.map(normalizeP);
-      if (config.useCache) {
-        mockState.setCachedContent(cacheKey, scripts);
+      if (Array.isArray(scriptsToSearch)) {
+        scriptsToSearch.push(...scripts);
       }
-
-      return scripts;
     }),
 
     getCallCounts: () => config.callCounts,

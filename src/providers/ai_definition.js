@@ -1,5 +1,6 @@
 import { Location, Position, Range, Uri, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE } from '../utils/coreConstants';
+import { escapeRegexLiteral } from '../utils/regexPatterns';
 import { buildVariableRegex } from '../language/variable';
 import { getIncludePath, getIncludeScripts } from '../utils/includeResolution';
 import { getIncludeText } from '../utils/fsCache';
@@ -52,7 +53,7 @@ const AutoItDefinitionProvider = {
     if (typeof string !== 'string') {
       throw new ValidationError('Input must be a string for regex escaping');
     }
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return escapeRegexLiteral(string);
   },
 
   /**
@@ -286,22 +287,13 @@ const AutoItDefinitionProvider = {
       }
 
       const scriptsToSearch = [];
-      const mockResult = getIncludeScripts(document, docText, scriptsToSearch);
-      // Handle both mock (returns array) and real function (populates by reference)
-      const scripts = Array.isArray(mockResult) ? mockResult : scriptsToSearch;
+      // getIncludeScripts populates the array by reference and returns void.
+      getIncludeScripts(document, docText, scriptsToSearch);
 
-      for (const script of scripts) {
+      for (const script of scriptsToSearch) {
         let scriptPath;
         try {
-          // Check if script is already a full path (for mocked tests) or needs to be resolved
-          if (
-            script &&
-            (script.includes('/') || script.includes('\\') || script.endsWith('.au3'))
-          ) {
-            scriptPath = script; // Already a path
-          } else {
-            scriptPath = getIncludePath(script, document);
-          }
+          scriptPath = getIncludePath(script, document);
         } catch (e) {
           window.showInformationMessage(
             `getIncludePath failed for script: ${script}, error: ${e.message}`,

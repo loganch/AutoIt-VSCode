@@ -11,3 +11,9 @@ coverage/
 
 # Claude Code local files (plans, settings)
 .claude/
+.desloppify/
+
+# Local tool state (brooks-lint, Serena, generated scorecard badge)
+.brooks-lint-history.json
+.serena/
+scorecard.png
