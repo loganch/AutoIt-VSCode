@@ -1,3 +1,10 @@
+/**
+ * App-level defaults and data tables: the UDF name list, formatter settings,
+ * and tuning constants for include-depth/debounce timing. Constants that are
+ * VS Code document-registration or language-parsing primitives (the
+ * `DocumentSelector` shape, macro names, source regexes) live in
+ * utils/coreConstants.js instead -- see that file's header for the split.
+ */
 const DEFAULT_UDFS = [
   'APIComConstants',
   'APIConstants',

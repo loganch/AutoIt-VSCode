@@ -1,3 +1,11 @@
+/**
+ * VS Code document-registration and language-parsing primitives: the
+ * DocumentSelector shape all providers register against, AutoIt macro names
+ * shown for hover/completion, and the source-scanning regexes shared across
+ * features. App-level defaults and data tables (UDF names, formatter
+ * settings, timing tuning) live in ../constants.js instead -- see that
+ * file's header for the split.
+ */
 const AI_CONSTANTS = [
   '$MB_ICONERROR',
   '$MB_ICONINFORMATION',
