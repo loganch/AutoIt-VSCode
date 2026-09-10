@@ -1,9 +1,9 @@
 import { Location, Position, Range, languages, window, workspace } from 'vscode';
 import { AUTOIT_MODE } from '../utils/coreConstants';
 import { AUTOIT_KEYWORDS } from '../signatures/keywords';
+import { escapeRegexLiteral } from '../utils/regexPatterns';
 import {
   blankStrings,
-  escapeRegex,
   findEnclosingFunctionInDocument,
   isLocalDeclaredInBody,
   stringMask,
@@ -69,7 +69,7 @@ const AutoItReferenceProvider = {
   // this restricts the search to the function body so a Local that shadows an earlier
   // same-named Global/assignment resolves to the correct in-scope declaration line.
   findLocalDeclarationLine(document, range, name) {
-    const escaped = escapeRegex(name);
+    const escaped = escapeRegexLiteral(name);
     // Param in the Func signature, OR a Local/Static/Dim declaration of `name`.
     const declRe = new RegExp(`\\b(?:Local|Static|Dim)\\b[^\\n]*?${escaped}\\b`, 'i');
     const paramRe = new RegExp(`^\\s*(?:volatile\\s+)?Func\\b[^\\n(]*\\([^)]*${escaped}\\b`, 'i');
@@ -185,7 +185,7 @@ const AutoItReferenceProvider = {
   },
 
   buildMatchRegex(name, isVariable) {
-    const escaped = escapeRegex(name);
+    const escaped = escapeRegexLiteral(name);
     // For variables the `$` is the left boundary; guard the right with \b.
     // For functions, both sides use \b.
     const pattern = isVariable ? `${escaped}\\b` : `\\b${escaped}\\b`;

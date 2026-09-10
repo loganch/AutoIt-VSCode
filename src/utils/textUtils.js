@@ -1,8 +1,5 @@
 import { Range } from 'vscode';
-
-function escapeRegex(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+import { escapeRegexLiteral } from './regexPatterns';
 
 function stripLineComment(line) {
   let inSingle = false;
@@ -102,7 +99,7 @@ function rangeContainsRange(outerRange, innerRange) {
 }
 
 function isLocalDeclaredInBody(bodyText, name) {
-  const escaped = escapeRegex(name);
+  const escaped = escapeRegexLiteral(name);
   const codeOnly = bodyText
     .split(/\r?\n/)
     .map(l => blankStrings(stripLineComment(l)))
@@ -115,7 +112,6 @@ function isLocalDeclaredInBody(bodyText, name) {
 
 export {
   blankStrings,
-  escapeRegex,
   findEnclosingFunctionInDocument,
   isInComment,
   isLocalDeclaredInBody,

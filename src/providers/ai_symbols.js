@@ -13,7 +13,7 @@ import { isSkippableLine } from '../utils/includeResolution';
 import { REGEX_PATTERNS } from '../utils/regexPatterns';
 
 const { functionPattern, regionPattern, variablePattern } = REGEX_PATTERNS;
-import { rangeContainsRange as sharedRangeContainsRange } from '../utils/textUtils';
+import { rangeContainsRange } from '../utils/textUtils';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;
@@ -216,10 +216,6 @@ function comparePositions(left, right) {
   }
 
   return left.character - right.character;
-}
-
-function rangeContainsRange(outerRange, innerRange) {
-  return sharedRangeContainsRange(outerRange, innerRange);
 }
 
 /**
