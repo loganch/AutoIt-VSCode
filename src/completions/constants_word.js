@@ -6,8 +6,6 @@ import {
   setDetail,
 } from '../completionTransforms';
 
-let items = [];
-
 let WdBreakType = [
   {
     label: '$WdColumnBreak',
@@ -479,24 +477,24 @@ let WdUnits = [
 ];
 WdUnits = setDetail(WdUnits, 'WdUnits Enumeration', 'Specifies a unit of measure to use.');
 
-items = items.concat(
-  WdExportRange,
-  WdFindWrap,
-  WdNewDocumentType,
-  WdOpenFormat,
-  WdOrientation,
-  WdOriginalFormat,
-  WdPrintOutItem,
-  WdPrintOutPages,
-  WdPrintOutRange,
-  WdSaveFormat,
-  WdSaveOptions,
-  WdUnits,
-  WdExportFormat,
-  WdCollapseDirection,
-  MsoDocProperties,
-  WdBreakType,
-);
+const items = [
+  ...WdExportRange,
+  ...WdFindWrap,
+  ...WdNewDocumentType,
+  ...WdOpenFormat,
+  ...WdOrientation,
+  ...WdOriginalFormat,
+  ...WdPrintOutItem,
+  ...WdPrintOutPages,
+  ...WdPrintOutRange,
+  ...WdSaveFormat,
+  ...WdSaveOptions,
+  ...WdUnits,
+  ...WdExportFormat,
+  ...WdCollapseDirection,
+  ...MsoDocProperties,
+  ...WdBreakType,
+];
 
 const completions = fillCompletions(items, CompletionItemKind.Constant, '', 'WordConstants.au3');
 const hovers = completionToHover(completions);
