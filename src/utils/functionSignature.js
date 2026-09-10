@@ -4,9 +4,7 @@ import { REGEX_PATTERNS } from './regexPatterns';
 import { validateString, isValidDocument } from './validation';
 import { safeFileExists, getIncludeText } from './fsCache';
 import { getIncludePath } from './includeResolution';
-import aiConfig from '../providers/ai_config';
-
-const { findFilepath } = aiConfig;
+import { findFilepath } from '../providers/pathResolution';
 
 const MIN_FUNCTION_MATCH_PARTS = 4;
 

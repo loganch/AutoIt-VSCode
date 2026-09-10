@@ -1,11 +1,9 @@
 import path from 'path';
-import aiConfig from '../providers/ai_config';
+import { findFilepath } from '../providers/pathResolution';
 import { safeExecute } from '../errorUtils';
 import { REGEX_PATTERNS } from './regexPatterns';
 import { validateString, isValidDocument } from './validation';
 import { safeFileExists, normalizePath, getIncludeText } from './fsCache';
-
-const { findFilepath } = aiConfig;
 
 /**
  * Determines if a text line should be skipped during AutoIt code analysis by checking for

@@ -46,10 +46,13 @@ export default [
       // Layering rule (F23): data → domain helpers → features → infrastructure.
       // Enforced below: the data layer (completions/, hovers/, signatures/) and
       // parsers/ cannot import from providers/ (features), services/ (infra), or
-      // commands/ (orchestration). Both layers are currently clean, so this is a
-      // regression guard. Aspirational rules deferred to F24/F25 (need refactoring):
-      //   - utils/ should not import providers/ai_config (2 violations via findFilepath)
-      //   - features (providers/ai_*) should import services/ only via ai_config
+      // commands/ (orchestration); utils/ cannot import the ai_config hub (it has
+      // module-load side effects — a config-change listener and getPaths() call —
+      // that non-feature code shouldn't trigger just to reach findFilepath; import
+      // the narrow providers/pathResolution leaf instead). All three are currently
+      // clean, so this is a regression guard. Aspirational rule deferred to F25
+      // (needs refactoring): features (providers/ai_*) should import services/
+      // only via ai_config.
       'import/no-restricted-paths': [
         'error',
         {
@@ -63,6 +66,12 @@ export default [
               target: 'src/parsers/**',
               from: ['src/providers/**', 'src/services/**', 'src/commands/**'],
               message: 'Parsers must not import features or infrastructure (F23 layering rule).',
+            },
+            {
+              target: 'src/utils/**',
+              from: ['src/providers/ai_config.js'],
+              message:
+                'utils/ must not import the ai_config hub (module-load side effects); import providers/pathResolution directly (F23/F24 layering rule).',
             },
           ],
         },
