@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { parse } from 'jsonc-parser';
 import { performance } from 'perf_hooks';
+import { handleError } from '../errorUtils';
 
 /**
  * @typedef {Object.<string, string>} KeybindingMap
@@ -55,7 +56,7 @@ class KeybindingService {
       this.isInitialized = true;
       return this.keybindings;
     } catch (error) {
-      console.error('Failed to initialize KeybindingService:', error);
+      handleError('KeybindingService.initialize', error);
       throw error;
     }
   }
@@ -122,7 +123,7 @@ class KeybindingService {
             cleanup();
             resolve(this.profileDir);
           } catch (parseError) {
-            console.error('Error parsing settings.json:', parseError);
+            handleError('KeybindingService parsing settings.json', parseError);
           }
         });
       };
@@ -254,7 +255,7 @@ class KeybindingService {
             : parse(data.toString()) || this.keybindingsDefaultRaw;
           updateKeybindings(parsed);
         } catch (parseError) {
-          console.error('Error parsing keybindings.json:', parseError);
+          handleError('KeybindingService parsing keybindings.json', parseError);
           updateKeybindings(this.keybindingsDefaultRaw);
         }
       });

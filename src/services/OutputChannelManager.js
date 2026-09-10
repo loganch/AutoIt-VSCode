@@ -1,6 +1,7 @@
 import { window } from 'vscode';
 import { HOTKEY_LINE_DELAY_MS, NO_BREAK_SPACE } from '../commandTimings';
 import { commandsPrefix } from '../commandsList';
+import { handleError } from '../errorUtils';
 // Constants to avoid magic numbers when checking for CRLF endings
 const CRLF = '\r\n';
 const CRLF_LENGTH = 2;
@@ -321,7 +322,7 @@ class OutputChannelManager {
 
         return ret;
       } catch (error) {
-        console.error('[OutputChannelManager] Proxy handler error:', error);
+        handleError('OutputChannelManager proxy handler', error);
         // Provide a fallback function that prevents crashes
         return () => {
           console.warn(
@@ -408,7 +409,7 @@ class OutputChannelManager {
       const proxyChannel = this.createProxyOutputChannel(options);
       proxyChannel[method](text);
     } catch (error) {
-      console.error('Error routing output:', error);
+      handleError('OutputChannelManager.routeOutput', error);
       // Fallback to direct output if proxy fails
       const { aiOutProcess } = options;
       if (aiOutProcess && typeof aiOutProcess[method] === 'function') {

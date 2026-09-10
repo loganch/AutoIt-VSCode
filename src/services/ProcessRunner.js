@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { decode } from 'iconv-lite';
 import { validateFilePath, validateExecutablePath } from '../utils/pathValidation';
+import { handleError } from '../errorUtils';
 
 const MILLISECONDS_TO_SECONDS = 1000;
 const EXIT_CODE_SPAWN_FAILURE = -2;
@@ -149,7 +150,7 @@ class ProcessRunner {
 
       return runner;
     } catch (error) {
-      console.error('Error in ProcessRunner.run:', error);
+      handleError('ProcessRunner.run', error);
       throw error;
     }
   }
@@ -204,7 +205,7 @@ class ProcessRunner {
       // Trigger cleanup
       this.processManager.cleanup();
     } catch (error) {
-      console.error('Error in _handleProcessExit:', error);
+      handleError('ProcessRunner._handleProcessExit', error);
     }
   }
 
@@ -330,7 +331,7 @@ class ProcessRunner {
           : data.toString();
         aiOut.append(output);
       } catch (error) {
-        console.error('Error processing output:', error);
+        handleError('ProcessRunner._setupOutputHandlers', error);
       }
     };
 

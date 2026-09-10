@@ -2,6 +2,7 @@
 import { window, workspace } from 'vscode';
 import { indexDocument } from './symbolIndex';
 import { debugLog } from '../debugLog';
+import { handleError } from '../errorUtils';
 
 const DEFAULT_MAX_WORKSPACE_SYMBOL_FILES = 500;
 const DEFAULT_WORKSPACE_SYMBOL_BATCH_SIZE = 10;
@@ -85,7 +86,7 @@ function ensureWarm() {
     .catch(err => {
       warmState = 'cold';
       warmPromise = null;
-      console.error('AutoIt: symbol index warm-up failed', err);
+      handleError('symbol index warm-up', err);
     });
   return warmPromise;
 }
