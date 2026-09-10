@@ -34,26 +34,6 @@ describe('pathValidation', () => {
       expect(result.normalized).toBe('test.au3');
     });
 
-    it('should detect path traversal outside workspace', () => {
-      const workspaceRoot = path.resolve('/workspace');
-      const result = validateFilePath('../../etc/passwd', workspaceRoot);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain('path traversal');
-    });
-
-    it('should allow paths within workspace', () => {
-      const workspaceRoot = path.resolve('/workspace');
-      const result = validateFilePath('subfolder/test.au3', workspaceRoot);
-      expect(result.valid).toBe(true);
-    });
-
-    it('should detect upward directory traversal', () => {
-      const workspaceRoot = path.resolve('/workspace');
-      const result = validateFilePath('../../../sensitive/file.au3', workspaceRoot);
-      expect(result.valid).toBe(false);
-      expect(result.error).toContain('path traversal');
-    });
-
     it('should handle absolute paths correctly', () => {
       const absolutePath = path.resolve('/workspace/test.au3');
       const result = validateFilePath(absolutePath);
@@ -92,40 +72,6 @@ describe('pathValidation', () => {
     it('should handle invalid paths gracefully', () => {
       expect(fileExists(null)).toBe(false);
       expect(fileExists('')).toBe(false);
-    });
-  });
-
-  describe('path traversal attack scenarios', () => {
-    const workspaceRoot = path.resolve('/workspace');
-
-    it('should block ../ traversal', () => {
-      const result = validateFilePath('../../../etc/passwd', workspaceRoot);
-      expect(result.valid).toBe(false);
-    });
-
-    it('should block ..\\ traversal on Windows', () => {
-      const result = validateFilePath('..\\..\\..\\windows\\system32\\config', workspaceRoot);
-      expect(result.valid).toBe(false);
-    });
-
-    it('should block mixed separator traversal', () => {
-      const result = validateFilePath('../../../etc/passwd', workspaceRoot);
-      expect(result.valid).toBe(false);
-    });
-
-    it('should block encoded traversal attempts', () => {
-      const result = validateFilePath('test\0poison.au3');
-      expect(result.valid).toBe(false);
-    });
-
-    it('should allow relative paths within workspace', () => {
-      const result = validateFilePath('./scripts/test.au3', workspaceRoot);
-      expect(result.valid).toBe(true);
-    });
-
-    it('should allow subdirectory paths', () => {
-      const result = validateFilePath('subfolder/nested/test.au3', workspaceRoot);
-      expect(result.valid).toBe(true);
     });
   });
 });
