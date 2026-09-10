@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { window } from 'vscode';
 import searchAndReplace from './editorActions';
 
 /**
@@ -20,11 +20,11 @@ async function debugRemove() {
   const msgBoxReplacementsMade = await searchAndReplace(msgBoxDebugPattern);
 
   if (consoleWriteReplacementsMade || msgBoxReplacementsMade) {
-    vscode.window.showInformationMessage(
+    window.showInformationMessage(
       `${consoleWriteReplacementsMade + msgBoxReplacementsMade} Debug line(s) removed successfully`,
     );
   } else {
-    vscode.window.showInformationMessage('No debug lines found');
+    window.showInformationMessage('No debug lines found');
   }
 }
 

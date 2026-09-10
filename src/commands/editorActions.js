@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { window, Range } from 'vscode';
 
 /**
  * Get the file name of the active document in the editor.
@@ -8,10 +8,10 @@ import * as vscode from 'vscode';
  * @returns {string} The file name of the active document, or an empty string if unavailable.
  */
 export function getActiveDocumentFileName() {
-  if (!vscode.window.activeTextEditor) {
+  if (!window.activeTextEditor) {
     return '';
   }
-  const { document } = vscode.window.activeTextEditor;
+  const { document } = window.activeTextEditor;
   if (!document || !document.fileName) {
     return '';
   }
@@ -26,10 +26,10 @@ export function getActiveDocumentFileName() {
  * @returns {Promise<number>} A promise that resolves to the number of replacements made.
  */
 async function searchAndReplace(regex, replacement = '\r\n') {
-  const editor = vscode.window.activeTextEditor;
+  const editor = window.activeTextEditor;
 
   if (!editor) {
-    vscode.window.showErrorMessage('No active editor');
+    window.showErrorMessage('No active editor');
     return 0;
   }
 
@@ -43,7 +43,7 @@ async function searchAndReplace(regex, replacement = '\r\n') {
   }
 
   await editor.edit(editBuilder => {
-    const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(text.length));
+    const fullRange = new Range(document.positionAt(0), document.positionAt(text.length));
     editBuilder.replace(fullRange, updatedText);
   });
 

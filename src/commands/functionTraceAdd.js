@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import { window, Range } from 'vscode';
 import searchAndReplace from './editorActions';
 
 /**
@@ -31,10 +31,10 @@ async function functionTraceAdd() {
   await searchAndReplace(traceStatementPattern);
 
   // Perform replacement using regular expressions
-  const editor = vscode.window.activeTextEditor;
+  const editor = window.activeTextEditor;
 
   if (!editor) {
-    vscode.window.showErrorMessage('No active editor');
+    window.showErrorMessage('No active editor');
     return;
   }
 
@@ -48,7 +48,7 @@ async function functionTraceAdd() {
   }
 
   await editor.edit(editBuilder => {
-    const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(text.length));
+    const fullRange = new Range(document.positionAt(0), document.positionAt(text.length));
     editBuilder.replace(fullRange, updatedText);
   });
 }
