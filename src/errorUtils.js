@@ -5,9 +5,10 @@ import { window } from 'vscode';
 // ERROR HANDLING AND LOGGING
 // ============================================================================
 //
-// Leaf module: depends only on the VS Code `window` API. Extracted from
-// util.js so completionTransforms.js (and other focused modules) can share
-// error handling without creating a cycle back through util.js.
+// Leaf module: depends only on the VS Code `window` API. Split out of the
+// old util.js God module (tech-debt finding F7) so completionTransforms.js
+// (and other focused modules) can share error handling without an import
+// cycle back through it.
 
 /**
  * Centralized error handler for consistent logging and user feedback

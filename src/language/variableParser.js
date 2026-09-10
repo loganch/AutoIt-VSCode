@@ -1,6 +1,6 @@
 /**
  * Parses AutoIt source code to extract variable declarations with scope information
- * Based on MapParser.js structure and patterns
+ * Based on the MapParser structure and patterns in language/map.js
  */
 
 import { isCommentLine, cleanLine } from './variable.js';
