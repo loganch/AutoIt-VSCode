@@ -19,9 +19,9 @@ export const validateString = (value, defaultValue = '') => {
  * @returns {boolean} True if valid document
  */
 export const isValidDocument = document => {
-  return (
+  return Boolean(
     document &&
-    (document.uri?.fsPath || document.fileName) &&
-    typeof document.getText === 'function'
+      (document.uri?.fsPath || document.fileName) &&
+      typeof document.getText === 'function',
   );
 };
