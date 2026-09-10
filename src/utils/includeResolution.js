@@ -2,13 +2,8 @@ import path from 'path';
 import aiConfig from '../providers/ai_config';
 import { safeExecute } from '../errorUtils';
 import { REGEX_PATTERNS } from './regexPatterns';
-import {
-  validateString,
-  isValidDocument,
-  safeFileExists,
-  normalizePath,
-  getIncludeText,
-} from './fsCache';
+import { validateString, isValidDocument } from './validation';
+import { safeFileExists, normalizePath, getIncludeText } from './fsCache';
 
 const { findFilepath } = aiConfig;
 

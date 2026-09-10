@@ -2,16 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { safeExecute } from '../errorUtils';
 import { REGEX_PATTERNS } from './regexPatterns';
-
-/**
- * Validates and normalizes string input
- * @param {any} value - Value to validate
- * @param {string} [defaultValue=''] - Default value if invalid
- * @returns {string} Validated string
- */
-export const validateString = (value, defaultValue = '') => {
-  return typeof value === 'string' && value.length > 0 ? value.trim() : defaultValue;
-};
+import { validateString } from './validation';
 
 /**
  * Validates file path input
@@ -20,19 +11,6 @@ export const validateString = (value, defaultValue = '') => {
  */
 export const isValidFilePath = filePath => {
   return typeof filePath === 'string' && filePath.length > 0 && filePath.trim().length > 0;
-};
-
-/**
- * Validates VSCode document object
- * @param {any} document - Document to validate
- * @returns {boolean} True if valid document
- */
-export const isValidDocument = document => {
-  return (
-    document &&
-    (document.uri?.fsPath || document.fileName) &&
-    typeof document.getText === 'function'
-  );
 };
 
 /**
@@ -59,14 +37,20 @@ export const clearIncludeCache = () => includeCache.clear();
 const STAT_GRACE_MS = 5_000;
 
 /**
- * Safely check if file exists with proper error handling
+ * Safely check that a regular file exists and is accessible. The single
+ * existence API for the codebase — pathValidation delegates to this.
  * @param {string} filePath - Path to check
- * @returns {boolean} True if file exists and is accessible
+ * @returns {boolean} True if a regular file exists at the path
  */
 export const safeFileExists = filePath => {
   if (!isValidFilePath(filePath)) return false;
 
-  return safeExecute(() => fs.existsSync(filePath), false, `File existence check for ${filePath}`);
+  // existsSync short-circuits so a missing file never reaches statSync (no log noise).
+  return safeExecute(
+    () => fs.existsSync(filePath) && fs.statSync(filePath).isFile(),
+    false,
+    `File existence check for ${filePath}`,
+  );
 };
 
 /**

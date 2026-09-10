@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs';
+import { safeFileExists } from './fsCache';
 
 /**
  * Validates that a file path is safe and doesn't contain path traversal attempts.
@@ -62,19 +62,6 @@ function validateFilePath(filePath, workspaceRoot = null) {
 }
 
 /**
- * Validates that a file exists and is accessible
- * @param {string} filePath - The file path to check
- * @returns {boolean} True if file exists and is accessible
- */
-function fileExists(filePath) {
-  try {
-    return fs.existsSync(filePath) && fs.statSync(filePath).isFile();
-  } catch {
-    return false;
-  }
-}
-
-/**
  * Validates that an executable path is safe to run
  * Checks for path traversal and ensures the file exists
  *
@@ -90,7 +77,7 @@ function validateExecutablePath(execPath, allowedDir = null) {
   }
 
   // Check if executable exists
-  if (!fileExists(validation.normalized)) {
+  if (!safeFileExists(validation.normalized)) {
     return {
       valid: false,
       normalized: validation.normalized,
@@ -101,4 +88,4 @@ function validateExecutablePath(execPath, allowedDir = null) {
   return validation;
 }
 
-export { validateFilePath, validateExecutablePath, fileExists };
+export { validateFilePath, validateExecutablePath, safeFileExists as fileExists };

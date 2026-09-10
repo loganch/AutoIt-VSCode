@@ -3,7 +3,7 @@ const path = require('path');
 const mockFindFilepath = jest.fn(() => '');
 const mockExistsSync = jest.fn();
 const mockReadFileSync = jest.fn();
-const mockStatSync = jest.fn(() => ({ mtimeMs: 1 }));
+const mockStatSync = jest.fn(() => ({ mtimeMs: 1, isFile: () => true }));
 
 const normalizedEndsWith = (inputPath, suffix) =>
   path.normalize(inputPath).toLowerCase().endsWith(path.normalize(suffix).toLowerCase());
@@ -64,7 +64,7 @@ describe('util module', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFindFilepath.mockImplementation(() => '');
-    mockStatSync.mockImplementation(() => ({ mtimeMs: 1 }));
+    mockStatSync.mockImplementation(() => ({ mtimeMs: 1, isFile: () => true }));
 
     mockExistsSync.mockImplementation(filePath => {
       return normalizedEndsWith(filePath, helperPath) || normalizedEndsWith(filePath, nestedPath);

@@ -1,7 +1,8 @@
 import { handleError, safeExecute } from '../errorUtils';
 import { splitTopLevel } from '../language/functionSignatureParsing';
 import { REGEX_PATTERNS } from './regexPatterns';
-import { validateString, isValidDocument, safeFileExists, getIncludeText } from './fsCache';
+import { validateString, isValidDocument } from './validation';
+import { safeFileExists, getIncludeText } from './fsCache';
 import { getIncludePath } from './includeResolution';
 import aiConfig from '../providers/ai_config';
 
