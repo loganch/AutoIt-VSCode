@@ -361,6 +361,10 @@ const items = [
 ];
 
 // Add the variable icon and Macro detail to each entry
-const entries = fillCompletions(items, CompletionItemKind.Constant, 'Send() Command');
+const completions = fillCompletions(items, CompletionItemKind.Constant, 'Send() Command');
 
-export default entries;
+// No hovers export: these {KEY} tokens live inside Send() string literals, not as
+// standalone identifiers, so VSCode's hover provider has no word to match them
+// against. Every entry already carries its own `documentation` for the completion
+// popup itself. See udfRegistry.js's `// completions only — no hovers` comment.
+export default completions;
