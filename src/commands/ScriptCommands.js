@@ -1,8 +1,4 @@
 import { window } from 'vscode';
-import ProcessRunner from '../services/ProcessRunner';
-import ProcessManager from '../services/ProcessManager';
-import OutputChannelManager from '../services/OutputChannelManager';
-import HotkeyManager from '../services/HotkeyManager';
 import conf from '../providers/ai_config';
 import {
   showErrorMessage,
@@ -12,50 +8,20 @@ import {
 import { getActiveDocumentFileName } from './editorActions';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';
-
-import packageJson from '../../package.json';
+import {
+  globalOutputChannel,
+  processManager,
+  processRunner,
+} from '../services/commandServiceStack';
 
 const { config } = conf;
+
+export { globalOutputChannel };
 
 // Constants
 const STATUS_BAR_MESSAGE_TIMEOUT = 1500; // milliseconds
 const SCRIPT_STOP_INFO_TIMEOUT = 10000; // milliseconds
 const PATH_PARTS_TO_SHOW = 2; // number of path parts to show in error messages
-
-// Instantiate services
-// Create singleton global channel using cached factory method
-const globalOutputChannel = OutputChannelManager.createGlobalOutputChannel(
-  'AutoIt (global)',
-  'vscode-autoit-output',
-);
-
-export { globalOutputChannel };
-
-const processManager = new ProcessManager(
-  config,
-  globalOutputChannel, // Use the singleton instead of creating a new one
-  getActiveDocumentFileName,
-  `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
-);
-
-const hotkeyManager = new HotkeyManager(config);
-
-const outputChannelManager = new OutputChannelManager(
-  globalOutputChannel, // 1st param: globalOutputChannel (was incorrectly config)
-  config, // 2nd param: config (was incorrectly {})
-  {}, // 3rd param: keybindings
-  hotkeyManager, // 4th param: aWrapperHotkey
-  processManager, // 5th param: runners (was missing)
-);
-
-const processRunner = new ProcessRunner({
-  config,
-  processManager,
-  outputChannelManager,
-  hotkeyManager,
-  getActiveDocumentFileName,
-  globalOutputChannel, // Use the singleton instead of creating a new one
-});
 
 /**
  * Runs the active AutoIt script

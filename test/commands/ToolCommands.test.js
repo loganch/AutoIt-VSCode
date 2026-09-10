@@ -60,9 +60,18 @@ jest.mock('../../src/services/ProcessRunner', () =>
 );
 
 jest.mock('../../src/services/ProcessManager', () => jest.fn().mockImplementation(() => ({})));
-jest.mock('../../src/services/OutputChannelManager', () =>
-  jest.fn().mockImplementation(() => ({})),
-);
+jest.mock('../../src/services/OutputChannelManager', () => {
+  const MockOutputChannelManager = jest.fn().mockImplementation(() => ({}));
+  MockOutputChannelManager.createGlobalOutputChannel = jest.fn(() => ({
+    append: jest.fn(),
+    appendLine: jest.fn(),
+    clear: jest.fn(),
+    dispose: jest.fn(),
+    hide: jest.fn(),
+    show: jest.fn(),
+  }));
+  return MockOutputChannelManager;
+});
 jest.mock('../../src/services/HotkeyManager', () => jest.fn().mockImplementation(() => ({})));
 
 describe('ToolCommands.launchHelp', () => {
