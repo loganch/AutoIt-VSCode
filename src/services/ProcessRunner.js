@@ -7,32 +7,16 @@ const MILLISECONDS_TO_SECONDS = 1000;
 const EXIT_CODE_SPAWN_FAILURE = -2;
 
 /**
- * Service class for spawning and managing AutoIt processes with comprehensive functionality
- * for process lifecycle management, output handling, and reuse logic.
- *
- * Features:
- * - Process spawning with proper configuration
- * - Output piping with encoding conversion
- * - Process lifecycle management (start, run, exit)
- * - Working directory setup
- * - Encoding handling for output code page conversion
- * - Process reuse with robust logic
- * - Dependency injection for testability and modularity
+ * Service class for spawning and managing AutoIt processes: process lifecycle,
+ * output piping with code-page conversion, and output-panel reuse.
  */
 class ProcessRunner {
   /**
-   * @typedef {Object} ProcessManager
-   * @typedef {Object} OutputChannelManager
-   * @typedef {Object} HotkeyManager
-   * @typedef {Object} ChildProcess
-   */
-
-  /**
    * Creates a new ProcessRunner instance.
    * @param {Object} config - Configuration object from ai_config
-   * @param {ProcessManager} processManager - ProcessManager instance for tracking running processes
-   * @param {OutputChannelManager} outputChannelManager - OutputChannelManager for creating output channels
-   * @param {HotkeyManager} hotkeyManager - HotkeyManager for managing AutoIt3Wrapper hotkeys
+   * @param {import('./ProcessManager').default} processManager - Tracks running processes
+   * @param {import('./OutputChannelManager').default} outputChannelManager - Creates output channels
+   * @param {import('./HotkeyManager').default} hotkeyManager - Manages AutoIt3Wrapper hotkeys
    * @param {Function} getActiveDocumentFileName - Function to get the active document filename
    * @param {Object} globalOutputChannel - Global output channel singleton
    */
@@ -93,11 +77,7 @@ class ProcessRunner {
       // Create or reuse output channel
       const aiOutProcess = this.config.multiOutput
         ? (runnerPrev && !runnerPrev.info.aiOut.void && runnerPrev.info.aiOut) ||
-          this.outputChannelManager.constructor.createProcessOutputChannel(
-            id,
-            thisFile,
-            'vscode-autoit-output',
-          )
+          this.outputChannelManager.createProcessOutputChannel(id, thisFile, 'vscode-autoit-output')
         : this._createVoidOutputChannel();
 
       // Create proxy output channel with formatting
