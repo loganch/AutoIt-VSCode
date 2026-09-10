@@ -172,7 +172,7 @@ const openInclude = () => {
       } else {
         const library = found[0].includes('<');
         const foundPath = findFilepath(includeFile, library);
-        if (foundPath && typeof foundPath === 'string') {
+        if (foundPath) {
           includeFile = foundPath;
         }
       }

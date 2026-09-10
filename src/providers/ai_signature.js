@@ -136,7 +136,7 @@ function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, doc) {
   libraryIncludes.forEach(fileName => {
     if (DEFAULT_UDFS.indexOf(fileName.replace('.au3', '')) === -1) {
       const fullPath = findFilepath(fileName);
-      if (typeof fullPath === 'string') {
+      if (fullPath) {
         Object.assign(includes, getIncludeData(fullPath, doc));
       }
     }

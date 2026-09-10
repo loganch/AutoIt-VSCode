@@ -67,7 +67,7 @@ export const getIncludePath = (fileOrPath, document) => {
       `Library path resolution for ${cleanPath}`,
     );
 
-    if (libPath && typeof libPath === 'string') {
+    if (libPath) {
       return normalizePath(libPath);
     }
   }
@@ -92,9 +92,7 @@ export const getIncludePath = (fileOrPath, document) => {
     `Fallback path resolution for ${cleanPath}`,
   );
 
-  return fallbackPath && typeof fallbackPath === 'string'
-    ? normalizePath(fallbackPath)
-    : normalizePath(cleanPath);
+  return fallbackPath ? normalizePath(fallbackPath) : normalizePath(cleanPath);
 };
 
 /**
@@ -144,7 +142,7 @@ const collectIncludeScripts = (document, docText, scriptsToSearch, visited) => {
         null,
         `Include resolution for ${includePath}`,
       );
-      resolvedPath = typeof fallback === 'string' ? fallback : null;
+      resolvedPath = fallback;
     }
 
     if (!resolvedPath) return;

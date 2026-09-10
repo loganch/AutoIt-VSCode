@@ -124,10 +124,10 @@ describe('ai_config', () => {
   });
 
   describe('findFilepath', () => {
-    test('returns false when file does not exist on any path', () => {
+    test('returns null when file does not exist on any path', () => {
       mockFsExistsSync.mockReturnValue(false);
       const result = conf.findFilepath('nonexistent.au3');
-      expect(result).toBe(false);
+      expect(result).toBeNull();
     });
 
     test('returns file path when file exists in include path', () => {
@@ -138,8 +138,8 @@ describe('ai_config', () => {
         .mockReturnValue(false);
 
       const result = conf.findFilepath('Array.au3');
-      // Either returns a string path or false — just validate type
-      expect(typeof result === 'string' || result === false).toBe(true);
+      // Either returns a string path or null — just validate type
+      expect(typeof result === 'string' || result === null).toBe(true);
     });
   });
 });

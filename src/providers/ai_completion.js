@@ -148,7 +148,7 @@ const getLibraryFunctions = (libraryIncludes, doc) => {
     return libraryIncludes
       .flatMap(file => {
         const fullPath = findFilepath(file);
-        if (!fullPath || typeof fullPath !== 'string') {
+        if (!fullPath) {
           return [];
         }
         const includeData = getIncludeData(fullPath, doc);

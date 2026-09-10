@@ -181,7 +181,7 @@ export const getIncludeData = (fileName, doc) => {
       `Include data path resolution for ${fileName}`,
     );
 
-    if (foundPath && typeof foundPath === 'string') {
+    if (foundPath) {
       filePath = foundPath;
     }
   }

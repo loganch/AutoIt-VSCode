@@ -83,10 +83,10 @@ function updateFullPath(_path, data, msgSuffix) {
 
 /**
  * Find a file by checking configured includePaths and (optionally) auto-detected AutoIt Include folders.
- * Returns the first matching full path or false if not found.
+ * Returns the first matching full path or null if not found.
  * @param {string} file - filename to search for
  * @param {boolean} library - whether to prefer library entries (true) or search them last (false)
- * @returns {(string|boolean)} Full path if found, or false
+ * @returns {(string|null)} Full path if found, or null
  */
 const findFilepath = (file, library = true) => {
   // work with copy to avoid changing main config
@@ -116,7 +116,7 @@ const findFilepath = (file, library = true) => {
     }
   }
 
-  return false;
+  return null;
 };
 
 function getPathsSmartHelp(defaultPath, confValue, i) {
@@ -147,8 +147,7 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
         // prefer the resolved path from updateFullPath, otherwise try configured include paths
         let resolved = filePath;
         if (!resolved) {
-          const found = findFilepath(aUdfPath[k], true);
-          if (typeof found === 'string') resolved = found;
+          resolved = findFilepath(aUdfPath[k], true);
         }
         if (resolved) {
           aUdfPath[k] = resolved;
