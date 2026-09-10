@@ -3,7 +3,7 @@
  * Based on MapParser.js structure and patterns
  */
 
-import VariablePatterns from './variable.js';
+import { isCommentLine, cleanLine } from './variable.js';
 import {
   parseFunctionBoundaries,
   parseFunctionDeclarationLine,
@@ -16,7 +16,6 @@ class VariableParser {
     this.source = source;
     this.filePath = filePath;
     this.lines = source.split('\n');
-    this.patterns = new VariablePatterns();
     this.functions = []; // Populated by parseFunctionBoundaries()
     this.variables = []; // Populated by parseVariableDeclarations()
   }
@@ -48,12 +47,12 @@ class VariableParser {
     // Parse explicit declarations and parameters
     this.lines.forEach((line, lineIndex) => {
       // Skip comment lines
-      if (this.patterns.isComment(line)) {
+      if (isCommentLine(line)) {
         return;
       }
 
       // Clean line for analysis
-      const cleanedLine = this.patterns.cleanLine(line);
+      const cleanedLine = cleanLine(line);
 
       // Parse Global declarations
       this.parseExplicitDeclarations(cleanedLine, lineIndex, 'Global', 'global');
