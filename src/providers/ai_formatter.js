@@ -1,11 +1,11 @@
 import { Position, Range, TextEdit, Uri, languages, window, workspace } from 'vscode';
 import { spawn } from 'child_process';
 import fs from 'fs/promises';
-import fsSync from 'fs';
 import path from 'path';
 import conf from './ai_config';
 import { FORMATTER } from '../constants';
 import { debugLog } from '../debugLog';
+import { validateFilePath, validateExecutablePath } from '../utils/pathValidation';
 
 const RANDOM_SUFFIX_START_INDEX = 2;
 const RANDOM_SUFFIX_END_INDEX = 8;
@@ -101,22 +101,20 @@ function runTidy(filePath) {
   return new Promise((resolve, reject) => {
     debugLog(`[AutoIt Formatter] Starting Tidy process for: ${filePath}`);
 
-    if (!filePath || typeof filePath !== 'string') {
-      reject(new Error('Invalid file path provided to runTidy'));
+    const fileValidation = validateFilePath(filePath);
+    if (!fileValidation.valid) {
+      reject(new Error(`Invalid file path provided to runTidy: ${fileValidation.error}`));
       return;
     }
 
-    if (!fsSync.existsSync(filePath)) {
-      reject(new Error(`Source file does not exist: ${filePath}`));
-      return;
-    }
-
-    if (!fsSync.existsSync(conf.config.aiPath)) {
+    const aiPathValidation = validateExecutablePath(conf.config.aiPath);
+    if (!aiPathValidation.valid) {
       reject(new Error(`AutoIt executable not found: ${conf.config.aiPath}`));
       return;
     }
 
-    if (!fsSync.existsSync(conf.config.wrapperPath)) {
+    const wrapperPathValidation = validateExecutablePath(conf.config.wrapperPath);
+    if (!wrapperPathValidation.valid) {
       reject(new Error(`Wrapper not found: ${conf.config.wrapperPath}`));
       return;
     }
@@ -125,16 +123,14 @@ function runTidy(filePath) {
       `[AutoIt Formatter] Command: ${conf.config.aiPath} ${conf.config.wrapperPath} /Tidy /in ${filePath}`,
     );
 
-    const tidyProcess = spawn(conf.config.aiPath, [
-      conf.config.wrapperPath,
-      '/Tidy',
-      '/in',
-      filePath,
+    const tidyProcess = spawn(
+      conf.config.aiPath,
+      [conf.config.wrapperPath, '/Tidy', '/in', filePath],
       {
         stdio: 'pipe',
         cwd: path.dirname(filePath),
       },
-    ]);
+    );
 
     let stdoutData = '';
     let stderrData = '';
