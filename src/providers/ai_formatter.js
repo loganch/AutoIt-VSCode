@@ -5,6 +5,7 @@ import fsSync from 'fs';
 import path from 'path';
 import conf from './ai_config';
 import { FORMATTER } from '../constants';
+import { debugLog } from '../debugLog';
 
 const RANDOM_SUFFIX_START_INDEX = 2;
 const RANDOM_SUFFIX_END_INDEX = 8;
@@ -21,9 +22,8 @@ const AutoItFormatterProvider = {
    * @returns {Promise<TextEdit[]>} Array of text edits to apply formatting
    */
   provideDocumentFormattingEdits: async document => {
-    console.log('[AutoIt Formatter] Starting document formatting');
+    debugLog('[AutoIt Formatter] Starting document formatting');
 
-    // Input validation
     if (!document) {
       window.showErrorMessage('No document provided for formatting');
       return [];
@@ -43,47 +43,41 @@ const AutoItFormatterProvider = {
     const tempFile = generateTempFilePath(workspaceFolder);
     const backupDir = path.join(workspaceFolder, FORMATTER.BACKUP_DIR_NAME);
 
-    console.log(`[AutoIt Formatter] Workspace: ${workspaceFolder}`);
-    console.log(`[AutoIt Formatter] Temp file: ${tempFile}`);
-    console.log(`[AutoIt Formatter] Backup dir: ${backupDir}`);
+    debugLog(`[AutoIt Formatter] Workspace: ${workspaceFolder}`);
+    debugLog(`[AutoIt Formatter] Temp file: ${tempFile}`);
+    debugLog(`[AutoIt Formatter] Backup dir: ${backupDir}`);
 
     try {
       const startTime = Date.now();
 
-      // Ensure backup directory exists
       await ensureDirectoryExists(backupDir);
-      console.log(`[AutoIt Formatter] Backup directory ready: ${backupDir}`);
+      debugLog(`[AutoIt Formatter] Backup directory ready: ${backupDir}`);
 
-      // Write document content to temporary file asynchronously
       const documentContent = document.getText();
-      console.log(`[AutoIt Formatter] Writing ${documentContent.length} characters to temp file`);
+      debugLog(`[AutoIt Formatter] Writing ${documentContent.length} characters to temp file`);
       await workspace.fs.writeFile(Uri.file(tempFile), Buffer.from(documentContent));
 
-      // Execute Tidy formatting on the temporary file
       await runTidy(tempFile);
 
-      // Read the formatted content back
       const formattedContent = await workspace.fs.readFile(Uri.file(tempFile));
       const formattedText = formattedContent.toString();
-      console.log(`[AutoIt Formatter] Read ${formattedText.length} characters from formatted file`);
+      debugLog(`[AutoIt Formatter] Read ${formattedText.length} characters from formatted file`);
 
-      // Validate that formatting produced valid content
       if (!formattedText || formattedText.trim() === '') {
         throw new Error('Tidy produced empty or invalid output');
       }
 
       const endTime = Date.now();
-      console.log(`[AutoIt Formatter] Formatting completed in ${endTime - startTime}ms`);
+      debugLog(`[AutoIt Formatter] Formatting completed in ${endTime - startTime}ms`);
 
       return [TextEdit.replace(fullDocumentRange(document), formattedText)];
     } catch (error) {
       const errorMessage = `AutoIt Formatting Error: ${error.message}`;
       window.showErrorMessage(errorMessage);
-      console.error('[AutoIt Formatter] Error details:', error);
+      debugLog(`[AutoIt Formatter] Error details: ${error?.message ?? error}`);
       return [];
     } finally {
-      // Clean up temporary and backup files asynchronously
-      console.log('[AutoIt Formatter] Starting cleanup');
+      debugLog('[AutoIt Formatter] Starting cleanup');
       await cleanupFiles(tempFile, backupDir);
     }
   },
@@ -105,9 +99,8 @@ export const formatterProvider = languages.registerDocumentFormattingEditProvide
  */
 function runTidy(filePath) {
   return new Promise((resolve, reject) => {
-    console.log(`[AutoIt Formatter] Starting Tidy process for: ${filePath}`);
+    debugLog(`[AutoIt Formatter] Starting Tidy process for: ${filePath}`);
 
-    // Validate input parameters
     if (!filePath || typeof filePath !== 'string') {
       reject(new Error('Invalid file path provided to runTidy'));
       return;
@@ -118,7 +111,6 @@ function runTidy(filePath) {
       return;
     }
 
-    // Check if config paths exist
     if (!fsSync.existsSync(conf.config.aiPath)) {
       reject(new Error(`AutoIt executable not found: ${conf.config.aiPath}`));
       return;
@@ -129,19 +121,18 @@ function runTidy(filePath) {
       return;
     }
 
-    console.log(
+    debugLog(
       `[AutoIt Formatter] Command: ${conf.config.aiPath} ${conf.config.wrapperPath} /Tidy /in ${filePath}`,
     );
 
-    // Spawn Tidy process with proper error handling
     const tidyProcess = spawn(conf.config.aiPath, [
       conf.config.wrapperPath,
       '/Tidy',
       '/in',
       filePath,
       {
-        stdio: 'pipe', // Ensure proper stdio handling
-        cwd: path.dirname(filePath), // Set working directory to file location
+        stdio: 'pipe',
+        cwd: path.dirname(filePath),
       },
     ]);
 
@@ -152,37 +143,35 @@ function runTidy(filePath) {
     const timeoutId = setTimeout(() => {
       if (!hasExited && !tidyProcess.killed) {
         hasExited = true;
-        tidyProcess.kill('SIGTERM'); // Use SIGTERM for graceful shutdown
+        tidyProcess.kill('SIGTERM');
         reject(new Error(`Tidy process timed out after ${FORMATTER.TIDY_TIMEOUT_MS}ms`));
       }
     }, FORMATTER.TIDY_TIMEOUT_MS);
 
-    // Capture stdout and stderr
     tidyProcess.stdout.on('data', data => {
       stdoutData += data.toString();
-      console.log(`[AutoIt Formatter] Tidy stdout: ${data.toString().trim()}`);
+      debugLog(`[AutoIt Formatter] Tidy stdout: ${data.toString().trim()}`);
     });
 
     tidyProcess.stderr.on('data', data => {
       stderrData += data.toString();
-      console.error(`[AutoIt Formatter] Tidy stderr: ${data.toString().trim()}`);
+      debugLog(`[AutoIt Formatter] Tidy stderr: ${data.toString().trim()}`);
     });
 
-    // Handle process exit with proper validation
     const handleExit = code => {
-      if (hasExited) return; // Prevent multiple exit handlers
+      if (hasExited) return;
       hasExited = true;
 
       clearTimeout(timeoutId);
 
-      console.log(`[AutoIt Formatter] Tidy exited with code: ${code}`);
+      debugLog(`[AutoIt Formatter] Tidy exited with code: ${code}`);
 
       if (stdoutData) {
-        console.log(`[AutoIt Formatter] Final stdout: ${stdoutData.trim()}`);
+        debugLog(`[AutoIt Formatter] Final stdout: ${stdoutData.trim()}`);
       }
 
       if (stderrData) {
-        console.error(`[AutoIt Formatter] Final stderr: ${stderrData.trim()}`);
+        debugLog(`[AutoIt Formatter] Final stderr: ${stderrData.trim()}`);
       }
 
       if (code === 0) {
@@ -193,17 +182,15 @@ function runTidy(filePath) {
       }
     };
 
-    // Handle process errors
     const handleError = error => {
       if (hasExited) return;
       hasExited = true;
 
       clearTimeout(timeoutId);
-      console.error(`[AutoIt Formatter] Process error: ${error.message}`);
+      debugLog(`[AutoIt Formatter] Process error: ${error.message}`);
       reject(new Error(`Failed to start Tidy process: ${error.message}`));
     };
 
-    // Set up event listeners
     tidyProcess.on('exit', handleExit);
     tidyProcess.on('error', handleError);
   });
@@ -249,7 +236,7 @@ async function cleanupFiles(tempFile, backupDir) {
   // Clean up temporary file
   cleanupPromises.push(
     safeDeleteFile(tempFile).catch(error =>
-      console.warn(`Failed to cleanup temp file ${tempFile}:`, error.message),
+      debugLog(`Failed to cleanup temp file ${tempFile}: ${error.message}`),
     ),
   );
 
@@ -260,7 +247,7 @@ async function cleanupFiles(tempFile, backupDir) {
   );
   cleanupPromises.push(
     safeDeleteFile(backupFile).catch(error =>
-      console.warn(`Failed to cleanup backup file ${backupFile}:`, error.message),
+      debugLog(`Failed to cleanup backup file ${backupFile}: ${error.message}`),
     ),
   );
 
