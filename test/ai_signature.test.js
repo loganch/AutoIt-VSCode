@@ -71,11 +71,9 @@ jest.mock('../src/utils/regexPatterns', () => ({
   },
 }));
 
-jest.mock('../src/providers/ai_config', () => ({
+jest.mock('../src/providers/pathResolution', () => ({
   __esModule: true,
-  default: {
-    findFilepath: mockFindFilepath,
-  },
+  findFilepath: mockFindFilepath,
 }));
 
 jest.mock('../src/constants', () => ({

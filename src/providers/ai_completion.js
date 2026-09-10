@@ -19,14 +19,12 @@ const {
   libraryIncludePattern,
   variablePattern,
 } = REGEX_PATTERNS;
-import aiConfig from './ai_config';
+import { findFilepath } from './pathResolution';
 import { DEFAULT_UDFS } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';
 import VariableTrackingService from '../services/VariableTrackingService.js';
 import { attachIncludeEdits } from '../utils/includeAutoInsert';
 import { isParenTriggerOn } from '../completionTransforms';
-
-const { findFilepath } = aiConfig;
 
 // Per-document caches for include completions, keyed by document URI
 // Each entry: { files: string[], completions: CompletionItem[] }

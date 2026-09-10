@@ -2,13 +2,14 @@ import { window, Position, Uri } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import aiConfig from '../providers/ai_config';
+import { findFilepath } from '../providers/pathResolution';
 import { showErrorMessage } from '../providers/ai_showMessage';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import OutputChannelManager from '../services/OutputChannelManager';
 import { globalOutputChannel, processManager } from '../services/commandServiceStack';
 
 const { functionDefinitionRegex } = REGEX_PATTERNS;
-const { config, findFilepath } = aiConfig;
+const { config } = aiConfig;
 
 /** @type {number} Length of double underscore prefix for internal functions. */
 const DOUBLE_UNDERSCORE_LENGTH = 2;

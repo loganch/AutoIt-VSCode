@@ -49,6 +49,11 @@ jest.mock('../../src/providers/ai_config', () => ({
   },
 }));
 
+jest.mock('../../src/providers/pathResolution', () => ({
+  __esModule: true,
+  findFilepath: (...args) => mockFindFilepath(...args),
+}));
+
 jest.mock('../../src/commands/scriptCommands.js', () => ({
   globalOutputChannel: {},
 }));

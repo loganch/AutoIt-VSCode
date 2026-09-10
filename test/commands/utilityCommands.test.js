@@ -81,6 +81,11 @@ jest.mock('../../src/providers/ai_config', () => ({
   },
 }));
 
+jest.mock('../../src/providers/pathResolution', () => ({
+  __esModule: true,
+  findFilepath: (...args) => mockFindFilepath(...args),
+}));
+
 describe('UtilityCommands', () => {
   let utility;
 
