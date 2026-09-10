@@ -1,5 +1,3 @@
-const path = require('path');
-
 class MockPosition {
   constructor(line, character) {
     this.line = line;
