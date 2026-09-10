@@ -70,7 +70,11 @@ function migrateTokenColorDefaults() {
     }
   } catch (error) {
     // Log only to console to keep activation resilient without hiding diagnostics.
-    console.debug('[autoit] Failed to update tokenColorCustomizations defaults.', error);
+    // Log the message only — the error object may carry settings context.
+    console.debug(
+      '[autoit] Failed to update tokenColorCustomizations defaults:',
+      error?.message ?? error,
+    );
   }
 }
 
