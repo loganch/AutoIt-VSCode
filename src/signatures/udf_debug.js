@@ -7,7 +7,7 @@ import {
   valueFirstHeader,
 } from '../completionTransforms';
 
-const include = '`#include <Debug.au3>`';
+const include = '(Requires: `#include <Debug.au3>`)';
 
 const signatures = {
   _Assert: {
