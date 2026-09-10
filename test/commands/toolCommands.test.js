@@ -49,7 +49,7 @@ jest.mock('../../src/providers/ai_config', () => ({
   },
 }));
 
-jest.mock('../../src/commands/ScriptCommands.js', () => ({
+jest.mock('../../src/commands/scriptCommands.js', () => ({
   globalOutputChannel: {},
 }));
 
@@ -99,7 +99,7 @@ describe('ToolCommands.launchHelp', () => {
     mockFindFilepath.mockReturnValue('');
     mockGetIncludeText.mockReturnValue('; no matching function declaration');
 
-    ({ launchHelp } = require('../../src/commands/ToolCommands'));
+    ({ launchHelp } = require('../../src/commands/toolCommands'));
   });
 
   test('does not throw for malformed query with unmatched parenthesis in smart-help path', () => {
@@ -154,7 +154,7 @@ describe('ToolCommands.launchInfo', () => {
 
     mockExistsSync.mockReturnValue(true);
 
-    ({ launchInfo } = require('../../src/commands/ToolCommands'));
+    ({ launchInfo } = require('../../src/commands/toolCommands'));
   });
 
   test('spawns the info tool when the executable exists', () => {

@@ -1,7 +1,7 @@
 import { window, Position, Uri } from 'vscode';
 import path from 'path';
 import fs from 'fs';
-import { globalOutputChannel } from './ScriptCommands.js';
+import { globalOutputChannel } from './scriptCommands.js';
 import aiConfig from '../providers/ai_config';
 import { showErrorMessage } from '../providers/ai_showMessage';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';

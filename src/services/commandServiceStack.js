@@ -10,7 +10,7 @@ const { config } = conf;
 
 /**
  * Shared singleton service stack for running/tracking AutoIt3Wrapper processes.
- * Both ScriptCommands.js and ToolCommands.js spawn processes through this same
+ * Both scriptCommands.js and toolCommands.js spawn processes through this same
  * stack so a single ProcessManager owns runner state across script and tool commands.
  */
 const globalOutputChannel = OutputChannelManager.createGlobalOutputChannel(

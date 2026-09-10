@@ -19,13 +19,13 @@ jest.mock('../src/providers/ai_config', () => ({
   },
 }));
 
-jest.mock('../src/commands/ScriptCommands', () => ({
+jest.mock('../src/commands/scriptCommands', () => ({
   runScript: jest.fn(),
   killScript: (...args) => mockKillScript(...args),
   restartScript: jest.fn(),
 }));
 
-jest.mock('../src/commands/ToolCommands', () => ({
+jest.mock('../src/commands/toolCommands', () => ({
   build: jest.fn(),
   check: jest.fn(),
   compile: jest.fn(),
@@ -35,12 +35,12 @@ jest.mock('../src/commands/ToolCommands', () => ({
   tidy: jest.fn(),
 }));
 
-jest.mock('../src/commands/DebugCommands', () => ({
+jest.mock('../src/commands/debugCommands', () => ({
   debugConsole: jest.fn(),
   debugMsgBox: jest.fn(),
 }));
 
-jest.mock('../src/commands/UtilityCommands', () => ({
+jest.mock('../src/commands/utilityCommands', () => ({
   changeParams: jest.fn(),
   getActiveDocumentFileName: (...args) => mockUtilityGetActiveDocumentFileName(...args),
   insertHeader: jest.fn(),

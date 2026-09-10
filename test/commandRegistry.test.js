@@ -6,13 +6,13 @@
 const mockKillScript = jest.fn();
 const mockGetActiveDocumentFileName = jest.fn();
 
-jest.mock('../src/commands/ScriptCommands', () => ({
+jest.mock('../src/commands/scriptCommands', () => ({
   __esModule: true,
   runScript: jest.fn(),
   killScript: (...args) => mockKillScript(...args),
   restartScript: jest.fn(),
 }));
-jest.mock('../src/commands/ToolCommands', () => ({
+jest.mock('../src/commands/toolCommands', () => ({
   __esModule: true,
   compile: jest.fn(),
   tidy: jest.fn(),
@@ -22,12 +22,12 @@ jest.mock('../src/commands/ToolCommands', () => ({
   launchInfo: jest.fn(),
   launchKoda: jest.fn(),
 }));
-jest.mock('../src/commands/DebugCommands', () => ({
+jest.mock('../src/commands/debugCommands', () => ({
   __esModule: true,
   debugMsgBox: jest.fn(),
   debugConsole: jest.fn(),
 }));
-jest.mock('../src/commands/UtilityCommands', () => ({
+jest.mock('../src/commands/utilityCommands', () => ({
   __esModule: true,
   changeParams: jest.fn(),
   openInclude: jest.fn(),

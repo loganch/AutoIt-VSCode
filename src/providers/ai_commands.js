@@ -9,7 +9,7 @@ import { commandsList as _commandsList, commandsPrefix } from '../commandsList';
 
 // getActiveDocumentFileName feeds the ProcessManager's output-name resolution.
 // Command id -> handler wiring lives in commandRegistry.js (see F6).
-import * as UtilityCommands from '../commands/UtilityCommands';
+import * as UtilityCommands from '../commands/utilityCommands';
 import packageJson from '../../package.json';
 
 const { config } = conf;

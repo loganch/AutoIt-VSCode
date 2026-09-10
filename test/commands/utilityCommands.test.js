@@ -39,7 +39,7 @@ jest.mock('../../src/providers/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
 }));
 
-jest.mock('../../src/commands/ScriptCommands.js', () => ({
+jest.mock('../../src/commands/scriptCommands.js', () => ({
   globalOutputChannel: {
     replace: (...args) => mockReplace(...args),
   },
@@ -69,7 +69,7 @@ describe('UtilityCommands', () => {
     mockShowInputBox.mockResolvedValue(undefined);
     mockExistsSync.mockReturnValue(false);
     mockFindFilepath.mockReturnValue(false);
-    utility = require('../../src/commands/UtilityCommands.js');
+    utility = require('../../src/commands/utilityCommands.js');
   });
 
   test('getActiveDocumentFileName returns empty string when no active editor', () => {

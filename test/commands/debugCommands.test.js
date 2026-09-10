@@ -21,7 +21,7 @@ const {
   debugMsgBox,
   getDebugText,
   getIndent,
-} = require('../../src/commands/DebugCommands.js');
+} = require('../../src/commands/debugCommands.js');
 
 const createEditor = ({ activeLine, lines, selectedWord }) => {
   const insert = jest.fn();

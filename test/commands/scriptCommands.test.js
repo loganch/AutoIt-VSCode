@@ -123,7 +123,7 @@ describe('ScriptCommands', () => {
       killScript,
       restartScript,
       runScript,
-    } = require('../../src/commands/ScriptCommands.js'));
+    } = require('../../src/commands/scriptCommands.js'));
   });
 
   test('exports the singleton global output channel', () => {
