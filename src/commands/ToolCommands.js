@@ -4,6 +4,7 @@ import { window } from 'vscode';
 import fs from 'fs';
 import { spawn } from 'child_process';
 import { getIncludeText } from '../utils/fsCache';
+import { escapeRegexLiteral } from '../utils/regexPatterns';
 import conf from '../providers/ai_config';
 import ProcessRunner from '../services/ProcessRunner';
 import ProcessManager from '../services/ProcessManager';
@@ -14,15 +15,6 @@ import HotkeyManager from '../services/HotkeyManager';
 const STATUS_MSG_TIMEOUT_MS = 1500;
 
 const { config, findFilepath } = conf;
-
-/**
- * Escapes regex metacharacters so dynamic input can be matched literally.
- * @param {string} value
- * @returns {string}
- */
-function escapeRegexLiteral(value) {
-  return typeof value === 'string' ? value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
-}
 
 // Instantiate services
 const processManager = new ProcessManager(
