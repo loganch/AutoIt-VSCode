@@ -21,55 +21,56 @@ const _cachedOutputChannels = {};
  */
 
 /**
- * Process-specific output formatting strategy - shows timestamps only for process output
+ * Process-specific output formatting strategy - shows timestamps only for process output.
+ * @param {string[]} lines - Lines to format (mutated in place)
+ * @param {{time: string, isNewLineProcess: boolean, config: Object}} state - Formatting state
+ * @returns {{lines: string[], isNewLineProcess: boolean}} Formatted lines and updated state
  */
-class ProcessFormattingStrategy {
-  format(lines, context) {
-    const { time, isNewLineProcess, config } = context;
-    if (config.outputShowTime === 'Process' || config.outputShowTime === 'All') {
-      for (let i = 0; i < lines.length; i++) {
-        if (i === lines.length - 1 && lines[i] === '') break;
-        if (isNewLineProcess) {
-          lines[i] = time + NO_BREAK_SPACE + lines[i];
-        }
-        // Set isNewLineProcess to true for next iteration
-        context.isNewLineProcess = true;
+function formatProcessLines(lines, { time, isNewLineProcess, config }) {
+  let nextIsNewLineProcess = isNewLineProcess;
+  if (config.outputShowTime === 'Process' || config.outputShowTime === 'All') {
+    for (let i = 0; i < lines.length; i++) {
+      if (i === lines.length - 1 && lines[i] === '') break;
+      if (nextIsNewLineProcess) {
+        lines[i] = time + NO_BREAK_SPACE + lines[i];
       }
+      nextIsNewLineProcess = true;
     }
-    return lines;
   }
+  return { lines, isNewLineProcess: nextIsNewLineProcess };
 }
 
 /**
- * Multi-output formatting strategy - includes process ID prefixes
+ * Multi-output formatting strategy - includes process ID prefixes.
+ * @param {string[]} lines - Lines to format (mutated in place)
+ * @param {{prefixId: string, prefixEmpty: string, time: string, isNewLine: boolean, lastId: number, id: number, config: Object}} state - Formatting state
+ * @returns {{lines: string[], isNewLine: boolean, lastId: number}} Formatted lines and updated state
  */
-class MultiFormattingStrategy {
-  format(lines, context) {
-    const { prefixId, prefixEmpty, time, isNewLine, lastId, id, config } = context;
+function formatMultiLines(lines, { prefixId, prefixEmpty, time, isNewLine, lastId, id, config }) {
+  const prefixTime =
+    config.outputShowTime === 'Global' || config.outputShowTime === 'All'
+      ? time + NO_BREAK_SPACE
+      : '';
 
-    const prefixTime =
-      config.outputShowTime === 'Global' || config.outputShowTime === 'All'
-        ? time + NO_BREAK_SPACE
-        : '';
+  let nextIsNewLine = isNewLine;
+  let nextLastId = lastId;
+  for (let i = 0; i < lines.length; i++) {
+    if (i === lines.length - 1 && lines[i] === '') break;
 
-    for (let i = 0; i < lines.length; i++) {
-      if (i === lines.length - 1 && lines[i] === '') break;
-
-      if (isNewLine) {
-        if (config.multiOutputShowProcessId === 'Multi') {
-          lines[i] = prefixId + lines[i];
-        } else if (config.multiOutputShowProcessId !== 'None') {
-          lines[i] = (lastId === id ? prefixEmpty : prefixId) + lines[i];
-        }
-        if (prefixTime) {
-          lines[i] = prefixTime + lines[i];
-        }
-        context.lastId = id;
+    if (nextIsNewLine) {
+      if (config.multiOutputShowProcessId === 'Multi') {
+        lines[i] = prefixId + lines[i];
+      } else if (config.multiOutputShowProcessId !== 'None') {
+        lines[i] = (nextLastId === id ? prefixEmpty : prefixId) + lines[i];
       }
-      context.isNewLine = true;
+      if (prefixTime) {
+        lines[i] = prefixTime + lines[i];
+      }
+      nextLastId = id;
     }
-    return lines;
+    nextIsNewLine = true;
   }
+  return { lines, isNewLine: nextIsNewLine, lastId: nextLastId };
 }
 
 /**
@@ -122,10 +123,10 @@ class OutputChannelManager {
     this.aWrapperHotkey = aWrapperHotkey;
     this.runners = runners || {};
 
-    // Strategy pattern implementations
+    // Formatting strategies: (lines, state) => { lines, ...updatedState }
     this.strategies = {
-      process: new ProcessFormattingStrategy(),
-      multi: new MultiFormattingStrategy(),
+      process: formatProcessLines,
+      multi: formatMultiLines,
     };
 
     // Hotkey failure message patterns
@@ -213,15 +214,14 @@ class OutputChannelManager {
       }
 
       // Apply process formatting strategy
-      const processContext = {
+      const processResult = this.strategies.process(linesProcess, {
         time,
         isNewLineProcess,
         config: this.config,
-      };
-      const formattedProcessLines = this.strategies.process.format(linesProcess, processContext);
-      ({ isNewLineProcess } = processContext);
+      });
+      ({ isNewLineProcess } = processResult);
 
-      const textProcess = formattedProcessLines.join('\r\n');
+      const textProcess = processResult.lines.join('\r\n');
       if (textProcess) {
         aiOutProcess[prop](textProcess);
         isNewLineProcess =
@@ -234,7 +234,7 @@ class OutputChannelManager {
       }
 
       // Apply multi formatting strategy
-      const multiContext = {
+      const multiResult = this.strategies.multi(lines, {
         prefixId,
         prefixEmpty,
         time,
@@ -242,12 +242,11 @@ class OutputChannelManager {
         lastId: this.runners.lastId,
         id,
         config: this.config,
-      };
-      const formattedGlobalLines = this.strategies.multi.format(lines, multiContext);
-      this.runners.isNewLine = multiContext.isNewLine;
-      this.runners.lastId = multiContext.lastId;
+      });
+      this.runners.isNewLine = multiResult.isNewLine;
+      this.runners.lastId = multiResult.lastId;
 
-      const textGlobal = formattedGlobalLines.join('\r\n');
+      const textGlobal = multiResult.lines.join('\r\n');
       if (textGlobal) {
         aiOut[prop](textGlobal);
         this.runners.isNewLine =
