@@ -39,11 +39,35 @@ jest.mock('../../src/providers/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
 }));
 
-jest.mock('../../src/commands/scriptCommands.js', () => ({
-  globalOutputChannel: {
-    replace: (...args) => mockReplace(...args),
-  },
-}));
+jest.mock('../../src/services/commandServiceStack', () => {
+  const pkg = require('../../package.json');
+  return {
+    globalOutputChannel: {
+      replace: (...args) => mockReplace(...args),
+    },
+    processManager: {
+      outputName: `extension-output-${pkg.publisher}.${pkg.name}-#`,
+      config: { outputMaxHistoryLines: 2 },
+      isAiOutVisible() {
+        const { window } = require('vscode');
+        for (let i = 0; i < window.visibleTextEditors.length; i += 1) {
+          const editor = window.visibleTextEditors[i];
+          const { fileName } = editor.document;
+          if (fileName.startsWith(this.outputName)) {
+            const rest = fileName.slice(this.outputName.length);
+            const index = rest.indexOf('-');
+            if (index !== -1) {
+              const id = rest.slice(0, index);
+              const name = rest.slice(index + 1);
+              return { id, name, output: editor };
+            }
+          }
+        }
+        return null;
+      },
+    },
+  };
+});
 
 jest.mock('../../src/providers/ai_config', () => ({
   __esModule: true,

@@ -1,15 +1,14 @@
 import { window, Position, Uri } from 'vscode';
 import path from 'path';
 import fs from 'fs';
-import { globalOutputChannel } from './scriptCommands.js';
 import aiConfig from '../providers/ai_config';
 import { showErrorMessage } from '../providers/ai_showMessage';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
-import packageJson from '../../package.json';
+import OutputChannelManager from '../services/OutputChannelManager';
+import { globalOutputChannel, processManager } from '../services/commandServiceStack';
 
 const { functionDefinitionRegex } = REGEX_PATTERNS;
 const { config, findFilepath } = aiConfig;
-const aiOutCommon = globalOutputChannel;
 
 /** @type {number} Length of double underscore prefix for internal functions. */
 const DOUBLE_UNDERSCORE_LENGTH = 2;
@@ -22,26 +21,6 @@ const BYREF_PREFIX_LENGTH = 6;
 
 /** @type {number} Padding length for parameter names in documentation. */
 const PARAMETER_PAD_LENGTH = 21;
-
-const runners = {
-  isAiOutVisible() {
-    for (let i = 0; i < window.visibleTextEditors.length; i += 1) {
-      const editor = window.visibleTextEditors[i];
-      const { fileName } = editor.document;
-      if (fileName.startsWith(this.outputName)) {
-        const rest = fileName.slice(this.outputName.length);
-        const index = rest.indexOf('-');
-        if (index !== -1) {
-          const id = rest.slice(0, index);
-          const name = rest.slice(index + 1);
-          return { id, name, output: editor };
-        }
-      }
-    }
-    return null;
-  },
-  outputName: `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
-};
 
 /**
  * Gets the file name of the active document in the editor
@@ -80,23 +59,14 @@ function getTime() {
 
 /**
  * Trims the output text in the visible AutoIt output to the max number of lines
- * set in the configuration.
- *
- * If the number of lines in the output text is more than the max, the excess lines
- * are removed and the rest are displayed.
+ * set in the configuration. Delegates to the shared ProcessManager's
+ * isAiOutVisible() and OutputChannelManager.trimOutputLines() so this stays
+ * the single implementation of that logic.
  * @returns {void}
  */
 const trimOutputLines = () => {
   try {
-    const out = runners.isAiOutVisible();
-    if (!out || !config.outputMaxHistoryLines) return;
-
-    if (out.output.document.lineCount > config.outputMaxHistoryLines) {
-      const text = out.output.document.getText();
-      const lines = text.split(/\r?\n/);
-      const outputText = lines.slice(-config.outputMaxHistoryLines).join('\r\n');
-      aiOutCommon.replace(outputText);
-    }
+    OutputChannelManager.trimOutputLines(processManager, globalOutputChannel);
   } catch (error) {
     console.error('Error trimming output lines:', error);
   }
