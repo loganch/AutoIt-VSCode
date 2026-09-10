@@ -101,7 +101,7 @@ import * as treeViewConstants from './completions/constants_treeview';
 import * as upDownConstants from './completions/constants_updown';
 import * as windowsConstants from './completions/constants_windows';
 import * as wordConstants from './completions/constants_word';
-import * as inetConstants from './completions/constantsInet';
+import * as inetConstants from './completions/constants_inet';
 import * as directives from './completions/directives';
 
 // Signature modules: each exports `signatures` as default plus completions/hovers.

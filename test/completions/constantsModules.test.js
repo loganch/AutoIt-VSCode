@@ -59,7 +59,7 @@ const constantsStatusbarModule = require('../../src/completions/constants_status
 const constantsStringModule = require('../../src/completions/constants_string.js');
 const constantsTabModule = require('../../src/completions/constants_tab.js');
 const constantsWindowsModule = require('../../src/completions/constants_windows.js');
-const constantsInetModule = require('../../src/completions/constantsInet.js');
+const constantsInetModule = require('../../src/completions/constants_inet.js');
 
 const completionModules = [
   {
