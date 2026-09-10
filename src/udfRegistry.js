@@ -104,8 +104,10 @@ import * as wordConstants from './completions/constants_word';
 import * as inetConstants from './completions/constantsInet';
 import * as directives from './completions/directives';
 
-// Every entry contributes both its completions and (if present) its hovers.
-const modules = [
+// Signature modules: each exports `signatures` as default plus completions/hovers.
+// This list is the single source of truth — signatures/index.js derives its
+// aggregate from it, so a new UDF is registered in exactly one place.
+const signatureModules = [
   functions,
   keywords,
   macros,
@@ -175,6 +177,10 @@ const modules = [
   udf_winapi_shpath,
   udf_winapi_sys,
   udf_winapi_theme,
+];
+
+// Completions-only modules (no signature maps): snippets and constants tables.
+const completionModules = [
   sendKeys, // completions only — no hovers
   aviConstants,
   buttonConstants,
@@ -204,6 +210,9 @@ const modules = [
   inetConstants,
 ];
 
+// Every entry contributes both its completions and (if present) its hovers.
+const modules = [...signatureModules, ...completionModules];
+
 const moduleCompletions = mod => mod.completions ?? mod.default ?? [];
 const moduleHovers = mod => mod.hovers ?? {};
 
@@ -225,3 +234,5 @@ const directiveHovers = [
 export const completions = [...modules.flatMap(moduleCompletions), ...directiveCompletions.flat()];
 
 export const hovers = Object.assign({}, ...modules.map(moduleHovers), ...directiveHovers);
+
+export { signatureModules };
