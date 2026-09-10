@@ -321,51 +321,13 @@ jest.mock('../src/utils/coreConstants', () => ({
 // Prepare mutable mocks for the modules ai_definition imports from; we
 // override implementations per test
 jest.mock('../src/utils/includeResolution', () => {
-  // Define paths and content locally within the mock to avoid Jest scoping issues
+  // Define paths locally within the mock to avoid Jest scoping issues.
+  // File contents are served by the fsCache mock below, so only the path
+  // mapping is needed here.
   const pathModule = require('path');
-  const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
   const mockHelperPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
   const mockMissingPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'missing.au3');
   const mockLibArrayPath = pathModule.join(process.cwd(), 'lib', 'Array.au3');
-
-  // Define content constants locally
-  const mockMainContent = [
-    '#include "helper.au3"',
-    '#include <Array.au3>', // note: our parser will not use <> literally; util mocks return data for lib include
-    'Local $a, $b = 1, _',
-    '    $c',
-    'Global $Mixed_Name123 = 0',
-    '; function with volatile after name',
-    '    Func DoWork volatile($x, $y)',
-    '        Return $x + $y',
-    '    EndFunc',
-    '; function normal',
-    'Func NormalFunc($p)',
-    '    Return $p',
-    'EndFunc',
-    '; calls to included functions and variables',
-    'Local $result = HelperFunc($helperVar)',
-    'Local $libResult = LibFunc($Array_InLib)',
-  ].join('\n');
-
-  const mockHelperContent = [
-    '; nested include to test recursion (not existing to simulate missing readable)',
-    '#include "missing.au3"',
-    'Const $CONST_ONE = 1',
-    '    Local   $helperVar = 2',
-    '; volatile before name',
-    'Func volatile HelperFunc($v)',
-    '    Return $v',
-    'EndFunc',
-  ].join('\n');
-
-  const mockLibArrayContent = [
-    '; Fake Array.au3',
-    'Global $Array_InLib = 42',
-    'Func LibFunc($x)',
-    '  Return $x',
-    'EndFunc',
-  ].join('\n');
 
   return {
     getIncludeScripts: jest.fn(() => []),
