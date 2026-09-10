@@ -6,7 +6,7 @@ jest.mock('vscode', () => ({
 
 jest.mock('../../src/commands/editorActions', () => jest.fn());
 
-import debugRemove from '../../src/commands/debugRemove';
+import { debugRemove } from '../../src/commands/debugCommands';
 import searchAndReplace from '../../src/commands/editorActions';
 
 const REMOVED_DEBUG_LINE_BATCH_ONE = 2;

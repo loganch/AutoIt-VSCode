@@ -38,6 +38,8 @@ jest.mock('../src/commands/toolCommands', () => ({
 jest.mock('../src/commands/debugCommands', () => ({
   debugConsole: jest.fn(),
   debugMsgBox: jest.fn(),
+  debugRemove: jest.fn(),
+  traceRemove: jest.fn(),
 }));
 
 jest.mock('../src/commands/utilityCommands', () => ({
@@ -47,17 +49,7 @@ jest.mock('../src/commands/utilityCommands', () => ({
   openInclude: jest.fn(),
 }));
 
-jest.mock('../src/commands/debugRemove.js', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
 jest.mock('../src/commands/functionTraceAdd.js', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}));
-
-jest.mock('../src/commands/trace.js', () => ({
   __esModule: true,
   default: jest.fn(),
 }));

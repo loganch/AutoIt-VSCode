@@ -1,4 +1,5 @@
 import { window, Position } from 'vscode';
+import searchAndReplace from './editorActions';
 
 /**
  * Configuration for debug code templates.
@@ -159,4 +160,47 @@ function debugConsole() {
   }
 }
 
-export { getDebugText, getIndent, debugMsgBox, debugConsole };
+/**
+ * Removes debug lines from an AutoIt Script.
+ *
+ * This function uses regular expressions to find and replace the debug lines in the active text editor.
+ * If any replacements are made, it displays a success message.
+ * Otherwise, it displays a message indicating that no debug lines were found.
+ *
+ * @returns {Promise<void>} A promise that resolves once the debug lines are removed.
+ */
+async function debugRemove() {
+  const consoleWriteDebugPattern =
+    /\s+?(;~?\s+)?;### Debug CONSOLE.*?\r\n\s?(;~?\s+)?ConsoleWrite\('@@ Debug\('.+\r\n/g;
+  const msgBoxDebugPattern =
+    /\s+?(;~?\s+)?;### Debug MSGBOX.*?\r\n\s?(;~?\s+)?MsgBox\(262144, 'Debug line ~'.+\r\n/g;
+
+  const consoleWriteReplacementsMade = await searchAndReplace(consoleWriteDebugPattern);
+  const msgBoxReplacementsMade = await searchAndReplace(msgBoxDebugPattern);
+
+  if (consoleWriteReplacementsMade || msgBoxReplacementsMade) {
+    window.showInformationMessage(
+      `${consoleWriteReplacementsMade + msgBoxReplacementsMade} Debug line(s) removed successfully`,
+    );
+  } else {
+    window.showInformationMessage('No debug lines found');
+  }
+}
+
+const functionTracePattern = /\s+?(;~?\s+)?ConsoleWrite\([^\r\n]+\)[ \t]*;### Trace[^\r\n]+/g;
+
+/**
+ * Removes function trace lines added by functionTraceAdd.
+ * @returns {Promise<void>} A promise that resolves once the trace lines are removed.
+ */
+async function traceRemove() {
+  const traceRemovalResult = await searchAndReplace(functionTracePattern, '');
+
+  if (traceRemovalResult) {
+    window.showInformationMessage(`${traceRemovalResult} trace line(s) removed.`);
+  } else {
+    window.showInformationMessage('No trace lines found.');
+  }
+}
+
+export { getDebugText, getIndent, debugMsgBox, debugConsole, debugRemove, traceRemove };

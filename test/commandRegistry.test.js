@@ -26,6 +26,8 @@ jest.mock('../src/commands/debugCommands', () => ({
   __esModule: true,
   debugMsgBox: jest.fn(),
   debugConsole: jest.fn(),
+  debugRemove: jest.fn(),
+  traceRemove: jest.fn(),
 }));
 jest.mock('../src/commands/utilityCommands', () => ({
   __esModule: true,
@@ -34,9 +36,7 @@ jest.mock('../src/commands/utilityCommands', () => ({
   insertHeader: jest.fn(),
   getActiveDocumentFileName: (...args) => mockGetActiveDocumentFileName(...args),
 }));
-jest.mock('../src/commands/debugRemove.js', () => ({ __esModule: true, default: jest.fn() }));
 jest.mock('../src/commands/functionTraceAdd.js', () => ({ __esModule: true, default: jest.fn() }));
-jest.mock('../src/commands/trace.js', () => ({ __esModule: true, default: jest.fn() }));
 
 import { commandRegistry } from '../src/commandRegistry';
 import { commandsList } from '../src/commandsList';

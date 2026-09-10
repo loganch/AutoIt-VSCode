@@ -15,9 +15,7 @@ import * as ScriptCommands from './commands/scriptCommands';
 import * as ToolCommands from './commands/toolCommands';
 import * as DebugCommands from './commands/debugCommands';
 import * as UtilityCommands from './commands/utilityCommands';
-import debugRemove from './commands/debugRemove.js';
 import functionTraceAdd from './commands/functionTraceAdd.js';
-import traceRemove from './commands/trace.js';
 
 const killScriptOpened = (thisFile = null) =>
   ScriptCommands.killScript(thisFile || UtilityCommands.getActiveDocumentFileName());
@@ -38,12 +36,12 @@ export const commandRegistry = {
 
   debugMsgBox: DebugCommands.debugMsgBox,
   debugConsole: DebugCommands.debugConsole,
+  debugRemove: DebugCommands.debugRemove,
+  traceRemove: DebugCommands.traceRemove,
 
   changeParams: UtilityCommands.changeParams,
   openInclude: UtilityCommands.openInclude,
   insertHeader: UtilityCommands.insertHeader,
 
-  debugRemove,
   functionTraceAdd,
-  traceRemove,
 };
