@@ -106,6 +106,18 @@ describe('util module', () => {
     expect(path.basename(resolved)).toBe('helper.au3');
   });
 
+  test('getIncludePath returns an empty string when the include cannot be resolved', () => {
+    const document = {
+      fileName: mainDocumentPath,
+      getText: jest.fn(),
+      uri: { fsPath: mainDocumentPath },
+    };
+
+    const resolved = getIncludePath('"missing.au3"', document);
+
+    expect(resolved).toBe('');
+  });
+
   test('getIncludeText reads and caches AutoIt include files', () => {
     const firstRead = getIncludeText(helperPath);
     const secondRead = getIncludeText(helperPath);

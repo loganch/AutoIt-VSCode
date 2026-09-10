@@ -92,7 +92,7 @@ export const getIncludePath = (fileOrPath, document) => {
     `Fallback path resolution for ${cleanPath}`,
   );
 
-  return fallbackPath ? normalizePath(fallbackPath) : normalizePath(cleanPath);
+  return fallbackPath ? normalizePath(fallbackPath) : '';
 };
 
 /**
