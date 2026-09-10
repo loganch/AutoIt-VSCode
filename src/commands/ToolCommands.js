@@ -10,6 +10,7 @@ import ProcessRunner from '../services/ProcessRunner';
 import ProcessManager from '../services/ProcessManager';
 import OutputChannelManager from '../services/OutputChannelManager';
 import HotkeyManager from '../services/HotkeyManager';
+import { validateExecutablePath } from '../utils/pathValidation';
 
 // Timeout used for status bar messages (ms)
 const STATUS_MSG_TIMEOUT_MS = 1500;
@@ -168,6 +169,12 @@ async function build() {
  * @returns {void}
  */
 function launchHelp() {
+  const helpPathValidation = validateExecutablePath(config.helpPath);
+  if (!helpPathValidation.valid) {
+    window.showErrorMessage(`AutoIt help file not found: ${config.helpPath}`);
+    return;
+  }
+
   const editor = window.activeTextEditor;
   const wordRange = editor.document.getWordRangeAtPosition(editor.selection.start);
 
@@ -225,6 +232,12 @@ function launchHelp() {
  * @returns {void}
  */
 function launchInfo() {
+  const infoPathValidation = validateExecutablePath(config.infoPath);
+  if (!infoPathValidation.valid) {
+    window.showErrorMessage(`AutoIt Window Info tool not found: ${config.infoPath}`);
+    return;
+  }
+
   spawn(config.infoPath, [], { detached: true });
 }
 

@@ -39,6 +39,7 @@ jest.mock('fs', () => ({
 
 jest.mock('../../src/utils/fsCache', () => ({
   getIncludeText: (...args) => mockGetIncludeText(...args),
+  safeFileExists: (...args) => mockExistsSync(...args),
 }));
 
 jest.mock('../../src/providers/ai_config', () => ({
@@ -121,5 +122,46 @@ describe('ToolCommands.launchHelp', () => {
       ['mk:@MSITStore:C:\\AutoIt\\AutoIt.chm::/funcs/_ABC_Func.htm'],
       { detached: true },
     );
+  });
+
+  test('shows an error and does not spawn when the help executable is missing', () => {
+    mockExistsSync.mockReturnValue(false);
+
+    launchHelp();
+
+    expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
+      `AutoIt help file not found: ${mockConfig.helpPath}`,
+    );
+    expect(mockSpawn).not.toHaveBeenCalled();
+  });
+});
+
+describe('ToolCommands.launchInfo', () => {
+  let launchInfo;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetModules();
+
+    mockExistsSync.mockReturnValue(true);
+
+    ({ launchInfo } = require('../../src/commands/ToolCommands'));
+  });
+
+  test('spawns the info tool when the executable exists', () => {
+    launchInfo();
+
+    expect(mockSpawn).toHaveBeenCalledWith(mockConfig.infoPath, [], { detached: true });
+  });
+
+  test('shows an error and does not spawn when the info executable is missing', () => {
+    mockExistsSync.mockReturnValue(false);
+
+    launchInfo();
+
+    expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
+      `AutoIt Window Info tool not found: ${mockConfig.infoPath}`,
+    );
+    expect(mockSpawn).not.toHaveBeenCalled();
   });
 });
