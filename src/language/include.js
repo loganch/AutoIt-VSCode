@@ -1,7 +1,7 @@
 import path from 'path';
-import fs from 'fs';
 import { REGEX_PATTERNS } from '../utils/regexPatterns';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from '../constants';
+import { safeFileExists, safeReadFile } from '../utils/fsCache';
 
 /**
  * Resolves AutoIt #include directives to file paths
@@ -50,7 +50,7 @@ export default class IncludeResolver {
       const currentDir = path.dirname(currentFile);
       const absolutePath = path.resolve(currentDir, include.path);
 
-      if (fs.existsSync(absolutePath)) {
+      if (safeFileExists(absolutePath)) {
         return absolutePath;
       }
       return null;
@@ -60,7 +60,7 @@ export default class IncludeResolver {
       // Try each AutoIt include path
       for (const includePath of this.autoitIncludePaths) {
         const absolutePath = path.join(includePath, include.path);
-        if (fs.existsSync(absolutePath)) {
+        if (safeFileExists(absolutePath)) {
           return absolutePath;
         }
       }
@@ -88,33 +88,31 @@ export default class IncludeResolver {
     visited.add(absolutePath);
     const resolvedFiles = [];
 
-    try {
-      if (!fs.existsSync(filePath)) {
-        return [];
-      }
+    // safeFileExists/safeReadFile never throw (both safeExecute-backed, same
+    // strategy as utils/includeResolution.js) -- a read failure just yields no
+    // includes for this file rather than needing its own catch here.
+    if (!safeFileExists(filePath)) {
+      return [];
+    }
 
-      const source = fs.readFileSync(filePath, 'utf8');
-      const includes = this.parseIncludes(source, filePath);
+    const source = safeReadFile(filePath);
+    const includes = this.parseIncludes(source, filePath);
 
-      for (const include of includes) {
-        const resolved = this.resolveIncludePath(include, filePath);
-        if (resolved) {
-          const absoluteResolved = path.resolve(resolved);
-          if (!visited.has(absoluteResolved)) {
-            // Check depth limit before adding
-            if (depth < this.maxDepth) {
-              resolvedFiles.push(resolved);
+    for (const include of includes) {
+      const resolved = this.resolveIncludePath(include, filePath);
+      if (resolved) {
+        const absoluteResolved = path.resolve(resolved);
+        if (!visited.has(absoluteResolved)) {
+          // Check depth limit before adding
+          if (depth < this.maxDepth) {
+            resolvedFiles.push(resolved);
 
-              // Recursively resolve includes in the included file
-              const nested = this.resolveAllIncludes(resolved, visited, depth + 1);
-              resolvedFiles.push(...nested);
-            }
+            // Recursively resolve includes in the included file
+            const nested = this.resolveAllIncludes(resolved, visited, depth + 1);
+            resolvedFiles.push(...nested);
           }
         }
       }
-    } catch (error) {
-      // Gracefully handle file read errors
-      console.warn(`Failed to resolve includes for ${filePath}:`, error.message);
     }
 
     return resolvedFiles;

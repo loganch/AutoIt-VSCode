@@ -89,6 +89,8 @@ $mUser.age = 30`,
     it('should merge keys from included files', async () => {
       // Setup mocks for both sync (IncludeResolver) and async (MapTrackingService) APIs
       fs.existsSync = jest.fn().mockReturnValue(true);
+      // IncludeResolver goes through fsCache.safeFileExists, which also stats the path
+      fs.statSync = jest.fn().mockReturnValue({ isFile: () => true });
       fs.readFileSync = jest.fn(filePath => {
         // Normalize paths for comparison (handle Windows/Unix differences)
         const normalizedPath = filePath.replace(/\\/g, '/');
@@ -149,6 +151,8 @@ $mApp.version = "1.0"`;
     it('should handle missing included files gracefully', async () => {
       // Setup mocks for sync API (IncludeResolver)
       fs.existsSync = jest.fn().mockReturnValue(true);
+      // IncludeResolver goes through fsCache.safeFileExists, which also stats the path
+      fs.statSync = jest.fn().mockReturnValue({ isFile: () => true });
       fs.readFileSync = jest.fn(filePath => {
         const normalizedPath = filePath.replace(/\\/g, '/');
         if (

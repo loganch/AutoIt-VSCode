@@ -84,9 +84,12 @@ EndFunc`;
 Global $gMain = 1`;
 
     const existsSyncMock = /** @type {jest.Mock} */ (/** @type {unknown} */ (fs.existsSync));
+    const statSyncMock = /** @type {jest.Mock} */ (/** @type {unknown} */ (fs.statSync));
     const readFileSyncMock = /** @type {jest.Mock} */ (/** @type {unknown} */ (fs.readFileSync));
 
     existsSyncMock.mockReturnValue(true);
+    // IncludeResolver goes through fsCache.safeFileExists, which also stats the path
+    statSyncMock.mockReturnValue({ isFile: () => true });
     readFileSyncMock.mockImplementation(filePath => {
       const baseName = getBaseName(filePath);
 

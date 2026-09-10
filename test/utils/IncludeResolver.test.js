@@ -1,6 +1,6 @@
 import path from 'path';
-import fs from 'fs';
 import IncludeResolver from '../../src/language/include.js';
+import * as fsCache from '../../src/utils/fsCache';
 
 // Normalize paths for cross-platform/case-insensitive Windows comparisons
 const norm = p =>
@@ -9,8 +9,11 @@ const norm = p =>
 const INCLUDE_COUNT_THREE = 3;
 const MAX_DEPTH_TWO = 2;
 
-// Mock fs at the top of the file
-jest.mock('fs');
+// IncludeResolver goes through the shared safe I/O helpers (not raw fs)
+jest.mock('../../src/utils/fsCache', () => ({
+  safeFileExists: jest.fn(),
+  safeReadFile: jest.fn(),
+}));
 
 describe('IncludeResolver', () => {
   describe('parseIncludes', () => {
@@ -80,7 +83,7 @@ describe('IncludeResolver', () => {
 
     it('should resolve relative include from current file directory', () => {
       const resolver = new IncludeResolver('/workspace');
-      fs.existsSync = jest.fn().mockReturnValue(true);
+      fsCache.safeFileExists.mockReturnValue(true);
 
       const resolved = resolver.resolveIncludePath(
         { type: 'relative', path: 'config.au3' },
@@ -96,7 +99,7 @@ describe('IncludeResolver', () => {
 
     it('should resolve relative path with ../', () => {
       const resolver = new IncludeResolver('/workspace');
-      fs.existsSync = jest.fn().mockReturnValue(true);
+      fsCache.safeFileExists.mockReturnValue(true);
 
       const resolved = resolver.resolveIncludePath(
         { type: 'relative', path: '../lib/utils.au3' },
@@ -113,7 +116,9 @@ describe('IncludeResolver', () => {
     it('should resolve library include from AutoIt paths', () => {
       const resolver = new IncludeResolver('/workspace', ['/autoit/include']);
       const expectedPath = path.join('/autoit/include', 'Array.au3');
-      fs.existsSync = jest.fn(p => path.normalize(p) === path.normalize(expectedPath));
+      fsCache.safeFileExists.mockImplementation(
+        p => path.normalize(p) === path.normalize(expectedPath),
+      );
 
       const resolved = resolver.resolveIncludePath(
         { type: 'library', path: 'Array.au3' },
@@ -125,7 +130,7 @@ describe('IncludeResolver', () => {
 
     it('should return null if file does not exist', () => {
       const resolver = new IncludeResolver('/workspace');
-      fs.existsSync = jest.fn().mockReturnValue(false);
+      fsCache.safeFileExists.mockReturnValue(false);
 
       const resolved = resolver.resolveIncludePath(
         { type: 'relative', path: 'missing.au3' },
@@ -138,7 +143,9 @@ describe('IncludeResolver', () => {
     it('should try multiple library paths until found', () => {
       const resolver = new IncludeResolver('/workspace', ['/path1/include', '/path2/include']);
       const expectedPath = path.join('/path2/include', 'File.au3');
-      fs.existsSync = jest.fn(p => path.normalize(p) === path.normalize(expectedPath));
+      fsCache.safeFileExists.mockImplementation(
+        p => path.normalize(p) === path.normalize(expectedPath),
+      );
 
       const resolved = resolver.resolveIncludePath(
         { type: 'library', path: 'File.au3' },
@@ -158,8 +165,8 @@ describe('IncludeResolver', () => {
       const resolver = new IncludeResolver('/workspace');
 
       // Mock file system
-      fs.existsSync = jest.fn().mockReturnValue(true);
-      fs.readFileSync = jest.fn(filePath => {
+      fsCache.safeFileExists.mockReturnValue(true);
+      fsCache.safeReadFile.mockImplementation(filePath => {
         const basename = path.basename(filePath);
         if (basename === 'main.au3') {
           return '#include "config.au3"';
@@ -181,8 +188,8 @@ describe('IncludeResolver', () => {
     it('should detect and prevent circular includes', () => {
       const resolver = new IncludeResolver('/workspace');
 
-      fs.existsSync = jest.fn().mockReturnValue(true);
-      fs.readFileSync = jest.fn(filePath => {
+      fsCache.safeFileExists.mockReturnValue(true);
+      fsCache.safeReadFile.mockImplementation(filePath => {
         const basename = path.basename(filePath);
         if (basename === 'a.au3') {
           return '#include "b.au3"';
@@ -204,8 +211,8 @@ describe('IncludeResolver', () => {
     it('should respect max depth limit', () => {
       const resolver = new IncludeResolver('/workspace', [], MAX_DEPTH_TWO);
 
-      fs.existsSync = jest.fn().mockReturnValue(true);
-      fs.readFileSync = jest.fn(filePath => {
+      fsCache.safeFileExists.mockReturnValue(true);
+      fsCache.safeReadFile.mockImplementation(filePath => {
         const basename = path.basename(filePath);
         if (basename === 'level1.au3') {
           return '#include "level2.au3"';
