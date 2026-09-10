@@ -250,13 +250,10 @@ const AutoItDefinitionProvider = {
       // Functions: use the function regex helper
       return this.createFunctionRegex(lookup);
     } catch (error) {
-      // Provide user-friendly error message while preserving error details
-      let userMessage = 'Failed to create search pattern';
-      if (error instanceof ValidationError || error instanceof RegexError) {
-        userMessage = error.message;
-      }
-
-      window.showErrorMessage(`determineRegex error: ${userMessage}`);
+      // Internal-only: a failed pattern build just means "not found" to the
+      // caller. The single user-facing toast for provideDefinition lives at
+      // its own catch boundary.
+      console.error('AutoIt: determineRegex failed', error);
       return null;
     }
   },
@@ -291,25 +288,10 @@ const AutoItDefinitionProvider = {
       getIncludeScripts(document, docText, scriptsToSearch);
 
       for (const script of scriptsToSearch) {
-        let scriptPath;
-        try {
-          scriptPath = getIncludePath(script, document);
-        } catch (e) {
-          window.showInformationMessage(
-            `getIncludePath failed for script: ${script}, error: ${e.message}`,
-          );
-          continue;
-        }
-
-        let scriptContent = '';
-        try {
-          scriptContent = getIncludeText(scriptPath) || '';
-        } catch (e) {
-          window.showInformationMessage(
-            `getIncludeText failed for path: ${scriptPath}, error: ${e.message}`,
-          );
-          continue;
-        }
+        // getIncludePath/getIncludeText never throw (both are safeExecute-backed
+        // and fall back to '' on any failure); an empty result is filtered below.
+        const scriptPath = getIncludePath(script, document);
+        const scriptContent = getIncludeText(scriptPath) || '';
         if (!scriptContent || scriptContent.trim().length === 0) continue;
 
         // Opportunistic fill: index this just-read file into the warm index so
@@ -365,15 +347,10 @@ const AutoItDefinitionProvider = {
 
       return null;
     } catch (err) {
-      // Provide user-friendly error message while categorizing errors
-      let userMessage = 'Include file search failed';
-      if (err instanceof ValidationError) {
-        userMessage = 'Invalid parameters provided for include file search';
-      } else if (err instanceof DefinitionProviderError) {
-        userMessage = err.message;
-      }
-
-      window.showErrorMessage(`findDefinitionInIncludeFiles error: ${userMessage}`);
+      // Internal-only: a failed include-file search just means "not found"
+      // to the caller. The single user-facing toast for provideDefinition
+      // lives at its own catch boundary.
+      console.error('AutoIt: findDefinitionInIncludeFiles failed', err);
       return null;
     }
   },
