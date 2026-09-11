@@ -396,7 +396,8 @@ const provideCompletionItems = async (document, position) => {
     return mapCompletions;
   }
 
-  // Get variable completions based on prefix
+  // Get variable completions when the trigger is '$'; getVariableCompletions
+  // only ever produces results for a '$' prefix, so any other prefix is empty.
   let variableCompletions = [];
 
   if (prefix === '$') {
@@ -420,9 +421,6 @@ const provideCompletionItems = async (document, position) => {
       // Fallback to regex-based approach
       variableCompletions = getVariableCompletions(text, prefix);
     }
-  } else {
-    // For non-$ prefixes, use existing regex approach
-    variableCompletions = getVariableCompletions(text, prefix);
   }
 
   const functionCompletions = getLocalFunctionCompletions(text);
