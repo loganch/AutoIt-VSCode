@@ -84,12 +84,13 @@ const AutoItFormatterProvider = {
 };
 
 /**
- * Registers the AutoIt formatter provider with VS Code
+ * Registers the AutoIt formatter provider with VS Code and returns its
+ * Disposable. Deferred to a factory (called from extension.js's activate())
+ * instead of module scope, so merely importing this module doesn't register.
+ * @returns {import('vscode').Disposable}
  */
-export const formatterProvider = languages.registerDocumentFormattingEditProvider(
-  'autoit',
-  AutoItFormatterProvider,
-);
+export const registerFormatterFeature = () =>
+  languages.registerDocumentFormattingEditProvider('autoit', AutoItFormatterProvider);
 
 /**
  * Executes the AutoIt3Wrapper Tidy command on the specified file

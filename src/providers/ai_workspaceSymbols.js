@@ -79,8 +79,6 @@ function provideWorkspaceSymbols(query, token) {
   });
 }
 
-const watcher = workspace.createFileSystemWatcher('**/*.{au3,a3x}');
-
 /**
  * Update symbols for a specific file instead of clearing entire cache.
  * @param {import('vscode').Uri} uri - The file URI that changed
@@ -100,13 +98,25 @@ function removeFileSymbols(uri) {
   removeDocument(toUriString(uri.fsPath));
 }
 
-// Incremental cache updates instead of full invalidation
-watcher.onDidChange(updateFileSymbols);
-watcher.onDidCreate(updateFileSymbols);
-watcher.onDidDelete(removeFileSymbols);
+/**
+ * Registers the workspace symbol provider and the file-system watcher that
+ * keeps the symbol index in sync, returning their Disposables. Deferred to a
+ * factory (called from extension.js's activate()) instead of module scope,
+ * so both are tied to the extension's lifetime instead of the process's.
+ * @returns {import('vscode').Disposable[]}
+ */
+const registerWorkspaceSymbolsFeature = () => {
+  const watcher = workspace.createFileSystemWatcher('**/*.{au3,a3x}');
+  // Incremental cache updates instead of full invalidation
+  const onChange = watcher.onDidChange(updateFileSymbols);
+  const onCreate = watcher.onDidCreate(updateFileSymbols);
+  const onDelete = watcher.onDidDelete(removeFileSymbols);
 
-const workspaceSymbolProvider = languages.registerWorkspaceSymbolProvider({
-  provideWorkspaceSymbols,
-});
+  const workspaceSymbolProvider = languages.registerWorkspaceSymbolProvider({
+    provideWorkspaceSymbols,
+  });
 
-export default workspaceSymbolProvider;
+  return [watcher, onChange, onCreate, onDelete, workspaceSymbolProvider];
+};
+
+export default registerWorkspaceSymbolsFeature;

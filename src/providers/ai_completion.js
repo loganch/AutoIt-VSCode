@@ -472,12 +472,13 @@ const provideCompletionItems = async (document, position) => {
   return attachIncludeEdits(merged, document, autoInsertEnabled);
 };
 
-const completionFeature = languages.registerCompletionItemProvider(
-  AUTOIT_MODE,
-  { provideCompletionItems },
-  '.',
-  '$',
-  '#',
-);
+/**
+ * Registers the completion provider and returns its Disposable. Deferred to a
+ * factory (called from extension.js's activate()) instead of module scope,
+ * so merely importing this module doesn't register with VS Code.
+ * @returns {import('vscode').Disposable}
+ */
+const registerCompletionFeature = () =>
+  languages.registerCompletionItemProvider(AUTOIT_MODE, { provideCompletionItems }, '.', '$', '#');
 
-export default completionFeature;
+export default registerCompletionFeature;

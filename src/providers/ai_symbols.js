@@ -658,5 +658,15 @@ async function provideDocumentSymbols(doc) {
   return result;
 }
 
-export default languages.registerDocumentSymbolProvider(AUTOIT_MODE, { provideDocumentSymbols });
+/**
+ * Registers the document symbol provider and returns its Disposable. Deferred
+ * to a factory (called from extension.js's activate()) instead of module
+ * scope, so merely importing this module (e.g. from symbolIndex.js, which
+ * needs only provideDocumentSymbols) doesn't register with VS Code.
+ * @returns {import('vscode').Disposable}
+ */
+const registerSymbolsFeature = () =>
+  languages.registerDocumentSymbolProvider(AUTOIT_MODE, { provideDocumentSymbols });
+
+export default registerSymbolsFeature;
 export { provideDocumentSymbols };

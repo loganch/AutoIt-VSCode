@@ -67,7 +67,7 @@ jest.mock('../src/language/variable', () => ({
  */
 function loadProvider() {
   jest.isolateModules(() => {
-    require('../src/providers/ai_workspaceSymbols');
+    require('../src/providers/ai_workspaceSymbols').default();
   });
 
   const providerCalls = mockRegisterWorkspaceSymbolProvider.mock.calls;

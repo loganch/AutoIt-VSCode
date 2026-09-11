@@ -2,25 +2,25 @@ import { languages, window, workspace } from 'vscode';
 import { existsSync } from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import languageConfiguration from './languageConfiguration';
-import hoverFeature from './providers/ai_hover';
-import completionFeature, {
+import registerHoverFeature from './providers/ai_hover';
+import registerCompletionFeature, {
   registerCompletionCacheCleanup,
   clearCompletionCaches,
 } from './providers/ai_completion';
-import symbolsFeature from './providers/ai_symbols';
-import signaturesFeature, {
-  signatureHoverProvider,
+import registerSymbolsFeature from './providers/ai_symbols';
+import registerSignatureHelpFeature, {
+  registerSignatureHoverProvider,
   clearSignatureCache,
 } from './providers/ai_signature';
-import workspaceSymbolsFeature from './providers/ai_workspaceSymbols';
-import goToDefinitionFeature, {
+import registerWorkspaceSymbolsFeature from './providers/ai_workspaceSymbols';
+import registerDefinitionFeature, {
   registerDefinitionCacheInvalidation,
   clearDefinitionCache,
 } from './providers/ai_definition';
-import referencesFeature from './providers/ai_references';
+import registerReferencesFeature from './providers/ai_references';
 
 import { registerCommands } from './registerCommands';
-import { formatterProvider } from './providers/ai_formatter';
+import { registerFormatterFeature } from './providers/ai_formatter';
 import {
   clearDiagnosticsOwnedBy,
   parseAu3CheckOutput,
@@ -363,14 +363,14 @@ export const activate = ctx => {
   conf.init();
 
   const features = [
-    hoverFeature,
-    completionFeature,
-    symbolsFeature,
-    signaturesFeature,
-    signatureHoverProvider,
-    workspaceSymbolsFeature,
-    goToDefinitionFeature,
-    referencesFeature,
+    registerHoverFeature(),
+    registerCompletionFeature(),
+    registerSymbolsFeature(),
+    registerSignatureHelpFeature(),
+    registerSignatureHoverProvider(),
+    ...registerWorkspaceSymbolsFeature(),
+    registerDefinitionFeature(),
+    registerReferencesFeature(),
     conf.registerConfigListener(),
     registerParenTriggerListener(),
     registerCompletionCacheCleanup(),
@@ -379,7 +379,7 @@ export const activate = ctx => {
 
   // Only register formatter on Windows with valid paths
   if (validateFormatterPaths()) {
-    features.push(formatterProvider);
+    features.push(registerFormatterFeature());
   }
 
   ctx.subscriptions.push(...features);

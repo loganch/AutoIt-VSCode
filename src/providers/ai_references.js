@@ -235,7 +235,14 @@ const AutoItReferenceProvider = {
   },
 };
 
-const referenceProvider = languages.registerReferenceProvider(AUTOIT_MODE, AutoItReferenceProvider);
+/**
+ * Registers the reference provider and returns its Disposable. Deferred to a
+ * factory (called from extension.js's activate()) instead of module scope,
+ * so merely importing this module doesn't register with VS Code.
+ * @returns {import('vscode').Disposable}
+ */
+const registerReferencesFeature = () =>
+  languages.registerReferenceProvider(AUTOIT_MODE, AutoItReferenceProvider);
 
-export default referenceProvider;
+export default registerReferencesFeature;
 export { AutoItReferenceProvider };

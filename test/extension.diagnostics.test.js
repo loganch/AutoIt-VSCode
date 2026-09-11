@@ -96,31 +96,38 @@ jest.mock('../src/services/MapTrackingService.js', () => stubService);
 jest.mock('../src/services/VariableTrackingService.js', () => stubService);
 
 // Feature providers are irrelevant here; stub them to keep activate() cheap.
-const stubFeature = { __esModule: true, default: { dispose: () => {} } };
-jest.mock('../src/languageConfiguration', () => stubFeature);
-jest.mock('../src/providers/ai_hover', () => stubFeature);
+// languageConfiguration's default is data passed to setLanguageConfiguration
+// (not invoked), so it keeps the plain-object shape; provider modules whose
+// default is a register-and-return-Disposable factory get the function shape.
+const stubDataFeature = { __esModule: true, default: { dispose: () => {} } };
+const stubProviderFeature = { __esModule: true, default: () => ({ dispose: () => {} }) };
+jest.mock('../src/languageConfiguration', () => stubDataFeature);
+jest.mock('../src/providers/ai_hover', () => stubProviderFeature);
 jest.mock('../src/providers/ai_completion', () => ({
-  ...stubFeature,
+  ...stubProviderFeature,
   registerCompletionCacheCleanup: () => ({ dispose: () => {} }),
   clearCompletionCaches: () => {},
 }));
-jest.mock('../src/providers/ai_symbols', () => stubFeature);
-jest.mock('../src/providers/ai_workspaceSymbols', () => stubFeature);
+jest.mock('../src/providers/ai_symbols', () => stubProviderFeature);
+jest.mock('../src/providers/ai_workspaceSymbols', () => ({
+  __esModule: true,
+  default: () => [{ dispose: () => {} }],
+}));
 jest.mock('../src/providers/ai_definition', () => ({
-  ...stubFeature,
+  ...stubProviderFeature,
   registerDefinitionCacheInvalidation: () => ({ dispose: () => {} }),
   clearDefinitionCache: () => {},
 }));
-jest.mock('../src/providers/ai_references', () => stubFeature);
+jest.mock('../src/providers/ai_references', () => stubProviderFeature);
 jest.mock('../src/providers/ai_signature', () => ({
   __esModule: true,
-  default: { dispose: () => {} },
-  signatureHoverProvider: { dispose: () => {} },
+  default: () => ({ dispose: () => {} }),
+  registerSignatureHoverProvider: () => ({ dispose: () => {} }),
   clearSignatureCache: () => {},
 }));
 jest.mock('../src/providers/ai_formatter', () => ({
   __esModule: true,
-  formatterProvider: { dispose: () => {} },
+  registerFormatterFeature: () => ({ dispose: () => {} }),
 }));
 jest.mock('../src/registerCommands', () => ({
   __esModule: true,

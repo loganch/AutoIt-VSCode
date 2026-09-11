@@ -237,8 +237,9 @@ describe('ai_completion cache behavior', () => {
     ({ languages, workspace } = require('vscode'));
 
     // Re-import to get fresh module state
-    const { registerCompletionCacheCleanup } = require('../src/providers/ai_completion');
-    registerCompletionCacheCleanup();
+    const completionModule = require('../src/providers/ai_completion');
+    completionModule.default();
+    completionModule.registerCompletionCacheCleanup();
 
     // Extract the provider function
     const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
@@ -455,7 +456,7 @@ describe('arraysMatch utility', () => {
     ({ languages } = require('vscode'));
 
     // Access internal function through module
-    require('../src/providers/ai_completion');
+    require('../src/providers/ai_completion').default();
     // Note: arraysMatch is not exported, so we test it indirectly through cache behavior
 
     // Extract the provider function
@@ -500,7 +501,7 @@ describe('attachIncludeEdits integration', () => {
       { label: 'MsgBox', kind: 3 },
     ]);
 
-    require('../src/providers/ai_completion');
+    require('../src/providers/ai_completion').default();
 
     const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
     if (provider) {

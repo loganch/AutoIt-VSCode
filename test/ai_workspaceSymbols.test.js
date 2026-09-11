@@ -149,7 +149,7 @@ describe('ai_workspaceSymbols module', () => {
   let capturedWatcherArg;
 
   beforeAll(() => {
-    require('../src/providers/ai_workspaceSymbols');
+    require('../src/providers/ai_workspaceSymbols').default();
     // Capture before resetMocks resets these
     capturedProviderArg =
       mockRegisterWorkspaceSymbolProvider.mock.calls.length > 0

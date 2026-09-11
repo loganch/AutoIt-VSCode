@@ -232,63 +232,74 @@ function createSignatureInfo(foundSig) {
 }
 
 /**
- * Creates a Hover object for the user created functions.
- *
- * @param {import("vscode").TextDocument} document - The TextDocument object representing the AutoIt script
- * @param {import("vscode").Position} position - The position of the cursor when the function was called * @returns {Hover | null} - A Hover object containing the hover info, or null if no info found.
+ * Registers the signature hover provider — a Hover object for the user
+ * created functions — and returns its Disposable. Deferred to a factory
+ * (called from extension.js's activate()) instead of module scope, so merely
+ * importing this module doesn't register with VS Code.
+ * @returns {import('vscode').Disposable}
  */
-export const signatureHoverProvider = languages.registerHoverProvider(AUTOIT_MODE, {
-  provideHover(document, position) {
-    if (isInComment(document, position)) return null;
+export const registerSignatureHoverProvider = () =>
+  languages.registerHoverProvider(AUTOIT_MODE, {
+    provideHover(document, position) {
+      if (isInComment(document, position)) return null;
 
-    const hoveredPosition = document.getWordRangeAtPosition(position);
-    if (!hoveredPosition) return null;
-    const hoveredWord = document.getText(hoveredPosition);
+      const hoveredPosition = document.getWordRangeAtPosition(position);
+      if (!hoveredPosition) return null;
+      const hoveredWord = document.getText(hoveredPosition);
 
-    const matchedSignature = getDocumentSignatures(document)[hoveredWord];
+      const matchedSignature = getDocumentSignatures(document)[hoveredWord];
 
-    if (!matchedSignature || !matchedSignature.label) return null;
+      if (!matchedSignature || !matchedSignature.label) return null;
 
-    const description = matchedSignature.description || '';
-    // documentation format: "Included from X" or "description\rIncluded from X"
-    const includedFrom = matchedSignature.documentation.split('\r').at(-1) || '';
-    const hoverText = [
-      ...(description ? [description] : []),
-      `##### ${includedFrom}`,
-      `\`\`\`\r${matchedSignature.label}\r\`\`\``,
-    ];
+      const description = matchedSignature.description || '';
+      // documentation format: "Included from X" or "description\rIncluded from X"
+      const includedFrom = matchedSignature.documentation.split('\r').at(-1) || '';
+      const hoverText = [
+        ...(description ? [description] : []),
+        `##### ${includedFrom}`,
+        `\`\`\`\r${matchedSignature.label}\r\`\`\``,
+      ];
 
-    return new Hover(hoverText);
-  },
-});
-
-export default languages.registerSignatureHelpProvider(
-  AUTOIT_MODE,
-  {
-    /**
-     * Provides signature help for a given document and position.
-     * @param {import("vscode").TextDocument} document - The document to provide signature help for.
-     * @param {import("vscode").Position} position - The position in the document to provide signature help for.
-     */
-    provideSignatureHelp(document, position) {
-      const caller = getCallInfo(document, position);
-      if (!caller.func) return null;
-
-      const allSignatures = {
-        ...defaultSigs,
-        ...getDocumentSignatures(document),
-      };
-
-      const matchedSignature = allSignatures[caller.func];
-      if (!matchedSignature) return null;
-
-      const result = new SignatureHelp();
-      result.signatures = [createSignatureInfo(matchedSignature)];
-      result.activeSignature = 0;
-      result.activeParameter = caller.commas;
-      return result;
+      return new Hover(hoverText);
     },
-  },
-  '(',
-  ',',
-);
+  });
+
+/**
+ * Registers the signature-help provider and returns its Disposable. Deferred
+ * to a factory (called from extension.js's activate()) instead of module
+ * scope, so merely importing this module doesn't register with VS Code.
+ * @returns {import('vscode').Disposable}
+ */
+const registerSignatureHelpFeature = () =>
+  languages.registerSignatureHelpProvider(
+    AUTOIT_MODE,
+    {
+      /**
+       * Provides signature help for a given document and position.
+       * @param {import("vscode").TextDocument} document - The document to provide signature help for.
+       * @param {import("vscode").Position} position - The position in the document to provide signature help for.
+       */
+      provideSignatureHelp(document, position) {
+        const caller = getCallInfo(document, position);
+        if (!caller.func) return null;
+
+        const allSignatures = {
+          ...defaultSigs,
+          ...getDocumentSignatures(document),
+        };
+
+        const matchedSignature = allSignatures[caller.func];
+        if (!matchedSignature) return null;
+
+        const result = new SignatureHelp();
+        result.signatures = [createSignatureInfo(matchedSignature)];
+        result.activeSignature = 0;
+        result.activeParameter = caller.commas;
+        return result;
+      },
+    },
+    '(',
+    ',',
+  );
+
+export default registerSignatureHelpFeature;

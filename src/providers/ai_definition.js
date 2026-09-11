@@ -346,7 +346,14 @@ export const registerDefinitionCacheInvalidation = () =>
 /** Drops every cached definition result. Called from extension.js's deactivate(). */
 export const clearDefinitionCache = () => definitionCache.clear();
 
-const defProvider = languages.registerDefinitionProvider(AUTOIT_MODE, AutoItDefinitionProvider);
+/**
+ * Registers the definition provider and returns its Disposable. Deferred to a
+ * factory (called from extension.js's activate()) instead of module scope,
+ * so merely importing this module doesn't register with VS Code.
+ * @returns {import('vscode').Disposable}
+ */
+const registerDefinitionFeature = () =>
+  languages.registerDefinitionProvider(AUTOIT_MODE, AutoItDefinitionProvider);
 
-export default defProvider;
+export default registerDefinitionFeature;
 export { AutoItDefinitionProvider, definitionCache };
