@@ -75,7 +75,7 @@ class ProcessRunner {
           processCommand,
         });
 
-      const id = runnerPrev ? runnerPrev.info.id : ++this.processManager.id;
+      const id = runnerPrev ? runnerPrev.info.id : this.processManager.nextId();
 
       // Create or reuse output channel
       const aiOutProcess = this.config.multiOutput
@@ -314,8 +314,7 @@ class ProcessRunner {
   _registerRunner(runner, runnerPrev, info) {
     if (runnerPrev) {
       // Update existing runner
-      this.processManager.runners.set(runner, runnerPrev.info);
-      this.processManager.runners.delete(runnerPrev.runner);
+      this.processManager.replaceRunner(runnerPrev.runner, runner, runnerPrev.info);
     } else {
       // Add new runner
       this.processManager.addRunner(runner, info);

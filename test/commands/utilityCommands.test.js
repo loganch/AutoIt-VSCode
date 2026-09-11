@@ -48,6 +48,7 @@ jest.mock('../../src/services/commandServiceStack', () => {
     processManager: {
       outputName: `extension-output-${pkg.publisher}.${pkg.name}-#`,
       config: { outputMaxHistoryLines: 2 },
+      outputMaxHistoryLines: 2,
       isAiOutVisible() {
         const { window } = require('vscode');
         for (let i = 0; i < window.visibleTextEditors.length; i += 1) {

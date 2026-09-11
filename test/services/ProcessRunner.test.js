@@ -58,8 +58,13 @@ describe('ProcessRunner', () => {
       id: 0,
       lastId: 0,
       runners: new Map(),
+      nextId: jest.fn(() => 1),
       findRunner: jest.fn(() => null),
       addRunner: jest.fn(),
+      replaceRunner: jest.fn((oldRunner, newRunner, info) => {
+        processManager.runners.set(newRunner, info);
+        processManager.runners.delete(oldRunner);
+      }),
       cleanup: jest.fn(),
     };
     outputChannelManager = {

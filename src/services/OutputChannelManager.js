@@ -393,12 +393,13 @@ class OutputChannelManager {
    */
   static trimOutputLines(runners, globalOutputChannel) {
     const out = runners.isAiOutVisible();
-    if (!out || !runners.config.outputMaxHistoryLines) return;
+    const maxLines = runners.outputMaxHistoryLines;
+    if (!out || !maxLines) return;
 
-    if (out.output.document.lineCount > runners.config.outputMaxHistoryLines) {
+    if (out.output.document.lineCount > maxLines) {
       const text = out.output.document.getText();
       const lines = text.split(/\r?\n/);
-      const outputText = lines.slice(-runners.config.outputMaxHistoryLines).join('\r\n');
+      const outputText = lines.slice(-maxLines).join('\r\n');
       globalOutputChannel.replace(outputText);
     }
   }

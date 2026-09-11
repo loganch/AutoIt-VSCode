@@ -37,9 +37,65 @@ class ProcessManager extends EventEmitter {
     this.getActiveDocumentFileName = getActiveDocumentFileName;
     this.outputName = outputName;
     this.runners = new Map();
-    this.isNewLine = true;
-    this.lastId = 0;
+    this._isNewLine = true;
+    this._lastId = 0;
     this.id = 0;
+  }
+
+  /**
+   * Whether the last output write ended on a new line.
+   * @type {boolean}
+   */
+  get isNewLine() {
+    return this._isNewLine;
+  }
+
+  set isNewLine(value) {
+    this._isNewLine = value;
+  }
+
+  /**
+   * ID of the process that last wrote output.
+   * @type {number}
+   */
+  get lastId() {
+    return this._lastId;
+  }
+
+  set lastId(value) {
+    this._lastId = value;
+  }
+
+  /**
+   * Maximum number of output history lines to retain.
+   * @type {number}
+   */
+  get outputMaxHistoryLines() {
+    return this.config.outputMaxHistoryLines;
+  }
+
+  /**
+   * Increments and returns the next process ID.
+   * @returns {number} The next process ID
+   */
+  nextId() {
+    this.id += 1;
+    return this.id;
+  }
+
+  /**
+   * Replaces a tracked runner, used when a process reuses an existing output panel and ID.
+   * @param {Object} oldRunner - The previous process object
+   * @param {Object} newRunner - The new process object
+   * @param {RunnerInfo} info - The runner information to retain
+   */
+  replaceRunner(oldRunner, newRunner, info) {
+    try {
+      this.runners.set(newRunner, info);
+      this.runners.delete(oldRunner);
+    } catch (error) {
+      this.outputChannel.appendLine(`[ProcessManager] Error in replaceRunner: ${error.message}`);
+    }
   }
 
   /**
