@@ -321,9 +321,11 @@ const AutoItDefinitionProvider = {
 // Definition result cache
 // Key:   `${document.uri.toString()}::${lookupText}`
 // Value: Location | Location[] | null
-// Entries are evicted the moment the document is edited, so results never go
-// stale.  The cache only pays off for repeated F12 on the same symbol without
-// any intervening edit (common during code navigation).
+// Cleared entirely on any AutoIt document edit: a cached Location can point
+// into an include file, so an edit anywhere can stale entries keyed under a
+// different document's prefix. The cache only pays off for repeated F12 on
+// the same symbol without any intervening edit (common during code
+// navigation), so clearing on every edit is cheap and provably fresh.
 // ---------------------------------------------------------------------------
 const definitionCache = new Map();
 
@@ -334,14 +336,7 @@ const definitionCache = new Map();
  * @returns {import('vscode').Disposable}
  */
 export const registerDefinitionCacheInvalidation = () =>
-  workspace.onDidChangeTextDocument(event => {
-    const prefix = event.document.uri.toString() + '::';
-    for (const key of definitionCache.keys()) {
-      if (key.startsWith(prefix)) {
-        definitionCache.delete(key);
-      }
-    }
-  });
+  workspace.onDidChangeTextDocument(() => definitionCache.clear());
 
 /** Drops every cached definition result. Called from extension.js's deactivate(). */
 export const clearDefinitionCache = () => definitionCache.clear();
