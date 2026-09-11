@@ -255,21 +255,26 @@ class OutputChannelManager {
       }
     };
 
+    const isHotkeyFailureLine = line =>
+      this.hotkeyFailedMsg.some(pattern => line.replace(pattern, '') !== line);
+
+    // A hotkey failure is reported across a short run of lines (e.g. one line
+    // naming the failure, a second with the SetHotKey details). Replace the
+    // first such line with a single friendly message and drop the rest of
+    // the run; only fires once per proxy, matching the wrapper emitting it
+    // once per script launch.
     const stripHotkeyFailureLines = lines => {
-      for (let i = 0; i < lines.length; i++) {
-        if (hotkeyFailedMsgFound) continue;
-        for (let r = 0; r < this.hotkeyFailedMsg.length; r++) {
-          const line = lines[i].replace(this.hotkeyFailedMsg[r], '');
-          if (line === lines[i]) continue;
-          if (hotkeyFailedMsgFound) {
-            lines.splice(i, 1);
-          } else {
-            this.aWrapperHotkey.reset(id);
-            lines[i] = this.generateHotkeyReplacementMessage();
-            hotkeyFailedMsgFound = true;
-          }
-          if (++i >= lines.length) break;
-        }
+      if (hotkeyFailedMsgFound) return;
+
+      const matchIndex = lines.findIndex(isHotkeyFailureLine);
+      if (matchIndex === -1) return;
+
+      this.aWrapperHotkey.reset(id);
+      lines[matchIndex] = this.generateHotkeyReplacementMessage();
+      hotkeyFailedMsgFound = true;
+
+      for (let i = lines.length - 1; i > matchIndex; i--) {
+        if (isHotkeyFailureLine(lines[i])) lines.splice(i, 1);
       }
     };
 

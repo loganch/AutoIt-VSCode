@@ -87,7 +87,14 @@ describe('OutputChannelManager', () => {
     const { window } = require('vscode');
 
     const manager = new OutputChannelManager(
-      { append: jest.fn(), appendLine: jest.fn(), show: jest.fn(), hide: jest.fn(), clear: jest.fn(), dispose: jest.fn() },
+      {
+        append: jest.fn(),
+        appendLine: jest.fn(),
+        show: jest.fn(),
+        hide: jest.fn(),
+        clear: jest.fn(),
+        dispose: jest.fn(),
+      },
       {},
     );
 
@@ -131,5 +138,42 @@ describe('OutputChannelManager', () => {
     expect(message).toContain('Ctrl+K');
     expect(message).toContain('Restart');
     expect(message).toContain('Stop');
+  });
+
+  it('collapses a hotkey-failure line run into a single replacement message once', () => {
+    // Plain functions (not jest.fn()) — the OutputChannelManager proxy checks
+    // `instanceof Function` on the wrapped channel methods, which jest.fn()
+    // mocks fail across Jest's sandbox realm.
+    const processAppendCalls = [];
+    const processChannel = { ...makeChannel(), append: text => processAppendCalls.push(text) };
+    const globalAppendCalls = [];
+    const globalPlainChannel = { ...globalChannel, append: text => globalAppendCalls.push(text) };
+
+    const manager = new OutputChannelManager(
+      globalPlainChannel,
+      config,
+      { 'extension.restartScript': 'Ctrl+R' },
+      hotkeyManager,
+      runners,
+    );
+
+    const proxy = manager.createProxyOutputChannel({ id: 1, aiOutProcess: processChannel });
+
+    proxy.append(
+      '!>Failed Setting Hotkey(s)...\r\n--> SetHotKey () Restart failed, SetHotKey () Stop failed.\r\n',
+    );
+
+    expect(hotkeyManager.reset).toHaveBeenCalledTimes(1);
+    const written = globalAppendCalls.join('');
+    expect(written).toContain('Ctrl+R');
+    expect(written).not.toContain('SetHotKey');
+
+    // A second failure block later in the run is left untouched — the
+    // wrapper only reports this once per launch.
+    globalAppendCalls.length = 0;
+    hotkeyManager.reset.mockClear();
+    proxy.append('!>Failed Setting Hotkey(s)...\r\n');
+    expect(hotkeyManager.reset).not.toHaveBeenCalled();
+    expect(globalAppendCalls.join('')).toContain('!>Failed Setting Hotkey(s)...');
   });
 });
