@@ -191,8 +191,8 @@ describe('ai_workspaceSymbols module', () => {
     // Cold cache: provideWorkspaceSymbols debounces (300ms real) then builds.
     await capturedProviderArg.provideWorkspaceSymbols('', { isCancellationRequested: false });
 
-    expect(symbolIndex.symbolsCache.size).toBeGreaterThan(0);
-    const allNames = [...symbolIndex.symbolsCache.values()].flat().map(s => s.name);
+    expect(symbolIndex.hasIndexedSymbols()).toBe(true);
+    const allNames = symbolIndex.getAllSymbols().map(s => s.name);
     expect(allNames).toContain('SharedFunc');
   });
 });

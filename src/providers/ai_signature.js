@@ -20,6 +20,13 @@ const documentSignatureCache = new Map();
 const FUNCTION_NAME_PART_INDEX_FROM_END = 2;
 
 /**
+ * Drops every cached document-signature entry. Cached entries reuse resolved
+ * include function signatures, so they go stale when `autoit.includePaths`
+ * changes; also called from extension.js's deactivate().
+ */
+export const clearSignatureCache = () => documentSignatureCache.clear();
+
+/**
  * Reduces a partial line of code to the current Function for parsing
  * @param {string} code The line of code
  */

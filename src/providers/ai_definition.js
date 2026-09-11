@@ -343,6 +343,9 @@ export const registerDefinitionCacheInvalidation = () =>
     }
   });
 
+/** Drops every cached definition result. Called from extension.js's deactivate(). */
+export const clearDefinitionCache = () => definitionCache.clear();
+
 const defProvider = languages.registerDefinitionProvider(AUTOIT_MODE, AutoItDefinitionProvider);
 
 export default defProvider;

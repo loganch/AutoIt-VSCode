@@ -50,6 +50,16 @@ export const registerCompletionCacheCleanup = () =>
   });
 
 /**
+ * Drops every cached include-completion entry. Cached entries store paths
+ * resolved via the configured includePaths, so they go stale when
+ * `autoit.includePaths` changes; also called from extension.js's deactivate().
+ */
+export const clearCompletionCaches = () => {
+  includeCache.clear();
+  libraryIncludeCache.clear();
+};
+
+/**
  * Creates a new completion item.
  * @param {CompletionItemKind} kind - The kind of completion item.
  * @param {string} name - The name of the completion item.

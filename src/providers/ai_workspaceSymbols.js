@@ -1,5 +1,10 @@
 import { languages, workspace } from 'vscode';
-import { symbolsCache, indexDocument, removeDocument } from '../services/symbolIndex';
+import {
+  getAllSymbols,
+  hasIndexedSymbols,
+  indexDocument,
+  removeDocument,
+} from '../services/symbolIndex';
 import { toUriString } from '../services/includeGraph';
 import { ensureWarm } from '../services/symbolWarmup';
 
@@ -16,7 +21,7 @@ const SEARCH_DEBOUNCE_MS = 300;
  * @returns {Array} Matching workspace symbols.
  */
 function filterCachedSymbols(query) {
-  const allSymbols = Array.from(symbolsCache.values()).flat();
+  const allSymbols = getAllSymbols();
 
   if (query && query.length > 0) {
     const lowerQuery = query.toLowerCase();
@@ -36,7 +41,7 @@ function filterCachedSymbols(query) {
  */
 function provideWorkspaceSymbols(query, token) {
   // Warm cache: answer immediately instead of paying the full debounce delay.
-  if (symbolsCache.size > 0) {
+  if (hasIndexedSymbols()) {
     return Promise.resolve(token?.isCancellationRequested ? [] : filterCachedSymbols(query));
   }
 
@@ -59,7 +64,7 @@ function provideWorkspaceSymbols(query, token) {
       // Build cache if empty. ensureWarm runs the single shared workspace-build
       // implementation (populating symbolsCache directly via indexDocument) and is
       // idempotent, so it coalesces with any activation-time warm-up — no double build.
-      if (symbolsCache.size === 0) {
+      if (!hasIndexedSymbols()) {
         await ensureWarm();
       }
 

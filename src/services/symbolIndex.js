@@ -225,22 +225,42 @@ function removeDocument(uriString) {
   removeEdges(uriString);
 }
 
-// --- test seams ---
-function __resetForTests() {
+/** Snapshot of every indexed symbol, flattened across all documents. */
+function getAllSymbols() {
+  return Array.from(symbolsCache.values()).flat();
+}
+
+/** True once at least one document has been indexed. */
+function hasIndexedSymbols() {
+  return symbolsCache.size > 0;
+}
+
+/** True when `uriString` has an indexed entry (regardless of content). */
+function hasSymbolsFor(uriString) {
+  return symbolsCache.has(uriString);
+}
+
+/** Drops the entire symbol index. Called from extension.js's deactivate(). */
+function resetIndex() {
   symbolsCache.clear();
 }
+
+// --- test seam ---
 function __setSymbolsForTests(uriString, symbols) {
   symbolsCache.set(uriString, symbols);
 }
 
 export {
-  symbolsCache,
   lookupDefinition,
   flattenSymbols,
   indexDocument,
   warmDocument,
   noteFileContent,
   removeDocument,
-  __resetForTests,
+  getAllSymbols,
+  hasIndexedSymbols,
+  hasSymbolsFor,
+  resetIndex,
+  resetIndex as __resetForTests,
   __setSymbolsForTests,
 };

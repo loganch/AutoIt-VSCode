@@ -81,10 +81,12 @@ function removeEdges(uriString) {
   includeEdges.delete(uriString);
 }
 
-// --- test seams ---
-function __resetForTests() {
+/** Drops the entire include graph. Called from extension.js's deactivate(). */
+function clearIncludeEdges() {
   includeEdges.clear();
 }
+
+// --- test seam ---
 function __setEdgesForTests(uriString, edges) {
   includeEdges.set(uriString, edges);
 }
@@ -95,6 +97,7 @@ export {
   extractIncludeEdges,
   getIncludeSet,
   removeEdges,
-  __resetForTests,
+  clearIncludeEdges,
+  clearIncludeEdges as __resetForTests,
   __setEdgesForTests,
 };

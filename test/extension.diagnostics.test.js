@@ -102,18 +102,21 @@ jest.mock('../src/providers/ai_hover', () => stubFeature);
 jest.mock('../src/providers/ai_completion', () => ({
   ...stubFeature,
   registerCompletionCacheCleanup: () => ({ dispose: () => {} }),
+  clearCompletionCaches: () => {},
 }));
 jest.mock('../src/providers/ai_symbols', () => stubFeature);
 jest.mock('../src/providers/ai_workspaceSymbols', () => stubFeature);
 jest.mock('../src/providers/ai_definition', () => ({
   ...stubFeature,
   registerDefinitionCacheInvalidation: () => ({ dispose: () => {} }),
+  clearDefinitionCache: () => {},
 }));
 jest.mock('../src/providers/ai_references', () => stubFeature);
 jest.mock('../src/providers/ai_signature', () => ({
   __esModule: true,
   default: { dispose: () => {} },
   signatureHoverProvider: { dispose: () => {} },
+  clearSignatureCache: () => {},
 }));
 jest.mock('../src/providers/ai_formatter', () => ({
   __esModule: true,

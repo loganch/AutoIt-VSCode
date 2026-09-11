@@ -3,12 +3,19 @@ import { existsSync } from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import languageConfiguration from './languageConfiguration';
 import hoverFeature from './providers/ai_hover';
-import completionFeature, { registerCompletionCacheCleanup } from './providers/ai_completion';
+import completionFeature, {
+  registerCompletionCacheCleanup,
+  clearCompletionCaches,
+} from './providers/ai_completion';
 import symbolsFeature from './providers/ai_symbols';
-import signaturesFeature, { signatureHoverProvider } from './providers/ai_signature';
+import signaturesFeature, {
+  signatureHoverProvider,
+  clearSignatureCache,
+} from './providers/ai_signature';
 import workspaceSymbolsFeature from './providers/ai_workspaceSymbols';
 import goToDefinitionFeature, {
   registerDefinitionCacheInvalidation,
+  clearDefinitionCache,
 } from './providers/ai_definition';
 import referencesFeature from './providers/ai_references';
 
@@ -23,7 +30,8 @@ import { clearIncludeCache } from './utils/fsCache';
 import { debugLog } from './debugLog';
 import conf from './config/ai_config';
 import { registerParenTriggerListener } from './completionTransforms';
-import { warmDocument } from './services/symbolIndex';
+import { warmDocument, resetIndex } from './services/symbolIndex';
+import { clearIncludeEdges } from './services/includeGraph';
 import { ensureWarm } from './services/symbolWarmup';
 import MapTrackingService from './services/MapTrackingService.js';
 import VariableTrackingService from './services/VariableTrackingService.js';
@@ -248,6 +256,13 @@ const setupConfigSync = (ctx, mapTrackingService, variableTrackingService) => {
         lastCheckedVersions.clear();
       }
 
+      // Include- and library-completion/signature caches store paths resolved via
+      // the configured includePaths, so a change invalidates them the same way.
+      if (event.affectsConfiguration('autoit.includePaths')) {
+        clearCompletionCaches();
+        clearSignatureCache();
+      }
+
       if (
         event.affectsConfiguration('autoit.includePaths') ||
         event.affectsConfiguration('autoit.maps.includeDepth')
@@ -389,4 +404,12 @@ export function deactivate() {
   lastCheckedVersions.clear();
   clearIncludeCache();
   resetDiagnosticTracking();
+
+  // Provider caches: nothing else clears these on the extension's own
+  // teardown (only individual entries evict on document close/edit).
+  clearCompletionCaches();
+  clearDefinitionCache();
+  clearSignatureCache();
+  resetIndex();
+  clearIncludeEdges();
 }

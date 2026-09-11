@@ -188,12 +188,12 @@ describe('symbolIndex.removeDocument', () => {
     ]);
     includeGraph.__setEdgesForTests('file://a', ['file://b']);
 
-    expect(index.symbolsCache.has('file://a')).toBe(true);
+    expect(index.hasSymbolsFor('file://a')).toBe(true);
     expect(includeGraph.includeEdges.has('file://a')).toBe(true);
 
     index.removeDocument('file://a');
 
-    expect(index.symbolsCache.has('file://a')).toBe(false);
+    expect(index.hasSymbolsFor('file://a')).toBe(false);
     expect(includeGraph.includeEdges.has('file://a')).toBe(false);
   });
 });
@@ -213,13 +213,13 @@ describe('symbolIndex.warmDocument', () => {
   it('indexes a just-opened .au3 document', async () => {
     const doc = docFor('/proj/opened.au3');
     await index.warmDocument(doc);
-    expect(index.symbolsCache.has(doc.uri.toString())).toBe(true);
+    expect(index.hasSymbolsFor(doc.uri.toString())).toBe(true);
   });
 
   it('skips a non-.au3 document', async () => {
     const doc = docFor('/proj/notes.txt');
     await index.warmDocument(doc);
-    expect(index.symbolsCache.has(doc.uri.toString())).toBe(false);
+    expect(index.hasSymbolsFor(doc.uri.toString())).toBe(false);
   });
 });
 
@@ -238,7 +238,7 @@ describe('symbolIndex.noteFileContent', () => {
     await new Promise(resolve => setImmediate(resolve));
 
     expect(workspace.openTextDocument).toHaveBeenCalled();
-    expect(index.symbolsCache.has(uriString)).toBe(true);
+    expect(index.hasSymbolsFor(uriString)).toBe(true);
   });
 
   it('does not re-index an already-cached path', async () => {
