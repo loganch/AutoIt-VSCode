@@ -397,26 +397,6 @@ class OutputChannelManager {
       globalOutputChannel.replace(outputText);
     }
   }
-
-  /**
-   * Routes output to the appropriate channel based on configuration.
-   * @param {string} text - Text to output
-   * @param {OutputOptions} options - Output options
-   * @param {string} method - Output method ('append' or 'appendLine')
-   */
-  routeOutput(text, options, method = 'append') {
-    try {
-      const proxyChannel = this.createProxyOutputChannel(options);
-      proxyChannel[method](text);
-    } catch (error) {
-      handleError('OutputChannelManager.routeOutput', error);
-      // Fallback to direct output if proxy fails
-      const { aiOutProcess } = options;
-      if (aiOutProcess && typeof aiOutProcess[method] === 'function') {
-        aiOutProcess[method](text);
-      }
-    }
-  }
 }
 
 export default OutputChannelManager;
