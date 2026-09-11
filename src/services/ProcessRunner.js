@@ -142,6 +142,11 @@ class ProcessRunner {
       // Set up exit handler
       runner.on('exit', exit);
 
+      // Handle spawn errors that surface asynchronously (e.g. ENOENT) instead
+      // of synchronously via a missing pid; without this listener Node
+      // treats an unhandled 'error' event as an uncaught exception.
+      runner.on('error', error => exit(EXIT_CODE_SPAWN_FAILURE, error.message));
+
       // Handle spawn errors
       if (!runner.pid) {
         exit(EXIT_CODE_SPAWN_FAILURE, 'wrong path?');
