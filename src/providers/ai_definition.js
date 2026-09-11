@@ -327,14 +327,21 @@ const AutoItDefinitionProvider = {
 // ---------------------------------------------------------------------------
 const definitionCache = new Map();
 
-workspace.onDidChangeTextDocument(event => {
-  const prefix = event.document.uri.toString() + '::';
-  for (const key of definitionCache.keys()) {
-    if (key.startsWith(prefix)) {
-      definitionCache.delete(key);
+/**
+ * Registers the document-change cache invalidation and returns its Disposable
+ * so extension.js can tie its lifetime to the extension via ctx.subscriptions,
+ * instead of it living for the process lifetime as an import-time side effect.
+ * @returns {import('vscode').Disposable}
+ */
+export const registerDefinitionCacheInvalidation = () =>
+  workspace.onDidChangeTextDocument(event => {
+    const prefix = event.document.uri.toString() + '::';
+    for (const key of definitionCache.keys()) {
+      if (key.startsWith(prefix)) {
+        definitionCache.delete(key);
+      }
     }
-  }
-});
+  });
 
 const defProvider = languages.registerDefinitionProvider(AUTOIT_MODE, AutoItDefinitionProvider);
 

@@ -237,7 +237,8 @@ describe('ai_completion cache behavior', () => {
     ({ languages, workspace } = require('vscode'));
 
     // Re-import to get fresh module state
-    require('../src/providers/ai_completion');
+    const { registerCompletionCacheCleanup } = require('../src/providers/ai_completion');
+    registerCompletionCacheCleanup();
 
     // Extract the provider function
     const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];

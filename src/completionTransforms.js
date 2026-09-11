@@ -23,11 +23,18 @@ const defaultZero = `${br + br}\`Default = 0\``;
 // Configuration for completion behavior
 let parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
 
-workspace.onDidChangeConfiguration(event => {
-  if (event.affectsConfiguration('autoit.enableParenTriggerForFunctions')) {
-    parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
-  }
-});
+/**
+ * Registers the paren-trigger config listener and returns its Disposable so
+ * extension.js can tie its lifetime to the extension via ctx.subscriptions,
+ * instead of it living for the process lifetime as an import-time side effect.
+ * @returns {import('vscode').Disposable}
+ */
+export const registerParenTriggerListener = () =>
+  workspace.onDidChangeConfiguration(event => {
+    if (event.affectsConfiguration('autoit.enableParenTriggerForFunctions')) {
+      parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
+    }
+  });
 
 // Single source of truth for F14 (tech-debt): ai_completion.js reads this instead of
 // keeping its own copy of the setting + listener.

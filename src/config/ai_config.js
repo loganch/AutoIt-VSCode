@@ -17,19 +17,6 @@ import {
 import { getPaths, updateIncludePaths, findFilepath, refreshPaths } from './pathResolution';
 import { init as initTokenColors } from './tokenColorMigration';
 
-workspace.onDidChangeConfiguration(({ affectsConfiguration }) => {
-  if (isNoEvents() || !affectsConfiguration('autoit')) return;
-
-  refreshData();
-
-  if (affectsConfiguration('autoit.includePaths')) {
-    updateIncludePaths();
-  }
-
-  notifyListeners();
-  refreshPaths();
-});
-
 /**
  * Explicit init gate (F17): getPaths() can write global config (the legacy
  * smartHelp array gets migrated via upgradeSmartHelpConfig), so — like the
@@ -41,9 +28,31 @@ function init() {
   getPaths();
 }
 
+/**
+ * Registers the `autoit.*` config-change listener and returns its Disposable
+ * so extension.js can tie its lifetime to the extension via ctx.subscriptions,
+ * instead of it living for the process lifetime as an import-time side effect.
+ * @returns {import('vscode').Disposable}
+ */
+function registerConfigListener() {
+  return workspace.onDidChangeConfiguration(({ affectsConfiguration }) => {
+    if (isNoEvents() || !affectsConfiguration('autoit')) return;
+
+    refreshData();
+
+    if (affectsConfiguration('autoit.includePaths')) {
+      updateIncludePaths();
+    }
+
+    notifyListeners();
+    refreshPaths();
+  });
+}
+
 export default {
   config,
   init,
+  registerConfigListener,
   addListener,
   removeListener,
   noEvents,

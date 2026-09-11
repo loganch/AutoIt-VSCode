@@ -34,14 +34,20 @@ const MAX_CACHE_SIZE = 50; // LRU cache limit
 
 const functionPattern = setRegExpFlags(_functionPattern, 'gim');
 
-// Clean up cache when documents are closed
-workspace.onDidCloseTextDocument(document => {
-  if (document.languageId === 'autoit') {
-    const docUri = document.uri.toString();
-    includeCache.delete(docUri);
-    libraryIncludeCache.delete(docUri);
-  }
-});
+/**
+ * Registers the document-close cache cleanup and returns its Disposable so
+ * extension.js can tie its lifetime to the extension via ctx.subscriptions,
+ * instead of it living for the process lifetime as an import-time side effect.
+ * @returns {import('vscode').Disposable}
+ */
+export const registerCompletionCacheCleanup = () =>
+  workspace.onDidCloseTextDocument(document => {
+    if (document.languageId === 'autoit') {
+      const docUri = document.uri.toString();
+      includeCache.delete(docUri);
+      libraryIncludeCache.delete(docUri);
+    }
+  });
 
 /**
  * Creates a new completion item.

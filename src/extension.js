@@ -3,11 +3,13 @@ import { existsSync } from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import languageConfiguration from './languageConfiguration';
 import hoverFeature from './providers/ai_hover';
-import completionFeature from './providers/ai_completion';
+import completionFeature, { registerCompletionCacheCleanup } from './providers/ai_completion';
 import symbolsFeature from './providers/ai_symbols';
 import signaturesFeature, { signatureHoverProvider } from './providers/ai_signature';
 import workspaceSymbolsFeature from './providers/ai_workspaceSymbols';
-import goToDefinitionFeature from './providers/ai_definition';
+import goToDefinitionFeature, {
+  registerDefinitionCacheInvalidation,
+} from './providers/ai_definition';
 import referencesFeature from './providers/ai_references';
 
 import { registerCommands } from './registerCommands';
@@ -20,6 +22,7 @@ import {
 import { clearIncludeCache } from './utils/fsCache';
 import { debugLog } from './debugLog';
 import conf from './config/ai_config';
+import { registerParenTriggerListener } from './completionTransforms';
 import { warmDocument } from './services/symbolIndex';
 import { ensureWarm } from './services/symbolWarmup';
 import MapTrackingService from './services/MapTrackingService.js';
@@ -353,6 +356,10 @@ export const activate = ctx => {
     workspaceSymbolsFeature,
     goToDefinitionFeature,
     referencesFeature,
+    conf.registerConfigListener(),
+    registerParenTriggerListener(),
+    registerCompletionCacheCleanup(),
+    registerDefinitionCacheInvalidation(),
   ];
 
   // Only register formatter on Windows with valid paths

@@ -71,7 +71,14 @@ jest.mock('vscode', () => {
 
 jest.mock('../src/config/ai_config', () => ({
   __esModule: true,
-  default: { config: mockConfig, aiPath: '', wrapperPath: '', data: {}, init: () => {} },
+  default: {
+    config: mockConfig,
+    aiPath: '',
+    wrapperPath: '',
+    data: {},
+    init: () => {},
+    registerConfigListener: () => ({ dispose: () => {} }),
+  },
 }));
 
 const stubService = {
@@ -92,10 +99,16 @@ jest.mock('../src/services/VariableTrackingService.js', () => stubService);
 const stubFeature = { __esModule: true, default: { dispose: () => {} } };
 jest.mock('../src/languageConfiguration', () => stubFeature);
 jest.mock('../src/providers/ai_hover', () => stubFeature);
-jest.mock('../src/providers/ai_completion', () => stubFeature);
+jest.mock('../src/providers/ai_completion', () => ({
+  ...stubFeature,
+  registerCompletionCacheCleanup: () => ({ dispose: () => {} }),
+}));
 jest.mock('../src/providers/ai_symbols', () => stubFeature);
 jest.mock('../src/providers/ai_workspaceSymbols', () => stubFeature);
-jest.mock('../src/providers/ai_definition', () => stubFeature);
+jest.mock('../src/providers/ai_definition', () => ({
+  ...stubFeature,
+  registerDefinitionCacheInvalidation: () => ({ dispose: () => {} }),
+}));
 jest.mock('../src/providers/ai_references', () => stubFeature);
 jest.mock('../src/providers/ai_signature', () => ({
   __esModule: true,
