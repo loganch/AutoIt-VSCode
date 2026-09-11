@@ -199,6 +199,7 @@ $mData.key = "value"`;
 
   describe('updateConfiguration', () => {
     it('should update workspace root and include paths', () => {
+      MapTrackingService.resetInstance();
       const initialService = MapTrackingService.getInstance(
         '/workspace1',
         ['path1'],
@@ -228,44 +229,39 @@ $mData.key = "value"`;
       consoleWarnSpy.mockClear();
     });
 
-    it('should warn when getInstance is called with different parameters', () => {
+    it('should throw when getInstance is called with different parameters', () => {
       // Reset and start fresh for this test
       MapTrackingService.resetInstance();
       MapTrackingService.getInstance('/workspace1', ['path1'], INCLUDE_DEPTH_THREE);
-      MapTrackingService.getInstance('/workspace2', ['path2'], INCLUDE_DEPTH_FIVE);
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'getInstance called with different parameters than initial instance',
-        ),
-      );
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Use updateConfiguration()'),
-      );
+      expect(() =>
+        MapTrackingService.getInstance('/workspace2', ['path2'], INCLUDE_DEPTH_FIVE),
+      ).toThrow(/getInstance called with different parameters than initial instance/);
     });
 
-    it('should not warn when getInstance is called with same parameters', () => {
+    it('should not throw when getInstance is called with same parameters', () => {
       // Reset and start fresh for this test
       MapTrackingService.resetInstance();
       MapTrackingService.getInstance('/workspace', ['path'], INCLUDE_DEPTH_THREE);
-      MapTrackingService.getInstance('/workspace', ['path'], INCLUDE_DEPTH_THREE);
 
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      expect(() =>
+        MapTrackingService.getInstance('/workspace', ['path'], INCLUDE_DEPTH_THREE),
+      ).not.toThrow();
     });
 
-    it('should not warn when getInstance is called with default values matching initial instance', () => {
+    it('should not throw when getInstance is called with default values matching initial instance', () => {
       // Initialize with default values
       MapTrackingService.resetInstance();
       MapTrackingService.getInstance('', [], INCLUDE_DEPTH_THREE);
-      // Call again with explicit defaults
-      MapTrackingService.getInstance('', [], INCLUDE_DEPTH_THREE);
 
-      expect(consoleWarnSpy).not.toHaveBeenCalled();
+      // Call again with explicit defaults
+      expect(() => MapTrackingService.getInstance('', [], INCLUDE_DEPTH_THREE)).not.toThrow();
     });
   });
 
   describe('resetInstance', () => {
     it('should allow creating a new instance after reset', () => {
+      MapTrackingService.resetInstance();
       const instance1 = MapTrackingService.getInstance('/workspace1', [], INCLUDE_DEPTH_THREE);
       MapTrackingService.resetInstance();
       const instance2 = MapTrackingService.getInstance('/workspace2', [], INCLUDE_DEPTH_FIVE);

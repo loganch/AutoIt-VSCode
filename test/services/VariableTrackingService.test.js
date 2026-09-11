@@ -132,13 +132,12 @@ Global $gMain = 1`;
     expect(service.fileParsers.size).toBe(0);
   });
 
-  test('warns when getInstance is called with different parameters', () => {
+  test('throws when getInstance is called with different parameters', () => {
     VariableTrackingService.resetInstance();
     VariableTrackingService.getInstance('/workspace-one', ['one'], INITIAL_MAX_DEPTH);
-    VariableTrackingService.getInstance('/workspace-two', ['two'], UPDATED_MAX_DEPTH);
 
-    expect(consoleWarnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('getInstance called with different parameters than initial instance'),
-    );
+    expect(() =>
+      VariableTrackingService.getInstance('/workspace-two', ['two'], UPDATED_MAX_DEPTH),
+    ).toThrow(/getInstance called with different parameters than initial instance/);
   });
 });

@@ -43,7 +43,10 @@ class TrackingServiceBase {
   /**
    * Get singleton instance. Parameters only apply on first call; use
    * {@link TrackingServiceBase#updateConfiguration} to change them later.
+   * extension.js's setupDocumentTracking() is the sole initialization site —
+   * every other caller must use the parameterless form.
    * @returns {TrackingServiceBase}
+   * @throws {Error} If called with parameters that differ from the initial instance.
    */
   static getInstance(...args) {
     const Ctor = this;
@@ -61,7 +64,7 @@ class TrackingServiceBase {
         (maxIncludeDepth !== undefined && maxIncludeDepth !== instance.includeResolver.maxDepth);
 
       if (hasChanges) {
-        console.warn(
+        throw new Error(
           `[${Ctor.name}] getInstance called with different parameters than initial instance. ` +
             'Use updateConfiguration() to modify singleton settings.',
         );

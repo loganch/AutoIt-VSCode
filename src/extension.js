@@ -388,11 +388,14 @@ export const activate = ctx => {
 
   registerCommands(ctx);
 
-  ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
-
+  // Sole init site for MapTrackingService/VariableTrackingService — must run
+  // before ensureWarm() (or anything else that may call their getInstance())
+  // so the singletons are constructed with real config, not defaults.
   const { mapTrackingService, variableTrackingService } = setupDocumentTracking(ctx);
   setupConfigSync(ctx, mapTrackingService, variableTrackingService);
   setupDiagnostics(ctx);
+
+  ensureWarm(); // warm the symbol index in the background for fast Go-to-Definition
 
   console.log('AutoIt is now active!');
 };

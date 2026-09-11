@@ -319,12 +319,6 @@ const getMapKeyCompletions = async (document, position, mapName) => {
 
   const mapTrackingService = MapTrackingService.getInstance();
 
-  // Check if mapTrackingService is non-null before using it
-  if (!mapTrackingService) {
-    console.warn('MapTrackingService instance is null');
-    return [];
-  }
-
   const filePath = document.uri.fsPath;
   const { line } = position;
 
@@ -408,30 +402,23 @@ const provideCompletionItems = async (document, position) => {
   if (prefix === '$') {
     // Try scope-aware approach first
     const variableTracker = VariableTrackingService.getInstance();
-    if (!variableTracker) {
-      console.warn(
-        '[ai_completion] VariableTrackingService instance is null; using regex fallback',
-      );
-      variableCompletions = getVariableCompletions(text, prefix);
-    } else {
-      try {
-        const filePath = document.uri.fsPath;
-        const variables = await variableTracker.getVariablesWithIncludes(filePath, position.line);
-        if (variables.length > 0) {
-          variableCompletions = createVariableCompletions(variables);
-        } else {
-          // Fall back to regex when scope-aware returns nothing (file not yet parsed,
-          // or file has no explicitly-declared variables)
-          variableCompletions = getVariableCompletions(text, prefix);
-        }
-      } catch (error) {
-        console.warn(
-          '[ai_completion] Scope-aware variables failed, using regex fallback:',
-          error.message,
-        );
-        // Fallback to regex-based approach
+    try {
+      const filePath = document.uri.fsPath;
+      const variables = await variableTracker.getVariablesWithIncludes(filePath, position.line);
+      if (variables.length > 0) {
+        variableCompletions = createVariableCompletions(variables);
+      } else {
+        // Fall back to regex when scope-aware returns nothing (file not yet parsed,
+        // or file has no explicitly-declared variables)
         variableCompletions = getVariableCompletions(text, prefix);
       }
+    } catch (error) {
+      console.warn(
+        '[ai_completion] Scope-aware variables failed, using regex fallback:',
+        error.message,
+      );
+      // Fallback to regex-based approach
+      variableCompletions = getVariableCompletions(text, prefix);
     }
   } else {
     // For non-$ prefixes, use existing regex approach

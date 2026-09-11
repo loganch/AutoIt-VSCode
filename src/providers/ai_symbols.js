@@ -14,7 +14,6 @@ import { REGEX_PATTERNS } from '../utils/regexPatterns';
 
 const { functionPattern, regionPattern, variablePattern } = REGEX_PATTERNS;
 import { rangeContainsRange } from '../utils/textUtils';
-import { DEFAULT_MAX_INCLUDE_DEPTH } from '../constants';
 import MapTrackingService from '../services/MapTrackingService.js';
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;
 const commentStartRegex = /^\s*#(?:cs|comments-start)/;
@@ -524,16 +523,9 @@ function convertToDocumentSymbols(symbolInfoArray) {
  */
 async function addMapSymbols(doc, result) {
   try {
-    // Get AutoIt configuration
-    const autoitConfig = workspace.getConfiguration('autoit');
-    const { workspaceFolders } = workspace;
-    const workspaceRoot =
-      workspaceFolders && workspaceFolders.length > 0 ? workspaceFolders[0].uri.fsPath : '';
-    const includePaths = autoitConfig.get('includePaths', []);
-    const includeDepth = autoitConfig.get('maps.includeDepth', DEFAULT_MAX_INCLUDE_DEPTH);
-
-    // Get MapTrackingService instance
-    const mapService = MapTrackingService.getInstance(workspaceRoot, includePaths, includeDepth);
+    // extension.js's setupDocumentTracking() is the sole owner that
+    // initializes/reconfigures this singleton; just use it here.
+    const mapService = MapTrackingService.getInstance();
 
     // Update file in service (immediate, not debounced for document symbols)
     const filePath = doc.uri.fsPath;

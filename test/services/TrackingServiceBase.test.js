@@ -120,11 +120,10 @@ describe('TrackingServiceBase', () => {
     expect(service.fileParsers.size).toBe(0);
   });
 
-  test('getInstance warns when called with different parameters', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    MinimalTracker.getInstance('/different');
-
-    expect(warnSpy).toHaveBeenCalled();
+  test('getInstance throws when called with different parameters', () => {
+    expect(() => MinimalTracker.getInstance('/different')).toThrow(
+      /getInstance called with different parameters/,
+    );
   });
 
   test('_ensureIncludedFilesParsed reads and caches uncached includes', async () => {
