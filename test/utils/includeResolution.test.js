@@ -52,10 +52,8 @@ const {
   getIncludeScripts,
   isSkippableLine,
 } = require('../../src/utils/includeResolution');
-const { getIncludeText, normalizePath } = require('../../src/utils/fsCache');
-const { setRegExpFlags } = require('../../src/utils/regexPatterns');
 
-describe('util module', () => {
+describe('includeResolution', () => {
   const fixturesDir = path.join(process.cwd(), 'fixtures');
   const helperPath = path.join(fixturesDir, 'helper.au3');
   const nestedPath = path.join(fixturesDir, 'nested.au3');
@@ -77,21 +75,6 @@ describe('util module', () => {
 
       return '; nested include';
     });
-  });
-
-  test('normalizePath returns an absolute path', () => {
-    const normalized = normalizePath(path.join('fixtures', 'helper.au3'));
-
-    expect(path.isAbsolute(normalized)).toBe(true);
-    expect(path.basename(normalized)).toBe('helper.au3');
-  });
-
-  test('setRegExpFlags preserves the original pattern', () => {
-    const baseRegex = /autoit/i;
-    const updatedRegex = setRegExpFlags(baseRegex, 'gm');
-
-    expect(updatedRegex.source).toBe(baseRegex.source);
-    expect(updatedRegex.flags).toBe('gm');
   });
 
   test('getIncludePath resolves quoted includes relative to the current document', () => {
@@ -116,15 +99,6 @@ describe('util module', () => {
     const resolved = getIncludePath('"missing.au3"', document);
 
     expect(resolved).toBe('');
-  });
-
-  test('getIncludeText reads and caches AutoIt include files', () => {
-    const firstRead = getIncludeText(helperPath);
-    const secondRead = getIncludeText(helperPath);
-
-    expect(firstRead).toContain('nested.au3');
-    expect(secondRead).toBe(firstRead);
-    expect(mockReadFileSync).toHaveBeenCalledTimes(1);
   });
 
   test('getIncludeScripts collects nested include files recursively', () => {
