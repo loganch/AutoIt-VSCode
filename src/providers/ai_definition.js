@@ -261,11 +261,9 @@ const AutoItDefinitionProvider = {
         noteFileContent(scriptPath, scriptContent);
 
         // Reset regex lastIndex to ensure fresh search
-        if (defRegex && typeof defRegex.lastIndex === 'number') {
-          defRegex.lastIndex = 0;
-        }
+        defRegex.lastIndex = 0;
 
-        const m = defRegex ? defRegex.exec(scriptContent) : null;
+        const m = defRegex.exec(scriptContent);
         if (!m || typeof m.index !== 'number') {
           continue;
         }
