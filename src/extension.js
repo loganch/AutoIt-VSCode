@@ -63,7 +63,7 @@ const validateFormatterPaths = () => {
   }
 
   // Check if required paths exist
-  const { aiPath, wrapperPath } = conf;
+  const { aiPath, wrapperPath } = config;
   if (!aiPath || !wrapperPath) {
     return false;
   }
