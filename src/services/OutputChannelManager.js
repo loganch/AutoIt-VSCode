@@ -297,13 +297,12 @@ class OutputChannelManager {
 
         // Validate that the property exists on the target object
         if (!(prop in aiOut)) {
-          console.error(
-            `[OutputChannelManager] Method '${prop}' not found on output channel. Available methods:`,
-            Object.getOwnPropertyNames(aiOut).filter(name => typeof aiOut[name] === 'function'),
+          const available = Object.getOwnPropertyNames(aiOut).filter(
+            name => typeof aiOut[name] === 'function',
           );
           throw new Error(
-            `OutputChannelManager: Method '${prop}' is not available on the output channel. ` +
-              `This usually indicates incorrect initialization - the first parameter should be an output channel, not a config object.`,
+            `OutputChannelManager: Method '${prop}' is not available on the output channel ` +
+              `(available: ${available.join(', ')}). This usually indicates incorrect initialization - the first parameter should be an output channel, not a config object.`,
           );
         }
 
