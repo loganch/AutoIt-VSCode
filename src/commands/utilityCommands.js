@@ -7,6 +7,7 @@ import { showErrorMessage } from '../config/ai_showMessage';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import OutputChannelManager from '../services/OutputChannelManager';
 import { getServiceStack } from '../services/commandServiceStack';
+import { getActiveDocumentFileName } from './editorActions';
 
 const { functionDefinitionRegex } = REGEX_PATTERNS;
 const { config } = aiConfig;
@@ -22,21 +23,6 @@ const BYREF_PREFIX_LENGTH = 6;
 
 /** @type {number} Padding length for parameter names in documentation. */
 const PARAMETER_PAD_LENGTH = 21;
-
-/**
- * Gets the file name of the active document in the editor
- * @returns {string} The file name or empty string if not available
- */
-function getActiveDocumentFileName() {
-  if (!window.activeTextEditor) {
-    return '';
-  }
-  const { document } = window.activeTextEditor;
-  if (!document.fileName) {
-    return '';
-  }
-  return document.fileName;
-}
 
 /**
  * Returns the current time in a specific format.
