@@ -264,4 +264,4 @@ const registerDefinitionFeature = () =>
   languages.registerDefinitionProvider(AUTOIT_MODE, AutoItDefinitionProvider);
 
 export default registerDefinitionFeature;
-export { AutoItDefinitionProvider, definitionCache };
+export { AutoItDefinitionProvider };
