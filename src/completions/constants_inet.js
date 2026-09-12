@@ -1,7 +1,7 @@
 import { CompletionItemKind } from 'vscode';
 import { completionToHover, fillCompletions } from '../completionTransforms';
 
-const InetConstants = [
+const items = [
   {
     label: '$INET_LOCALCACHE',
     documentation: '(0) = Get the file from local cache if available (default).',
@@ -62,12 +62,12 @@ const InetConstants = [
   },
 ];
 
-const items = fillCompletions(
-  InetConstants,
+const completions = fillCompletions(
+  items,
   CompletionItemKind.Constant,
   'InetGet Constant',
   'InetConstants.au3',
 );
-const hovers = completionToHover(items);
+const hovers = completionToHover(completions);
 
-export { items as default, hovers };
+export { completions as default, hovers };
