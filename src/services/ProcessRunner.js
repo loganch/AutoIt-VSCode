@@ -94,7 +94,12 @@ class ProcessRunner {
         status: true,
       };
 
+      // Spawn failure can surface twice (async 'error' event plus the
+      // synchronous missing-pid guard below); keep exit idempotent.
+      let exited = false;
       const exit = (code, text) => {
+        if (exited) return;
+        exited = true;
         this._handleProcessExit(id, code, text, info, aiOut);
       };
 
