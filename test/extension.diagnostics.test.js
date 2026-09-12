@@ -121,8 +121,7 @@ jest.mock('../src/providers/ai_definition', () => ({
 jest.mock('../src/providers/ai_references', () => stubProviderFeature);
 jest.mock('../src/providers/ai_signature', () => ({
   __esModule: true,
-  default: () => ({ dispose: () => {} }),
-  registerSignatureHoverProvider: () => ({ dispose: () => {} }),
+  default: () => [{ dispose: () => {} }],
   clearSignatureCache: () => {},
 }));
 jest.mock('../src/providers/ai_formatter', () => ({

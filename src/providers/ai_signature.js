@@ -238,7 +238,7 @@ function createSignatureInfo(foundSig) {
  * importing this module doesn't register with VS Code.
  * @returns {import('vscode').Disposable}
  */
-export const registerSignatureHoverProvider = () =>
+const registerSignatureHoverProvider = () =>
   languages.registerHoverProvider(AUTOIT_MODE, {
     provideHover(document, position) {
       if (isInComment(document, position)) return null;
@@ -265,12 +265,14 @@ export const registerSignatureHoverProvider = () =>
   });
 
 /**
- * Registers the signature-help provider and returns its Disposable. Deferred
- * to a factory (called from extension.js's activate()) instead of module
- * scope, so merely importing this module doesn't register with VS Code.
- * @returns {import('vscode').Disposable}
+ * Registers the signature-help and signature-hover providers and returns their
+ * Disposables. One call activates the whole signature feature, matching the
+ * single-bootstrap contract of every other provider. Deferred to a factory
+ * (called from extension.js's activate()) instead of module scope, so merely
+ * importing this module doesn't register with VS Code.
+ * @returns {import('vscode').Disposable[]}
  */
-const registerSignatureHelpFeature = () =>
+const registerSignatureHelpFeature = () => [
   languages.registerSignatureHelpProvider(
     AUTOIT_MODE,
     {
@@ -300,6 +302,8 @@ const registerSignatureHelpFeature = () =>
     },
     '(',
     ',',
-  );
+  ),
+  registerSignatureHoverProvider(),
+];
 
 export default registerSignatureHelpFeature;

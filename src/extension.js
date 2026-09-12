@@ -8,10 +8,7 @@ import registerCompletionFeature, {
   clearCompletionCaches,
 } from './providers/ai_completion';
 import registerSymbolsFeature from './providers/ai_symbols';
-import registerSignatureHelpFeature, {
-  registerSignatureHoverProvider,
-  clearSignatureCache,
-} from './providers/ai_signature';
+import registerSignatureHelpFeature, { clearSignatureCache } from './providers/ai_signature';
 import registerWorkspaceSymbolsFeature from './providers/ai_workspaceSymbols';
 import registerDefinitionFeature, {
   registerDefinitionCacheInvalidation,
@@ -366,8 +363,7 @@ export const activate = ctx => {
     registerHoverFeature(),
     registerCompletionFeature(),
     registerSymbolsFeature(),
-    registerSignatureHelpFeature(),
-    registerSignatureHoverProvider(),
+    ...registerSignatureHelpFeature(),
     ...registerWorkspaceSymbolsFeature(),
     registerDefinitionFeature(),
     registerReferencesFeature(),

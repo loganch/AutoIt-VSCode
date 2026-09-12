@@ -106,7 +106,6 @@ describe('ai_signature', () => {
   beforeAll(() => {
     signatureModule = require('../src/providers/ai_signature');
     signatureModule.default();
-    signatureModule.registerSignatureHoverProvider();
     hoverProvider = mockRegisterHoverProvider.mock.calls[0]?.[1] ?? null;
     signatureProvider = mockRegisterSignatureHelpProvider.mock.calls[0]?.[1] ?? null;
   });
@@ -117,7 +116,6 @@ describe('ai_signature', () => {
       expect.objectContaining({ provideSignatureHelp: expect.any(Function) }),
     );
     expect(signatureModule.default).toBeDefined();
-    expect(signatureModule.registerSignatureHoverProvider).toBeDefined();
   });
 
   test('provideSignatureHelp returns null when no callable function is found', () => {
