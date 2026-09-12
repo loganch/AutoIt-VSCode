@@ -25,7 +25,6 @@ function showError(sPath, data, msgSuffix) {
     const type = data.file !== undefined ? 'File' : 'Directory';
     setTimeout(() => {
       data.message = showErrorMessage(`${type} "${sPath}" not found (autoit.${msgSuffix})`);
-      return data.message;
     }, timeout);
   }
 
