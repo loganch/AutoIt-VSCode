@@ -41,7 +41,7 @@ jest.mock('../../src/config/ai_showMessage', () => ({
 
 jest.mock('../../src/services/commandServiceStack', () => {
   const pkg = require('../../package.json');
-  return {
+  const stack = {
     globalOutputChannel: {
       replace: (...args) => mockReplace(...args),
     },
@@ -67,6 +67,12 @@ jest.mock('../../src/services/commandServiceStack', () => {
         return null;
       },
     },
+  };
+  return {
+    ...stack,
+    createServiceStack: jest.fn(() => ({ ...stack })),
+    getServiceStack: jest.fn(() => stack),
+    resetServiceStack: jest.fn(),
   };
 });
 

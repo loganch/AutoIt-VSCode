@@ -9,14 +9,10 @@ import { getActiveDocumentFileName } from './editorActions';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';
 import {
-  globalOutputChannel,
-  processManager,
-  processRunner,
+  getServiceStack,
 } from '../services/commandServiceStack';
 
 const { config } = conf;
-
-export { globalOutputChannel };
 
 // Constants
 const STATUS_BAR_MESSAGE_TIMEOUT = 1500; // milliseconds
@@ -92,7 +88,7 @@ async function runScript() {
   }
 
   try {
-    await processRunner.run(
+    await getServiceStack().processRunner.run(
       config.aiPath,
       args,
       config.multiOutput && config.multiOutputReuseOutput,
@@ -109,7 +105,7 @@ async function runScript() {
  * @returns {void}
  */
 function killScript(thisFile = null) {
-  const data = processManager.findRunner({ status: true, thisFile });
+  const data = getServiceStack().processManager.findRunner({ status: true, thisFile });
   if (!data) {
     let file = ' ';
     if (thisFile) {
@@ -132,7 +128,7 @@ function killScript(thisFile = null) {
  * @returns {Promise<void>|undefined} Promise if async operation, undefined otherwise
  */
 function restartScript() {
-  const { runner, info } = processManager.lastRunningOpened || {};
+  const { runner, info } = getServiceStack().processManager.lastRunningOpened || {};
 
   // If there's a currently running script, kill it and restart when it exits
   if (runner && info?.status) {

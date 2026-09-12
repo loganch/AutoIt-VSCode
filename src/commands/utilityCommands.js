@@ -6,7 +6,7 @@ import { findFilepath } from '../config/pathResolution';
 import { showErrorMessage } from '../config/ai_showMessage';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import OutputChannelManager from '../services/OutputChannelManager';
-import { globalOutputChannel, processManager } from '../services/commandServiceStack';
+import { getServiceStack } from '../services/commandServiceStack';
 
 const { functionDefinitionRegex } = REGEX_PATTERNS;
 const { config } = aiConfig;
@@ -67,6 +67,7 @@ function getTime() {
  */
 const trimOutputLines = () => {
   try {
+    const { processManager, globalOutputChannel } = getServiceStack();
     OutputChannelManager.trimOutputLines(processManager, globalOutputChannel);
   } catch (error) {
     console.error('Error trimming output lines:', error);

@@ -6,7 +6,7 @@ import { getIncludeText } from '../utils/fsCache';
 import { escapeRegexLiteral } from '../utils/regexPatterns';
 import conf from '../config/ai_config';
 import { findFilepath } from '../config/pathResolution';
-import { processRunner } from '../services/commandServiceStack';
+import { getServiceStack } from '../services/commandServiceStack';
 import { validateExecutablePath } from '../utils/pathValidation';
 
 // Timeout used for status bar messages (ms)
@@ -37,7 +37,7 @@ async function compile() {
   window.setStatusBarMessage('Compiling script...', STATUS_MSG_TIMEOUT_MS);
 
   // Launch the AutoIt Wrapper executable with the script's path
-  await processRunner.run(config.aiPath, [
+  await getServiceStack().processRunner.run(config.aiPath, [
     config.wrapperPath,
     '/ShowGui',
     '/prod',
@@ -69,7 +69,7 @@ async function tidy() {
   window.setStatusBarMessage(`Tidying script...${thisFile}`, STATUS_MSG_TIMEOUT_MS);
 
   // Launch the AutoIt Wrapper executable with the script's path
-  await processRunner.run(config.aiPath, [config.wrapperPath, '/Tidy', '/in', thisFile]);
+  await getServiceStack().processRunner.run(config.aiPath, [config.wrapperPath, '/Tidy', '/in', thisFile]);
 }
 
 /**
@@ -95,7 +95,7 @@ async function check() {
   window.setStatusBarMessage(`Checking script...${thisFile}`, STATUS_MSG_TIMEOUT_MS);
 
   // Launch the AutoIt Wrapper executable with the script's path
-  await processRunner.run(config.aiPath, [
+  await getServiceStack().processRunner.run(config.aiPath, [
     config.wrapperPath,
     '/AU3check',
     '/prod',
@@ -128,7 +128,7 @@ async function build() {
   window.setStatusBarMessage('Building script...', STATUS_MSG_TIMEOUT_MS);
 
   // Launch the AutoIt Wrapper executable with the script's path
-  await processRunner.run(config.aiPath, [
+  await getServiceStack().processRunner.run(config.aiPath, [
     config.wrapperPath,
     '/NoStatus',
     '/prod',
@@ -219,7 +219,7 @@ function launchInfo() {
  * @returns {void}
  */
 function launchKoda() {
-  processRunner.run(config.kodaPath, []);
+  getServiceStack().processRunner.run(config.kodaPath, []);
 }
 
 export { compile, tidy, check, build, launchHelp, launchInfo, launchKoda };

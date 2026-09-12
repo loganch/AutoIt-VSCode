@@ -87,10 +87,10 @@ jest.mock('../../src/utils/parameterValidation.js', () => ({
 }));
 
 describe('ScriptCommands', () => {
-  let globalOutputChannel;
   let killScript;
   let restartScript;
   let runScript;
+  let getServiceStack;
 
   beforeEach(() => {
     jest.resetModules();
@@ -119,15 +119,16 @@ describe('ScriptCommands', () => {
     );
 
     ({
-      globalOutputChannel,
       killScript,
       restartScript,
       runScript,
     } = require('../../src/commands/scriptCommands.js'));
+    ({ getServiceStack } = require('../../src/services/commandServiceStack.js'));
   });
 
-  test('exports the singleton global output channel', () => {
-    expect(globalOutputChannel).toBe(mockGlobalOutputChannel);
+  test('builds the shared stack lazily via getServiceStack', () => {
+    expect(MockOutputChannelManager.createGlobalOutputChannel).not.toHaveBeenCalled();
+    expect(getServiceStack().globalOutputChannel).toBe(mockGlobalOutputChannel);
     expect(MockOutputChannelManager.createGlobalOutputChannel).toHaveBeenCalledWith(
       'AutoIt (global)',
       'vscode-autoit-output',
