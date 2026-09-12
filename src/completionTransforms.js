@@ -20,8 +20,10 @@ const opt = '**[optional]**';
 const br = '  ';
 const defaultZero = `${br + br}\`Default = 0\``;
 
-// Configuration for completion behavior
-let parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
+// Configuration for completion behavior. Resolved lazily (not at import time)
+// so merely importing this module — e.g. via the ~97 data files — never calls
+// the VS Code API before the extension host is ready.
+let parenTriggerOn;
 
 /**
  * Registers the paren-trigger config listener and returns its Disposable so
@@ -38,7 +40,12 @@ export const registerParenTriggerListener = () =>
 
 // Single source of truth for F14 (tech-debt): ai_completion.js reads this instead of
 // keeping its own copy of the setting + listener.
-export const isParenTriggerOn = () => parenTriggerOn;
+export const isParenTriggerOn = () => {
+  if (parenTriggerOn === undefined) {
+    parenTriggerOn = workspace.getConfiguration('autoit').get('enableParenTriggerForFunctions');
+  }
+  return parenTriggerOn;
+};
 
 /**
  * Transforms an array of completion entries into VSCode CompletionItem objects with consistent
@@ -75,7 +82,7 @@ const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
       kind,
       detail: newDetail,
       get commitCharacters() {
-        return kind === CompletionItemKind.Function && parenTriggerOn ? ['('] : [];
+        return kind === CompletionItemKind.Function && isParenTriggerOn() ? ['('] : [];
       },
       documentation: newDoc,
       ...(requiredScript ? { requiredInclude: requiredScript } : {}),
@@ -177,12 +184,16 @@ const signatureToCompletion = (signatures, kind, detail) => {
 
   const includeMatch = typeof detail === 'string' ? detail.match(/#include\s+<([^>]+)>/) : null;
   const requiredInclude = includeMatch ? includeMatch[1] : undefined;
+  const itemKind = kind || CompletionItemKind.Function;
 
   return Object.entries(signatures).map(([key, signature]) => ({
     label: key,
     documentation: signature?.documentation || '',
-    kind: kind || CompletionItemKind.Function,
+    kind: itemKind,
     detail: detail || '',
+    get commitCharacters() {
+      return itemKind === CompletionItemKind.Function && isParenTriggerOn() ? ['('] : [];
+    },
     ...(requiredInclude ? { requiredInclude } : {}),
   }));
 };
