@@ -4,11 +4,6 @@ import { safeExecute } from '../errorUtils';
 import { REGEX_PATTERNS } from './regexPatterns';
 import { validateString } from './validation';
 
-/**
- * Validates file path input
- * @param {any} filePath - Path to validate
- * @returns {boolean} True if valid path
- */
 export const isValidFilePath = filePath => {
   return typeof filePath === 'string' && filePath.length > 0 && filePath.trim().length > 0;
 };
@@ -76,14 +71,7 @@ export const safeFileStat = filePath => {
   return safeExecute(() => fs.statSync(filePath), null, `File stat for ${filePath}`);
 };
 
-/**
- * Converts a file path to a normalized, absolute path format that works consistently across operating systems.
- * This function ensures paths can be used safely as Map/Set keys by standardizing path separators,
- * making relative paths absolute, and normalizing drive letter casing on Windows.
- *
- * @param {any} inputPath - The file path to normalize (string expected, other types return empty string)
- * @returns {string} Normalized absolute path with consistent separators, or empty string if input is invalid
- */
+/** Normalize a path to an absolute, consistent-separator string safe for Map/Set keys. */
 export const normalizePath = inputPath => {
   const rawPath = validateString(inputPath);
   if (!rawPath) return '';
@@ -92,15 +80,12 @@ export const normalizePath = inputPath => {
     () => {
       let normalized = path.normalize(rawPath);
 
-      // Make absolute if necessary
       if (!path.isAbsolute(normalized)) {
         normalized = path.resolve(process.cwd(), normalized);
       }
 
-      // Standardize path separators
       normalized = normalized.replace(/[/\\]+/g, path.sep);
 
-      // Lowercase drive letter on Windows for consistency
       if (process.platform === 'win32' && REGEX_PATTERNS.windowsDriveLetter.test(normalized)) {
         normalized = normalized.charAt(0).toLowerCase() + normalized.slice(1);
       }
