@@ -92,6 +92,8 @@ const AutoItFormatterProvider = {
 export const registerFormatterFeature = () =>
   languages.registerDocumentFormattingEditProvider('autoit', AutoItFormatterProvider);
 
+export default registerFormatterFeature;
+
 /**
  * Executes the AutoIt3Wrapper Tidy command on the specified file
  * @param {string} filePath - Path to the file to format

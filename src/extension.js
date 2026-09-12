@@ -20,7 +20,7 @@ import registerDefinitionFeature, {
 import registerReferencesFeature from './providers/ai_references';
 
 import { registerCommands } from './registerCommands';
-import { registerFormatterFeature } from './providers/ai_formatter';
+import registerFormatterFeature from './providers/ai_formatter';
 import {
   clearDiagnosticsOwnedBy,
   parseAu3CheckOutput,
