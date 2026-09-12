@@ -50,7 +50,6 @@ class ProcessRunner {
     try {
       const thisFile = this.getActiveDocumentFileName();
 
-      // Validate the script file path to prevent path traversal
       if (thisFile) {
         const fileValidation = validateFilePath(thisFile);
         if (!fileValidation.valid) {
@@ -58,7 +57,6 @@ class ProcessRunner {
         }
       }
 
-      // Validate the executable path to prevent executing arbitrary executables
       const execValidation = validateExecutablePath(cmdPath);
       if (!execValidation.valid) {
         throw new Error(`Security: ${execValidation.error}`);
@@ -66,7 +64,6 @@ class ProcessRunner {
 
       const processCommand = cmdPath + ' ' + args.join(' ');
 
-      // Find existing runner for reuse if enabled
       const runnerPrev =
         bAiOutReuse &&
         this.processManager.findRunner({
@@ -77,19 +74,16 @@ class ProcessRunner {
 
       const id = runnerPrev ? runnerPrev.info.id : this.processManager.nextId();
 
-      // Create or reuse output channel
       const aiOutProcess = this.config.multiOutput
         ? (runnerPrev && !runnerPrev.info.aiOut.void && runnerPrev.info.aiOut) ||
           this.outputChannelManager.createProcessOutputChannel(id, thisFile, 'vscode-autoit-output')
         : this._createVoidOutputChannel();
 
-      // Create proxy output channel with formatting
       const aiOut = this.outputChannelManager.createProxyOutputChannel({
         id,
         aiOutProcess,
       });
 
-      // Get or create runner info
       const info = (runnerPrev && runnerPrev.info) || {
         id,
         startTime: new Date().getTime(),
@@ -100,46 +94,31 @@ class ProcessRunner {
         status: true,
       };
 
-      // Set up exit handler
       const exit = (code, text) => {
         this._handleProcessExit(id, code, text, info, aiOut);
       };
 
-      // Store internal output reference
       if (!info._aiOut) info._aiOut = aiOut;
 
-      // Handle output panel reuse
       if (runnerPrev) {
         this._handleOutputReuse(runnerPrev, aiOutProcess, info);
       }
 
-      // Clear output if configured
       this._clearOutputIfNeeded(aiOutProcess);
-
-      // Show output channel
       this._showOutputChannel(aiOutProcess);
 
-      // Set working directory
       const workDir = path.dirname(thisFile);
 
-      // Disable hotkeys
       await this.hotkeyManager.disable(id);
 
-      // Spawn the process
       const runner = spawn(cmdPath, args, {
         cwd: workDir,
       });
 
-      // Display process command line
       this._displayProcessCommand(aiOut, id, cmdPath, args, runner.pid);
-
-      // Register runner
       this._registerRunner(runner, runnerPrev, info);
-
-      // Set up output handlers
       this._setupOutputHandlers(runner, aiOut);
 
-      // Set up exit handler
       runner.on('exit', exit);
 
       // Handle spawn errors that surface asynchronously (e.g. ENOENT) instead
@@ -147,7 +126,6 @@ class ProcessRunner {
       // treats an unhandled 'error' event as an uncaught exception.
       runner.on('error', error => exit(EXIT_CODE_SPAWN_FAILURE, error.message));
 
-      // Handle spawn errors
       if (!runner.pid) {
         exit(EXIT_CODE_SPAWN_FAILURE, 'wrong path?');
         throw new Error(`Failed to spawn process: ${cmdPath}`);
@@ -190,24 +168,18 @@ class ProcessRunner {
    */
   async _handleProcessExit(id, code, text, info, aiOut) {
     try {
-      // Reset hotkeys
       await this.hotkeyManager.reset(id);
 
-      // Convert null code to 0
       code = Number(code);
 
-      // Update runner info
       info.endTime = new Date().getTime();
       info.status = false;
 
-      // Flush output
       aiOut.flush();
 
-      // Display exit message
       const exitMessage = this._formatExitMessage(code, text, info);
       aiOut.appendLine(exitMessage);
 
-      // Trigger cleanup
       this.processManager.cleanup();
     } catch (error) {
       handleError('ProcessRunner._handleProcessExit', error);
@@ -313,10 +285,8 @@ class ProcessRunner {
    */
   _registerRunner(runner, runnerPrev, info) {
     if (runnerPrev) {
-      // Update existing runner
       this.processManager.replaceRunner(runnerPrev.runner, runner, runnerPrev.info);
     } else {
-      // Add new runner
       this.processManager.addRunner(runner, info);
     }
   }
