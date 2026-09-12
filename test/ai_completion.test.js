@@ -239,7 +239,7 @@ describe('ai_completion cache behavior', () => {
     // Re-import to get fresh module state
     const completionModule = require('../src/providers/ai_completion');
     completionModule.default();
-    completionModule.registerCompletionCacheCleanup();
+    completionModule.registerCompletionCacheInvalidation();
 
     // Extract the provider function
     const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];

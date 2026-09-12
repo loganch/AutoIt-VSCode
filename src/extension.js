@@ -4,7 +4,7 @@ import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
 import languageConfiguration from './languageConfiguration';
 import registerHoverFeature from './providers/ai_hover';
 import registerCompletionFeature, {
-  registerCompletionCacheCleanup,
+  registerCompletionCacheInvalidation,
   clearCompletionCaches,
 } from './providers/ai_completion';
 import registerSymbolsFeature from './providers/ai_symbols';
@@ -373,7 +373,7 @@ export const activate = ctx => {
     registerReferencesFeature(),
     conf.registerConfigListener(),
     registerParenTriggerListener(),
-    registerCompletionCacheCleanup(),
+    registerCompletionCacheInvalidation(),
     registerDefinitionCacheInvalidation(),
   ];
 

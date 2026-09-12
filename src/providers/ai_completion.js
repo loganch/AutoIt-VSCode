@@ -35,12 +35,12 @@ const MAX_CACHE_SIZE = 50; // LRU cache limit
 const functionPattern = setRegExpFlags(_functionPattern, 'gim');
 
 /**
- * Registers the document-close cache cleanup and returns its Disposable so
+ * Registers the document-close cache invalidation and returns its Disposable so
  * extension.js can tie its lifetime to the extension via ctx.subscriptions,
  * instead of it living for the process lifetime as an import-time side effect.
  * @returns {import('vscode').Disposable}
  */
-export const registerCompletionCacheCleanup = () =>
+export const registerCompletionCacheInvalidation = () =>
   workspace.onDidCloseTextDocument(document => {
     if (document.languageId === 'autoit') {
       const docUri = document.uri.toString();

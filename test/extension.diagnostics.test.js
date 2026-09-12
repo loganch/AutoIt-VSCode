@@ -105,7 +105,7 @@ jest.mock('../src/languageConfiguration', () => stubDataFeature);
 jest.mock('../src/providers/ai_hover', () => stubProviderFeature);
 jest.mock('../src/providers/ai_completion', () => ({
   ...stubProviderFeature,
-  registerCompletionCacheCleanup: () => ({ dispose: () => {} }),
+  registerCompletionCacheInvalidation: () => ({ dispose: () => {} }),
   clearCompletionCaches: () => {},
 }));
 jest.mock('../src/providers/ai_symbols', () => stubProviderFeature);
