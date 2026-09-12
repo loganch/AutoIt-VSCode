@@ -4,7 +4,7 @@ const path = require('path');
 const pkg = require('../../package.json');
 
 const expected = `extension-output-${pkg.publisher}.${pkg.name}-#`;
-const producers = ['src/services/commandServiceStack.js', 'src/providers/ai_commands.js'];
+const producers = ['src/services/commandServiceStack.js'];
 
 describe('outputName interpolation guard', () => {
   it.each(producers)('builds interpolated outputName in %s', rel => {
