@@ -12,7 +12,7 @@ export function getActiveDocumentFileName() {
     return '';
   }
   const { document } = window.activeTextEditor;
-  if (!document || !document.fileName) {
+  if (!document.fileName) {
     return '';
   }
   return document.fileName;
