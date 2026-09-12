@@ -106,8 +106,6 @@ describe('DebugCommands', () => {
 
     debugConsole();
 
-    expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
-      expect.stringContaining('is not a valid variable or macro'),
-    );
+    expect(mockWindow.showErrorMessage).toHaveBeenCalledWith('AutoIt: debugConsole failed');
   });
 });

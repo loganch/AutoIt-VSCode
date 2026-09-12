@@ -1,5 +1,6 @@
 import { window, Position } from 'vscode';
 import searchAndReplace from './editorActions';
+import { handleError } from '../errorUtils';
 
 /**
  * Configuration for debug code templates.
@@ -127,7 +128,7 @@ function debugMsgBox() {
       edit.insert(debugText.position, debugCode);
     });
   } catch (error) {
-    window.showErrorMessage(`Debug MsgBox Error: ${error.message}`);
+    handleError('debugMsgBox', error, true);
   }
 }
 
@@ -156,7 +157,7 @@ function debugConsole() {
       edit.insert(debugText.position, debugCode);
     });
   } catch (error) {
-    window.showErrorMessage(`Debug Console Error: ${error.message}`);
+    handleError('debugConsole', error, true);
   }
 }
 
