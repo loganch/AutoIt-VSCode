@@ -167,7 +167,8 @@ const AutoItReferenceProvider = {
   // and line).
   resolveDeclaration(document, cursorPos) {
     try {
-      return AutoItDefinitionProvider.provideDefinition(document, cursorPos);
+      const result = AutoItDefinitionProvider.provideDefinition(document, cursorPos);
+      return Array.isArray(result) ? (result[0] ?? null) : result;
     } catch {
       return null;
     }
