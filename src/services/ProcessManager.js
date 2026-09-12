@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { window } from 'vscode';
+import { handleError } from '../errorUtils';
 
 const MILLISECONDS_PER_SECOND = 1000;
 
@@ -94,7 +95,7 @@ class ProcessManager extends EventEmitter {
       this.runners.set(newRunner, info);
       this.runners.delete(oldRunner);
     } catch (error) {
-      this.outputChannel.appendLine(`[ProcessManager] Error in replaceRunner: ${error.message}`);
+      handleError('ProcessManager.replaceRunner', error);
     }
   }
 
@@ -130,7 +131,7 @@ class ProcessManager extends EventEmitter {
 
       return found ? { runner: found[0], info: found[1] } : null;
     } catch (error) {
-      this.outputChannel.appendLine(`[ProcessManager] Error in findRunner: ${error.message}`);
+      handleError('ProcessManager.findRunner', error);
       return null;
     }
   }
@@ -156,7 +157,7 @@ class ProcessManager extends EventEmitter {
       }
       return null;
     } catch (error) {
-      this.outputChannel.appendLine(`[ProcessManager] Error in isAiOutVisible: ${error.message}`);
+      handleError('ProcessManager.isAiOutVisible', error);
       return null;
     }
   }
@@ -189,7 +190,7 @@ class ProcessManager extends EventEmitter {
       }
       this.emit('cleanupCompleted');
     } catch (error) {
-      this.outputChannel.appendLine(`[ProcessManager] Error in cleanup: ${error.message}`);
+      handleError('ProcessManager.cleanup', error);
     }
   }
 
@@ -214,16 +215,12 @@ class ProcessManager extends EventEmitter {
           this.runners.delete(runner);
           this.emit('runnerCleaned', { id: info.id, file: info.thisFile });
         } catch (error) {
-          this.outputChannel.appendLine(
-            `[ProcessManager] Error in cleanup callback: ${error.message}`,
-          );
+          handleError('ProcessManager.cleanup callback', error);
         }
       };
       info.callback();
     } catch (error) {
-      this.outputChannel.appendLine(
-        `[ProcessManager] Error in cleanupFinishedRunner: ${error.message}`,
-      );
+      handleError('ProcessManager.cleanupFinishedRunner', error);
     }
   }
 
@@ -237,7 +234,7 @@ class ProcessManager extends EventEmitter {
       this.runners.set(runner, info);
       this.emit('runnerAdded', { id: info.id, file: info.thisFile, command: info.processCommand });
     } catch (error) {
-      this.outputChannel.appendLine(`[ProcessManager] Error in addRunner: ${error.message}`);
+      handleError('ProcessManager.addRunner', error);
     }
   }
 
@@ -261,9 +258,7 @@ class ProcessManager extends EventEmitter {
         }
       }
     } catch (error) {
-      this.outputChannel.appendLine(
-        `[ProcessManager] Error in updateRunnerStatus: ${error.message}`,
-      );
+      handleError('ProcessManager.updateRunnerStatus', error);
     }
   }
 
@@ -287,9 +282,7 @@ class ProcessManager extends EventEmitter {
       });
       this.emit('finishedRunnersCleared');
     } catch (error) {
-      this.outputChannel.appendLine(
-        `[ProcessManager] Error in clearFinishedRunners: ${error.message}`,
-      );
+      handleError('ProcessManager.clearFinishedRunners', error);
     }
   }
 }
