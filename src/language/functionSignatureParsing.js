@@ -5,48 +5,58 @@
 
 const FUNCTION_START_PATTERN = /^\s*(?:Volatile\s+)?Func\s+(\w+)\s*\(/i;
 
-const scanForClosingParen = (text, startIndex) => {
-  let depth = 0;
+/**
+ * Yields each character with its quoted context so callers never reimplement
+ * AutoIt string tracking (including doubled-quote escapes). Quote characters
+ * themselves yield as quoted; callers gate delimiter/depth logic on !quoted.
+ */
+const walkQuoteAware = function* (text, startIndex = 0) {
   let inDoubleQuote = false;
   let inSingleQuote = false;
 
   for (let index = startIndex; index < text.length; index += 1) {
     const char = text[index];
     const nextChar = text[index + 1];
+    const inQuotes = inDoubleQuote || inSingleQuote;
 
-    if (inDoubleQuote) {
-      // AutoIt escapes a quote inside double-quoted strings using doubled quotes.
-      if (char === '"' && nextChar === '"') {
+    if (inQuotes) {
+      const activeQuote = inDoubleQuote ? '"' : "'";
+      // AutoIt escapes a quote inside same-quoted strings using doubled quotes.
+      if (char === activeQuote && nextChar === activeQuote) {
+        yield { char, index, quoted: true };
         index += 1;
+        yield { char: nextChar, index, quoted: true };
         continue;
       }
-
-      if (char === '"') {
+      if (char === activeQuote) {
         inDoubleQuote = false;
-      }
-      continue;
-    }
-
-    if (inSingleQuote) {
-      // AutoIt escapes a quote inside single-quoted strings using doubled quotes.
-      if (char === "'" && nextChar === "'") {
-        index += 1;
-        continue;
-      }
-
-      if (char === "'") {
         inSingleQuote = false;
       }
+      yield { char, index, quoted: true };
       continue;
     }
 
     if (char === '"') {
       inDoubleQuote = true;
+      yield { char, index, quoted: true };
       continue;
     }
 
     if (char === "'") {
       inSingleQuote = true;
+      yield { char, index, quoted: true };
+      continue;
+    }
+
+    yield { char, index, quoted: false };
+  }
+};
+
+const scanForClosingParen = (text, startIndex) => {
+  let depth = 0;
+
+  for (const { char, index, quoted } of walkQuoteAware(text, startIndex)) {
+    if (quoted) {
       continue;
     }
 
@@ -76,49 +86,9 @@ const splitTopLevel = (text, delimiter = ',') => {
   let parenDepth = 0;
   let bracketDepth = 0;
   let braceDepth = 0;
-  let inDoubleQuote = false;
-  let inSingleQuote = false;
 
-  for (let index = 0; index < text.length; index += 1) {
-    const char = text[index];
-    const nextChar = text[index + 1];
-
-    if (inDoubleQuote) {
-      current += char;
-      if (char === '"' && nextChar === '"') {
-        current += nextChar;
-        index += 1;
-        continue;
-      }
-
-      if (char === '"') {
-        inDoubleQuote = false;
-      }
-      continue;
-    }
-
-    if (inSingleQuote) {
-      current += char;
-      if (char === "'" && nextChar === "'") {
-        current += nextChar;
-        index += 1;
-        continue;
-      }
-
-      if (char === "'") {
-        inSingleQuote = false;
-      }
-      continue;
-    }
-
-    if (char === '"') {
-      inDoubleQuote = true;
-      current += char;
-      continue;
-    }
-
-    if (char === "'") {
-      inSingleQuote = true;
+  for (const { char, quoted } of walkQuoteAware(text)) {
+    if (quoted) {
       current += char;
       continue;
     }
