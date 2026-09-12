@@ -15,10 +15,15 @@ const STATUS_MSG_TIMEOUT_MS = 1500;
 const { config } = conf;
 
 /**
- * Compiles the AutoIt script using AutoIt3Wrapper.
+ * Shared save/validate/run lifecycle for the AutoIt3Wrapper commands.
+ * @param {object} options - Command configuration.
+ * @param {string[]} options.flags - Wrapper flags inserted between wrapperPath and '/in'.
+ * @param {string|((file: string) => string)} options.statusMessage - Status bar text or builder.
+ * @param {boolean} options.dirtyIsError - Abort on dirty-after-save instead of continuing.
+ * @param {string} [options.progressVerb] - Verb for the dirty-continue notice (e.g. 'compiling').
  * @returns {Promise<void>}
  */
-async function compile() {
+async function runWrapperCommand({ flags, statusMessage, dirtyIsError, progressVerb }) {
   const thisDoc = window.activeTextEditor.document;
   const thisFile = getActiveDocumentFileName();
   // Save the file
@@ -29,21 +34,40 @@ async function compile() {
   }
 
   if (thisDoc.isDirty) {
+    if (dirtyIsError) {
+      window.showErrorMessage(`File failed to save ("${thisFile}")`);
+      return;
+    }
     window.showInformationMessage(
-      `File failed to save, compiling saved file instead ("${thisFile}")`,
+      `File failed to save, ${progressVerb} saved file instead ("${thisFile}")`,
     );
   }
 
-  window.setStatusBarMessage('Compiling script...', STATUS_MSG_TIMEOUT_MS);
+  window.setStatusBarMessage(
+    typeof statusMessage === 'function' ? statusMessage(thisFile) : statusMessage,
+    STATUS_MSG_TIMEOUT_MS,
+  );
 
   // Launch the AutoIt Wrapper executable with the script's path
   await getServiceStack().processRunner.run(config.aiPath, [
     config.wrapperPath,
-    '/ShowGui',
-    '/prod',
+    ...flags,
     '/in',
     thisFile,
   ]);
+}
+
+/**
+ * Compiles the AutoIt script using AutoIt3Wrapper.
+ * @returns {Promise<void>}
+ */
+async function compile() {
+  await runWrapperCommand({
+    flags: ['/ShowGui', '/prod'],
+    statusMessage: 'Compiling script...',
+    dirtyIsError: false,
+    progressVerb: 'compiling',
+  });
 }
 
 /**
@@ -51,25 +75,11 @@ async function compile() {
  * @returns {Promise<void>}
  */
 async function tidy() {
-  const thisDoc = window.activeTextEditor.document;
-  const thisFile = getActiveDocumentFileName();
-
-  // Save the file
-  await thisDoc.save();
-  if (thisDoc.isUntitled) {
-    window.showErrorMessage(`"${thisFile}" file must be saved first!`);
-    return;
-  }
-
-  if (thisDoc.isDirty) {
-    window.showErrorMessage(`File failed to save ("${thisFile}")`);
-    return;
-  }
-
-  window.setStatusBarMessage(`Tidying script...${thisFile}`, STATUS_MSG_TIMEOUT_MS);
-
-  // Launch the AutoIt Wrapper executable with the script's path
-  await getServiceStack().processRunner.run(config.aiPath, [config.wrapperPath, '/Tidy', '/in', thisFile]);
+  await runWrapperCommand({
+    flags: ['/Tidy'],
+    statusMessage: thisFile => `Tidying script...${thisFile}`,
+    dirtyIsError: true,
+  });
 }
 
 /**
@@ -77,31 +87,11 @@ async function tidy() {
  * @returns {Promise<void>}
  */
 async function check() {
-  const thisDoc = window.activeTextEditor.document;
-  const thisFile = getActiveDocumentFileName();
-
-  // Save the file
-  await thisDoc.save();
-  if (thisDoc.isUntitled) {
-    window.showErrorMessage(`"${thisFile}" file must be saved first!`);
-    return;
-  }
-
-  if (thisDoc.isDirty) {
-    window.showErrorMessage(`File failed to save ("${thisFile}")`);
-    return;
-  }
-
-  window.setStatusBarMessage(`Checking script...${thisFile}`, STATUS_MSG_TIMEOUT_MS);
-
-  // Launch the AutoIt Wrapper executable with the script's path
-  await getServiceStack().processRunner.run(config.aiPath, [
-    config.wrapperPath,
-    '/AU3check',
-    '/prod',
-    '/in',
-    thisFile,
-  ]);
+  await runWrapperCommand({
+    flags: ['/AU3check', '/prod'],
+    statusMessage: thisFile => `Checking script...${thisFile}`,
+    dirtyIsError: true,
+  });
 }
 
 /**
@@ -109,32 +99,12 @@ async function check() {
  * @returns {Promise<void>}
  */
 async function build() {
-  const thisDoc = window.activeTextEditor.document;
-  const thisFile = getActiveDocumentFileName();
-
-  // Save the file
-  await thisDoc.save();
-  if (thisDoc.isUntitled) {
-    window.showErrorMessage(`"${thisFile}" file must be saved first!`);
-    return;
-  }
-
-  if (thisDoc.isDirty) {
-    window.showInformationMessage(
-      `File failed to save, building saved file instead ("${thisFile}")`,
-    );
-  }
-
-  window.setStatusBarMessage('Building script...', STATUS_MSG_TIMEOUT_MS);
-
-  // Launch the AutoIt Wrapper executable with the script's path
-  await getServiceStack().processRunner.run(config.aiPath, [
-    config.wrapperPath,
-    '/NoStatus',
-    '/prod',
-    '/in',
-    thisFile,
-  ]);
+  await runWrapperCommand({
+    flags: ['/NoStatus', '/prod'],
+    statusMessage: 'Building script...',
+    dirtyIsError: false,
+    progressVerb: 'building',
+  });
 }
 
 /**
