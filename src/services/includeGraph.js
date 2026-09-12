@@ -1,12 +1,10 @@
 // src/services/includeGraph.js
 import { Uri } from 'vscode';
 import { getIncludePath } from '../utils/includeResolution';
+import { REGEX_PATTERNS } from '../utils/regexPatterns';
 
 // uriString -> string[] of resolved include-target uriStrings
 const includeEdges = new Map();
-
-const RELATIVE_INCLUDE = /^\s*#include\s+"([^"]+)"/gm;
-const LIBRARY_INCLUDE = /^\s*#include\s+<([^>]+)>/gm;
 
 const CASE_INSENSITIVE_FS = process.platform === 'win32' || process.platform === 'darwin';
 
@@ -42,8 +40,8 @@ function extractIncludeEdges(documentUriString, text, docLike, resolveInclude = 
       if (resolved) edges.push(toUriString(resolved));
     }
   };
-  collect(RELATIVE_INCLUDE, raw => `"${raw}"`);
-  collect(LIBRARY_INCLUDE, raw => `<${raw}>`);
+  collect(REGEX_PATTERNS.relativeInclude, raw => `"${raw}"`);
+  collect(REGEX_PATTERNS.libraryInclude, raw => `<${raw}>`);
   includeEdges.set(documentUriString, edges);
   return edges;
 }

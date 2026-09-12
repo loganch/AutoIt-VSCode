@@ -121,6 +121,8 @@ jest.mock('../src/utils/regexPatterns', () => ({
     functionPattern: /func/i,
     regionPattern: /#region/i,
     variablePattern: /\$\w+/g,
+    relativeInclude: /^\s*#include\s+"([^"]+)"/gm,
+    libraryInclude: /^\s*#include\s+<([^>]+)>/gm,
   },
 }));
 
