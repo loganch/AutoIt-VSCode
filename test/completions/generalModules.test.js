@@ -103,7 +103,8 @@ describe('general completion modules', () => {
   });
 
   test('completions index exports merged completion list', () => {
-    const items = resolveDefault(require('../../src/completions/index.js'));
+    const { completions } = require('../../src/udfRegistry');
+    const items = completions;
 
     expect(Array.isArray(items)).toBe(true);
     expect(items.length).toBeGreaterThan(MINIMUM_COMPLETION_ITEMS);

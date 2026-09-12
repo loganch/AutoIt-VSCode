@@ -440,8 +440,7 @@ const provideCompletionItems = async (document, position) => {
   const libraryCompletions = getLibraryFunctions(libraryIncludes, document);
 
   if (!completions) {
-    const mod = await import('../completions');
-    completions = Array.isArray(mod) ? mod : mod.default;
+    ({ completions } = await import('../udfRegistry'));
   }
 
   const merged = [

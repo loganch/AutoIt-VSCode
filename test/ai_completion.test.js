@@ -220,7 +220,7 @@ jest.mock('../src/config/pathResolution', () => ({
   findFilepath: (...args) => mockFindFilepath(...args),
 }));
 
-jest.mock('../src/completions', () => []);
+jest.mock('../src/udfRegistry', () => ({ completions: [] }));
 jest.mock('../src/constants', () => ({ DEFAULT_UDFS: [] }));
 
 describe('ai_completion cache behavior', () => {
@@ -496,10 +496,12 @@ describe('attachIncludeEdits integration', () => {
 
     ({ languages } = require('vscode'));
 
-    jest.doMock('../src/completions', () => [
-      { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
-      { label: 'MsgBox', kind: 3 },
-    ]);
+    jest.doMock('../src/udfRegistry', () => ({
+      completions: [
+        { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
+        { label: 'MsgBox', kind: 3 },
+      ],
+    }));
 
     require('../src/providers/ai_completion').default();
 

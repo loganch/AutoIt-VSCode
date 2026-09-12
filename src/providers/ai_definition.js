@@ -21,66 +21,28 @@ const FUNCTION_PATTERN_B_TEMPLATE =
   '^[ \\t]*{funcKeyword}[ \\t]+({escaped})[ \\t]+{volatile}[ \\t]*\\(';
 
 const AutoItDefinitionProvider = {
-  /**
-   * Escapes special regex characters in a string
-   * @param {string} string - The string to escape
-   * @returns {string} The escaped string
-   */
   escapeRegex(string) {
-    if (typeof string !== 'string') {
-      throw new Error('Input must be a string for regex escaping');
-    }
     return escapeRegexLiteral(string);
   },
 
-  /**
-   * Creates a regex pattern for variable definitions
-   * @param {string} variableName - The variable name to create regex for
-   * @returns {RegExp} The compiled regex for variable matching
-   */
   createVariableRegex(variableName) {
-    if (!variableName || typeof variableName !== 'string') {
-      throw new Error('Variable name must be a non-empty string');
-    }
-
-    try {
-      // Delegate to the shared builder (single source of truth, also used by
-      // the warm symbol index). Same pattern + flags as before.
-      return buildVariableRegex(variableName);
-    } catch (error) {
-      throw new Error(`Failed to create variable regex for "${variableName}": ${error.message}`, {
-        cause: error,
-      });
-    }
+    // Delegate to the shared builder (single source of truth, also used by
+    // the warm symbol index). Same pattern + flags as before.
+    return buildVariableRegex(variableName);
   },
 
-  /**
-   * Creates a regex pattern for function definitions
-   * @param {string} functionName - The function name to create regex for
-   * @returns {RegExp} The compiled regex for function matching
-   */
   createFunctionRegex(functionName) {
-    if (!functionName || typeof functionName !== 'string') {
-      throw new Error('Function name must be a non-empty string');
-    }
+    const escaped = this.escapeRegex(functionName);
+    const patternA = FUNCTION_PATTERN_A_TEMPLATE.replace('{funcKeyword}', FUNCTION_KEYWORD)
+      .replace('{volatile}', VOLATILE_KEYWORD)
+      .replace('{escaped}', escaped);
 
-    try {
-      const escaped = this.escapeRegex(functionName);
-      const patternA = FUNCTION_PATTERN_A_TEMPLATE.replace('{funcKeyword}', FUNCTION_KEYWORD)
-        .replace('{volatile}', VOLATILE_KEYWORD)
-        .replace('{escaped}', escaped);
+    const patternB = FUNCTION_PATTERN_B_TEMPLATE.replace('{funcKeyword}', FUNCTION_KEYWORD)
+      .replace('{volatile}', VOLATILE_KEYWORD)
+      .replace('{escaped}', escaped);
 
-      const patternB = FUNCTION_PATTERN_B_TEMPLATE.replace('{funcKeyword}', FUNCTION_KEYWORD)
-        .replace('{volatile}', VOLATILE_KEYWORD)
-        .replace('{escaped}', escaped);
-
-      const combined = `(?:${patternA})|(?:${patternB})`;
-      return new RegExp(combined, REGEX_FLAGS);
-    } catch (error) {
-      throw new Error(`Failed to create function regex for "${functionName}": ${error.message}`, {
-        cause: error,
-      });
-    }
+    const combined = `(?:${patternA})|(?:${patternB})`;
+    return new RegExp(combined, REGEX_FLAGS);
   },
 
   /**
@@ -91,14 +53,10 @@ const AutoItDefinitionProvider = {
    */
   provideDefinition(document, position) {
     try {
-      // Input validation
-      if (!document || !position || typeof document.getText !== 'function') {
-        throw new Error('Invalid document or position provided');
-      }
       const lookupRange = document.getWordRangeAtPosition(position);
       if (!lookupRange) return null;
       const lookupText = document.getText(lookupRange);
-      if (typeof lookupText !== 'string' || lookupText.trim().length === 0) return null;
+      if (!lookupText.trim()) return null;
 
       // Return cached result when available (cache is invalidated on every document edit)
       const cacheKey = `${document.uri.toString()}::${lookupText}`;
@@ -107,15 +65,13 @@ const AutoItDefinitionProvider = {
       }
 
       const documentText = document.getText();
-      if (typeof documentText !== 'string' || documentText.length === 0) return null;
+      if (!documentText) return null;
 
-      // Build regex for the symbol
       const definitionRegex = this.determineRegex(lookupText);
       if (!definitionRegex) return null;
 
-      // First attempt: search in current document
       const match = definitionRegex.exec(documentText);
-      if (match && typeof match.index === 'number') {
+      if (match) {
         // Capture group for symbol if present; compute the exact symbol index
         let symbolOffsetInMatch = 0;
         if (match[1]) {
@@ -165,7 +121,6 @@ const AutoItDefinitionProvider = {
         console.error('AutoIt: definition index fast path failed', err);
       }
 
-      // Search include files
       const includeResult = this.findDefinitionInIncludeFiles(
         documentText,
         definitionRegex,
@@ -191,59 +146,20 @@ const AutoItDefinitionProvider = {
     }
   },
 
-  /**
-   * Determines the regex for a given lookup string.
-   * Chooses variable or function regex and compiles with appropriate flags.
-   * @param {string} lookup - The lookup string.
-   * @returns {RegExp} The regex for the lookup string.
-   */
   determineRegex(lookup) {
     try {
-      if (!lookup || typeof lookup !== 'string') {
-        throw new Error('Lookup string must be a non-empty string');
-      }
-
-      if (lookup.startsWith('$')) {
-        // Variables: use the variable regex helper
-        return this.createVariableRegex(lookup);
-      }
-
-      // Functions: use the function regex helper
-      return this.createFunctionRegex(lookup);
+      return lookup.startsWith('$')
+        ? this.createVariableRegex(lookup)
+        : this.createFunctionRegex(lookup);
     } catch (error) {
-      // Internal-only: a failed pattern build just means "not found" to the
-      // caller. The single user-facing toast for provideDefinition lives at
-      // its own catch boundary.
+      // A failed pattern build means "not found" to the caller.
       console.error('AutoIt: determineRegex failed', error);
       return null;
     }
   },
 
-  /**
-   * Searches the included scripts in a document for a definition matching a regular expression.
-   * Always returns either null or a structured object describing the match.
-   * @param {string} docText - The text of the document.
-   * @param {RegExp} defRegex - The regular expression to search for.
-   * @param {import("vscode").TextDocument} document - The document being searched.
-   * @param {string} lookupText - The original symbol text being looked up.
-   * @returns {object|null}
-   */
   findDefinitionInIncludeFiles(docText, defRegex, document, lookupText) {
     try {
-      // Input validation
-      if (!docText || typeof docText !== 'string') {
-        throw new Error('Document text must be a non-empty string');
-      }
-      if (!defRegex || !(defRegex instanceof RegExp)) {
-        throw new Error('Definition regex must be a valid RegExp');
-      }
-      if (!document) {
-        throw new Error('Document must be provided');
-      }
-      if (!lookupText || typeof lookupText !== 'string') {
-        throw new Error('Lookup text must be a non-empty string');
-      }
-
       const scriptsToSearch = [];
       // getIncludeScripts populates the array by reference and returns void.
       getIncludeScripts(document, docText, scriptsToSearch);
@@ -260,11 +176,10 @@ const AutoItDefinitionProvider = {
         // first use. Fire-and-forget; never throws and never alters this scan.
         noteFileContent(scriptPath, scriptContent);
 
-        // Reset regex lastIndex to ensure fresh search
         defRegex.lastIndex = 0;
 
         const m = defRegex.exec(scriptContent);
-        if (!m || typeof m.index !== 'number') {
+        if (!m) {
           continue;
         }
         const [fullMatch, firstGroup, secondGroup] = m;
