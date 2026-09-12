@@ -49,7 +49,7 @@ export const buildVariableRegex = variableName => {
  * @returns {boolean}
  */
 export const isVariableDeclarationLine = (lineText, variableName) => {
-  if (typeof lineText !== 'string' || !variableName || typeof variableName !== 'string') {
+  if (!lineText || !variableName) {
     return false;
   }
   return buildVariableRegex(variableName).test(lineText);
