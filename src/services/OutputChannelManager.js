@@ -120,6 +120,13 @@ class OutputChannelManager {
     this.globalOutputChannel = globalOutputChannel;
     this.config = config;
     this.keybindings = keybindings || {};
+    // An empty map silently truncates hotkey-failure messages (see
+    // generateHotkeyReplacementMessage), so say so once at wiring time.
+    if (Object.keys(this.keybindings).length === 0) {
+      console.warn(
+        '[OutputChannelManager] No keybindings provided; hotkey-failure messages will omit key hints.',
+      );
+    }
     this.aWrapperHotkey = aWrapperHotkey;
     this.runners = runners || {};
 
