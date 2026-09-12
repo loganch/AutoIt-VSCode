@@ -163,6 +163,13 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
   }
 }
 
+/**
+ * Populate all configured path objects from the current configuration.
+ *
+ * Path values (fullPath, dir, file) are resolved synchronously. Existence
+ * verification via workspace.fs.stat is fire-and-forget async — any "path not
+ * found" error messages appear after this function returns.
+ */
 function getPaths() {
   aiPath = splitPath(conf.data.aiPath || '');
 
@@ -239,6 +246,12 @@ function getPaths() {
   return undefined;
 }
 
+/**
+ * Re-resolve include paths and sync them to the registry.
+ *
+ * Path values are resolved synchronously. Existence verification is
+ * fire-and-forget async — see getPaths() for the same contract.
+ */
 function updateIncludePaths() {
   // Only operate on Windows
   if (!isWinOS) return;
