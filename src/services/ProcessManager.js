@@ -180,7 +180,7 @@ class ProcessManager extends EventEmitter {
           i >= this.config.multiOutputMaxFinished ||
           (this.config.multiOutputFinishedTimeout && info.endTime < endTime)
         ) {
-          this.cleanupFinishedRunner(info, runner);
+          this.cleanupFinishedRunner(runner, info);
         } else {
           info.timer = this.config.multiOutputFinishedTimeout
             ? setTimeout(info.callback.bind(this), info.endTime - endTime)
@@ -195,10 +195,10 @@ class ProcessManager extends EventEmitter {
 
   /**
    * Cleans up a finished runner by flushing its output and disposing of its output window, if necessary.
-   * @param {RunnerInfo} info - Information about the finished runner, including its callback and output window.
    * @param {Object} runner - The runner process object
+   * @param {RunnerInfo} info - Information about the finished runner, including its callback and output window.
    */
-  cleanupFinishedRunner(info, runner) {
+  cleanupFinishedRunner(runner, info) {
     try {
       const localAiOutCommon = this.outputChannel;
       info.callback = () => {
@@ -283,7 +283,7 @@ class ProcessManager extends EventEmitter {
       const finished = [...this.runners.entries()].filter(([_, info]) => !info.status);
       finished.forEach(([runner, info]) => {
         clearTimeout(info.timer);
-        this.cleanupFinishedRunner(info, runner);
+        this.cleanupFinishedRunner(runner, info);
       });
       this.emit('finishedRunnersCleared');
     } catch (error) {
