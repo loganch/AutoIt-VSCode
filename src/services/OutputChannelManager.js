@@ -292,11 +292,14 @@ class OutputChannelManager {
         const isFlush = prop === 'flush';
         const isError = prop === 'error';
 
-        if (isFlush) prop = 'append';
-        else if (isError) prop = 'appendLine';
+        // Alias virtual methods to their real targets without mutating the
+        // intercepted name, so errors and fallbacks report what was asked for.
+        let targetProp = prop;
+        if (isFlush) targetProp = 'append';
+        else if (isError) targetProp = 'appendLine';
 
         // Validate that the property exists on the target object
-        if (!(prop in aiOut)) {
+        if (!(targetProp in aiOut)) {
           const available = Object.getOwnPropertyNames(aiOut).filter(
             name => typeof aiOut[name] === 'function',
           );
@@ -306,19 +309,19 @@ class OutputChannelManager {
           );
         }
 
-        let ret = aiOut[prop];
+        let ret = aiOut[targetProp];
         if (!(ret instanceof Function)) return ret;
 
         ret = text => {
           if (text === undefined) return;
 
           clearTimeout(prevLineTimer);
-          const lines = prop === 'append' ? text.split(/\r?\n/) : [text];
+          const lines = targetProp === 'append' ? text.split(/\r?\n/) : [text];
           lines[0] = prevLine + lines[0];
 
           stripHotkeyFailureLines(lines);
-          bufferPartialLine(lines, prop, isFlush, proxy);
-          if (lines.length) outputText(aiOut, prop, lines);
+          bufferPartialLine(lines, targetProp, isFlush, proxy);
+          if (lines.length) outputText(aiOut, targetProp, lines);
         };
 
         if (isFlush) ret('');
