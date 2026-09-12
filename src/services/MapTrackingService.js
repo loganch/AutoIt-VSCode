@@ -8,11 +8,7 @@ import TrackingServiceBase from './TrackingServiceBase.js';
  * and key-merge strategy.
  */
 class MapTrackingService extends TrackingServiceBase {
-  /**
-   * @param {string} source - File source code
-   * @returns {MapParser}
-   */
-  createParser(source) {
+  createParser(source, _filePath) {
     return new MapParser(source);
   }
 
