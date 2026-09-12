@@ -179,3 +179,52 @@ describe('ToolCommands.launchInfo', () => {
     expect(mockSpawn).not.toHaveBeenCalled();
   });
 });
+
+describe('ToolCommands.launchKoda', () => {
+  let launchKoda;
+  const mockRun = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.resetModules();
+
+    mockExistsSync.mockReturnValue(true);
+
+    // resetMocks wipes the class-mock implementations; reinstall for the stack factory
+    const ProcessRunner = require('../../src/services/ProcessRunner');
+    const ProcessManager = require('../../src/services/ProcessManager');
+    const OutputChannelManager = require('../../src/services/OutputChannelManager');
+    const HotkeyManager = require('../../src/services/HotkeyManager');
+    ProcessRunner.mockImplementation(() => ({ run: (...args) => mockRun(...args) }));
+    ProcessManager.mockImplementation(() => ({}));
+    OutputChannelManager.mockImplementation(() => ({}));
+    OutputChannelManager.createGlobalOutputChannel.mockImplementation(() => ({
+      append: jest.fn(),
+      appendLine: jest.fn(),
+      clear: jest.fn(),
+      dispose: jest.fn(),
+      hide: jest.fn(),
+      show: jest.fn(),
+    }));
+    HotkeyManager.mockImplementation(() => ({}));
+
+    ({ launchKoda } = require('../../src/commands/toolCommands'));
+  });
+
+  test('runs Koda when the executable exists', () => {
+    launchKoda();
+
+    expect(mockRun).toHaveBeenCalledWith(mockConfig.kodaPath, []);
+  });
+
+  test('shows an error and does not run when the Koda executable is missing', () => {
+    mockExistsSync.mockReturnValue(false);
+
+    launchKoda();
+
+    expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
+      `Koda Form Designer not found: ${mockConfig.kodaPath}`,
+    );
+    expect(mockRun).not.toHaveBeenCalled();
+  });
+});

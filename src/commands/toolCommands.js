@@ -219,6 +219,12 @@ function launchInfo() {
  * @returns {void}
  */
 function launchKoda() {
+  const kodaPathValidation = validateExecutablePath(config.kodaPath);
+  if (!kodaPathValidation.valid) {
+    window.showErrorMessage(`Koda Form Designer not found: ${config.kodaPath}`);
+    return;
+  }
+
   getServiceStack().processRunner.run(config.kodaPath, []);
 }
 
