@@ -84,7 +84,6 @@ function formatMultiLines(lines, { prefixId, prefixEmpty, time, isNewLine, lastI
  * - Hotkey message filtering and replacement
  * - Output routing based on configuration
  * - Line buffering with timeout management for incomplete lines
- * - Comprehensive JSDoc documentation
  *
  * @class OutputChannelManager
  */
