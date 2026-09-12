@@ -59,6 +59,11 @@ function removeListener(id) {
   listeners.delete(id);
 }
 
+/**
+ * Sets whether configuration-change handling is suppressed.
+ * @param {boolean} value - True to suppress events, false to re-enable them.
+ * @returns {void}
+ */
 function noEvents(value) {
   bNoEvents = Boolean(value);
 }
