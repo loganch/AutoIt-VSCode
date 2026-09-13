@@ -57,7 +57,7 @@ export const isParenTriggerOn = () => {
  * @param {CompletionItemKind} kind - VSCode completion item type (Function, Variable, Constant, etc.)
  * @param {string} [detail=''] - Additional text to append to each item's detail field
  * @param {string} [requiredScript=''] - AutoIt include file name to show in documentation (e.g., "Array.au3")
- * @returns {Array} Array of VSCode CompletionItem objects ready for IntelliSense display
+ * @returns {import('vscode').CompletionItem[]} Array of VSCode CompletionItem objects ready for IntelliSense display
  */
 const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
   if (!Array.isArray(entries)) {
@@ -98,7 +98,7 @@ const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
  * @param {Array} array - Array of completion item objects to modify
  * @param {string} detail - Text to set as the detail field for all items (replaces existing detail)
  * @param {string} doc - Documentation text to append to existing documentation with italic formatting
- * @returns {Array} New array with modified completion items, or empty array if input is invalid
+ * @returns {import('vscode').CompletionItem[]} New array with modified completion items, or empty array if input is invalid
  */
 const setDetail = (array, detail, doc) => {
   if (!Array.isArray(array)) {
@@ -119,7 +119,7 @@ const setDetail = (array, detail, doc) => {
  * by the hover system, including code block formatting for function signatures.
  *
  * @param {Object} signatures - Object where keys are function names and values are signature objects with label/documentation
- * @returns {Object} Object where keys are function names and values are arrays of [documentation, formatted_code_block]
+ * @returns {Object.<string, [string, string]>} Object where keys are function names and values are arrays of [documentation, formatted_code_block]
  */
 const signatureToHover = signatures => {
   if (!signatures || typeof signatures !== 'object') {
@@ -127,6 +127,7 @@ const signatureToHover = signatures => {
     return {};
   }
 
+  /** @type {Object.<string, [string, string]>} */
   const hoverObjects = {};
 
   Object.entries(signatures).forEach(([key, signature]) => {
@@ -147,7 +148,7 @@ const signatureToHover = signatures => {
  * consistency between IntelliSense suggestions and hover information.
  *
  * @param {Array} completions - Array of completion items with label and documentation properties
- * @returns {Object} Object mapping function/item names to their documentation strings for hover display
+ * @returns {Object.<string, string>} Object mapping function/item names to their documentation strings for hover display
  */
 const completionToHover = completions => {
   if (!Array.isArray(completions)) {
@@ -155,6 +156,7 @@ const completionToHover = completions => {
     return {};
   }
 
+  /** @type {Object.<string, string>} */
   const hoverObjects = {};
 
   completions.forEach(item => {
