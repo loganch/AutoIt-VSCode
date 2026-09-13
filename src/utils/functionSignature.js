@@ -9,6 +9,20 @@ import { findFilepath } from '../config/pathResolution';
 const MIN_FUNCTION_MATCH_PARTS = 4;
 
 /**
+ * @typedef {Object} ParamInfo
+ * @property {string} label
+ * @property {string} documentation
+ */
+
+/**
+ * @typedef {Object} FunctionSignatureData
+ * @property {string} label
+ * @property {string} description
+ * @property {string} documentation
+ * @property {Object.<string, ParamInfo>} params
+ */
+
+/**
  * Extracts parameter documentation from AutoIt function header comments using regex matching.
  * Searches for parameter documentation in the format "; $paramName - description" within
  * function header comments. Used to build comprehensive function signatures with parameter help.
@@ -44,9 +58,10 @@ const extractParamDocumentation = (text, paramEntry, headerIndex) => {
  * @param {string} paramText - Raw parameter list text from function definition (e.g., "$param1, $param2 = 0")
  * @param {string} text - Complete source file content containing parameter documentation
  * @param {number} headerIndex - Index where function header documentation begins in the text
- * @returns {Object} Object where keys are parameter names and values are parameter info objects with label and documentation
+ * @returns {Object.<string, ParamInfo>} Object where keys are parameter names and values are parameter info objects with label and documentation
  */
 export const getParams = (paramText, text, headerIndex) => {
+  /** @type {Object.<string, ParamInfo>} */
   const params = {};
 
   if (!validateString(paramText) || typeof text !== 'string') {
@@ -83,7 +98,7 @@ export const getParams = (paramText, text, headerIndex) => {
  * @param {RegExpExecArray} functionMatch - Regex match result containing function definition parts [full_match, label, name, params]
  * @param {string} fileText - Complete content of the source file containing the function
  * @param {string} fileName - Name of the file containing the function (used in documentation)
- * @returns {Object} Object with functionName (string) and functionObject (signature data with label, description, documentation, params)
+ * @returns {{functionName: string, functionObject: FunctionSignatureData}} Object with functionName and its signature data
  */
 export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
   if (
@@ -92,13 +107,13 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
     functionMatch.length < MIN_FUNCTION_MATCH_PARTS
   ) {
     handleError('buildFunctionSignature', 'Invalid function match', false, { functionMatch });
-    return { functionName: '', functionObject: {} };
+    return { functionName: '', functionObject: { label: '', description: '', documentation: '', params: {} } };
   }
 
   const [, functionLabel, functionName, paramsText] = functionMatch;
 
   if (!validateString(functionName)) {
-    return { functionName: '', functionObject: {} };
+    return { functionName: '', functionObject: { label: '', description: '', documentation: '', params: {} } };
   }
 
   let description = '';
@@ -160,9 +175,10 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
  *
  * @param {string} fileName - Name or path of the include file to process (e.g., "Array.au3" or "<WinAPI.au3>")
  * @param {import('vscode').TextDocument} doc - Current VSCode document used for resolving relative include paths
- * @returns {Object} Object where keys are function names and values are complete signature objects with documentation and parameters
+ * @returns {Object.<string, FunctionSignatureData>} Object where keys are function names and values are complete signature objects with documentation and parameters
  */
 export const getIncludeData = (fileName, doc) => {
+  /** @type {Object.<string, FunctionSignatureData>} */
   const functions = {};
 
   if (!validateString(fileName) || !isValidDocument(doc)) {
