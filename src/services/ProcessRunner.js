@@ -42,11 +42,11 @@ class ProcessRunner {
    * Runs a process with the given command and arguments
    * @param {string} cmdPath - Path to the executable
    * @param {string[]} args - Command line arguments
-   * @param {boolean} bAiOutReuse - Whether to reuse output panels
+   * @param {boolean} reuseAiOutput - Whether to reuse output panels
    * @returns {Promise<ChildProcess>} The spawned process
    * @throws {Error} If path validation fails or the process fails to spawn
    */
-  async run(cmdPath, args = [], bAiOutReuse = true) {
+  async run(cmdPath, args = [], reuseAiOutput = true) {
     try {
       const thisFile = this.getActiveDocumentFileName();
 
@@ -65,7 +65,7 @@ class ProcessRunner {
       const processCommand = cmdPath + ' ' + args.join(' ');
 
       const runnerPrev =
-        bAiOutReuse &&
+        reuseAiOutput &&
         this.processManager.findRunner({
           status: false,
           thisFile,

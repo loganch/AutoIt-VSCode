@@ -28,7 +28,7 @@ const conf = {
 
 const listeners = new Map();
 let listenerId = 0;
-let bNoEvents = false;
+let suppressEvents = false;
 
 const config = new Proxy(conf, {
   get(target, prop) {
@@ -65,12 +65,12 @@ function removeListener(id) {
  * @returns {void}
  */
 function noEvents(value) {
-  bNoEvents = Boolean(value);
+  suppressEvents = Boolean(value);
 }
 
 /** @returns {boolean} True while configuration-change handling is suppressed. */
 function isNoEvents() {
-  return bNoEvents;
+  return suppressEvents;
 }
 
 /** Re-read the workspace configuration after a change event. */

@@ -68,15 +68,15 @@ export function splitPath(_path) {
  * @returns {string} normalized path
  */
 export function fixPath(value, data, aiPath) {
-  const sPath = splitPath(value || '');
+  const parts = splitPath(value || '');
   const { file } = data;
   const { dir } = data;
-  if (sPath.file === '') sPath.file = file || '';
+  if (parts.file === '') parts.file = file || '';
 
-  if (sPath.dir === '' || sPath.isRelative)
-    sPath.dir = aiPath.dir + sPath.dir + (!sPath.isRelative ? dir || '' : '');
+  if (parts.dir === '' || parts.isRelative)
+    parts.dir = aiPath.dir + parts.dir + (!parts.isRelative ? dir || '' : '');
 
-  if (file === undefined) sPath.file += '/';
+  if (file === undefined) parts.file += '/';
 
-  return (sPath.dir + '/' + sPath.file).replace(/[\\/]+/g, '\\');
+  return (parts.dir + '/' + parts.file).replace(/[\\/]+/g, '\\');
 }

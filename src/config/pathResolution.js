@@ -13,7 +13,7 @@ const MESSAGE_HIDE_DELAY_MS = 1000;
 let showErrors = false;
 let aiPath = { path: '', dir: '', file: '', isRelative: false };
 
-function showError(sPath, data, msgSuffix) {
+function showError(filePath, data, msgSuffix) {
   if (!msgSuffix) return;
 
   const timeout = data.message && !data.message.isHidden ? MESSAGE_HIDE_DELAY_MS : 0;
@@ -21,31 +21,31 @@ function showError(sPath, data, msgSuffix) {
     data.message.hide();
     delete data.message;
   }
-  if (data.prevCheck !== sPath) {
+  if (data.prevCheck !== filePath) {
     const type = data.file !== undefined ? 'File' : 'Directory';
     setTimeout(() => {
-      data.message = showErrorMessage(`${type} "${sPath}" not found (autoit.${msgSuffix})`);
+      data.message = showErrorMessage(`${type} "${filePath}" not found (autoit.${msgSuffix})`);
     }, timeout);
   }
 
-  data.prevCheck = sPath;
+  data.prevCheck = filePath;
 }
 
 /**
  * Verify that a previously-resolved fullPath exists and matches expected type.
  * Uses workspace.fs.stat for editor-friendly checks.
- * @param {string} sPath - original (user) path string used for messages
+ * @param {string} filePath - original (user) path string used for messages
  * @param {object} data - metadata holding fullPath and file indicator
  * @param {string} msgSuffix - configuration key suffix for error messages
- * @returns {Promise<string|undefined>} resolves to sPath on success, undefined on failure
+ * @returns {Promise<string|undefined>} resolves to filePath on success, undefined on failure
  */
-function verifyPath(sPath, data, msgSuffix) {
+function verifyPath(filePath, data, msgSuffix) {
   return Promise.resolve(workspace.fs.stat(Uri.file(data.fullPath)))
     .then(stats => {
       const type =
         (data.file !== undefined ? FileType.File : FileType.Directory) | FileType.SymbolicLink;
       if (!(stats.type & type)) {
-        if (showErrors) showError(sPath, data, msgSuffix);
+        if (showErrors) showError(filePath, data, msgSuffix);
 
         return undefined;
       }
@@ -54,11 +54,11 @@ function verifyPath(sPath, data, msgSuffix) {
         data.message.hide();
         delete data.message;
       }
-      data.prevCheck = sPath;
-      return sPath;
+      data.prevCheck = filePath;
+      return filePath;
     })
     .catch(() => {
-      if (showErrors) showError(sPath, data, msgSuffix);
+      if (showErrors) showError(filePath, data, msgSuffix);
       return undefined;
     });
 }
@@ -68,7 +68,7 @@ function verifyPath(sPath, data, msgSuffix) {
  * @param {string} _path - configured path/value
  * @param {object} data - metadata object to update with fullPath
  * @param {string} [msgSuffix] - configuration key suffix for error messages (optional)
- * @returns {Promise<string|undefined>} resolves to sPath on success, undefined on failure
+ * @returns {Promise<string|undefined>} resolves to filePath on success, undefined on failure
  */
 function updateFullPath(_path, data, msgSuffix) {
   // Resolve VS Code variables before processing the path
@@ -190,9 +190,9 @@ function resolvePaths() {
       // Enhanced include path handling with auto-detection
       if (Array.isArray(confValue)) {
         for (let j = 0; j < confValue.length; j++) {
-          let sPath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
+          let filePath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
 
-          if (sPath === '') sPath = 'Include';
+          if (filePath === '') filePath = 'Include';
 
           if (defaultPath[j] === undefined)
             defaultPath[j] = {
@@ -200,7 +200,7 @@ function resolvePaths() {
               ...(defaultPath[0].check || { dir: '', file: undefined }),
             };
 
-          updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
+          updateFullPath(filePath, defaultPath[j], `${i}[${j}]`);
         }
       }
 
@@ -225,9 +225,9 @@ function resolvePaths() {
       getPathsSmartHelp(defaultPath, confValue, i);
     } else if (Array.isArray(confValue)) {
       for (let j = 0; j < confValue.length; j++) {
-        let sPath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
+        let filePath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
 
-        if (sPath === '' && i === 'includePaths') sPath = 'Include';
+        if (filePath === '' && i === 'includePaths') filePath = 'Include';
 
         if (defaultPath[j] === undefined)
           defaultPath[j] = {
@@ -235,7 +235,7 @@ function resolvePaths() {
             ...(defaultPath[0].check || { dir: '', file: undefined }),
           };
 
-        updateFullPath(sPath, defaultPath[j], `${i}[${j}]`);
+        updateFullPath(filePath, defaultPath[j], `${i}[${j}]`);
       }
     } else {
       defaultPath.fullPath = fixPath(confValue, defaultPath, aiPath);
@@ -258,14 +258,14 @@ function updateIncludePaths() {
   const { includePaths } = conf.data;
   if (Array.isArray(includePaths)) {
     for (let j = 0; j < includePaths.length; j++) {
-      let sPath = (typeof includePaths[j] === 'string' ? includePaths[j] : '').trim();
-      if (sPath === '') sPath = 'Include';
+      let filePath = (typeof includePaths[j] === 'string' ? includePaths[j] : '').trim();
+      if (filePath === '') filePath = 'Include';
       if (conf.defaultPaths.includePaths[j] === undefined)
         conf.defaultPaths.includePaths[j] = {
           fullPath: '',
           ...(conf.defaultPaths.includePaths[0].check || { dir: '', file: undefined }),
         };
-      updateFullPath(sPath, conf.defaultPaths.includePaths[j], `includePaths[${j}]`);
+      updateFullPath(filePath, conf.defaultPaths.includePaths[j], `includePaths[${j}]`);
     }
 
     // Update the registry key with resolved paths (silent on success, only surface errors)
