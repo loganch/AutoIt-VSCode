@@ -169,7 +169,7 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
  * verification via workspace.fs.stat is fire-and-forget async — any "path not
  * found" error messages appear after this function returns.
  */
-function getPaths() {
+function resolvePaths() {
   aiPath = splitPath(conf.data.aiPath || '');
 
   // Auto-detect AutoIt installation if no aiPath is configured
@@ -249,7 +249,7 @@ function getPaths() {
  * Re-resolve include paths and sync them to the registry.
  *
  * Path values are resolved synchronously. Existence verification is
- * fire-and-forget async — see getPaths() for the same contract.
+ * fire-and-forget async — see resolvePaths() for the same contract.
  */
 function updateIncludePaths() {
   // Only operate on Windows
@@ -280,7 +280,7 @@ function updateIncludePaths() {
 /** Re-verify all configured paths after a configuration change. */
 function refreshPaths() {
   showErrors = isWinOS;
-  getPaths();
+  resolvePaths();
 }
 
-export { getPaths, updateIncludePaths, findFilepath, refreshPaths };
+export { resolvePaths, updateIncludePaths, findFilepath, refreshPaths };

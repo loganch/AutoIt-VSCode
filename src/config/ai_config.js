@@ -14,18 +14,18 @@ import {
   notifyListeners,
   config,
 } from './configStore';
-import { getPaths, updateIncludePaths, findFilepath, refreshPaths } from './pathResolution';
+import { resolvePaths, updateIncludePaths, findFilepath, refreshPaths } from './pathResolution';
 import { init as initTokenColors } from './tokenColorMigration';
 
 /**
- * Explicit init gate (F17): getPaths() can write global config (the legacy
+ * Explicit init gate (F17): resolvePaths() can write global config (the legacy
  * smartHelp array gets migrated via upgradeSmartHelpConfig), so — like the
  * token-color migration — it must not run merely from importing this module.
  * Called once from extension.js's `activate()`.
  */
 function init() {
   initTokenColors();
-  getPaths();
+  resolvePaths();
 }
 
 /**
