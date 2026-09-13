@@ -174,18 +174,18 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
  * information and documentation.
  *
  * @param {string} fileName - Name or path of the include file to process (e.g., "Array.au3" or "<WinAPI.au3>")
- * @param {import('vscode').TextDocument} doc - Current VSCode document used for resolving relative include paths
+ * @param {import('vscode').TextDocument} document - Current VSCode document used for resolving relative include paths
  * @returns {Object.<string, FunctionSignatureData>} Object where keys are function names and values are complete signature objects with documentation and parameters
  */
-export const getIncludeData = (fileName, doc) => {
+export const getIncludeData = (fileName, document) => {
   /** @type {Object.<string, FunctionSignatureData>} */
   const functions = {};
 
-  if (!validateString(fileName) || !isValidDocument(doc)) {
+  if (!validateString(fileName) || !isValidDocument(document)) {
     return functions;
   }
 
-  let filePath = getIncludePath(fileName, doc);
+  let filePath = getIncludePath(fileName, document);
 
   // Fallback path resolution
   if (!safeFileExists(filePath)) {

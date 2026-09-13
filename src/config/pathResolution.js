@@ -83,21 +83,21 @@ function updateFullPath(_path, data, msgSuffix) {
 /**
  * Find a file by checking configured includePaths and (optionally) auto-detected AutoIt Include folders.
  * Returns the first matching full path or null if not found.
- * @param {string} file - filename to search for
- * @param {boolean} library - whether to prefer library entries (true) or search them last (false)
+ * @param {string} fileName - filename to search for
+ * @param {boolean} preferLibrary - whether to prefer library entries (true) or search them last (false)
  * @returns {(string|null)} Full path if found, or null
  */
-const findFilepath = (file, library = true) => {
+const findFilepath = (fileName, preferLibrary = true) => {
   // work with copy to avoid changing main config
   const includePaths = [...conf.defaultPaths.includePaths.map(a => a.fullPath)];
-  if (!library) {
+  if (!preferLibrary) {
     // move main library entry to the bottom so that it is searched last
     includePaths.push(includePaths.shift());
   }
 
   // Search configured include paths (skip falsy entries)
   for (const iPath of includePaths.filter(Boolean)) {
-    const candidate = path.join(iPath, file);
+    const candidate = path.join(iPath, fileName);
     if (fs.existsSync(candidate)) {
       return candidate;
     }
@@ -108,7 +108,7 @@ const findFilepath = (file, library = true) => {
   for (const autoItPath of detectedPaths) {
     const includePath = path.join(autoItPath, 'Include');
     if (fs.existsSync(includePath)) {
-      const candidate = path.join(includePath, file);
+      const candidate = path.join(includePath, fileName);
       if (fs.existsSync(candidate)) {
         return candidate;
       }

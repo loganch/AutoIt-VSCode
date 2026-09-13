@@ -39,12 +39,12 @@ export const isSkippableLine = line => {
  * and the current document's directory to locate files. Supports both `#include <file.au3>`
  * and `#include "file.au3"` formats.
  *
- * @param {string} fileOrPath - Include path from AutoIt source (e.g., "<Array.au3>" or "helper.au3")
+ * @param {string} fileName - Include path from AutoIt source (e.g., "<Array.au3>" or "helper.au3")
  * @param {import('vscode').TextDocument} document - Current VSCode document for resolving relative paths
  * @returns {string} Absolute file system path to the include file, or empty string if not found or invalid
  */
-export const getIncludePath = (fileOrPath, document) => {
-  const rawPath = validateString(fileOrPath);
+export const getIncludePath = (fileName, document) => {
+  const rawPath = validateString(fileName);
   if (!rawPath) return '';
 
   // Parse include format (angle brackets vs quotes)
