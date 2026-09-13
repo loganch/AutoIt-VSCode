@@ -58,16 +58,16 @@ describe('safeExecute', () => {
   });
 
   test('returns the operation result on success', () => {
-    expect(safeExecute(() => 42, 0, 'compute')).toBe(42);
+    expect(safeExecute('compute', () => 42, 0)).toBe(42);
   });
 
   test('returns the default value and logs when the operation throws', () => {
     const result = safeExecute(
+      'riskyOp',
       () => {
         throw new Error('kaboom');
       },
       'fallback',
-      'riskyOp',
     );
     expect(result).toBe('fallback');
     expect(consoleErrorSpy).toHaveBeenCalledWith('[AutoIt Extension] riskyOp: kaboom');

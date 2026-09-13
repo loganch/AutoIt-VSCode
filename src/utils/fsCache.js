@@ -42,9 +42,9 @@ export const safeFileExists = filePath => {
 
   // existsSync short-circuits so a missing file never reaches statSync (no log noise).
   return safeExecute(
+    `File existence check for ${filePath}`,
     () => fs.existsSync(filePath) && fs.statSync(filePath).isFile(),
     false,
-    `File existence check for ${filePath}`,
   );
 };
 
@@ -57,7 +57,7 @@ export const safeFileExists = filePath => {
 export const safeReadFile = (filePath, encoding = 'utf8') => {
   if (!isValidFilePath(filePath)) return '';
 
-  return safeExecute(() => fs.readFileSync(filePath, encoding), '', `Read file ${filePath}`);
+  return safeExecute(`Read file ${filePath}`, () => fs.readFileSync(filePath, encoding), '');
 };
 
 /**
@@ -68,7 +68,7 @@ export const safeReadFile = (filePath, encoding = 'utf8') => {
 export const safeFileStat = filePath => {
   if (!isValidFilePath(filePath)) return null;
 
-  return safeExecute(() => fs.statSync(filePath), null, `File stat for ${filePath}`);
+  return safeExecute(`File stat for ${filePath}`, () => fs.statSync(filePath), null);
 };
 
 /** Normalize a path to an absolute, consistent-separator string safe for Map/Set keys. */
@@ -77,6 +77,7 @@ export const normalizePath = inputPath => {
   if (!rawPath) return '';
 
   return safeExecute(
+    'Path normalization',
     () => {
       let normalized = path.normalize(rawPath);
 
@@ -93,7 +94,6 @@ export const normalizePath = inputPath => {
       return normalized;
     },
     '',
-    'Path normalization',
   );
 };
 

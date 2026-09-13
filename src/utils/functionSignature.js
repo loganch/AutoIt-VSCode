@@ -38,6 +38,7 @@ const extractParamDocumentation = (text, paramEntry, headerIndex) => {
   }
 
   return safeExecute(
+    'extractParamDocumentation',
     () => {
       const headerSubstring = text.substring(headerIndex);
       const paramRegex = REGEX_PATTERNS.parameterDoc(paramEntry);
@@ -46,7 +47,6 @@ const extractParamDocumentation = (text, paramEntry, headerIndex) => {
       return match?.groups?.documentation || '';
     },
     '',
-    'extractParamDocumentation',
   );
 };
 
@@ -120,6 +120,7 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
   let functionIndex = -1;
 
   safeExecute(
+    'buildFunctionSignature header parsing',
     () => {
       const headerRegex = REGEX_PATTERNS.headerRegex(functionName);
       const headerMatch = fileText.match(headerRegex);
@@ -151,7 +152,6 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
       return null;
     },
     null,
-    'buildFunctionSignature header parsing',
   );
 
   const functionDocumentation = `${description ? `${description}\r` : ''}Included from ${fileName || 'unknown'}`;
@@ -190,9 +190,9 @@ export const getIncludeData = (fileName, doc) => {
   // Fallback path resolution
   if (!safeFileExists(filePath)) {
     const foundPath = safeExecute(
+      `Include data path resolution for ${fileName}`,
       () => findFilepath(fileName, false),
       null,
-      `Include data path resolution for ${fileName}`,
     );
 
     if (foundPath) {

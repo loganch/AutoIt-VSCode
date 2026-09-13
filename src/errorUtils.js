@@ -35,12 +35,12 @@ const handleError = (operation, error, showUser = false, context = null) => {
 /**
  * Safe wrapper for operations that might throw
  * @template T
+ * @param {string} operationName - Name for error logging
  * @param {() => T} operation - Function to execute safely
  * @param {T} defaultValue - Default value on error
- * @param {string} operationName - Name for error logging
  * @returns {T} Result or default value
  */
-const safeExecute = (operation, defaultValue, operationName) => {
+const safeExecute = (operationName, operation, defaultValue) => {
   try {
     return operation();
   } catch (error) {

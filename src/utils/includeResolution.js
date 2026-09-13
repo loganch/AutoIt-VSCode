@@ -60,9 +60,9 @@ export const getIncludePath = (fileOrPath, document) => {
   // Library include resolution (angle brackets or simple .au3 files)
   if (hasAngle || (!isQuoted && cleanPath.endsWith('.au3') && !cleanPath.includes(path.sep))) {
     const libPath = safeExecute(
+      `Library path resolution for ${cleanPath}`,
       () => findFilepath(cleanPath, true),
       null,
-      `Library path resolution for ${cleanPath}`,
     );
 
     if (libPath) {
@@ -85,9 +85,9 @@ export const getIncludePath = (fileOrPath, document) => {
 
   // Fallback to include search paths
   const fallbackPath = safeExecute(
+    `Fallback path resolution for ${cleanPath}`,
     () => findFilepath(cleanPath, false),
     null,
-    `Fallback path resolution for ${cleanPath}`,
   );
 
   return fallbackPath ? normalizePath(fallbackPath) : '';
@@ -136,9 +136,9 @@ const collectIncludeScripts = (document, docText, scriptsToSearch, visited) => {
     // Fallback resolution if needed
     if (!resolvedPath) {
       const fallback = safeExecute(
+        `Include resolution for ${includePath}`,
         () => findFilepath(includePath, isLibrary),
         null,
-        `Include resolution for ${includePath}`,
       );
       resolvedPath = fallback;
     }
