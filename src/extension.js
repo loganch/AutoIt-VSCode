@@ -1,7 +1,7 @@
 import { languages, window, workspace } from 'vscode';
 import { existsSync } from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH } from './constants';
-import languageConfiguration from './languageConfiguration';
+import languageConfiguration from './language/languageConfiguration';
 import registerHoverFeature from './providers/ai_hover';
 import registerCompletionFeature, {
   registerCompletionCacheInvalidation,

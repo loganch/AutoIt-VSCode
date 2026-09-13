@@ -1,4 +1,4 @@
-import languageConfiguration from '../src/languageConfiguration';
+import languageConfiguration from '../../src/language/languageConfiguration';
 
 describe('languageConfiguration', () => {
   it('exports indentationRules', () => {

@@ -101,7 +101,7 @@ jest.mock('../src/services/VariableTrackingService.js', () => stubService);
 // default is a register-and-return-Disposable factory get the function shape.
 const stubDataFeature = { __esModule: true, default: { dispose: () => {} } };
 const stubProviderFeature = { __esModule: true, default: () => ({ dispose: () => {} }) };
-jest.mock('../src/languageConfiguration', () => stubDataFeature);
+jest.mock('../src/language/languageConfiguration', () => stubDataFeature);
 jest.mock('../src/providers/ai_hover', () => stubProviderFeature);
 jest.mock('../src/providers/ai_completion', () => ({
   ...stubProviderFeature,
