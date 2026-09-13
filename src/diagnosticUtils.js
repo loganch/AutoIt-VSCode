@@ -74,19 +74,11 @@ export const updateDiagnostics = (diagnostics, scriptPath, diagnosticToAdd) => {
  */
 const diagnosticOwners = new WeakMap();
 
-/**
- * Record which owner URI created a diagnostic, for later cleanup via clearDiagnosticsOwnedBy.
- * @param {object} diagnostic
- * @param {string} ownerUri
- */
+/** Record which owner URI created a diagnostic, for later cleanup via clearDiagnosticsOwnedBy. */
 export const setDiagnosticOwner = (diagnostic, ownerUri) =>
   diagnosticOwners.set(diagnostic, ownerUri);
 
-/**
- * Look up the owner URI previously recorded for a diagnostic via setDiagnosticOwner.
- * @param {object} diagnostic
- * @returns {string|undefined}
- */
+/** Look up the owner URI previously recorded for a diagnostic via setDiagnosticOwner. */
 export const getDiagnosticOwner = diagnostic => diagnosticOwners.get(diagnostic);
 
 const OUTPUT_REGEXP =
@@ -225,9 +217,7 @@ const trackedDiagnosticFileUris = new Set();
 /** Cap on trackedDiagnosticFileUris size; oldest entry is evicted once exceeded. */
 const MAX_TRACKED_DIAGNOSTIC_URIS = 500;
 
-/**
- * Clears all tracked diagnostic file URIs. Exposed for `deactivate()` and tests.
- */
+/** Clears all tracked diagnostic file URIs. Exposed for `deactivate()` and tests. */
 export const resetDiagnosticTracking = () => trackedDiagnosticFileUris.clear();
 
 /**
