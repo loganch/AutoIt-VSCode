@@ -61,11 +61,11 @@ function removeListener(id) {
 
 /**
  * Sets whether configuration-change handling is suppressed.
- * @param {boolean} value - True to suppress events, false to re-enable them.
+ * @param {boolean} suppress - True to suppress events, false to re-enable them.
  * @returns {void}
  */
-function noEvents(value) {
-  suppressEvents = Boolean(value);
+function setSuppressEvents(suppress) {
+  suppressEvents = Boolean(suppress);
 }
 
 /** @returns {boolean} True while configuration-change handling is suppressed. */
@@ -94,7 +94,7 @@ export {
   config,
   addListener,
   removeListener,
-  noEvents,
+  setSuppressEvents,
   isNoEvents,
   refreshData,
   notifyListeners,

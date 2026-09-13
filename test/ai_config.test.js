@@ -62,7 +62,7 @@ describe('ai_config', () => {
         config: expect.any(Object),
         addListener: expect.any(Function),
         removeListener: expect.any(Function),
-        noEvents: expect.any(Function),
+        setSuppressEvents: expect.any(Function),
         findFilepath: expect.any(Function),
       }),
     );
@@ -84,10 +84,10 @@ describe('ai_config', () => {
     });
   });
 
-  describe('noEvents', () => {
+  describe('setSuppressEvents', () => {
     test('can be called with truthy value without throwing', () => {
-      expect(() => conf.noEvents(true)).not.toThrow();
-      expect(() => conf.noEvents(false)).not.toThrow();
+      expect(() => conf.setSuppressEvents(true)).not.toThrow();
+      expect(() => conf.setSuppressEvents(false)).not.toThrow();
     });
   });
 

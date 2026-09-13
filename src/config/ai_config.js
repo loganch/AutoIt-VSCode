@@ -8,7 +8,7 @@ import { workspace } from 'vscode';
 import {
   addListener,
   removeListener,
-  noEvents,
+  setSuppressEvents,
   isNoEvents,
   refreshData,
   notifyListeners,
@@ -55,6 +55,6 @@ export default {
   registerConfigListener,
   addListener,
   removeListener,
-  noEvents,
+  setSuppressEvents,
   findFilepath,
 };
