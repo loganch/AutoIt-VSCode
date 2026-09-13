@@ -4,7 +4,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/commandTimings', () => ({
+jest.mock('../../src/commands/commandTimings', () => ({
   HOTKEY_LINE_DELAY_MS: 100,
   NO_BREAK_SPACE: '\u00a0',
 }));

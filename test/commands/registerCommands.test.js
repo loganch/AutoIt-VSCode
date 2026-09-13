@@ -8,7 +8,7 @@ jest.mock('vscode', () => ({
 }));
 
 // Mock the command registry: commandA/commandB have handlers, commandC does not.
-jest.mock('../src/commandRegistry', () => ({
+jest.mock('../../src/commands/commandRegistry', () => ({
   commandRegistry: {
     commandA: jest.fn(),
     commandB: jest.fn(),
@@ -16,12 +16,12 @@ jest.mock('../src/commandRegistry', () => ({
 }));
 
 // Mock commandsList to use simple known values (commandC has no registry handler)
-jest.mock('../src/commandsList', () => ({
+jest.mock('../../src/commandsList', () => ({
   commandsList: ['commandA', 'commandB', 'commandC'],
   commandsPrefix: 'autoit.',
 }));
 
-const { registerCommands } = require('../src/registerCommands');
+const { registerCommands } = require('../../src/commands/registerCommands');
 
 const REGISTERED_COMMAND_COUNT = 2;
 

@@ -6,13 +6,13 @@
 const mockKillScript = jest.fn();
 const mockGetActiveDocumentFileName = jest.fn();
 
-jest.mock('../src/commands/scriptCommands', () => ({
+jest.mock('../../src/commands/scriptCommands', () => ({
   __esModule: true,
   runScript: jest.fn(),
   killScript: (...args) => mockKillScript(...args),
   restartScript: jest.fn(),
 }));
-jest.mock('../src/commands/toolCommands', () => ({
+jest.mock('../../src/commands/toolCommands', () => ({
   __esModule: true,
   compile: jest.fn(),
   tidy: jest.fn(),
@@ -22,26 +22,26 @@ jest.mock('../src/commands/toolCommands', () => ({
   launchInfo: jest.fn(),
   launchKoda: jest.fn(),
 }));
-jest.mock('../src/commands/debugCommands', () => ({
+jest.mock('../../src/commands/debugCommands', () => ({
   __esModule: true,
   debugMsgBox: jest.fn(),
   debugConsole: jest.fn(),
   debugRemove: jest.fn(),
   traceRemove: jest.fn(),
 }));
-jest.mock('../src/commands/utilityCommands', () => ({
+jest.mock('../../src/commands/utilityCommands', () => ({
   __esModule: true,
   changeParams: jest.fn(),
   openInclude: jest.fn(),
   insertHeader: jest.fn(),
   getActiveDocumentFileName: (...args) => mockGetActiveDocumentFileName(...args),
 }));
-jest.mock('../src/commands/functionTraceAdd.js', () => ({ __esModule: true, default: jest.fn() }));
+jest.mock('../../src/commands/functionTraceAdd.js', () => ({ __esModule: true, default: jest.fn() }));
 
-import { commandRegistry } from '../src/commandRegistry';
-import { commandsList } from '../src/commandsList';
+import { commandRegistry } from '../../src/commands/commandRegistry';
+import { commandsList } from '../../src/commandsList';
 
-const packageJson = require('../package.json');
+const packageJson = require('../../package.json');
 
 describe('commandRegistry', () => {
   beforeEach(() => {

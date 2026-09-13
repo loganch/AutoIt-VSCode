@@ -1,6 +1,6 @@
 import { commands } from 'vscode';
 import { commandRegistry } from './commandRegistry';
-import { commandsList, commandsPrefix } from './commandsList';
+import { commandsList, commandsPrefix } from '../commandsList';
 
 export const registerCommands = ctx => {
   for (const command of commandsList) {

@@ -11,11 +11,11 @@
  * matching contribution to package.json. (package.json must stay separate —
  * VS Code reads it statically before the extension runs.)
  */
-import * as ScriptCommands from './commands/scriptCommands';
-import * as ToolCommands from './commands/toolCommands';
-import * as DebugCommands from './commands/debugCommands';
-import * as UtilityCommands from './commands/utilityCommands';
-import functionTraceAdd from './commands/functionTraceAdd.js';
+import * as ScriptCommands from './scriptCommands';
+import * as ToolCommands from './toolCommands';
+import * as DebugCommands from './debugCommands';
+import * as UtilityCommands from './utilityCommands';
+import functionTraceAdd from './functionTraceAdd.js';
 
 const killScriptOpened = (thisFile = null) =>
   ScriptCommands.killScript(thisFile || UtilityCommands.getActiveDocumentFileName());

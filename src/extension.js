@@ -16,7 +16,7 @@ import registerDefinitionFeature, {
 } from './providers/ai_definition';
 import registerReferencesFeature from './providers/ai_references';
 
-import { registerCommands } from './registerCommands';
+import { registerCommands } from './commands/registerCommands';
 import registerFormatterFeature from './providers/ai_formatter';
 import {
   clearDiagnosticsOwnedBy,

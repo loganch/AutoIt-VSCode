@@ -128,7 +128,7 @@ jest.mock('../src/providers/ai_formatter', () => ({
   __esModule: true,
   registerFormatterFeature: () => ({ dispose: () => {} }),
 }));
-jest.mock('../src/registerCommands', () => ({
+jest.mock('../src/commands/registerCommands', () => ({
   __esModule: true,
   registerCommands: () => {},
 }));
