@@ -48,6 +48,17 @@ export const isParenTriggerOn = () => {
 };
 
 /**
+ * Commit characters for a completion item of the given kind: `(` for
+ * functions when the paren-trigger setting is on, otherwise none. Single
+ * source of truth for this guard, shared by fillCompletions,
+ * signatureToCompletion, and ai_completion.js's createNewCompletionItem.
+ * @param {CompletionItemKind} kind
+ * @returns {string[]}
+ */
+export const parenCommitCharacters = kind =>
+  kind === CompletionItemKind.Function && isParenTriggerOn() ? ['('] : [];
+
+/**
  * Transforms an array of completion entries into VSCode CompletionItem objects with consistent
  * formatting and behavior. Adds include statements for UDF functions, configures commit characters
  * for function completions, and handles markdown documentation. Used to standardize completion
@@ -85,7 +96,7 @@ const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
         kind,
         detail: newDetail,
         get commitCharacters() {
-          return kind === CompletionItemKind.Function && isParenTriggerOn() ? ['('] : [];
+          return parenCommitCharacters(kind);
         },
         documentation: newDoc,
         ...(requiredScript ? { requiredInclude: requiredScript } : {}),
@@ -197,7 +208,7 @@ const signatureToCompletion = (signatures, kind, detail) => {
     kind: itemKind,
     detail: detail || '',
     get commitCharacters() {
-      return itemKind === CompletionItemKind.Function && isParenTriggerOn() ? ['('] : [];
+      return parenCommitCharacters(itemKind);
     },
     ...(requiredInclude ? { requiredInclude } : {}),
   }));

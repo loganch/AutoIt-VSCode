@@ -26,7 +26,7 @@ const { findFilepath } = aiConfig;
 import MapTrackingService from '../services/MapTrackingService.js';
 import VariableTrackingService from '../services/VariableTrackingService.js';
 import { attachIncludeEdits } from '../utils/includeAutoInsert';
-import { isParenTriggerOn } from '../completionTransforms';
+import { parenCommitCharacters } from '../completionTransforms';
 
 // Per-document caches for include completions, keyed by document URI
 // Each entry: { files: string[], completions: CompletionItem[] }
@@ -73,8 +73,9 @@ const createNewCompletionItem = (kind, name, itemDetail = 'Document Function') =
 
   compItem.detail = kind === CompletionItemKind.Variable ? 'Variable' : itemDetail;
 
-  if (kind === CompletionItemKind.Function && isParenTriggerOn()) {
-    compItem.commitCharacters = ['('];
+  const commitCharacters = parenCommitCharacters(kind);
+  if (commitCharacters.length > 0) {
+    compItem.commitCharacters = commitCharacters;
   }
 
   return compItem;
