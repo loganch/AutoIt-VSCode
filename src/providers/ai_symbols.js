@@ -33,17 +33,17 @@ const warnedFiles = new Set();
  * @param {Object} params - The input parameters.
  * @param {string} params.variable - The name of the variable.
  * @param {SymbolKind} params.variableKind - The kind of the variable symbol.
- * @param {import("vscode").TextDocument} params.doc - The document where the variable is defined.
+ * @param {import("vscode").TextDocument} params.document - The document where the variable is defined.
  * @param {import("vscode").TextLine} params.line - The line where the variable is defined.
  * @param {string} [params.container=null] - The name of the container where the variable is defined.
  * @returns {SymbolInformation} The symbol information object for the variable.
  */
-const createVariableSymbol = ({ variable, variableKind, doc, line, container = null }) => {
+const createVariableSymbol = ({ variable, variableKind, document, line, container = null }) => {
   return new SymbolInformation(
     variable,
     variableKind,
     container,
-    new Location(doc.uri, line.range),
+    new Location(document.uri, line.range),
   );
 };
 
@@ -153,19 +153,19 @@ const createRegionSymbol = (regionName, document, documentText) => {
  * @param {Object} params - An object containing the following properties:
  *   @param {string} params.text - The text to search for function symbols.
  *   @param {Set} params.processedSymbols - A set of already processed function symbols.
- *   @param {import("vscode").TextDocument} params.doc - The document object representing the text.
+ *   @param {import("vscode").TextDocument} params.document - The document object representing the text.
  *   @param {number} params.lineNum - The line number where the function symbol is located.
  *   @param {Array} params.result - An array to store the extracted function symbols.
  *   @param {string} params.scriptText - The full text of the script.
  * @returns {SymbolInformation|null} The extracted function symbol (also added to the `result` array), or null if none was found.
  */
 const parseFunctionFromText = params => {
-  const { text, processedSymbols, doc, lineNum, result, scriptText } = params;
+  const { text, processedSymbols, document, lineNum, result, scriptText } = params;
 
   const funcName = text.match(functionPattern);
   if (!funcName || processedSymbols.has(funcName[1])) return null;
 
-  const functionSymbol = generateFunctionSymbol(funcName[1], doc, text, lineNum, scriptText);
+  const functionSymbol = generateFunctionSymbol(funcName[1], document, text, lineNum, scriptText);
   if (!functionSymbol) return null;
 
   result.push(functionSymbol);
@@ -179,19 +179,19 @@ const parseFunctionFromText = params => {
  * @param {Object} params - An object containing the parameters.
  * @param {Array} params.regionName - An array containing the matched region name from the text.
  * @param {Set} params.found - A set containing the already found region names.
- * @param {Object} params.doc - The document object.
+ * @param {Object} params.document - The document object.
  * @param {Array} params.result - An array to store the symbol information objects.
  * @param {string} params.scriptText - The full text of the script.
  * @param {import("vscode").WorkspaceConfiguration} params.config - The current AutoIt configuration.
  * @returns {void} This function does not return anything.
  */
 const parseRegionFromText = params => {
-  const { regionName, found, doc, result, scriptText, config } = params;
+  const { regionName, found, document, result, scriptText, config } = params;
   if (!config.get('showRegionsInGoToSymbol', true)) return;
 
   if (!regionName || found.has(regionName[0])) return;
 
-  const regionSymbol = createRegionSymbol(regionName[1], doc, scriptText);
+  const regionSymbol = createRegionSymbol(regionName[1], document, scriptText);
   if (!regionSymbol) return;
   result.push(regionSymbol);
   found.add(regionName[0]);
@@ -268,12 +268,12 @@ function shouldSkipVariable(variable, lineText = '') {
   return false;
 }
 
-function addVariableToResults(result, variable, variableKind, doc, line, container) {
+function addVariableToResults(result, variable, variableKind, document, line, container) {
   result.push(
     createVariableSymbol({
       variable,
       variableKind,
-      doc,
+      document,
       line,
       container: container.name,
     }),
@@ -288,7 +288,7 @@ function addVariableToResults(result, variable, variableKind, doc, line, contain
  *   @param {array} params.result - An array to store the extracted variables.
  *   @param {import("vscode").TextLine} params.line - The line object from the document.
  *   @param {Set} params.addedVariables - A set of `name::container` keys for variables already added.
- *   @param {import("vscode").TextDocument} params.doc - The document object.
+ *   @param {import("vscode").TextDocument} params.document - The document object.
  *   @param {boolean} params.inContinuation - Indicates if the text is a continuation of a previous line.
  *   @param {SymbolKind} params.variableKind - The kind of variable (e.g., local, global).
  *   @param {SymbolInformation} params.currentFunction - The most recently parsed function symbol, if any.
@@ -296,7 +296,7 @@ function addVariableToResults(result, variable, variableKind, doc, line, contain
  * @returns {{inContinuation: boolean, variableKind: SymbolKind}} An object containing inContinuation (indicates if the text is a continuation) and variableKind (the kind of variable).
  */
 function parseVariablesFromText(params) {
-  const { text, result, line, addedVariables, doc, currentFunction, config } = params;
+  const { text, result, line, addedVariables, document, currentFunction, config } = params;
   let { inContinuation, variableKind } = params;
 
   if (!config.get('showVariablesInGoToSymbol', true)) {
@@ -329,7 +329,7 @@ function parseVariablesFromText(params) {
       continue;
     }
 
-    addVariableToResults(result, variable, variableKind, doc, line, container);
+    addVariableToResults(result, variable, variableKind, document, line, container);
     addedVariables.add(dedupKey);
   }
 
@@ -338,12 +338,12 @@ function parseVariablesFromText(params) {
 
 /**
  * Create DocumentSymbol array for Map keys (flat, single-level)
- * @param {import('vscode').TextDocument} doc - The document
+ * @param {import('vscode').TextDocument} document - The document
  * @param {Array} keysArray - Array of key objects {key, line, isDynamic}
  * @param {string} containerName - Parent Map variable name
  * @returns {Array<import('vscode').DocumentSymbol>}
  */
-function createKeySymbols(doc, keysArray, containerName) {
+function createKeySymbols(document, keysArray, containerName) {
   const keySymbols = [];
 
   // Sort keys by line number (order of first appearance)
@@ -356,7 +356,7 @@ function createKeySymbols(doc, keysArray, containerName) {
     const displayKey = isDynamic ? `[${key}]` : `"${key}"`;
 
     // Find the key string in the source line
-    const sourceLine = doc.lineAt(line);
+    const sourceLine = document.lineAt(line);
     const lineText = sourceLine.text;
 
     // Find key position in line
@@ -409,17 +409,17 @@ function createKeySymbols(doc, keysArray, containerName) {
 
 /**
  * Create DocumentSymbol for Map variable with key children
- * @param {import('vscode').TextDocument} doc - The document
+ * @param {import('vscode').TextDocument} document - The document
  * @param {object} mapDeclaration - Map declaration info from MapParser
  * @param {object} keysData - Flat keys from MapTrackingService
  * @param {object} parser - MapParser instance to get assignment details
  * @returns {import('vscode').DocumentSymbol}
  */
-function createMapSymbols(doc, mapDeclaration, keysData, parser) {
+function createMapSymbols(document, mapDeclaration, keysData, parser) {
   const { name, line } = mapDeclaration;
 
   // Create parent Map symbol
-  const mapLine = doc.lineAt(line);
+  const mapLine = document.lineAt(line);
   const mapRange = mapLine.range;
   const mapSymbol = new DocumentSymbol(name, 'Map', SymbolKind.Variable, mapRange, mapRange);
 
@@ -448,7 +448,7 @@ function createMapSymbols(doc, mapDeclaration, keysData, parser) {
   });
 
   // Add key children
-  mapSymbol.children = createKeySymbols(doc, allKeys, name);
+  mapSymbol.children = createKeySymbols(document, allKeys, name);
 
   return mapSymbol;
 }
@@ -510,18 +510,18 @@ function convertToDocumentSymbols(symbolInfoArray) {
 
 /**
  * Add Map variable symbols to results
- * @param {import('vscode').TextDocument} doc - The document
+ * @param {import('vscode').TextDocument} document - The document
  * @param {Array} result - Array to add symbols to
  */
-async function addMapSymbols(doc, result) {
+async function addMapSymbols(document, result) {
   try {
     // extension.js's setupDocumentTracking() is the sole owner that
     // initializes/reconfigures this singleton; just use it here.
     const mapService = MapTrackingService.getInstance();
 
     // Update file in service (immediate, not debounced for document symbols)
-    const filePath = doc.uri.fsPath;
-    const source = doc.getText();
+    const filePath = document.uri.fsPath;
+    const source = document.getText();
     mapService.updateFileImmediate(filePath, source);
 
     // Get Map declarations from the current file's parser
@@ -534,7 +534,7 @@ async function addMapSymbols(doc, result) {
     for (const mapDecl of mapDeclarations) {
       const keysData = await mapService.getKeysForMapWithIncludes(filePath, mapDecl.name, Infinity);
 
-      const mapSymbol = createMapSymbols(doc, mapDecl, keysData, parser);
+      const mapSymbol = createMapSymbols(document, mapDecl, keysData, parser);
       result.push(mapSymbol);
     }
   } catch (error) {
@@ -548,10 +548,10 @@ async function addMapSymbols(doc, result) {
  * It parses the text of the document line by line and extracts information about functions, variables, and regions.
  * Returns an array of symbol information objects.
  *
- * @param {import("vscode").TextDocument} doc - The document for which to provide symbols.
+ * @param {import("vscode").TextDocument} document - The document for which to provide symbols.
  * @returns {Promise<Array>} A promise that resolves to an array of symbol information objects, each containing the name, kind, and range of a symbol in the document.
  */
-async function provideDocumentSymbols(doc) {
+async function provideDocumentSymbols(document) {
   const result = [];
   const processedSymbols = new Set();
   const addedVariables = new Set();
@@ -559,24 +559,24 @@ async function provideDocumentSymbols(doc) {
   let inContinuation = false;
   let variableKind;
   let currentFunction = null;
-  const scriptText = doc.getText();
+  const scriptText = document.getText();
 
   // Read the configuration fresh on each invocation so setting changes take
   // effect without a window reload
   const currentConfig = workspace.getConfiguration('autoit');
   const maxLines = currentConfig.get('symbolMaxLines', DEFAULT_SYMBOL_MAX_LINES);
-  const lineCount = Math.min(doc.lineCount, maxLines);
+  const lineCount = Math.min(document.lineCount, maxLines);
 
   // Warn user once per file if document exceeds the symbol processing limit
-  if (doc.lineCount > maxLines && !warnedFiles.has(doc.uri.toString())) {
-    warnedFiles.add(doc.uri.toString());
+  if (document.lineCount > maxLines && !warnedFiles.has(document.uri.toString())) {
+    warnedFiles.add(document.uri.toString());
     window.showWarningMessage(
-      `AutoIt: File has ${doc.lineCount} lines but only processing first ${maxLines} for symbols. Increase 'autoit.symbolMaxLines' to index more lines.`,
+      `AutoIt: File has ${document.lineCount} lines but only processing first ${maxLines} for symbols. Increase 'autoit.symbolMaxLines' to index more lines.`,
     );
   }
 
   for (let lineNum = 0; lineNum < lineCount; lineNum += 1) {
-    const line = doc.lineAt(lineNum);
+    const line = document.lineAt(lineNum);
     const lineText = line.text;
     const regionName = lineText.match(regionPattern);
 
@@ -585,7 +585,7 @@ async function provideDocumentSymbols(doc) {
         const functionSymbol = parseFunctionFromText({
           text: lineText,
           processedSymbols,
-          doc,
+          document,
           lineNum,
           result,
           scriptText,
@@ -596,7 +596,7 @@ async function provideDocumentSymbols(doc) {
           inContinuation,
           text: lineText,
           addedVariables,
-          doc,
+          document,
           result,
           line,
           variableKind,
@@ -607,7 +607,7 @@ async function provideDocumentSymbols(doc) {
         parseRegionFromText({
           regionName,
           found: processedSymbols,
-          doc,
+          document,
           result,
           scriptText,
           config: currentConfig,
@@ -632,7 +632,7 @@ async function provideDocumentSymbols(doc) {
     // When Map intelligence is enabled, convert all SymbolInformation to DocumentSymbol
     // to support hierarchical Map keys
     const documentSymbols = convertToDocumentSymbols(result);
-    await addMapSymbols(doc, documentSymbols);
+    await addMapSymbols(document, documentSymbols);
     return documentSymbols;
   }
 

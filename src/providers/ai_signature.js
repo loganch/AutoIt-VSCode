@@ -82,9 +82,9 @@ function countCommas(code) {
   return commas;
 }
 
-function getCallInfo(doc, pos) {
+function getCallInfo(document, pos) {
   // Acquire the text up the point where the current cursor/paren/comma is at
-  const codeAtPosition = doc.lineAt(pos.line).text.substring(0, pos.character);
+  const codeAtPosition = document.lineAt(pos.line).text.substring(0, pos.character);
   const cleanCode = getParsableCode(codeAtPosition);
 
   return {
@@ -130,14 +130,14 @@ function getLibraryIncludesFromText(text) {
  *
  * @param {string[]} includesCheck - Include scripts referenced with `#include "..."`.
  * @param {string[]} libraryIncludes - Include file names referenced with `#include <...>`.
- * @param {import("vscode").TextDocument} doc - The document the includes belong to.
+ * @param {import("vscode").TextDocument} document - The document the includes belong to.
  * @returns {Object} An object containing the signatures found in the included files.
  */
-function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, doc) {
+function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, document) {
   const includes = {};
 
   includesCheck.forEach(script => {
-    Object.assign(includes, getIncludeData(script, doc));
+    Object.assign(includes, getIncludeData(script, document));
   });
 
   libraryIncludes.forEach(fileName => {
@@ -178,17 +178,17 @@ function parseLocalFunctionSignatures(text, fileName) {
  * On edits, include data is reused as long as the document's include list is unchanged,
  * so only local functions are re-parsed.
  *
- * @param {import("vscode").TextDocument} doc - The document to collect signatures for.
+ * @param {import("vscode").TextDocument} document - The document to collect signatures for.
  * @returns {Object} An object containing all signatures available to the document.
  */
-function getDocumentSignatures(doc) {
-  const cacheKey = doc.uri ? doc.uri.toString() : doc.fileName;
+function getDocumentSignatures(document) {
+  const cacheKey = document.uri ? document.uri.toString() : document.fileName;
   const cached = documentSignatureCache.get(cacheKey);
-  if (cached && cached.version === doc.version) {
+  if (cached && cached.version === document.version) {
     return cached.signatures;
   }
 
-  const text = doc.getText();
+  const text = document.getText();
   const includesCheck = getIncludesFromText(text);
   const libraryIncludes = getLibraryIncludesFromText(text).map(pattern => pattern[1]);
   const includeKey = JSON.stringify([includesCheck, libraryIncludes]);
@@ -196,15 +196,15 @@ function getDocumentSignatures(doc) {
   const includes =
     cached && cached.includeKey === includeKey
       ? cached.includes
-      : parseIncludedFunctionSignatures(includesCheck, libraryIncludes, doc);
+      : parseIncludedFunctionSignatures(includesCheck, libraryIncludes, document);
 
   const signatures = {
     ...includes,
-    ...parseLocalFunctionSignatures(text, doc.fileName),
+    ...parseLocalFunctionSignatures(text, document.fileName),
   };
 
   documentSignatureCache.set(cacheKey, {
-    version: doc.version,
+    version: document.version,
     includeKey,
     includes,
     signatures,

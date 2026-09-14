@@ -157,11 +157,11 @@ const getIncludeCompletions = (document, includesCheck) => {
 /**
  * Generates function completions from files included through library paths
  * @param {Array<String>} libraryIncludes Array containing filenames of library includes
- * @param {import('vscode').TextDocument} doc Originating text document
+ * @param {import('vscode').TextDocument} document Originating text document
  * @returns {CompletionItem[]} Array of completionItem objects
  */
-const getLibraryFunctions = (libraryIncludes, doc) => {
-  return getCachedCompletions(libraryIncludeCache, doc, libraryIncludes, () => {
+const getLibraryFunctions = (libraryIncludes, document) => {
+  return getCachedCompletions(libraryIncludeCache, document, libraryIncludes, () => {
     return libraryIncludes
       .flatMap(file => {
         const fullPath = findFilepath(file);
