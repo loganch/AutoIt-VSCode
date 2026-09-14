@@ -47,6 +47,46 @@ const AutoItDefinitionProvider = {
   },
 
   /**
+   * Warm-index fast path: look up lookupText in the in-memory symbol index,
+   * then keep only definitions whose file is reachable via #include from this
+   * document. Pure in-memory (no file-content reads); returns null on
+   * miss/error so the caller falls through to the include-graph scan.
+   * @param {import("vscode").TextDocument} document
+   * @param {string} documentText
+   * @param {string} lookupText
+   * @returns {Location|Location[]|null}
+   */
+  tryIndexFastPath(document, documentText, lookupText) {
+    try {
+      const isVariable = lookupText.startsWith('$');
+      const candidates = lookupDefinition(lookupText, isVariable);
+      if (candidates.length === 0) return null;
+
+      // Use the canonical (case-normalized) key so edge keys and candidate
+      // location keys share one space on case-insensitive filesystems.
+      const docUriString = toUriString(document.uri.fsPath);
+      // Parse the active document's includes live so unsaved edits are honored.
+      // (This also refreshes the service's edge map for this document as a side effect.)
+      const liveEdges = extractIncludeEdges(docUriString, documentText, document);
+      const includeSet = getIncludeSet(docUriString, liveEdges);
+      const inScope = candidates
+        .map(entry => entry.location)
+        .filter(
+          loc => loc && loc.uri && loc.uri.fsPath && includeSet.has(toUriString(loc.uri.fsPath)),
+        );
+
+      if (inScope.length === 1) return inScope[0];
+      if (inScope.length > 1) return inScope; // VS Code renders a peek list
+      return null;
+    } catch (err) {
+      // Unexpected: the in-memory fast path should not throw. Log and fall
+      // through to the include-graph scan so F12 still works.
+      handleError('definition index fast path', err);
+      return null;
+    }
+  },
+
+  /**
    * Finds the definition of a word in a document and returns its location.
    * @param {import("vscode").TextDocument} document - The document in which to search for the word definition.
    * @param {Position} position - The position of the word for which to find the definition.
@@ -84,38 +124,12 @@ const AutoItDefinitionProvider = {
       }
 
       // Index fast path: look up the symbol in the warm index, then keep only
-      // definitions whose file is reachable via #include from this document. Pure
-      // in-memory (no file-content reads); falls through to the scan on miss/error.
-      try {
-        const isVariable = lookupText.startsWith('$');
-        const candidates = lookupDefinition(lookupText, isVariable);
-        if (candidates.length > 0) {
-          // Use the canonical (case-normalized) key so edge keys and candidate
-          // location keys share one space on case-insensitive filesystems.
-          const docUriString = toUriString(document.uri.fsPath);
-          // Parse the active document's includes live so unsaved edits are honored.
-          // (This also refreshes the service's edge map for this document as a side effect.)
-          const liveEdges = extractIncludeEdges(docUriString, documentText, document);
-          const includeSet = getIncludeSet(docUriString, liveEdges);
-          const inScope = candidates
-            .map(entry => entry.location)
-            .filter(
-              loc =>
-                loc && loc.uri && loc.uri.fsPath && includeSet.has(toUriString(loc.uri.fsPath)),
-            );
-          if (inScope.length === 1) {
-            definitionCache.set(cacheKey, inScope[0]);
-            return inScope[0];
-          }
-          if (inScope.length > 1) {
-            definitionCache.set(cacheKey, inScope);
-            return inScope; // VS Code renders a peek list
-          }
-        }
-      } catch (err) {
-        // Unexpected: the in-memory fast path should not throw. Log and fall through
-        // to the include-graph scan so F12 still works.
-        handleError('definition index fast path', err);
+      // definitions whose file is reachable via #include from this document.
+      // Falls through to the include-graph scan on miss/error.
+      const fastPathResult = this.tryIndexFastPath(document, documentText, lookupText);
+      if (fastPathResult) {
+        definitionCache.set(cacheKey, fastPathResult);
+        return fastPathResult;
       }
 
       const includeResult = this.findDefinitionInIncludeFiles(
