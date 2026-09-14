@@ -32,7 +32,7 @@ jest.mock('../../src/config/ai_config', () => ({
 }));
 
 const { buildFunctionSignature, getParams } = require('../../src/utils/functionSignature');
-const { REGEX_PATTERNS: patterns } = require('../../src/utils/regexPatterns');
+const { buildHeaderRegex, buildParameterDocRegex } = require('../../src/utils/regexPatterns');
 
 const EXPECTED_PARAMETER_COUNT = 2;
 
@@ -65,8 +65,8 @@ describe('util signature regex safety', () => {
   });
 
   test('headerRegex escapes regex metacharacters in function names', () => {
-    expect(() => patterns.headerRegex('Bad)Name')).not.toThrow();
-    expect(() => patterns.headerRegex('Fn[Name]+')).not.toThrow();
+    expect(() => buildHeaderRegex('Bad)Name')).not.toThrow();
+    expect(() => buildHeaderRegex('Fn[Name]+')).not.toThrow();
   });
 
   test('buildFunctionSignature leaves documentation blank when Description is empty', () => {
@@ -132,8 +132,8 @@ describe('util signature regex safety', () => {
   });
 
   test('parameterDoc escapes regex metacharacters in parameter names', () => {
-    expect(() => patterns.parameterDoc('UBOUND_ROWS) -1))')).not.toThrow();
-    expect(() => patterns.parameterDoc('param.*+?^${}()|[]\\')).not.toThrow();
+    expect(() => buildParameterDocRegex('UBOUND_ROWS) -1))')).not.toThrow();
+    expect(() => buildParameterDocRegex('param.*+?^${}()|[]\\')).not.toThrow();
   });
 
   test('buildFunctionSignature exposes description as own field on functionObject', () => {

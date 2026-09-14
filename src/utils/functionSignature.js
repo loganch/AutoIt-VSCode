@@ -1,6 +1,6 @@
 import { handleError, safeExecute } from '../errorUtils';
 import { splitTopLevel } from '../language/functionSignatureParsing';
-import { REGEX_PATTERNS } from './regexPatterns';
+import { REGEX_PATTERNS, buildParameterDocRegex, buildHeaderRegex } from './regexPatterns';
 import { validateString, isValidDocument } from './validation';
 import { safeFileExists, getIncludeText } from './fsCache';
 import { getIncludePath } from './includeResolution';
@@ -41,7 +41,8 @@ const extractParamDocumentation = (text, paramEntry, headerIndex) => {
     'extractParamDocumentation',
     () => {
       const headerSubstring = text.substring(headerIndex);
-      const paramRegex = REGEX_PATTERNS.parameterDoc(paramEntry);
+      const paramRegex = buildParameterDocRegex(paramEntry);
+      if (!paramRegex) return '';
 
       const match = paramRegex.exec(headerSubstring);
       return match?.groups?.documentation || '';
@@ -122,8 +123,8 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
   safeExecute(
     'buildFunctionSignature header parsing',
     () => {
-      const headerRegex = REGEX_PATTERNS.headerRegex(functionName);
-      const headerMatch = fileText.match(headerRegex);
+      const headerRegex = buildHeaderRegex(functionName);
+      const headerMatch = headerRegex ? fileText.match(headerRegex) : null;
       description = headerMatch?.groups?.description || '';
       functionIndex = headerMatch?.index ?? -1;
 

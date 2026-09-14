@@ -13,6 +13,9 @@ export const escapeRegexLiteral = value => {
 
 // Cached regex patterns to avoid recreation, extending the frozen core set
 // with patterns specific to include resolution and signature/header parsing.
+// Static patterns only; regex-building functions live below as their own
+// exports so this table's values are all RegExp, never a mix of RegExp and
+// (string) => RegExp.
 export const REGEX_PATTERNS = Object.freeze({
   ...CORE_REGEX_PATTERNS,
   includePattern: /^#include\s+"([^"]+)"/gm,
@@ -23,29 +26,41 @@ export const REGEX_PATTERNS = Object.freeze({
   hasAngleBrackets: /^<.+>$/,
   hasQuotes: /^".+"$/,
   windowsDriveLetter: /^[A-Z]:[\\/]/,
-  parameterDoc: /** @param {string} paramEntry */ paramEntry => {
-    const normalizedParam =
-      typeof paramEntry === 'string' ? paramEntry.trim().replace(/^\$/, '') : '';
-    const escapedParam = escapeRegexLiteral(normalizedParam);
-
-    if (!escapedParam) return /$^/;
-
-    return new RegExp(
-      `;\\s*(?:Parameters\\s*\\.+:)?\\s*(?:\\$${escapedParam})\\s+-\\s(?<documentation>.+)`,
-    );
-  },
-  headerRegex: /** @param {string} functionName */ functionName => {
-    const escapedFunctionName = escapeRegexLiteral(functionName);
-    if (!escapedFunctionName) return /$^/;
-
-    // Allow Description to be on same line as Name OR on the next line
-    return new RegExp(
-      `;\\s*Name\\s*\\.+:\\s+${escapedFunctionName}\\s*` +
-        `(?:(?:\\r\\n|\\n)?\\s*;\\s+Description\\s*\\.+:[ \\t]+(?<description>\\S.*))?` +
-        `(?:\\r\\n|\\n|$)`,
-    );
-  },
 });
+
+/**
+ * Builds a regex that finds a parameter's documentation line in a function header comment.
+ * @param {string} paramEntry - Parameter name (with or without leading $)
+ * @returns {RegExp|null} Regex with a `documentation` capture group, or null if paramEntry is invalid
+ */
+export const buildParameterDocRegex = paramEntry => {
+  const normalizedParam =
+    typeof paramEntry === 'string' ? paramEntry.trim().replace(/^\$/, '') : '';
+  const escapedParam = escapeRegexLiteral(normalizedParam);
+
+  if (!escapedParam) return null;
+
+  return new RegExp(
+    `;\\s*(?:Parameters\\s*\\.+:)?\\s*(?:\\$${escapedParam})\\s+-\\s(?<documentation>.+)`,
+  );
+};
+
+/**
+ * Builds a regex that finds a function's Name/Description header comment block.
+ * @param {string} functionName - Function name to match in the header's Name field
+ * @returns {RegExp|null} Regex with an optional `description` capture group, or null if functionName is invalid
+ */
+export const buildHeaderRegex = functionName => {
+  const escapedFunctionName = escapeRegexLiteral(functionName);
+  if (!escapedFunctionName) return null;
+
+  // Allow Description to be on same line as Name OR on the next line
+  return new RegExp(
+    `;\\s*Name\\s*\\.+:\\s+${escapedFunctionName}\\s*` +
+      `(?:(?:\\r\\n|\\n)?\\s*;\\s+Description\\s*\\.+:[ \\t]+(?<description>\\S.*))?` +
+      `(?:\\r\\n|\\n|$)`,
+  );
+};
 
 /**
  * Creates a new regular expression with different flags while preserving the original pattern.
