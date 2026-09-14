@@ -314,13 +314,13 @@ jest.mock('fs', () => {
   };
 });
 
-jest.mock('../src/utils/coreConstants', () => ({
+jest.mock('../../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit', scheme: 'file' },
 }));
 
 // Prepare mutable mocks for the modules ai_definition imports from; we
 // override implementations per test
-jest.mock('../src/utils/includeResolution', () => {
+jest.mock('../../src/utils/includeResolution', () => {
   // Define paths locally within the mock to avoid Jest scoping issues.
   // File contents are served by the fsCache mock below, so only the path
   // mapping is needed here.
@@ -354,7 +354,7 @@ jest.mock('../src/utils/includeResolution', () => {
 // variable-definition matching behaves identically under the mock. Use a
 // PLAIN function (not jest.fn) so the global `resetMocks: true` jest config
 // does not wipe its implementation between tests.
-jest.mock('../src/language/variable', () => ({
+jest.mock('../../src/language/variable', () => ({
   buildVariableRegex: variableName => {
     const escaped = String(variableName).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const keywords = ['Local', 'Global', 'Const'].join('|');
@@ -365,7 +365,7 @@ jest.mock('../src/language/variable', () => ({
   },
 }));
 
-jest.mock('../src/utils/fsCache', () => {
+jest.mock('../../src/utils/fsCache', () => {
   const pathModule = require('path');
   const mockMainPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'main.au3');
   const mockHelperPath = pathModule.join(process.cwd(), 'test', 'fixtures', 'helper.au3');
@@ -428,11 +428,11 @@ jest.mock('../src/utils/fsCache', () => {
 // Mock the symbol-index service so the fast path is deterministic and free of
 // fs / real-index behavior. With these defaults (lookupDefinition -> []), the
 // fast path is a no-op and every existing test falls through to the scan path.
-jest.mock('../src/services/symbolIndex', () => ({
+jest.mock('../../src/services/symbolIndex', () => ({
   lookupDefinition: jest.fn(() => []),
   noteFileContent: jest.fn(),
 }));
-jest.mock('../src/services/includeGraph', () => {
+jest.mock('../../src/services/includeGraph', () => {
   const CASE_INSENSITIVE_FS = process.platform === 'win32' || process.platform === 'darwin';
   return {
     getIncludeSet: jest.fn(() => new Set()),
@@ -442,12 +442,12 @@ jest.mock('../src/services/includeGraph', () => {
     toUriString: jest.fn(fsPath => `file://${CASE_INSENSITIVE_FS ? fsPath.toLowerCase() : fsPath}`),
   };
 });
-const symbolIndex = require('../src/services/symbolIndex');
-const includeGraph = require('../src/services/includeGraph');
+const symbolIndex = require('../../src/services/symbolIndex');
+const includeGraph = require('../../src/services/includeGraph');
 
 // get the mock instances with proper typing
-const util = jest.mocked(require('../src/utils/includeResolution'));
-Object.assign(util, jest.mocked(require('../src/utils/fsCache')));
+const util = jest.mocked(require('../../src/utils/includeResolution'));
+Object.assign(util, jest.mocked(require('../../src/utils/fsCache')));
 
 // Default include-resolution implementation mirroring the real contract in
 // src/utils/includeResolution.js: absolute paths pass through normalized,
@@ -479,7 +479,7 @@ beforeEach(() => {
 });
 
 // Import the module under test
-const { AutoItDefinitionProvider, clearDefinitionCache } = require('../src/providers/ai_definition.js');
+const { AutoItDefinitionProvider, clearDefinitionCache } = require('../../src/providers/ai_definition.js');
 const definitionProvider = AutoItDefinitionProvider;
 
 function makeDoc(text = MAIN_CONTENT, filePath = MAIN_PATH) {

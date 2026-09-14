@@ -1,13 +1,13 @@
 const mockRegisterHoverProvider = jest.fn(() => ({ dispose: jest.fn() }));
 
-jest.mock('../src/hovers', () => ({
+jest.mock('../../src/hovers', () => ({
   __esModule: true,
   default: {
     myfunc: 'My hover docs',
   },
 }));
 
-jest.mock('../src/utils/coreConstants', () => ({
+jest.mock('../../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
 }));
 
@@ -28,7 +28,7 @@ describe('ai_hover module', () => {
   let registeredMode;
 
   beforeAll(() => {
-    hoverModule = require('../src/providers/ai_hover');
+    hoverModule = require('../../src/providers/ai_hover');
     hoverModule.default();
     registeredMode = mockRegisterHoverProvider.mock.calls[0]?.[0] ?? null;
     provider = mockRegisterHoverProvider.mock.calls[0]?.[1] ?? null;

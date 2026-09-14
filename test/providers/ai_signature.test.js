@@ -54,17 +54,17 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../src/utils/coreConstants', () => ({
+jest.mock('../../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
 }));
 
-jest.mock('../src/utils/functionSignature', () => ({
+jest.mock('../../src/utils/functionSignature', () => ({
   buildFunctionSignature: mockBuildFunctionSignature,
   getIncludeData: mockGetIncludeData,
   getIncludeDataByPath: mockGetIncludeData,
 }));
 
-jest.mock('../src/utils/regexPatterns', () => ({
+jest.mock('../../src/utils/regexPatterns', () => ({
   REGEX_PATTERNS: {
     functionDefinitionRegex: /^\s*(Func)\s+([^\s(]+)\s*\(([^)]*)\)/gim,
     includePattern: /#include\s+"([^"]+)"/gim,
@@ -72,16 +72,16 @@ jest.mock('../src/utils/regexPatterns', () => ({
   },
 }));
 
-jest.mock('../src/config/ai_config', () => ({
+jest.mock('../../src/config/ai_config', () => ({
   __esModule: true,
   default: { findFilePath: mockFindFilepath },
 }));
 
-jest.mock('../src/constants', () => ({
+jest.mock('../../src/constants', () => ({
   DEFAULT_UDFS: [],
 }));
 
-jest.mock('../src/signatures', () => ({
+jest.mock('../../src/signatures', () => ({
   __esModule: true,
   default: {
     MyFunc: {
@@ -105,7 +105,7 @@ describe('ai_signature', () => {
   });
 
   beforeAll(() => {
-    signatureModule = require('../src/providers/ai_signature');
+    signatureModule = require('../../src/providers/ai_signature');
     signatureModule.default();
     hoverProvider = mockRegisterHoverProvider.mock.calls[0]?.[1] ?? null;
     signatureProvider = mockRegisterSignatureHelpProvider.mock.calls[0]?.[1] ?? null;

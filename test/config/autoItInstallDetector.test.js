@@ -22,7 +22,7 @@ const loadModule = () => {
   jest.resetModules();
   const childProcess = require('child_process');
   const fsModule = require('fs');
-  const mod = require('../src/config/autoItInstallDetector');
+  const mod = require('../../src/config/autoItInstallDetector');
   return {
     detectAutoItPaths: mod.detectAutoItPaths,
     execSync: childProcess.execSync,

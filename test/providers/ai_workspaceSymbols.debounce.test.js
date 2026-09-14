@@ -44,7 +44,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../src/providers/ai_symbols', () => ({
+jest.mock('../../src/providers/ai_symbols', () => ({
   __esModule: true,
   default: { dispose: jest.fn() },
   provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
@@ -53,10 +53,10 @@ jest.mock('../src/providers/ai_symbols', () => ({
 // symbolIndex/includeGraph (imported transitively via ai_workspaceSymbols) import
 // getIncludePath/isVariableDeclarationLine; mock them so the real
 // includeResolution -> ai_config side-effect chain never loads.
-jest.mock('../src/utils/includeResolution', () => ({
+jest.mock('../../src/utils/includeResolution', () => ({
   getIncludePath: jest.fn(() => ''),
 }));
-jest.mock('../src/language/variable', () => ({
+jest.mock('../../src/language/variable', () => ({
   isVariableDeclarationLine: () => false,
 }));
 
@@ -67,7 +67,7 @@ jest.mock('../src/language/variable', () => ({
  */
 function loadProvider() {
   jest.isolateModules(() => {
-    require('../src/providers/ai_workspaceSymbols').default();
+    require('../../src/providers/ai_workspaceSymbols').default();
   });
 
   const providerCalls = mockRegisterWorkspaceSymbolProvider.mock.calls;

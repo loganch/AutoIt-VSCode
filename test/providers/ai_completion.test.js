@@ -193,11 +193,11 @@ const applyMockImplementations = () => {
   });
 };
 
-jest.mock('../src/utils/coreConstants', () => ({
+jest.mock('../../src/utils/coreConstants', () => ({
   AUTOIT_MODE: { language: 'autoit' },
 }));
 
-jest.mock('../src/utils/functionSignature', () => ({
+jest.mock('../../src/utils/functionSignature', () => ({
   buildFunctionSignature: jest.fn(() => ({
     functionName: '',
     functionObject: { description: '', documentation: '' },
@@ -206,7 +206,7 @@ jest.mock('../src/utils/functionSignature', () => ({
   getIncludeDataByPath: (...args) => mockGetIncludeData(...args),
 }));
 
-jest.mock('../src/utils/regexPatterns', () => ({
+jest.mock('../../src/utils/regexPatterns', () => ({
   REGEX_PATTERNS: {
     functionPattern: /Func\s+(?:volatile\s+)?(\w+)/i,
     variablePattern: /\$(\w+)/g,
@@ -216,13 +216,13 @@ jest.mock('../src/utils/regexPatterns', () => ({
   setRegExpFlags: (pattern, flags) => new RegExp(pattern.source, flags),
 }));
 
-jest.mock('../src/config/ai_config', () => ({
+jest.mock('../../src/config/ai_config', () => ({
   __esModule: true,
   default: { findFilePath: (...args) => mockFindFilepath(...args) },
 }));
 
-jest.mock('../src/udfRegistry', () => ({ completions: [] }));
-jest.mock('../src/constants', () => ({ DEFAULT_UDFS: [] }));
+jest.mock('../../src/udfRegistry', () => ({ completions: [] }));
+jest.mock('../../src/constants', () => ({ DEFAULT_UDFS: [] }));
 
 describe('ai_completion cache behavior', () => {
   let provideCompletionItems;
@@ -238,7 +238,7 @@ describe('ai_completion cache behavior', () => {
     ({ languages, workspace } = require('vscode'));
 
     // Re-import to get fresh module state
-    const completionModule = require('../src/providers/ai_completion');
+    const completionModule = require('../../src/providers/ai_completion');
     completionModule.default();
     completionModule.registerCompletionCacheInvalidation();
 
@@ -422,7 +422,7 @@ describe('ai_completion cache behavior', () => {
   });
 
   test('getLocalFunctionCompletions sets documentation from buildFunctionSignature description', async () => {
-    const { buildFunctionSignature } = require('../src/utils/functionSignature');
+    const { buildFunctionSignature } = require('../../src/utils/functionSignature');
     // mockReturnValueOnce (not mockReturnValue) keeps this override test-local;
     // the default mock takes over for any subsequent loop iteration
     buildFunctionSignature.mockReturnValueOnce({
@@ -457,7 +457,7 @@ describe('arraysMatch utility', () => {
     ({ languages } = require('vscode'));
 
     // Access internal function through module
-    require('../src/providers/ai_completion').default();
+    require('../../src/providers/ai_completion').default();
     // Note: arraysMatch is not exported, so we test it indirectly through cache behavior
 
     // Extract the provider function
@@ -497,14 +497,14 @@ describe('attachIncludeEdits integration', () => {
 
     ({ languages } = require('vscode'));
 
-    jest.doMock('../src/udfRegistry', () => ({
+    jest.doMock('../../src/udfRegistry', () => ({
       completions: [
         { label: '_ArrayDisplay', kind: 3, requiredInclude: 'Array.au3' },
         { label: 'MsgBox', kind: 3 },
       ],
     }));
 
-    require('../src/providers/ai_completion').default();
+    require('../../src/providers/ai_completion').default();
 
     const [, provider] = languages.registerCompletionItemProvider.mock.calls[0] || [];
     if (provider) {

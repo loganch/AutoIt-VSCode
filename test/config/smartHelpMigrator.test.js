@@ -1,6 +1,6 @@
 jest.mock('vscode', () => ({}));
 
-import { upgradeSmartHelpConfig } from '../src/config/smartHelpMigrator';
+import { upgradeSmartHelpConfig } from '../../src/config/smartHelpMigrator';
 
 const makeConf = (smartHelp, inspectResult = {}) => ({
   smartHelp,

@@ -95,7 +95,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../src/services/MapTrackingService.js', () => ({
+jest.mock('../../src/services/MapTrackingService.js', () => ({
   __esModule: true,
   default: {
     getInstance: jest.fn(() => ({
@@ -106,17 +106,17 @@ jest.mock('../src/services/MapTrackingService.js', () => ({
   },
 }));
 
-jest.mock('../src/constants', () => ({
+jest.mock('../../src/constants', () => ({
   DEFAULT_MAX_INCLUDE_DEPTH: 3,
   AUTOIT_MODE: { language: 'autoit' },
 }));
 
-jest.mock('../src/utils/coreConstants', () => ({
+jest.mock('../../src/utils/coreConstants', () => ({
   AI_CONSTANTS: {},
   AUTOIT_MODE: { language: 'autoit' },
 }));
 
-jest.mock('../src/utils/regexPatterns', () => ({
+jest.mock('../../src/utils/regexPatterns', () => ({
   REGEX_PATTERNS: {
     functionPattern: /func/i,
     regionPattern: /#region/i,
@@ -126,20 +126,20 @@ jest.mock('../src/utils/regexPatterns', () => ({
   },
 }));
 
-jest.mock('../src/utils/includeResolution', () => ({
+jest.mock('../../src/utils/includeResolution', () => ({
   isSkippableLine: jest.fn(() => false),
   getIncludePath: jest.fn(() => ''),
 }));
 
 // symbolIndex.indexDocument tags variable symbols via this helper.
-jest.mock('../src/language/variable', () => ({
+jest.mock('../../src/language/variable', () => ({
   isVariableDeclarationLine: () => false,
 }));
 
 // The provider delegates per-file indexing to symbolIndex.indexDocument, which
 // pulls provideDocumentSymbols from ai_symbols. Mock it here so the indexer sees
 // the mock and the heavy real ai_symbols module never loads.
-jest.mock('../src/providers/ai_symbols', () => ({
+jest.mock('../../src/providers/ai_symbols', () => ({
   __esModule: true,
   default: { dispose: jest.fn() },
   provideDocumentSymbols: (...args) => mockProvideDocumentSymbols(...args),
@@ -151,7 +151,7 @@ describe('ai_workspaceSymbols module', () => {
   let capturedWatcherArg;
 
   beforeAll(() => {
-    require('../src/providers/ai_workspaceSymbols').default();
+    require('../../src/providers/ai_workspaceSymbols').default();
     // Capture before resetMocks resets these
     capturedProviderArg =
       mockRegisterWorkspaceSymbolProvider.mock.calls.length > 0
@@ -177,7 +177,7 @@ describe('ai_workspaceSymbols module', () => {
   test('a workspace build populates the shared symbolIndex cache', async () => {
     const { workspace } = require('vscode');
 
-    const symbolIndex = require('../src/services/symbolIndex');
+    const symbolIndex = require('../../src/services/symbolIndex');
     symbolIndex.__resetForTests();
 
     // resetMocks wipes the getConfiguration implementation each test; restore a

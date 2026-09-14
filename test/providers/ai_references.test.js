@@ -200,19 +200,19 @@ jest.mock(
 // delegates to the REAL provider so the local-variable includeDeclaration:false
 // test (which relies on resolving $x's declaration line) still passes; only the
 // workspace decl-drop test overrides the return value.
-jest.mock('../src/providers/ai_definition', () => ({
+jest.mock('../../src/providers/ai_definition', () => ({
   AutoItDefinitionProvider: {
     provideDefinition: jest.fn((...args) =>
       jest
-        .requireActual('../src/providers/ai_definition')
+        .requireActual('../../src/providers/ai_definition')
         .AutoItDefinitionProvider.provideDefinition(...args),
     ),
   },
 }));
 
 const vscode = require('vscode');
-const { AutoItReferenceProvider } = require('../src/providers/ai_references');
-const { AutoItDefinitionProvider } = require('../src/providers/ai_definition');
+const { AutoItReferenceProvider } = require('../../src/providers/ai_references');
+const { AutoItDefinitionProvider } = require('../../src/providers/ai_definition');
 
 // clearMocks/restoreMocks strips the delegating default before each test, so the
 // local-path test would otherwise get `undefined` from provideDefinition.
@@ -220,7 +220,7 @@ const { AutoItDefinitionProvider } = require('../src/providers/ai_definition');
 beforeEach(() => {
   AutoItDefinitionProvider.provideDefinition.mockImplementation((...args) =>
     jest
-      .requireActual('../src/providers/ai_definition')
+      .requireActual('../../src/providers/ai_definition')
       .AutoItDefinitionProvider.provideDefinition(...args),
   );
 });

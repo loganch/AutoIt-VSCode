@@ -266,14 +266,14 @@ const mockVSCode = {
 jest.mock('vscode', () => mockVSCode, { virtual: true });
 
 // Import after mocking
-const { provideDocumentSymbols } = require('../src/providers/ai_symbols');
+const { provideDocumentSymbols } = require('../../src/providers/ai_symbols');
 
 describe('Map Symbol Generation', () => {
   let originalGetConfiguration;
 
   beforeEach(() => {
     // Reset MapTrackingService singleton before each test
-    const MapTrackingService = require('../src/services/MapTrackingService').default;
+    const MapTrackingService = require('../../src/services/MapTrackingService').default;
     MapTrackingService.resetInstance();
 
     // Store original configuration and set default mock
