@@ -8,12 +8,12 @@ jest.mock('../../src/utils/includeResolution', () => ({
 }));
 
 jest.mock('../../src/config/pathResolution', () => ({
-  findFilepath: jest.fn(),
+  findFilePath: jest.fn(),
 }));
 
 const { safeFileExists, getIncludeText } = require('../../src/utils/fsCache');
 const { getIncludePath } = require('../../src/utils/includeResolution');
-const { findFilepath } = require('../../src/config/pathResolution');
+const { findFilePath } = require('../../src/config/pathResolution');
 const { getIncludeData, getIncludeDataByPath } = require('../../src/utils/functionSignature');
 
 const FUNC_SOURCE = 'Func MyLibFunc($a)\nEndFunc\n';
@@ -32,19 +32,19 @@ describe('getIncludeData', () => {
     const result = getIncludeData('MyLib.au3', document);
 
     expect(getIncludePath).toHaveBeenCalledWith('MyLib.au3', document);
-    expect(findFilepath).not.toHaveBeenCalled();
+    expect(findFilePath).not.toHaveBeenCalled();
     expect(result).toHaveProperty('MyLibFunc');
     expect(result.MyLibFunc.documentation).toContain('Included from MyLib.au3');
   });
 
-  test('trusts getIncludePath\'s empty-string miss signal without re-resolving via findFilepath', () => {
+  test('trusts getIncludePath\'s empty-string miss signal without re-resolving via findFilePath', () => {
     // getIncludePath already encodes the full fallback order (including its
-    // own findFilepath call), so getIncludeData must not retry resolution.
+    // own findFilePath call), so getIncludeData must not retry resolution.
     getIncludePath.mockReturnValue('');
 
     const result = getIncludeData('MyLib.au3', document);
 
-    expect(findFilepath).not.toHaveBeenCalled();
+    expect(findFilePath).not.toHaveBeenCalled();
     expect(result).toEqual({});
   });
 
@@ -61,7 +61,7 @@ describe('getIncludeDataByPath', () => {
     const result = getIncludeDataByPath('C:\\lib\\MyLib.au3', 'MyLib.au3');
 
     expect(getIncludePath).not.toHaveBeenCalled();
-    expect(findFilepath).not.toHaveBeenCalled();
+    expect(findFilePath).not.toHaveBeenCalled();
     expect(getIncludeText).toHaveBeenCalledWith('C:\\lib\\MyLib.au3');
     expect(result.MyLibFunc.documentation).toContain('Included from MyLib.au3');
   });

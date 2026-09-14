@@ -22,7 +22,7 @@ const {
 import aiConfig from '../config/ai_config';
 import { DEFAULT_UDFS } from '../constants';
 
-const { findFilepath } = aiConfig;
+const { findFilePath } = aiConfig;
 import MapTrackingService from '../services/MapTrackingService.js';
 import VariableTrackingService from '../services/VariableTrackingService.js';
 import { attachIncludeEdits } from '../utils/includeAutoInsert';
@@ -164,7 +164,7 @@ const getLibraryFunctions = (libraryIncludes, document) => {
   return getCachedCompletions(libraryIncludeCache, document, libraryIncludes, () => {
     return libraryIncludes
       .flatMap(file => {
-        const fullPath = findFilepath(file);
+        const fullPath = findFilePath(file);
         if (!fullPath) {
           return [];
         }

@@ -85,7 +85,7 @@ jest.mock('../../src/config/ai_config', () => ({
       outputMaxHistoryLines: 2,
       update: (...args) => mockConfigUpdate(...args),
     },
-    findFilepath: (...args) => mockFindFilepath(...args),
+    findFilePath: (...args) => mockFindFilepath(...args),
   },
 }));
 

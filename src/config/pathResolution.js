@@ -94,7 +94,7 @@ function updateFullPath(_path, data, msgSuffix) {
  * @param {boolean} preferLibrary - whether to prefer library entries (true) or search them last (false)
  * @returns {(string|null)} Full path if found, or null
  */
-const findFilepath = (fileName, preferLibrary = true) => {
+const findFilePath = (fileName, preferLibrary = true) => {
   // work with copy to avoid changing main config
   const includePaths = [...conf.defaultPaths.includePaths.map(a => a.fullPath)];
   if (!preferLibrary) {
@@ -178,7 +178,7 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
         // prefer the resolved path from updateFullPath, otherwise try configured include paths
         let resolved = filePath;
         if (!resolved) {
-          resolved = findFilepath(aUdfPath[k], true);
+          resolved = findFilePath(aUdfPath[k], true);
         }
         if (resolved) {
           aUdfPath[k] = resolved;
@@ -297,4 +297,4 @@ function refreshPaths() {
   resolvePaths();
 }
 
-export { resolvePaths, updateIncludePaths, findFilepath, refreshPaths };
+export { resolvePaths, updateIncludePaths, findFilePath, refreshPaths };

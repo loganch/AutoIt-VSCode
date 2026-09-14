@@ -212,7 +212,7 @@ export const getIncludeData = (fileName, document) => {
   }
 
   // getIncludePath already encodes the full library/relative/search-path
-  // fallback order (down to its own findFilepath fallback), so its '' miss
+  // fallback order (down to its own findFilePath fallback), so its '' miss
   // signal is final — no need to re-resolve here.
   const filePath = getIncludePath(fileName, document);
 
@@ -221,8 +221,8 @@ export const getIncludeData = (fileName, document) => {
 
 /**
  * Same as getIncludeData, but for callers that have already resolved the
- * include file's path (e.g. via findFilepath) — skips the redundant
- * getIncludePath/findFilepath re-resolution getIncludeData would otherwise do.
+ * include file's path (e.g. via findFilePath) — skips the redundant
+ * getIncludePath/findFilePath re-resolution getIncludeData would otherwise do.
  * @param {string} filePath - Already-resolved absolute path to the include file
  * @param {string} [displayName] - Name shown in "Included from" documentation; defaults to filePath
  * @returns {Object.<string, FunctionSignatureData>}

@@ -27,7 +27,7 @@ jest.mock('vscode', () => ({
 jest.mock('../../src/config/ai_config', () => ({
   __esModule: true,
   default: {
-    findFilepath: jest.fn(() => ''),
+    findFilePath: jest.fn(() => ''),
   },
 }));
 

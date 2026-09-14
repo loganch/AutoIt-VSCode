@@ -27,11 +27,11 @@ const fs = require('fs');
 // isWinOS is captured once at module load; these tests run on the Windows
 // dev machine this repo targets, so refreshPaths()'s error-surfacing path is
 // exercised for real rather than being faked.
-const { resolvePaths, refreshPaths, findFilepath } = require('../../src/config/pathResolution');
+const { resolvePaths, refreshPaths, findFilePath } = require('../../src/config/pathResolution');
 
 const flushAsync = () => new Promise(resolve => setImmediate(resolve));
 
-describe('findFilepath', () => {
+describe('findFilePath', () => {
   beforeEach(() => {
     testConf.defaultPaths.includePaths = [{ fullPath: 'C:\\Configured\\Include' }];
     mockDetectAutoItPaths.mockReturnValue([]);
@@ -40,7 +40,7 @@ describe('findFilepath', () => {
   test('returns the first match from configured include paths', () => {
     jest.spyOn(fs, 'existsSync').mockImplementation(p => p === 'C:\\Configured\\Include\\Array.au3');
 
-    expect(findFilepath('Array.au3')).toBe('C:\\Configured\\Include\\Array.au3');
+    expect(findFilePath('Array.au3')).toBe('C:\\Configured\\Include\\Array.au3');
 
     fs.existsSync.mockRestore();
   });
@@ -55,7 +55,7 @@ describe('findFilepath', () => {
           p === 'C:\\Program Files\\AutoIt3\\Include\\Array.au3',
       );
 
-    expect(findFilepath('Array.au3')).toBe('C:\\Program Files\\AutoIt3\\Include\\Array.au3');
+    expect(findFilePath('Array.au3')).toBe('C:\\Program Files\\AutoIt3\\Include\\Array.au3');
 
     fs.existsSync.mockRestore();
   });
@@ -63,7 +63,7 @@ describe('findFilepath', () => {
   test('returns null when the file is nowhere to be found', () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
-    expect(findFilepath('Missing.au3')).toBeNull();
+    expect(findFilePath('Missing.au3')).toBeNull();
 
     fs.existsSync.mockRestore();
   });

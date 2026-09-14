@@ -76,7 +76,7 @@ describe('ai_config', () => {
         addListener: expect.any(Function),
         removeListener: expect.any(Function),
         setSuppressEvents: expect.any(Function),
-        findFilepath: expect.any(Function),
+        findFilePath: expect.any(Function),
       }),
     );
   });
@@ -165,10 +165,10 @@ describe('ai_config', () => {
     });
   });
 
-  describe('findFilepath', () => {
+  describe('findFilePath', () => {
     test('returns null when file does not exist on any path', () => {
       mockFsExistsSync.mockReturnValue(false);
-      const result = conf.findFilepath('nonexistent.au3');
+      const result = conf.findFilePath('nonexistent.au3');
       expect(result).toBeNull();
     });
 
@@ -179,7 +179,7 @@ describe('ai_config', () => {
         .mockReturnValueOnce(true) // candidate in includePaths exists
         .mockReturnValue(false);
 
-      const result = conf.findFilepath('Array.au3');
+      const result = conf.findFilePath('Array.au3');
       // Either returns a string path or null — just validate type
       expect(typeof result === 'string' || result === null).toBe(true);
     });

@@ -10,7 +10,7 @@ import { getServiceStack } from '../services/commandServiceStack';
 import { getActiveDocumentFileName } from './editorActions';
 
 const { functionDefinitionRegex } = REGEX_PATTERNS;
-const { config, findFilepath } = aiConfig;
+const { config, findFilePath } = aiConfig;
 
 /** @type {number} Length of double underscore prefix for internal functions. */
 const DOUBLE_UNDERSCORE_LENGTH = 2;
@@ -129,7 +129,7 @@ const openInclude = () => {
         includeFile = currFile;
       } else {
         const library = found[0].includes('<');
-        const foundPath = findFilepath(includeFile, library);
+        const foundPath = findFilePath(includeFile, library);
         if (foundPath) {
           includeFile = foundPath;
         }

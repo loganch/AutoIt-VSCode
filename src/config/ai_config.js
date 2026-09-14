@@ -14,7 +14,7 @@ import {
   notifyListeners,
   config,
 } from './configStore';
-import { resolvePaths, updateIncludePaths, findFilepath, refreshPaths } from './pathResolution';
+import { resolvePaths, updateIncludePaths, findFilePath, refreshPaths } from './pathResolution';
 import { init as initTokenColors } from './tokenColorMigration';
 
 /**
@@ -49,10 +49,10 @@ function registerConfigListener() {
   });
 }
 
-// findFilepath's public seam: provider/command-layer callers should import
-// this facade's `findFilepath`, not pathResolution.js directly. The two
+// findFilePath's public seam: provider/command-layer callers should import
+// this facade's `findFilePath`, not pathResolution.js directly. The two
 // exceptions are utils/functionSignature.js and utils/includeResolution.js,
-// which import pathResolution.js's findFilepath directly on purpose — routing
+// which import pathResolution.js's findFilePath directly on purpose — routing
 // the utils layer through this stateful config facade would be a step
 // backward for layering, not an improvement (see includeResolution.js's own
 // layering-contract comment for that reasoning).
@@ -63,5 +63,5 @@ export default {
   addListener,
   removeListener,
   setSuppressEvents,
-  findFilepath,
+  findFilePath,
 };

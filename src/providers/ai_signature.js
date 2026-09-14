@@ -15,7 +15,7 @@ const { functionDefinitionRegex, includePattern, libraryIncludePattern } = REGEX
 import aiConfig from '../config/ai_config';
 import defaultSigs from '../signatures';
 
-const { findFilepath } = aiConfig;
+const { findFilePath } = aiConfig;
 import { DEFAULT_UDFS } from '../constants';
 
 const documentSignatureCache = new Map();
@@ -142,7 +142,7 @@ function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, documen
 
   libraryIncludes.forEach(fileName => {
     if (DEFAULT_UDFS.indexOf(fileName.replace('.au3', '')) === -1) {
-      const fullPath = findFilepath(fileName);
+      const fullPath = findFilePath(fileName);
       if (fullPath) {
         Object.assign(includes, getIncludeDataByPath(fullPath, fileName));
       }

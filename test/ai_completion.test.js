@@ -218,7 +218,7 @@ jest.mock('../src/utils/regexPatterns', () => ({
 
 jest.mock('../src/config/ai_config', () => ({
   __esModule: true,
-  default: { findFilepath: (...args) => mockFindFilepath(...args) },
+  default: { findFilePath: (...args) => mockFindFilepath(...args) },
 }));
 
 jest.mock('../src/udfRegistry', () => ({ completions: [] }));

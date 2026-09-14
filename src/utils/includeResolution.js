@@ -1,5 +1,5 @@
 import path from 'path';
-import { findFilepath } from '../config/pathResolution';
+import { findFilePath } from '../config/pathResolution';
 import { safeExecute } from '../errorUtils';
 import { REGEX_PATTERNS } from './regexPatterns';
 import { validateString, isValidDocument } from './validation';
@@ -9,7 +9,7 @@ import { safeFileExists, normalizePath, getIncludeText } from './fsCache';
 // list): this is the middle layer — resolving a single #include token
 // (`getIncludePath`) or a document's full recursive include set
 // (`getIncludeScripts`) to file paths, falling back to pathResolution's
-// findFilepath. Doesn't parse source into an AST/edge-list (that's
+// findFilePath. Doesn't parse source into an AST/edge-list (that's
 // language/include.js and services/includeGraph.js) and doesn't touch
 // completion items (that's includeAutoInsert.js).
 
@@ -69,7 +69,7 @@ export const getIncludePath = (fileName, document) => {
   if (hasAngle || (!isQuoted && cleanPath.endsWith('.au3') && !cleanPath.includes(path.sep))) {
     const libPath = safeExecute(
       `Library path resolution for ${cleanPath}`,
-      () => findFilepath(cleanPath, true),
+      () => findFilePath(cleanPath, true),
       null,
     );
 
@@ -94,7 +94,7 @@ export const getIncludePath = (fileName, document) => {
   // Fallback to include search paths
   const fallbackPath = safeExecute(
     `Fallback path resolution for ${cleanPath}`,
-    () => findFilepath(cleanPath, false),
+    () => findFilePath(cleanPath, false),
     null,
   );
 
@@ -141,7 +141,7 @@ const collectIncludeScripts = (document, docText, scriptsToSearch, visited) => {
 
     // Resolve path with appropriate format hints. getIncludePath already
     // encodes the full library/relative/search-path fallback order (down to
-    // its own findFilepath fallback), so its '' miss signal is final.
+    // its own findFilePath fallback), so its '' miss signal is final.
     const pathToResolve = isLibrary ? `<${includePath}>` : includePath;
     const resolvedPath = getIncludePath(pathToResolve, document);
 

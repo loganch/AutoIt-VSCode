@@ -11,7 +11,7 @@ import { validateExecutablePath } from '../utils/pathValidation';
 // Timeout used for status bar messages (ms)
 const STATUS_MSG_TIMEOUT_MS = 1500;
 
-const { config, findFilepath } = conf;
+const { config, findFilePath } = conf;
 
 /**
  * Shared save/validate/run lifecycle for the AutoIt3Wrapper commands.
@@ -151,7 +151,7 @@ function launchHelp() {
     for (let j = 0; j < udfPaths.length; j += 1) {
       let filePath = udfPaths[j];
       if (!fs.existsSync(filePath)) {
-        filePath = findFilepath(filePath, true);
+        filePath = findFilePath(filePath, true);
         if (!filePath) {
           continue;
         }
