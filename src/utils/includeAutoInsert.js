@@ -1,6 +1,13 @@
 import { Position, TextEdit } from 'vscode';
 import { handleError } from '../errorUtils';
 
+// Include-capability layering (see config/pathResolution.js for the full
+// list): this is a completion-time post-processor, not a resolver — it
+// takes completion items already flagged with requiredInclude (see
+// completionTransforms.js) and appends a matching #include edit when the
+// document doesn't already have one, using the other layers only indirectly
+// via that flag.
+
 const INCLUDE_LINE_REGEX = /^\s*#include\b/i;
 
 const normalizeInclude = name => name.replace(/\.au3$/i, '').toLowerCase();

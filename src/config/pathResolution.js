@@ -81,6 +81,13 @@ function updateFullPath(_path, data, msgSuffix) {
 }
 
 /**
+ * Include-capability layering (see also utils/includeResolution.js,
+ * language/include.js, services/includeGraph.js, utils/includeAutoInsert.js):
+ * this is the lowest layer — it owns *where to search* (configured
+ * includePaths + auto-detected AutoIt installs) and is the library-path
+ * fallback the higher layers call into. It knows nothing about #include
+ * syntax or document structure.
+ *
  * Find a file by checking configured includePaths and (optionally) auto-detected AutoIt Include folders.
  * Returns the first matching full path or null if not found.
  * @param {string} fileName - filename to search for

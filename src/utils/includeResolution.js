@@ -5,6 +5,14 @@ import { REGEX_PATTERNS } from './regexPatterns';
 import { validateString, isValidDocument } from './validation';
 import { safeFileExists, normalizePath, getIncludeText } from './fsCache';
 
+// Include-capability layering (see config/pathResolution.js for the full
+// list): this is the middle layer — resolving a single #include token
+// (`getIncludePath`) or a document's full recursive include set
+// (`getIncludeScripts`) to file paths, falling back to pathResolution's
+// findFilepath. Doesn't parse source into an AST/edge-list (that's
+// language/include.js and services/includeGraph.js) and doesn't touch
+// completion items (that's includeAutoInsert.js).
+
 /**
  * Determines if a text line should be skipped during AutoIt code analysis by checking for
  * empty lines, whitespace-only lines, comment lines (starting with ;), and most preprocessor

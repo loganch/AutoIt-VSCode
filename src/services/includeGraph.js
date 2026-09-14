@@ -3,6 +3,12 @@ import { Uri } from 'vscode';
 import { getIncludePath } from '../utils/includeResolution';
 import { REGEX_PATTERNS } from '../utils/regexPatterns';
 
+// Include-capability layering (see config/pathResolution.js for the full
+// list): this is the top layer for go-to-definition — it builds and caches
+// a bidirectional graph of which documents include which (keyed on
+// getIncludePath's resolution), so ai_definition.js's fast path can
+// invalidate/traverse without re-parsing every #include on each lookup.
+
 // uriString -> string[] of resolved include-target uriStrings
 const includeEdges = new Map();
 
