@@ -105,8 +105,8 @@ async function runScript() {
  * @returns {void}
  */
 function killScript(thisFile = null) {
-  const data = getServiceStack().processManager.findRunner({ status: true, thisFile });
-  if (!data) {
+  const activeRun = getServiceStack().processManager.findRunner({ status: true, thisFile });
+  if (!activeRun) {
     let file = ' ';
     if (thisFile) {
       const parts = thisFile.split('\\');
@@ -119,8 +119,8 @@ function killScript(thisFile = null) {
   }
 
   window.setStatusBarMessage('Stopping the script...', STATUS_BAR_MESSAGE_TIMEOUT);
-  data.runner.stdin.pause();
-  data.runner.kill();
+  activeRun.runner.stdin.pause();
+  activeRun.runner.kill();
 }
 
 /**
