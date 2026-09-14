@@ -255,16 +255,12 @@ describe('Mixed Parameter Types', () => {
   });
 });
 
-describe('Integration Test Notes', () => {
-  test('README: How to manually test the fix', () => {
-    // Manual testing instructions:
-    // 1. Open the test fixture file: test/fixtures/au3check-params-test.au3
-    // 2. The file has #AutoIt3Wrapper_AU3Check_Parameters with various parameters
-    // 3. The file intentionally has code that triggers various warnings
-    // 4. When you save the file in VS Code with the extension active,
-    //    Au3Check should run with the specified parameters
-    // 5. Verify in the Problems tab that the correct warnings appear/disappear
-
-    expect(true).toBe(true); // This is just documentation
-  });
-});
+// Manual integration testing for the Au3Check-wiring path above (no automated
+// coverage exists for the end-to-end diagnostics flow, only the parameter
+// parsing logic tested above):
+// 1. Open the test fixture file: test/fixtures/au3check-params-test.au3
+// 2. The file has #AutoIt3Wrapper_AU3Check_Parameters with various parameters
+// 3. The file intentionally has code that triggers various warnings
+// 4. When you save the file in VS Code with the extension active,
+//    Au3Check should run with the specified parameters
+// 5. Verify in the Problems tab that the correct warnings appear/disappear
