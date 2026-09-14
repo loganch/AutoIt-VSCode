@@ -91,13 +91,20 @@ class TrackingServiceBase {
   updateConfiguration(workspaceRoot, autoitIncludePaths, maxIncludeDepth) {
     this.workspaceRoot = workspaceRoot;
     this.includeResolver = new IncludeResolver(workspaceRoot, autoitIncludePaths, maxIncludeDepth);
-    // Cancel all pending debounced parses
+    this._cancelPendingAndClearState();
+  }
+
+  /**
+   * Cancel all pending debounced parses and clear every cached-state map, so
+   * re-parsing starts fresh. Shared by updateConfiguration() (which also
+   * reassigns includeResolver/workspaceRoot around this) and clear().
+   */
+  _cancelPendingAndClearState() {
     for (const debouncedParse of this.debouncedParseByFile.values()) {
       if (debouncedParse.cancel) {
         debouncedParse.cancel();
       }
     }
-    // Clear all cached state to force re-parsing with new include paths
     this.fileParsers.clear();
     this.debouncedParseByFile.clear();
     this.pendingParses.clear();
@@ -205,16 +212,7 @@ class TrackingServiceBase {
    * Clear all cached data, cancelling all pending debounced parses.
    */
   clear() {
-    for (const debouncedParse of this.debouncedParseByFile.values()) {
-      if (debouncedParse.cancel) {
-        debouncedParse.cancel();
-      }
-    }
-    this.fileParsers.clear();
-    this.debouncedParseByFile.clear();
-    this.pendingParses.clear();
-    this.ongoingParses.clear();
-    this.latestQueuedSource.clear();
+    this._cancelPendingAndClearState();
   }
 
   /**
