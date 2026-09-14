@@ -115,7 +115,7 @@ const AutoItDefinitionProvider = {
       } catch (err) {
         // Unexpected: the in-memory fast path should not throw. Log and fall through
         // to the include-graph scan so F12 still works.
-        console.error('AutoIt: definition index fast path failed', err);
+        handleError('definition index fast path', err);
       }
 
       const includeResult = this.findDefinitionInIncludeFiles(
@@ -154,7 +154,7 @@ const AutoItDefinitionProvider = {
         : this.createFunctionRegex(lookup);
     } catch (error) {
       // A failed pattern build means "not found" to the caller.
-      console.error('AutoIt: determineRegex failed', error);
+      handleError('determineRegex', error);
       return null;
     }
   },
@@ -218,7 +218,7 @@ const AutoItDefinitionProvider = {
       // Internal-only: a failed include-file search just means "not found"
       // to the caller. The single user-facing toast for provideDefinition
       // lives at its own catch boundary.
-      console.error('AutoIt: findDefinitionInIncludeFiles failed', err);
+      handleError('findDefinitionInIncludeFiles', err);
       return null;
     }
   },
