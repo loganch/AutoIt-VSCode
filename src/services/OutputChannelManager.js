@@ -155,7 +155,7 @@ class OutputChannelManager {
    * @static
    * @param {string} name - Name for the output channel
    * @param {string} languageId - Language ID for syntax highlighting
-   * @returns {Object} VS Code output channel
+   * @returns {import("vscode").OutputChannel} VS Code output channel
    */
   static createGlobalOutputChannel(name, languageId) {
     // Return cached channel if present
@@ -180,7 +180,7 @@ class OutputChannelManager {
    * @param {number} processId - Process ID
    * @param {string} fileName - Associated file name
    * @param {string} languageId - Language ID for syntax highlighting
-   * @returns {Object} VS Code output channel
+   * @returns {import("vscode").OutputChannel} VS Code output channel
    */
   createProcessOutputChannel(processId, fileName, languageId) {
     const name = `AutoIt #${processId} (${fileName})`;
