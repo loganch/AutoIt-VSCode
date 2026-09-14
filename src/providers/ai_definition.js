@@ -183,16 +183,11 @@ const AutoItDefinitionProvider = {
         }
         const [fullMatch, firstGroup, secondGroup] = m;
 
-        // Determine the capture for the symbol name
-        let capture = null;
-        if (lookupText && lookupText.startsWith('$')) {
-          capture = firstGroup || null;
-        } else if (firstGroup) {
-          // function name capture may be in group 1 (pattern A) or 2 (pattern B)
-          capture = firstGroup;
-        } else if (secondGroup) {
-          capture = secondGroup;
-        }
+        // Determine the capture for the symbol name. Variables only ever
+        // match group 1; function names may land in group 1 (pattern A) or
+        // group 2 (pattern B).
+        const isVariable = lookupText && lookupText.startsWith('$');
+        const capture = firstGroup || (!isVariable && secondGroup) || null;
 
         const symbol = capture || lookupText || '';
         const idx = capture ? m.index + fullMatch.indexOf(capture) : m.index;
