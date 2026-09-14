@@ -188,22 +188,21 @@ class OutputChannelManager {
   }
 
   /**
-   * Creates a proxy output channel with formatting and filtering capabilities.
+   * Builds the mutable line-buffering/hotkey-strip state for one proxy channel
+   * (prevLine/prevLineTimer/isNewLineProcess/hotkeyFailedMsgFound) plus the
+   * closures that operate on it. Extracted from createProxyOutputChannel so
+   * that factory reads as: build state, build the get() trap using it, return
+   * the Proxy -- separate from this line-buffering/formatting logic.
    * @param {number} id - Process ID
-   * @param {Object} aiOutProcess - Process-specific output channel to proxy
-   * @returns {Proxy} Proxy object that handles output operations
+   * @param {import("vscode").OutputChannel} aiOutProcess - Process-specific output channel
+   * @param {string} prefixId
+   * @param {string} prefixEmpty
    */
-  createProxyOutputChannel(id, aiOutProcess) {
+  createLineBufferState(id, aiOutProcess, prefixId, prefixEmpty) {
     let prevLine = '';
     let prevLineTimer;
     let isNewLineProcess = true;
     let hotkeyFailedMsgFound = false;
-
-    const spacer = NO_BREAK_SPACE;
-    const prefixId = `#${id}:${spacer}`;
-    const prefixEmpty = ''.padStart(prefixId.length, spacer);
-
-    const aiOutCommon = this.globalOutputChannel;
 
     const outputText = (aiOut, prop, lines) => {
       const time = this.getTime();
@@ -294,6 +293,35 @@ class OutputChannelManager {
       }
     };
 
+    return {
+      stripHotkeyFailureLines,
+      bufferPartialLine,
+      outputText,
+      readPrevLine: () => prevLine,
+      clearPendingFlush: () => clearTimeout(prevLineTimer),
+    };
+  }
+
+  /**
+   * Creates a proxy output channel with formatting and filtering capabilities.
+   * @param {number} id - Process ID
+   * @param {Object} aiOutProcess - Process-specific output channel to proxy
+   * @returns {Proxy} Proxy object that handles output operations
+   */
+  createProxyOutputChannel(id, aiOutProcess) {
+    const spacer = NO_BREAK_SPACE;
+    const prefixId = `#${id}:${spacer}`;
+    const prefixEmpty = ''.padStart(prefixId.length, spacer);
+
+    const aiOutCommon = this.globalOutputChannel;
+    const {
+      stripHotkeyFailureLines,
+      bufferPartialLine,
+      outputText,
+      readPrevLine,
+      clearPendingFlush,
+    } = this.createLineBufferState(id, aiOutProcess, prefixId, prefixEmpty);
+
     const get = (aiOut, prop, proxy) => {
       try {
         const isFlush = prop === 'flush';
@@ -322,9 +350,9 @@ class OutputChannelManager {
         ret = text => {
           if (text === undefined) return;
 
-          clearTimeout(prevLineTimer);
+          clearPendingFlush();
           const lines = targetProp === 'append' ? text.split(/\r?\n/) : [text];
-          lines[0] = prevLine + lines[0];
+          lines[0] = readPrevLine() + lines[0];
 
           stripHotkeyFailureLines(lines);
           bufferPartialLine(lines, targetProp, isFlush, proxy);
