@@ -51,7 +51,8 @@ export const isParenTriggerOn = () => {
  * Transforms an array of completion entries into VSCode CompletionItem objects with consistent
  * formatting and behavior. Adds include statements for UDF functions, configures commit characters
  * for function completions, and handles markdown documentation. Used to standardize completion
- * items from various sources (built-in functions, UDFs, variables, etc.).
+ * items from various sources (built-in functions, UDFs, variables, etc.). Entries missing a
+ * string `label` are invalid and are dropped (logged via handleError) rather than passed through.
  *
  * @param {Array} entries - Array of raw completion objects with label and documentation properties
  * @param {CompletionItemKind} kind - VSCode completion item type (Function, Variable, Constant, etc.)
@@ -65,29 +66,31 @@ const fillCompletions = (entries, kind, detail = '', requiredScript = '') => {
     return [];
   }
 
-  return entries.map(entry => {
-    if (!entry || typeof entry.label !== 'string') {
-      return entry; // Return as-is if invalid
-    }
+  return entries
+    .filter(entry => {
+      if (entry && typeof entry.label === 'string') return true;
+      handleError('fillCompletions', 'Skipping invalid completion entry', false, { entry });
+      return false;
+    })
+    .map(entry => {
+      const newDoc = new MarkdownString(entry.documentation || '');
+      if (requiredScript) {
+        newDoc.appendCodeblock(`#include <${requiredScript}>`, 'autoit');
+      }
 
-    const newDoc = new MarkdownString(entry.documentation || '');
-    if (requiredScript) {
-      newDoc.appendCodeblock(`#include <${requiredScript}>`, 'autoit');
-    }
+      const newDetail = entry.detail ? `${entry.detail}${detail}` : detail;
 
-    const newDetail = entry.detail ? `${entry.detail}${detail}` : detail;
-
-    return {
-      ...entry,
-      kind,
-      detail: newDetail,
-      get commitCharacters() {
-        return kind === CompletionItemKind.Function && isParenTriggerOn() ? ['('] : [];
-      },
-      documentation: newDoc,
-      ...(requiredScript ? { requiredInclude: requiredScript } : {}),
-    };
-  });
+      return {
+        ...entry,
+        kind,
+        detail: newDetail,
+        get commitCharacters() {
+          return kind === CompletionItemKind.Function && isParenTriggerOn() ? ['('] : [];
+        },
+        documentation: newDoc,
+        ...(requiredScript ? { requiredInclude: requiredScript } : {}),
+      };
+    });
 };
 
 /**

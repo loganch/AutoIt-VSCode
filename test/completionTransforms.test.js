@@ -42,13 +42,12 @@ describe('fillCompletions', () => {
     expect(result[0].documentation.value).toContain('#include <Array.au3>');
   });
 
-  test('passes invalid entries through unchanged instead of dropping them', () => {
+  test('drops invalid entries instead of passing them through', () => {
     const entries = [{ label: 'valid', documentation: 'ok' }, { notLabel: true }, null];
     const result = fillCompletions(entries, vscode.CompletionItemKind.Variable);
 
-    expect(result).toHaveLength(3);
-    expect(result[1]).toEqual({ notLabel: true });
-    expect(result[2]).toBeNull();
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toBe('valid');
   });
 
   test('returns an empty array for non-array input', () => {
