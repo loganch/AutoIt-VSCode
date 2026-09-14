@@ -1,6 +1,7 @@
 import fsSync, { promises as fs } from 'fs';
 import path from 'path';
 import { debugLog } from '../debugLog';
+import { handleError } from '../errorUtils';
 
 /** @typedef {import('../config/configStore').AutoItConfig} AutoItConfig */
 
@@ -101,7 +102,7 @@ class HotkeyManager {
         iniData.substring(otherIndex + OTHER_SECTION_LENGTH);
     } catch (error) {
       this.iniDataOrig = null;
-      debugLog(`Error reading AutoIt3Wrapper.ini: ${error.message}`);
+      handleError('HotkeyManager read AutoIt3Wrapper.ini', error);
     }
 
     return { iniPath: this.iniPath, iniData };
@@ -127,7 +128,7 @@ class HotkeyManager {
         await fs.writeFile(_iniPath, _iniData, 'utf-8');
         debugLog(`HotkeyManager: Modified AutoIt3Wrapper.ini at ${_iniPath}`);
       } catch (error) {
-        debugLog(`Error writing AutoIt3Wrapper.ini: ${error.message}`);
+        handleError('HotkeyManager write AutoIt3Wrapper.ini', error);
         // Clean up on failure
         this.count.delete(id);
         throw error;
@@ -172,7 +173,9 @@ class HotkeyManager {
         debugLog(`HotkeyManager: Restored AutoIt3Wrapper.ini at ${this.iniPath}`);
       }
     } catch (error) {
-      debugLog(`Error restoring AutoIt3Wrapper.ini: ${error.message}`);
+      // Restoration failing leaves the user's editor hotkeys broken with no
+      // other signal, so surface this one to the user unlike the other two.
+      handleError('HotkeyManager reset restore ini', error, true);
     }
   }
 
