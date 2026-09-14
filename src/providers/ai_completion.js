@@ -12,6 +12,7 @@ let completions = null;
 import { AUTOIT_MODE } from '../utils/coreConstants';
 import { buildFunctionSignature, getIncludeData, getIncludeDataByPath } from '../utils/functionSignature';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
+import { handleError } from '../errorUtils';
 
 const {
   functionPattern: _functionPattern,
@@ -330,7 +331,7 @@ const getMapKeyCompletions = async (document, position, mapName) => {
     result = await mapTrackingService.getKeysForMapWithIncludes(filePath, mapName, line);
   } catch (error) {
     // Log the error and return empty array on failure
-    console.error(`Error getting map keys for ${mapName}:`, error);
+    handleError('getMapKeyCompletions', error);
     return [];
   }
 
@@ -417,10 +418,7 @@ const provideCompletionItems = async (document, position) => {
         variableCompletions = getVariableCompletions(text, prefix);
       }
     } catch (error) {
-      console.warn(
-        '[ai_completion] Scope-aware variables failed, using regex fallback:',
-        error.message,
-      );
+      handleError('provideCompletionItems variable lookup', error);
       // Fallback to regex-based approach
       variableCompletions = getVariableCompletions(text, prefix);
     }
