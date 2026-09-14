@@ -88,13 +88,18 @@ describe('resolvePaths / refreshPaths', () => {
   });
 
   test('surfaces an error message when the configured path does not exist', async () => {
-    workspace.fs.stat.mockRejectedValue(new Error('ENOENT'));
+    jest.useFakeTimers();
+    try {
+      workspace.fs.stat.mockRejectedValue(new Error('ENOENT'));
 
-    refreshPaths();
-    await flushAsync();
-    // showError's own message is scheduled behind a setTimeout delay.
-    await new Promise(resolve => setTimeout(resolve, 1100));
+      refreshPaths();
+      // showError's own message is scheduled behind a setTimeout delay; this
+      // drains both the workspace.fs.stat rejection microtask and that timer.
+      await jest.runAllTimersAsync();
 
-    expect(mockShowErrorMessage).toHaveBeenCalledWith(expect.stringContaining('AU3Check.exe'));
-  }, 10000);
+      expect(mockShowErrorMessage).toHaveBeenCalledWith(expect.stringContaining('AU3Check.exe'));
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
