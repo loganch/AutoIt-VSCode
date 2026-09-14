@@ -102,11 +102,12 @@ function getIndent() {
 }
 
 /**
- * Inserts a MsgBox debug statement for the selected variable or macro.
- * Includes proper indentation and error handling.
- * @throws {Error} If no valid variable/macro is selected or no active editor
+ * Inserts a debug statement (from DEBUG_TEMPLATES) for the selected variable
+ * or macro at the appropriate insertion point, with proper indentation.
+ * @param {keyof DEBUG_TEMPLATES} templateKey - Which template to insert.
+ * @param {string} operationName - Name reported to handleError on failure.
  */
-function debugMsgBox() {
+function insertDebugStatement(templateKey, operationName) {
   try {
     const editor = window.activeTextEditor;
     if (!editor) {
@@ -118,16 +119,26 @@ function debugMsgBox() {
       return; // Error already thrown in getDebugText
     }
 
+    const template = DEBUG_TEMPLATES[templateKey];
     const indent = getIndent();
-    const debugCode = `\n${indent}${DEBUG_TEMPLATES.MSGBOX.PREFIX}\n${indent}${DEBUG_TEMPLATES.MSGBOX.CODE.replace(/{VAR}/g, debugText.text)}`;
+    const debugCode = `\n${indent}${template.PREFIX}\n${indent}${template.CODE.replace(/{VAR}/g, debugText.text)}`;
 
     // Insert the debug code into the script
     editor.edit(edit => {
       edit.insert(debugText.position, debugCode);
     });
   } catch (error) {
-    handleError('debugMsgBox', error, true);
+    handleError(operationName, error, true);
   }
+}
+
+/**
+ * Inserts a MsgBox debug statement for the selected variable or macro.
+ * Includes proper indentation and error handling.
+ * @throws {Error} If no valid variable/macro is selected or no active editor
+ */
+function debugMsgBox() {
+  insertDebugStatement('MSGBOX', 'debugMsgBox');
 }
 
 /**
@@ -136,27 +147,7 @@ function debugMsgBox() {
  * @throws {Error} If no valid variable/macro is selected or no active editor
  */
 function debugConsole() {
-  try {
-    const editor = window.activeTextEditor;
-    if (!editor) {
-      throw new Error('No active text editor found');
-    }
-
-    const debugText = getDebugText();
-    if (!debugText || !('text' in debugText) || !('position' in debugText)) {
-      return; // Error already thrown in getDebugText
-    }
-
-    const indent = getIndent();
-    const debugCode = `\n${indent}${DEBUG_TEMPLATES.CONSOLE.PREFIX}\n${indent}${DEBUG_TEMPLATES.CONSOLE.CODE.replace(/{VAR}/g, debugText.text)}`;
-
-    // Insert the debug code into the script
-    editor.edit(edit => {
-      edit.insert(debugText.position, debugCode);
-    });
-  } catch (error) {
-    handleError('debugConsole', error, true);
-  }
+  insertDebugStatement('CONSOLE', 'debugConsole');
 }
 
 /**
