@@ -61,6 +61,7 @@ jest.mock('../src/utils/coreConstants', () => ({
 jest.mock('../src/utils/functionSignature', () => ({
   buildFunctionSignature: mockBuildFunctionSignature,
   getIncludeData: mockGetIncludeData,
+  getIncludeDataByPath: mockGetIncludeData,
 }));
 
 jest.mock('../src/utils/regexPatterns', () => ({

@@ -10,7 +10,7 @@ import {
 // Deferred until first completion so the ~70 completion modules don't load at activation.
 let completions = null;
 import { AUTOIT_MODE } from '../utils/coreConstants';
-import { buildFunctionSignature, getIncludeData } from '../utils/functionSignature';
+import { buildFunctionSignature, getIncludeData, getIncludeDataByPath } from '../utils/functionSignature';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 
 const {
@@ -168,7 +168,7 @@ const getLibraryFunctions = (libraryIncludes, doc) => {
         if (!fullPath) {
           return [];
         }
-        const includeData = getIncludeData(fullPath, doc);
+        const includeData = getIncludeDataByPath(fullPath, file);
         if (!includeData) {
           return [];
         }

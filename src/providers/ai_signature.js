@@ -7,7 +7,7 @@ import {
   languages,
 } from 'vscode';
 import { AUTOIT_MODE } from '../utils/coreConstants';
-import { buildFunctionSignature, getIncludeData } from '../utils/functionSignature';
+import { buildFunctionSignature, getIncludeData, getIncludeDataByPath } from '../utils/functionSignature';
 import { REGEX_PATTERNS } from '../utils/regexPatterns';
 import { isInComment } from '../utils/textUtils';
 
@@ -144,7 +144,7 @@ function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, doc) {
     if (DEFAULT_UDFS.indexOf(fileName.replace('.au3', '')) === -1) {
       const fullPath = findFilepath(fileName);
       if (fullPath) {
-        Object.assign(includes, getIncludeData(fullPath, doc));
+        Object.assign(includes, getIncludeDataByPath(fullPath, fileName));
       }
     }
   });

@@ -203,6 +203,7 @@ jest.mock('../src/utils/functionSignature', () => ({
     functionObject: { description: '', documentation: '' },
   })),
   getIncludeData: (...args) => mockGetIncludeData(...args),
+  getIncludeDataByPath: (...args) => mockGetIncludeData(...args),
 }));
 
 jest.mock('../src/utils/regexPatterns', () => ({
@@ -336,7 +337,7 @@ describe('ai_completion cache behavior', () => {
 
     // First call should parse the library include
     await provideCompletionItems(doc, position);
-    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, doc);
+    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, 'MyLib.au3');
 
     // Second call with same document should use cache
     mockGetIncludeData.mockClear();
@@ -379,7 +380,7 @@ describe('ai_completion cache behavior', () => {
 
     // Next call should rebuild (cache was cleared)
     await provideCompletionItems(doc, position);
-    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, doc);
+    expect(mockGetIncludeData).toHaveBeenCalledWith(LIBRARY_PATH, 'MyLib.au3');
   });
 
   test('returns correct completion types', async () => {

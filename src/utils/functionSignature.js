@@ -169,6 +169,35 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
 };
 
 /**
+ * Reads and parses an already-resolved include file's function definitions.
+ * Shared by getIncludeData (which resolves the path first) and
+ * getIncludeDataByPath (for callers that already have a resolved path).
+ * @param {string} filePath - Resolved absolute path to the include file
+ * @param {string} displayName - Name shown in each function's "Included from" documentation
+ * @returns {Object.<string, FunctionSignatureData>}
+ */
+const parseIncludeFunctions = (filePath, displayName) => {
+  /** @type {Object.<string, FunctionSignatureData>} */
+  const functions = {};
+
+  const fileData = getIncludeText(filePath);
+  if (!fileData) return functions;
+
+  // Reset regex state for global matching
+  REGEX_PATTERNS.functionDefinitionRegex.lastIndex = 0;
+
+  let functionMatch;
+  while ((functionMatch = REGEX_PATTERNS.functionDefinitionRegex.exec(fileData)) !== null) {
+    const functionData = buildFunctionSignature(functionMatch, fileData, displayName);
+    if (functionData.functionName) {
+      functions[functionData.functionName] = functionData.functionObject;
+    }
+  }
+
+  return functions;
+};
+
+/**
  * Processes an AutoIt include file to extract all function definitions and build signature objects
  * for IntelliSense and hover information. Resolves the include file path, reads its contents,
  * and parses all function definitions to create comprehensive signature data with parameter
@@ -179,11 +208,8 @@ export const buildFunctionSignature = (functionMatch, fileText, fileName) => {
  * @returns {Object.<string, FunctionSignatureData>} Object where keys are function names and values are complete signature objects with documentation and parameters
  */
 export const getIncludeData = (fileName, document) => {
-  /** @type {Object.<string, FunctionSignatureData>} */
-  const functions = {};
-
   if (!validateString(fileName) || !isValidDocument(document)) {
-    return functions;
+    return {};
   }
 
   let filePath = getIncludePath(fileName, document);
@@ -201,19 +227,18 @@ export const getIncludeData = (fileName, document) => {
     }
   }
 
-  const fileData = getIncludeText(filePath);
-  if (!fileData) return functions;
+  return parseIncludeFunctions(filePath, fileName);
+};
 
-  // Reset regex state for global matching
-  REGEX_PATTERNS.functionDefinitionRegex.lastIndex = 0;
-
-  let functionMatch;
-  while ((functionMatch = REGEX_PATTERNS.functionDefinitionRegex.exec(fileData)) !== null) {
-    const functionData = buildFunctionSignature(functionMatch, fileData, fileName);
-    if (functionData.functionName) {
-      functions[functionData.functionName] = functionData.functionObject;
-    }
-  }
-
-  return functions;
+/**
+ * Same as getIncludeData, but for callers that have already resolved the
+ * include file's path (e.g. via findFilepath) — skips the redundant
+ * getIncludePath/findFilepath re-resolution getIncludeData would otherwise do.
+ * @param {string} filePath - Already-resolved absolute path to the include file
+ * @param {string} [displayName] - Name shown in "Included from" documentation; defaults to filePath
+ * @returns {Object.<string, FunctionSignatureData>}
+ */
+export const getIncludeDataByPath = (filePath, displayName = filePath) => {
+  if (!validateString(filePath)) return {};
+  return parseIncludeFunctions(filePath, displayName);
 };
