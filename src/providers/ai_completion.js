@@ -19,8 +19,10 @@ const {
   libraryIncludePattern,
   variablePattern,
 } = REGEX_PATTERNS;
-import { findFilepath } from '../config/pathResolution';
+import aiConfig from '../config/ai_config';
 import { DEFAULT_UDFS } from '../constants';
+
+const { findFilepath } = aiConfig;
 import MapTrackingService from '../services/MapTrackingService.js';
 import VariableTrackingService from '../services/VariableTrackingService.js';
 import { attachIncludeEdits } from '../utils/includeAutoInsert';

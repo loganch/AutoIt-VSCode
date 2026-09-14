@@ -46,12 +46,8 @@ jest.mock('../../src/config/ai_config', () => ({
   __esModule: true,
   default: {
     config: mockConfig,
+    findFilepath: (...args) => mockFindFilepath(...args),
   },
-}));
-
-jest.mock('../../src/config/pathResolution', () => ({
-  __esModule: true,
-  findFilepath: (...args) => mockFindFilepath(...args),
 }));
 
 jest.mock('../../src/commands/scriptCommands.js', () => ({

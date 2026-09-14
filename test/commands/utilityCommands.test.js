@@ -85,12 +85,8 @@ jest.mock('../../src/config/ai_config', () => ({
       outputMaxHistoryLines: 2,
       update: (...args) => mockConfigUpdate(...args),
     },
+    findFilepath: (...args) => mockFindFilepath(...args),
   },
-}));
-
-jest.mock('../../src/config/pathResolution', () => ({
-  __esModule: true,
-  findFilepath: (...args) => mockFindFilepath(...args),
 }));
 
 describe('UtilityCommands', () => {

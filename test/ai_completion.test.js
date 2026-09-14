@@ -215,9 +215,9 @@ jest.mock('../src/utils/regexPatterns', () => ({
   setRegExpFlags: (pattern, flags) => new RegExp(pattern.source, flags),
 }));
 
-jest.mock('../src/config/pathResolution', () => ({
+jest.mock('../src/config/ai_config', () => ({
   __esModule: true,
-  findFilepath: (...args) => mockFindFilepath(...args),
+  default: { findFilepath: (...args) => mockFindFilepath(...args) },
 }));
 
 jest.mock('../src/udfRegistry', () => ({ completions: [] }));

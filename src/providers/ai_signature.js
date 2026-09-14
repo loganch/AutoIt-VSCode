@@ -12,8 +12,10 @@ import { REGEX_PATTERNS } from '../utils/regexPatterns';
 import { isInComment } from '../utils/textUtils';
 
 const { functionDefinitionRegex, includePattern, libraryIncludePattern } = REGEX_PATTERNS;
-import { findFilepath } from '../config/pathResolution';
+import aiConfig from '../config/ai_config';
 import defaultSigs from '../signatures';
+
+const { findFilepath } = aiConfig;
 import { DEFAULT_UDFS } from '../constants';
 
 const documentSignatureCache = new Map();

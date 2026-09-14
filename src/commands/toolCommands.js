@@ -5,14 +5,13 @@ import { spawn } from 'child_process';
 import { getIncludeText } from '../utils/fsCache';
 import { escapeRegexLiteral } from '../utils/regexPatterns';
 import conf from '../config/ai_config';
-import { findFilepath } from '../config/pathResolution';
 import { getServiceStack } from '../services/commandServiceStack';
 import { validateExecutablePath } from '../utils/pathValidation';
 
 // Timeout used for status bar messages (ms)
 const STATUS_MSG_TIMEOUT_MS = 1500;
 
-const { config } = conf;
+const { config, findFilepath } = conf;
 
 /**
  * Shared save/validate/run lifecycle for the AutoIt3Wrapper commands.
