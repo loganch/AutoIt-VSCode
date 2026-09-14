@@ -176,4 +176,21 @@ const DEFAULT_MAX_INCLUDE_DEPTH = 3;
  */
 const DEFAULT_PARSE_DEBOUNCE_MS = 500;
 
-export { DEFAULT_UDFS, FORMATTER, DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS };
+/** Prefix VS Code applies to this extension's registered command ids. */
+const COMMANDS_PREFIX = 'extension.';
+
+/** Delay before flushing a buffered output line, letting a hotkey replacement land first. */
+const HOTKEY_LINE_DELAY_MS = 100;
+
+/** Non-breaking space used to pad timestamps prepended to output lines. */
+const NO_BREAK_SPACE = ' ';
+
+export {
+  DEFAULT_UDFS,
+  FORMATTER,
+  DEFAULT_MAX_INCLUDE_DEPTH,
+  DEFAULT_PARSE_DEBOUNCE_MS,
+  COMMANDS_PREFIX,
+  HOTKEY_LINE_DELAY_MS,
+  NO_BREAK_SPACE,
+};

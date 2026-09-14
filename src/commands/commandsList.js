@@ -1,4 +1,4 @@
-export const commandsPrefix = 'extension.';
+export { COMMANDS_PREFIX as commandsPrefix } from '../constants';
 // key = command, value = function name
 export const commandsList = [
   'runScript',

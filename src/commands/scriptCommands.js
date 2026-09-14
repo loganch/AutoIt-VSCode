@@ -8,9 +8,7 @@ import {
 import { getActiveDocumentFileName } from './editorActions';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';
-import {
-  getServiceStack,
-} from '../services/commandServiceStack';
+import { getServiceStack } from '../services/commandServiceStack';
 import { handleError } from '../errorUtils';
 
 const { config } = conf;
@@ -89,7 +87,7 @@ async function runScript() {
   }
 
   try {
-    await getServiceStack().processRunner.run(
+    await getServiceStack(getActiveDocumentFileName).processRunner.run(
       config.aiPath,
       args,
       config.multiOutput && config.multiOutputReuseOutput,
@@ -105,7 +103,10 @@ async function runScript() {
  * @returns {void}
  */
 function killScript(thisFile = null) {
-  const activeRun = getServiceStack().processManager.findRunner({ status: true, thisFile });
+  const activeRun = getServiceStack(getActiveDocumentFileName).processManager.findRunner({
+    status: true,
+    thisFile,
+  });
   if (!activeRun) {
     let file = ' ';
     if (thisFile) {
@@ -128,7 +129,8 @@ function killScript(thisFile = null) {
  * @returns {Promise<void>|undefined} Promise if async operation, undefined otherwise
  */
 function restartScript() {
-  const { runner, info } = getServiceStack().processManager.lastRunningOpened || {};
+  const { runner, info } =
+    getServiceStack(getActiveDocumentFileName).processManager.lastRunningOpened || {};
 
   // If there's a currently running script, kill it and restart when it exits
   if (runner && info?.status) {

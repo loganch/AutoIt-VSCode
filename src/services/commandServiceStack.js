@@ -3,7 +3,6 @@ import ProcessManager from './ProcessManager';
 import OutputChannelManager from './OutputChannelManager';
 import HotkeyManager from './HotkeyManager';
 import conf from '../config/ai_config';
-import { getActiveDocumentFileName } from '../commands/editorActions';
 import packageJson from '../../package.json';
 
 const { config } = conf;
@@ -15,8 +14,12 @@ const { config } = conf;
  *
  * Importing this module is side-effect free. Call createServiceStack() for a
  * fresh stack (tests) or getServiceStack() for the cached shared instance.
+ *
+ * @param {Function} getActiveDocumentFileName - Getter for the active document's
+ *   filename, supplied by the commands/ caller so this services/ module doesn't
+ *   import from commands/.
  */
-export function createServiceStack() {
+export function createServiceStack(getActiveDocumentFileName) {
   const globalOutputChannel = OutputChannelManager.createGlobalOutputChannel(
     'AutoIt (global)',
     'vscode-autoit-output',
@@ -48,14 +51,20 @@ export function createServiceStack() {
     globalOutputChannel,
   });
 
-  return { globalOutputChannel, processManager, hotkeyManager, outputChannelManager, processRunner };
+  return {
+    globalOutputChannel,
+    processManager,
+    hotkeyManager,
+    outputChannelManager,
+    processRunner,
+  };
 }
 
 let _cached = null;
 
-export function getServiceStack() {
+export function getServiceStack(getActiveDocumentFileName) {
   if (!_cached) {
-    _cached = createServiceStack();
+    _cached = createServiceStack(getActiveDocumentFileName);
   }
   return _cached;
 }

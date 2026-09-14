@@ -1,6 +1,9 @@
 import { window } from 'vscode';
-import { HOTKEY_LINE_DELAY_MS, NO_BREAK_SPACE } from '../commands/commandTimings';
-import { commandsPrefix } from '../commands/commandsList';
+import {
+  COMMANDS_PREFIX as commandsPrefix,
+  HOTKEY_LINE_DELAY_MS,
+  NO_BREAK_SPACE,
+} from '../constants';
 import { handleError } from '../errorUtils';
 // Constants to avoid magic numbers when checking for CRLF endings
 const CRLF = '\r\n';

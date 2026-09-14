@@ -53,7 +53,7 @@ function getTime() {
  */
 const trimOutputLines = () => {
   try {
-    const { processManager, globalOutputChannel } = getServiceStack();
+    const { processManager, globalOutputChannel } = getServiceStack(getActiveDocumentFileName);
     OutputChannelManager.trimOutputLines(processManager, globalOutputChannel);
   } catch (error) {
     handleError('trimOutputLines', error);
