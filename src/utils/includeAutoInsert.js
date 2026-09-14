@@ -1,4 +1,5 @@
 import { Position, TextEdit } from 'vscode';
+import { handleError } from '../errorUtils';
 
 const INCLUDE_LINE_REGEX = /^\s*#include\b/i;
 
@@ -80,7 +81,7 @@ const attachIncludeEdits = (items, document, enabled = true) => {
       return item;
     });
   } catch (error) {
-    console.error(`[AutoIt Extension] attachIncludeEdits: ${error.message}`);
+    handleError('attachIncludeEdits', error);
     return items;
   }
 };

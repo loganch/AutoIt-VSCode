@@ -10,18 +10,21 @@ const INCLUDE_DEPTH_FIVE = 5;
 describe('MapTrackingService', () => {
   let service;
   let consoleWarnSpy;
+  let consoleErrorSpy;
 
   beforeEach(() => {
     // Reset singleton instance before each test
     MapTrackingService.resetInstance();
     // Set up spy before getInstance to catch any warnings
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     service = MapTrackingService.getInstance();
     service.clear(); // Clear state between tests
   });
 
   afterEach(() => {
     consoleWarnSpy.mockRestore();
+    consoleErrorSpy.mockRestore();
   });
 
   describe('singleton pattern', () => {
@@ -178,8 +181,8 @@ $mData.key = "value"`;
 
       service.updateFile('/workspace/test.au3', source);
 
-      // Clear any previous console warnings
-      consoleWarnSpy.mockClear();
+      // Clear any previous console output
+      consoleErrorSpy.mockClear();
 
       const keys = await service.getKeysForMapWithIncludes(
         '/workspace/test.au3',
@@ -189,10 +192,9 @@ $mData.key = "value"`;
 
       // Should still get keys from current file
       expect(keys.directKeys).toContain('key');
-      // Should have logged warning about missing file
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[MapTrackingService] Failed to read included file'),
-        expect.any(String),
+      // Should have logged the failure to read the missing include via handleError
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        expect.stringContaining('MapTrackingService _ensureIncludedFilesParsed'),
       );
     });
   });

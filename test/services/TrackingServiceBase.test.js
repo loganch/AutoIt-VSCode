@@ -142,12 +142,12 @@ describe('TrackingServiceBase', () => {
   test('_ensureIncludedFilesParsed skips unreadable includes', async () => {
     jest.spyOn(fs.promises, 'readFile').mockRejectedValue(new Error('ENOENT'));
     jest.spyOn(service.includeResolver, 'resolveAllIncludes').mockReturnValue(['C:\\missing.au3']);
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     const parsed = await service._ensureIncludedFilesParsed('C:\\main.au3');
 
     expect(parsed).toEqual([]);
-    expect(warnSpy).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalled();
   });
 
   test('_ensureIncludedFilesParsed does not re-read cached includes', async () => {

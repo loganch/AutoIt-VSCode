@@ -11,6 +11,7 @@ import { validateParameterString } from '../utils/parameterValidation.js';
 import {
   getServiceStack,
 } from '../services/commandServiceStack';
+import { handleError } from '../errorUtils';
 
 const { config } = conf;
 
@@ -94,7 +95,7 @@ async function runScript() {
       config.multiOutput && config.multiOutputReuseOutput,
     );
   } catch (error) {
-    console.error('Error running script:', error);
+    handleError('runScript', error);
     showErrorMessage(`Failed to run script: ${error.message}`);
   }
 }
@@ -139,7 +140,7 @@ function restartScript() {
       }
       // Fire and forget - errors will be handled by runScript internally
       runScript().catch(error => {
-        console.error('Error restarting script after exit:', error);
+        handleError('restartScript', error);
       });
     });
     killScript(info.thisFile);

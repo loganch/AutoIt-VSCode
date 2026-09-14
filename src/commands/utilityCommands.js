@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import aiConfig from '../config/ai_config';
 import { showErrorMessage } from '../config/ai_showMessage';
+import { handleError } from '../errorUtils';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import OutputChannelManager from '../services/OutputChannelManager';
 import { getServiceStack } from '../services/commandServiceStack';
@@ -38,7 +39,7 @@ function getTime() {
       })
       .replace(',', '.');
   } catch (error) {
-    console.error('Error formatting time:', error);
+    handleError('getTime', error);
     return new Date().toISOString();
   }
 }
@@ -55,7 +56,7 @@ const trimOutputLines = () => {
     const { processManager, globalOutputChannel } = getServiceStack();
     OutputChannelManager.trimOutputLines(processManager, globalOutputChannel);
   } catch (error) {
-    console.error('Error trimming output lines:', error);
+    handleError('trimOutputLines', error);
   }
 };
 
@@ -90,7 +91,7 @@ const changeConsoleParams = async () => {
 
     window.showInformationMessage(message);
   } catch (error) {
-    console.error('Error changing console params:', error);
+    handleError('changeConsoleParams', error);
     showErrorMessage('Failed to update console parameters.');
   }
 };
@@ -143,7 +144,7 @@ const openInclude = () => {
     const url = Uri.file(includeFile);
     window.showTextDocument(url);
   } catch (error) {
-    console.error('Error opening include file:', error);
+    handleError('openInclude', error);
     showErrorMessage('Failed to open include file.');
   }
 };
@@ -223,7 +224,7 @@ const insertHeader = () => {
       edit.insert(newPosition, header);
     });
   } catch (error) {
-    console.error('Error inserting header:', error);
+    handleError('insertHeader', error);
     showErrorMessage('Failed to insert header.');
   }
 };
