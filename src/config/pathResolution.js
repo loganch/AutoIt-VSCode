@@ -13,71 +13,86 @@ const MESSAGE_HIDE_DELAY_MS = 1000;
 let showErrors = false;
 let aiPath = { path: '', dir: '', file: '', isRelative: false };
 
-function showError(filePath, data, msgSuffix) {
+/**
+ * @typedef {Object} PathState - Per-configured-path verification/message state,
+ * mutated in place across showError/verifyPath/updateFullPath calls.
+ * @property {string} [fullPath] - Resolved absolute path (set by updateFullPath).
+ * @property {string} [file] - Expected filename; presence (vs. undefined) distinguishes a file check from a directory check.
+ * @property {{isHidden: boolean, hide: Function, message: Promise<any>}} [message] - The currently-shown "not found" message, if any (ai_showMessage.js's custom shape).
+ * @property {string} [prevCheck] - The last filePath checked, to avoid re-notifying for an unchanged value.
+ */
+
+/**
+ * @param {string} filePath
+ * @param {Object} pathState - see the PathState typedef above
+ * @param {string} msgSuffix
+ */
+function showError(filePath, pathState, msgSuffix) {
   if (!msgSuffix) return;
 
-  const timeout = data.message && !data.message.isHidden ? MESSAGE_HIDE_DELAY_MS : 0;
+  const timeout = pathState.message && !pathState.message.isHidden ? MESSAGE_HIDE_DELAY_MS : 0;
   if (timeout) {
-    data.message.hide();
-    delete data.message;
+    pathState.message.hide();
+    delete pathState.message;
   }
-  if (data.prevCheck !== filePath) {
-    const type = data.file !== undefined ? 'File' : 'Directory';
+  if (pathState.prevCheck !== filePath) {
+    const type = pathState.file !== undefined ? 'File' : 'Directory';
     setTimeout(() => {
-      data.message = showErrorMessage(`${type} "${filePath}" not found (autoit.${msgSuffix})`);
+      pathState.message = showErrorMessage(`${type} "${filePath}" not found (autoit.${msgSuffix})`);
     }, timeout);
   }
 
-  data.prevCheck = filePath;
+  pathState.prevCheck = filePath;
 }
 
 /**
  * Verify that a previously-resolved fullPath exists and matches expected type.
  * Uses workspace.fs.stat for editor-friendly checks.
  * @param {string} filePath - original (user) path string used for messages
- * @param {object} data - metadata holding fullPath and file indicator
+ * @param {Object} pathState - state holding fullPath and file indicator (see PathState typedef above)
  * @param {string} msgSuffix - configuration key suffix for error messages
  * @returns {Promise<string|undefined>} resolves to filePath on success, undefined on failure
  */
-function verifyPath(filePath, data, msgSuffix) {
-  return Promise.resolve(workspace.fs.stat(Uri.file(data.fullPath)))
+function verifyPath(filePath, pathState, msgSuffix) {
+  return Promise.resolve(workspace.fs.stat(Uri.file(pathState.fullPath)))
     .then(stats => {
       const type =
-        (data.file !== undefined ? FileType.File : FileType.Directory) | FileType.SymbolicLink;
+        (pathState.file !== undefined ? FileType.File : FileType.Directory) |
+        FileType.SymbolicLink;
       if (!(stats.type & type)) {
-        if (showErrors) showError(filePath, data, msgSuffix);
+        if (showErrors) showError(filePath, pathState, msgSuffix);
 
         return undefined;
       }
 
-      if (data.message) {
-        data.message.hide();
-        delete data.message;
+      if (pathState.message) {
+        pathState.message.hide();
+        delete pathState.message;
       }
-      data.prevCheck = filePath;
+      pathState.prevCheck = filePath;
       return filePath;
     })
     .catch(() => {
-      if (showErrors) showError(filePath, data, msgSuffix);
+      if (showErrors) showError(filePath, pathState, msgSuffix);
       return undefined;
     });
 }
 
 /**
- * Compute and set data.fullPath for a configured value, then verify it.
+ * Compute and set pathState.fullPath for a configured value, then verify it.
  * @param {string} _path - configured path/value
- * @param {object} data - metadata object to update with fullPath
+ * @param {Object} pathState - state object to update with fullPath (see PathState typedef above)
  * @param {string} [msgSuffix] - configuration key suffix for error messages (optional)
  * @returns {Promise<string|undefined>} resolves to filePath on success, undefined on failure
  */
-function updateFullPath(_path, data, msgSuffix) {
+function updateFullPath(_path, pathState, msgSuffix) {
   // Resolve VS Code variables before processing the path
   const resolvedPath = resolveVariables(_path);
-  if (resolvedPath !== '') data.fullPath = fixPath(resolvedPath, data, aiPath);
+  if (resolvedPath !== '') pathState.fullPath = fixPath(resolvedPath, pathState, aiPath);
 
-  if (data.fullPath === undefined) data.fullPath = '';
+  if (pathState.fullPath === undefined) pathState.fullPath = '';
 
-  return verifyPath(_path, data, msgSuffix);
+  return verifyPath(_path, pathState, msgSuffix);
 }
 
 /**
@@ -163,18 +178,18 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
       continue;
 
     const chmPath = val.chmPath.trim();
-    const data = { fullPath: '', ...defaultPath.check };
+    const pathState = { fullPath: '', ...defaultPath.check };
     const udfPath = Array.isArray(val.udfPath) ? [...val.udfPath] : val.udfPath.split('|');
     const msgSuffix = `${i}.${prefix}`;
 
-    updateFullPath(chmPath, data, `${msgSuffix}.chmPath`);
+    updateFullPath(chmPath, pathState, `${msgSuffix}.chmPath`);
 
     for (let k = 0; k < udfPath.length; k++) {
-      const oData = { fullPath: '', ...defaultPath.check };
+      const udfPathState = { fullPath: '', ...defaultPath.check };
       const bShowErrors = showErrors;
       const sMsgSuffix = msgSuffix;
       const aUdfPath = udfPath;
-      updateFullPath(udfPath[k], oData).then(filePath => {
+      updateFullPath(udfPath[k], udfPathState).then(filePath => {
         // prefer the resolved path from updateFullPath, otherwise try configured include paths
         let resolved = filePath;
         if (!resolved) {
@@ -183,12 +198,12 @@ function getPathsSmartHelp(defaultPath, confValue, i) {
         if (resolved) {
           aUdfPath[k] = resolved;
         } else if (bShowErrors) {
-          showError(aUdfPath[k], oData, `${sMsgSuffix}.udfPath[${k}]`);
+          showError(aUdfPath[k], udfPathState, `${sMsgSuffix}.udfPath[${k}]`);
         }
       });
     }
     defaultPath.fullPath[prefix] = {
-      chmPath: data.fullPath,
+      chmPath: pathState.fullPath,
       udfPath,
     };
   }
