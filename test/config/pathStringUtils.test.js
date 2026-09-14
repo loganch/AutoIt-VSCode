@@ -5,7 +5,7 @@ jest.mock('vscode', () => ({
 }));
 
 import { workspace } from 'vscode';
-import { fixPath, resolveVariables, splitPath } from '../../src/config/pathResolver';
+import { fixPath, resolveVariables, splitPath } from '../../src/config/pathStringUtils';
 
 describe('resolveVariables', () => {
   const originalHome = process.env.HOME;

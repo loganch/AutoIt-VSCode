@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { showErrorMessage } from './ai_showMessage';
 import { detectAutoItPaths } from './autoItInstallDetector';
-import { resolveVariables, splitPath, fixPath } from './pathResolver';
+import { resolveVariables, splitPath, fixPath } from './pathStringUtils';
 import { upgradeSmartHelpConfig } from './smartHelpMigrator';
 import { syncIncludePathsToRegistry } from './registrySync';
 import { conf } from './configStore';
