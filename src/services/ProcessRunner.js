@@ -77,7 +77,7 @@ class ProcessRunner {
       let aiOutProcess;
       if (!this.config.multiOutput) {
         aiOutProcess = this._createVoidOutputChannel();
-      } else if (runnerPrev?.info.aiOut && !runnerPrev.info.aiOut.void) {
+      } else if (runnerPrev && runnerPrev.info.aiOut && !runnerPrev.info.aiOut.void) {
         aiOutProcess = runnerPrev.info.aiOut;
       } else {
         aiOutProcess = this.outputChannelManager.createProcessOutputChannel(

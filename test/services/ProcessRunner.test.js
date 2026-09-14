@@ -69,9 +69,7 @@ describe('ProcessRunner', () => {
     };
     outputChannelManager = {
       createProxyOutputChannel: jest.fn(() => createChannel()),
-      constructor: {
-        createProcessOutputChannel: jest.fn(() => createChannel()),
-      },
+      createProcessOutputChannel: jest.fn(() => createChannel()),
     };
     hotkeyManager = {
       disable: jest.fn(() => Promise.resolve(undefined)),
@@ -211,6 +209,26 @@ describe('ProcessRunner', () => {
     expect(processManager.addRunner).toHaveBeenCalled();
     expect(result).toBe(child);
     expect(typeof exitHandlers.exit).toBe('function');
+  });
+
+  it('run does not throw when reuseAiOutput is false and multiOutput is on (matches runScript\'s call pattern)', async () => {
+    // scriptCommands.js's runScript passes reuseAiOutput = config.multiOutput &&
+    // config.multiOutputReuseOutput, which is `false` (the boolean, not null)
+    // whenever multiOutput is off. `false && findRunner(...)` short-circuits to
+    // `false` itself, so runnerPrev can be the boolean false, not just falsy-or-object.
+    config.multiOutput = true;
+    const child = {
+      pid: 123,
+      stdout: { on: jest.fn() },
+      stderr: { on: jest.fn() },
+      on: jest.fn(),
+    };
+    spawn.mockReturnValue(child);
+
+    await expect(runner.run('C:\\AutoIt\\AutoIt3.exe', ['script.au3'], false)).resolves.toBe(
+      child,
+    );
+    expect(processManager.findRunner).not.toHaveBeenCalled();
   });
 
   it('routes an asynchronous spawn error through the same exit/cleanup path as a normal exit', async () => {
