@@ -10,7 +10,11 @@ import {
 // Deferred until first completion so the ~70 completion modules don't load at activation.
 let completions = null;
 import { AUTOIT_MODE } from '../utils/coreConstants';
-import { buildFunctionSignature, getIncludeData, getIncludeDataByPath } from '../utils/functionSignature';
+import {
+  buildFunctionSignature,
+  getIncludeData,
+  getIncludeDataByPath,
+} from '../utils/functionSignature';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import { handleError } from '../errorUtils';
 
@@ -409,7 +413,10 @@ const provideCompletionItems = async (document, position) => {
     const variableTracker = VariableTrackingService.getInstance();
     try {
       const filePath = document.uri.fsPath;
-      const variables = await variableTracker.getVariablesWithIncludes(filePath, position.line);
+      const variables = await variableTracker.getVariablesAtPositionWithIncludes(
+        filePath,
+        position.line,
+      );
       if (variables.length > 0) {
         variableCompletions = createVariableCompletions(variables);
       } else {

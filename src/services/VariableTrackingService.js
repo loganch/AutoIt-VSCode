@@ -41,7 +41,7 @@ class VariableTrackingService extends TrackingServiceBase {
    * @param {number} line - Line number (0-based)
    * @returns {Promise<Array>} Promise resolving to array of variable objects
    */
-  async getVariablesWithIncludes(filePath, line) {
+  async getVariablesAtPositionWithIncludes(filePath, line) {
     const currentVariables = this.getVariablesAtPosition(filePath, line);
     const includedFiles = await this._ensureIncludedFilesParsed(filePath);
 

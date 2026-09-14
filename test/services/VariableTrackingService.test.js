@@ -114,7 +114,7 @@ Global $gMain = 1`;
 
     service.updateFile(mainPath, mainSource);
 
-    const variables = await service.getVariablesWithIncludes(mainPath, GLOBAL_LINE);
+    const variables = await service.getVariablesAtPositionWithIncludes(mainPath, GLOBAL_LINE);
     const names = variables.map(variable => variable.name);
 
     expect(names).toEqual(expect.arrayContaining(['$gMain', '$gIncluded']));
