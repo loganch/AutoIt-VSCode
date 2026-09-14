@@ -132,7 +132,7 @@ jest.mock('../src/commands/registerCommands', () => ({
   __esModule: true,
   registerCommands: () => {},
 }));
-jest.mock('../src/diagnosticUtils', () => ({
+jest.mock('../src/utils/diagnosticUtils', () => ({
   __esModule: true,
   parseAu3CheckOutput: () => {},
   clearDiagnosticsOwnedBy: () => {},

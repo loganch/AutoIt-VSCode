@@ -22,7 +22,7 @@ import {
   clearDiagnosticsOwnedBy,
   parseAu3CheckOutput,
   resetDiagnosticTracking,
-} from './diagnosticUtils';
+} from './utils/diagnosticUtils';
 import { clearIncludeCache } from './utils/fsCache';
 import { debugLog } from './debugLog';
 import conf from './config/ai_config';

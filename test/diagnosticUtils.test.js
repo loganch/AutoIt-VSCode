@@ -45,7 +45,7 @@ const {
   parseAu3CheckOutput,
   setDiagnosticOwner,
   updateDiagnostics,
-} = require('../src/diagnosticUtils');
+} = require('../src/utils/diagnosticUtils');
 
 const THIRD_LINE_ZERO_BASED = 2;
 const FOURTH_CHARACTER_ZERO_BASED = 3;
