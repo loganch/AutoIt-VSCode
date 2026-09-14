@@ -44,9 +44,6 @@ async function runScript() {
     return;
   }
 
-  // Simplified check - assume keybindings are set if not explicitly handled
-  // In a real implementation, you might want to pass keybindings as a parameter or import them
-
   // Save the file
   const saveResult = await thisDoc.save();
 

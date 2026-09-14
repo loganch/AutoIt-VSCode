@@ -37,6 +37,8 @@ export function createServiceStack(getActiveDocumentFileName) {
   const outputChannelManager = new OutputChannelManager({
     globalOutputChannel,
     config,
+    // Deliberately empty: KeybindingService exists but isn't wired in here --
+    // see the note atop KeybindingService.js for why.
     keybindings: {},
     aWrapperHotkey: hotkeyManager,
     runners: processManager,

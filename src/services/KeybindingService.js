@@ -15,6 +15,15 @@ import { handleError } from '../errorUtils';
 /**
  * Service for managing VSCode keybindings with profile detection, file watching,
  * and command mapping functionality.
+ *
+ * NOT currently wired into commandServiceStack.js (see the `keybindings: {}`
+ * note there). Its profile-directory detection mutates the user's global
+ * `consoleParams` setting as a side effect (`_detectProfileDirectory` calls
+ * `prefs.update(...)`) purely to discover which settings.json is active --
+ * disproportionate for the cosmetic hotkey-hint text it would enable, and
+ * `initialize()` is async where `createServiceStack()` is synchronous. Kept
+ * (with its tests) rather than deleted in case the hotkey-hint feature is
+ * revisited; wire it in deliberately if that happens.
  */
 class KeybindingService {
   // eslint-disable-next-line no-magic-numbers
