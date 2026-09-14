@@ -2,9 +2,8 @@ import { handleError, safeExecute } from '../errorUtils';
 import { splitTopLevel } from '../language/functionSignatureParsing';
 import { REGEX_PATTERNS, buildParameterDocRegex, buildHeaderRegex } from './regexPatterns';
 import { validateString, isValidDocument } from './validation';
-import { safeFileExists, getIncludeText } from './fsCache';
+import { getIncludeText } from './fsCache';
 import { getIncludePath } from './includeResolution';
-import { findFilepath } from '../config/pathResolution';
 
 const MIN_FUNCTION_MATCH_PARTS = 4;
 
@@ -212,20 +211,10 @@ export const getIncludeData = (fileName, document) => {
     return {};
   }
 
-  let filePath = getIncludePath(fileName, document);
-
-  // Fallback path resolution
-  if (!safeFileExists(filePath)) {
-    const foundPath = safeExecute(
-      `Include data path resolution for ${fileName}`,
-      () => findFilepath(fileName, false),
-      null,
-    );
-
-    if (foundPath) {
-      filePath = foundPath;
-    }
-  }
+  // getIncludePath already encodes the full library/relative/search-path
+  // fallback order (down to its own findFilepath fallback), so its '' miss
+  // signal is final — no need to re-resolve here.
+  const filePath = getIncludePath(fileName, document);
 
   return parseIncludeFunctions(filePath, fileName);
 };

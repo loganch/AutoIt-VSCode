@@ -37,16 +37,15 @@ describe('getIncludeData', () => {
     expect(result.MyLibFunc.documentation).toContain('Included from MyLib.au3');
   });
 
-  test('falls back to findFilepath when the initial resolution does not exist on disk', () => {
+  test('trusts getIncludePath\'s empty-string miss signal without re-resolving via findFilepath', () => {
+    // getIncludePath already encodes the full fallback order (including its
+    // own findFilepath call), so getIncludeData must not retry resolution.
     getIncludePath.mockReturnValue('');
-    safeFileExists.mockReturnValue(false);
-    findFilepath.mockReturnValue('C:\\lib\\MyLib.au3');
-    getIncludeText.mockReturnValue(FUNC_SOURCE);
 
     const result = getIncludeData('MyLib.au3', document);
 
-    expect(findFilepath).toHaveBeenCalledWith('MyLib.au3', false);
-    expect(result).toHaveProperty('MyLibFunc');
+    expect(findFilepath).not.toHaveBeenCalled();
+    expect(result).toEqual({});
   });
 
   test('returns an empty object for invalid input', () => {

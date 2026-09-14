@@ -139,19 +139,11 @@ const collectIncludeScripts = (document, docText, scriptsToSearch, visited) => {
   const processInclude = (includePath, isLibrary = false) => {
     if (!includePath) return;
 
-    // Resolve path with appropriate format hints
+    // Resolve path with appropriate format hints. getIncludePath already
+    // encodes the full library/relative/search-path fallback order (down to
+    // its own findFilepath fallback), so its '' miss signal is final.
     const pathToResolve = isLibrary ? `<${includePath}>` : includePath;
-    let resolvedPath = getIncludePath(pathToResolve, document);
-
-    // Fallback resolution if needed
-    if (!resolvedPath) {
-      const fallback = safeExecute(
-        `Include resolution for ${includePath}`,
-        () => findFilepath(includePath, isLibrary),
-        null,
-      );
-      resolvedPath = fallback;
-    }
+    const resolvedPath = getIncludePath(pathToResolve, document);
 
     if (!resolvedPath) return;
 
