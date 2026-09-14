@@ -125,6 +125,31 @@ const findFilepath = (fileName, preferLibrary = true) => {
   return null;
 };
 
+/**
+ * Resolve confValue[j] into defaultPath[j].fullPath, initializing the slot's
+ * default shape first if this is its first sighting. Shared by resolvePaths'
+ * includePaths and generic-array branches, which otherwise duplicated this
+ * loop body identically apart from the '' -> 'Include' fallback.
+ * @param {Array} confValue
+ * @param {Array} defaultPath
+ * @param {number} j
+ * @param {string} suffix - configuration key suffix for error messages
+ * @param {boolean} fallbackToInclude - whether an empty entry defaults to 'Include'
+ */
+function ensureIndexedPath(confValue, defaultPath, j, suffix, fallbackToInclude) {
+  let filePath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
+
+  if (filePath === '' && fallbackToInclude) filePath = 'Include';
+
+  if (defaultPath[j] === undefined)
+    defaultPath[j] = {
+      fullPath: '',
+      ...(defaultPath[0].check || { dir: '', file: undefined }),
+    };
+
+  updateFullPath(filePath, defaultPath[j], suffix);
+}
+
 function getPathsSmartHelp(defaultPath, confValue, i) {
   defaultPath.fullPath = {};
   for (const prefix in confValue) {
@@ -197,17 +222,7 @@ function resolvePaths() {
       // Enhanced include path handling with auto-detection
       if (Array.isArray(confValue)) {
         for (let j = 0; j < confValue.length; j++) {
-          let filePath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
-
-          if (filePath === '') filePath = 'Include';
-
-          if (defaultPath[j] === undefined)
-            defaultPath[j] = {
-              fullPath: '',
-              ...(defaultPath[0].check || { dir: '', file: undefined }),
-            };
-
-          updateFullPath(filePath, defaultPath[j], `${i}[${j}]`);
+          ensureIndexedPath(confValue, defaultPath, j, `${i}[${j}]`, true);
         }
       }
 
@@ -231,18 +246,10 @@ function resolvePaths() {
 
       getPathsSmartHelp(defaultPath, confValue, i);
     } else if (Array.isArray(confValue)) {
+      // i !== 'includePaths' here (that case is handled above), so entries
+      // never fall back to 'Include'.
       for (let j = 0; j < confValue.length; j++) {
-        let filePath = (typeof confValue[j] === 'string' ? confValue[j] : '').trim();
-
-        if (filePath === '' && i === 'includePaths') filePath = 'Include';
-
-        if (defaultPath[j] === undefined)
-          defaultPath[j] = {
-            fullPath: '',
-            ...(defaultPath[0].check || { dir: '', file: undefined }),
-          };
-
-        updateFullPath(filePath, defaultPath[j], `${i}[${j}]`);
+        ensureIndexedPath(confValue, defaultPath, j, `${i}[${j}]`, false);
       }
     } else {
       defaultPath.fullPath = fixPath(confValue, defaultPath, aiPath);
