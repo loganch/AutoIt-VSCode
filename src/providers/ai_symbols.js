@@ -15,6 +15,8 @@ import { REGEX_PATTERNS } from '../utils/regexPatterns';
 const { functionPattern, regionPattern, variablePattern } = REGEX_PATTERNS;
 import { rangeContainsRange } from '../utils/textUtils';
 import MapTrackingService from '../services/MapTrackingService.js';
+import { handleError } from '../errorUtils';
+
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;
 const commentStartRegex = /^\s*#(?:cs|comments-start)/;
 const continuationRegex = /\s_\b\s*(;.*)?\s*/;
@@ -24,16 +26,6 @@ const DEFAULT_SYMBOL_MAX_LINES = 50000;
 
 // Track which files have been warned about to avoid repeated warnings
 const warnedFiles = new Set();
-
-// Lazily created singleton; output channels are never disposed, so creating
-// one per error would leak channels
-let errorOutputChannel;
-const getErrorOutputChannel = () => {
-  if (!errorOutputChannel) {
-    errorOutputChannel = window.createOutputChannel('AutoIt');
-  }
-  return errorOutputChannel;
-};
 
 /**
  * Creates a symbol information object for a variable.
@@ -547,10 +539,7 @@ async function addMapSymbols(doc, result) {
     }
   } catch (error) {
     // Log error but don't break symbol generation
-    console.error('[AutoIt] Error generating Map symbols:', error);
-
-    // Log to output channel for debugging
-    getErrorOutputChannel().appendLine(`Error generating Map symbols: ${error.message}`);
+    handleError('addMapSymbols', error);
   }
 }
 
