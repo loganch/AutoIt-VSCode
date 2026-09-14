@@ -25,6 +25,7 @@ import {
 } from './utils/diagnosticUtils';
 import { clearIncludeCache } from './utils/fsCache';
 import { debugLog } from './debugLog';
+import { handleError } from './errorUtils';
 import conf from './config/ai_config';
 import { registerParenTriggerListener } from './completionTransforms';
 import { warmDocument, resetIndex } from './services/symbolIndex';
@@ -145,9 +146,7 @@ const setupDocumentTracking = ctx => {
     try {
       variableTrackingService.updateFileImmediate(filePath, text);
     } catch (error) {
-      console.error(
-        `[AutoIt][extension] Failed to update variable tracking for file: ${filePath}. Error: ${error.message}`,
-      );
+      handleError('syncDocumentImmediate variable tracking', error, false, { filePath });
     }
   };
 
@@ -287,9 +286,9 @@ const setupConfigSync = (ctx, mapTrackingService, variableTrackingService) => {
             updatedMaxDepth,
           );
         } catch (error) {
-          console.error(
-            `[AutoIt][extension] Failed to update MapTrackingService configuration for workspace: ${updatedWorkspaceRoot}. Config changed: includePaths or maps.includeDepth. Error: ${error.message}`,
-          );
+          handleError('MapTrackingService configuration update', error, false, {
+            updatedWorkspaceRoot,
+          });
           // Continue execution - the service will keep using previous configuration
         }
 
@@ -300,9 +299,9 @@ const setupConfigSync = (ctx, mapTrackingService, variableTrackingService) => {
             updatedMaxDepth,
           );
         } catch (error) {
-          console.error(
-            `[AutoIt][extension] Failed to update VariableTrackingService configuration for workspace: ${updatedWorkspaceRoot}. Config changed: includePaths or maps.includeDepth. Error: ${error.message}`,
-          );
+          handleError('VariableTrackingService configuration update', error, false, {
+            updatedWorkspaceRoot,
+          });
           // Continue execution - the service will keep using previous configuration
         }
       }
