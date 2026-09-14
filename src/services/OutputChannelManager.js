@@ -90,13 +90,14 @@ function formatMultiLines(lines, { prefixId, prefixEmpty, time, isNewLine, lastI
 class OutputChannelManager {
   /**
    * Creates an instance of OutputChannelManager.
-   * @param {Object} globalOutputChannel - Global output channel singleton
-   * @param {AutoItConfig} config - Configuration object from ai_config
-   * @param {Object} keybindings - Keybindings object for hotkey replacement
-   * @param {Object} aWrapperHotkey - AutoIt3Wrapper hotkey manager
-   * @param {Object} runners - Runners object for managing output state
+   * @param {Object} options
+   * @param {Object} options.globalOutputChannel - Global output channel singleton
+   * @param {AutoItConfig} options.config - Configuration object from ai_config
+   * @param {Object} [options.keybindings] - Keybindings object for hotkey replacement
+   * @param {Object} [options.aWrapperHotkey] - AutoIt3Wrapper hotkey manager
+   * @param {Object} [options.runners] - Runners object for managing output state
    */
-  constructor(globalOutputChannel, config, keybindings, aWrapperHotkey, runners) {
+  constructor({ globalOutputChannel, config, keybindings = {}, aWrapperHotkey, runners = {} }) {
     // Validate required parameters
     if (!globalOutputChannel) {
       throw new Error(
@@ -119,7 +120,7 @@ class OutputChannelManager {
 
     this.globalOutputChannel = globalOutputChannel;
     this.config = config;
-    this.keybindings = keybindings || {};
+    this.keybindings = keybindings;
     // An empty map silently truncates hotkey-failure messages (see
     // generateHotkeyReplacementMessage), so say so once at wiring time.
     if (Object.keys(this.keybindings).length === 0) {
@@ -128,7 +129,7 @@ class OutputChannelManager {
       );
     }
     this.aWrapperHotkey = aWrapperHotkey;
-    this.runners = runners || {};
+    this.runners = runners;
 
     // Formatting strategies: (lines, state) => { lines, ...updatedState }
     this.strategies = {

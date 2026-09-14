@@ -25,22 +25,22 @@ export function createServiceStack(getActiveDocumentFileName) {
     'vscode-autoit-output',
   );
 
-  const processManager = new ProcessManager(
+  const processManager = new ProcessManager({
     config,
-    globalOutputChannel,
+    outputChannel: globalOutputChannel,
     getActiveDocumentFileName,
-    `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
-  );
+    outputName: `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
+  });
 
   const hotkeyManager = new HotkeyManager(config);
 
-  const outputChannelManager = new OutputChannelManager(
+  const outputChannelManager = new OutputChannelManager({
     globalOutputChannel,
     config,
-    {},
-    hotkeyManager,
-    processManager,
-  );
+    keybindings: {},
+    aWrapperHotkey: hotkeyManager,
+    runners: processManager,
+  });
 
   const processRunner = new ProcessRunner({
     config,

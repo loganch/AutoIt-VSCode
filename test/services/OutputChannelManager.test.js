@@ -48,25 +48,52 @@ describe('OutputChannelManager', () => {
   });
 
   it('throws when globalOutputChannel is missing', () => {
-    expect(() => new OutputChannelManager(null, config, {}, hotkeyManager, runners)).toThrow(
-      /globalOutputChannel is required/,
-    );
+    expect(
+      () =>
+        new OutputChannelManager({
+          globalOutputChannel: null,
+          config,
+          keybindings: {},
+          aWrapperHotkey: hotkeyManager,
+          runners,
+        }),
+    ).toThrow(/globalOutputChannel is required/);
   });
 
   it('throws when globalOutputChannel lacks required methods', () => {
     expect(
-      () => new OutputChannelManager({ append: jest.fn() }, config, {}, hotkeyManager, runners),
+      () =>
+        new OutputChannelManager({
+          globalOutputChannel: { append: jest.fn() },
+          config,
+          keybindings: {},
+          aWrapperHotkey: hotkeyManager,
+          runners,
+        }),
     ).toThrow(/must have method/);
   });
 
   it('throws when config is missing', () => {
-    expect(() => new OutputChannelManager(globalChannel, null, {}, hotkeyManager, runners)).toThrow(
-      /config parameter is required/,
-    );
+    expect(
+      () =>
+        new OutputChannelManager({
+          globalOutputChannel: globalChannel,
+          config: null,
+          keybindings: {},
+          aWrapperHotkey: hotkeyManager,
+          runners,
+        }),
+    ).toThrow(/config parameter is required/);
   });
 
   it('creates an instance with valid dependencies', () => {
-    const manager = new OutputChannelManager(globalChannel, config, {}, hotkeyManager, runners);
+    const manager = new OutputChannelManager({
+      globalOutputChannel: globalChannel,
+      config,
+      keybindings: {},
+      aWrapperHotkey: hotkeyManager,
+      runners,
+    });
     expect(manager).toBeInstanceOf(OutputChannelManager);
     expect(manager.globalOutputChannel).toBe(globalChannel);
     expect(manager.config).toBe(config);
@@ -87,8 +114,8 @@ describe('OutputChannelManager', () => {
   it('creates process output channels with id in the name', () => {
     const { window } = require('vscode');
 
-    const manager = new OutputChannelManager(
-      {
+    const manager = new OutputChannelManager({
+      globalOutputChannel: {
         append: jest.fn(),
         appendLine: jest.fn(),
         show: jest.fn(),
@@ -96,8 +123,8 @@ describe('OutputChannelManager', () => {
         clear: jest.fn(),
         dispose: jest.fn(),
       },
-      {},
-    );
+      config: {},
+    });
 
     manager.createProcessOutputChannel(PROCESS_OUTPUT_CHANNEL_ID, 'demo.au3', 'autoit');
 
@@ -108,7 +135,13 @@ describe('OutputChannelManager', () => {
   });
 
   it('creates a proxy output channel with callable methods', () => {
-    const manager = new OutputChannelManager(globalChannel, config, {}, hotkeyManager, runners);
+    const manager = new OutputChannelManager({
+      globalOutputChannel: globalChannel,
+      config,
+      keybindings: {},
+      aWrapperHotkey: hotkeyManager,
+      runners,
+    });
     const processChannel = makeChannel({ name: 'proc1' });
 
     const proxy = manager.createProxyOutputChannel(1, processChannel);
@@ -119,16 +152,16 @@ describe('OutputChannelManager', () => {
   });
 
   it('generates a hotkey replacement message from configured keybindings', () => {
-    const manager = new OutputChannelManager(
-      globalChannel,
+    const manager = new OutputChannelManager({
+      globalOutputChannel: globalChannel,
       config,
-      {
+      keybindings: {
         'extension.restartScript': 'Ctrl+R',
         'extension.killScript': 'Ctrl+K',
       },
-      hotkeyManager,
+      aWrapperHotkey: hotkeyManager,
       runners,
-    );
+    });
 
     const message = manager.generateHotkeyReplacementMessage();
 
@@ -147,13 +180,13 @@ describe('OutputChannelManager', () => {
     const globalAppendCalls = [];
     const globalPlainChannel = { ...globalChannel, append: text => globalAppendCalls.push(text) };
 
-    const manager = new OutputChannelManager(
-      globalPlainChannel,
+    const manager = new OutputChannelManager({
+      globalOutputChannel: globalPlainChannel,
       config,
-      { 'extension.restartScript': 'Ctrl+R' },
-      hotkeyManager,
+      keybindings: { 'extension.restartScript': 'Ctrl+R' },
+      aWrapperHotkey: hotkeyManager,
       runners,
-    );
+    });
 
     const proxy = manager.createProxyOutputChannel(1, processChannel);
 

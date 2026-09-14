@@ -19,12 +19,12 @@ describe('ProcessManager', () => {
       show: jest.fn(),
     };
     mockGetActiveFileName = jest.fn(() => 'C:\\scripts\\active.au3');
-    manager = new ProcessManager(
-      { multiOutputFinishedTimeout: FINISHED_TIMEOUT_SECONDS, multiOutputMaxFinished: 3 },
-      mockOutputChannel,
-      mockGetActiveFileName,
-      'TestOutput',
-    );
+    manager = new ProcessManager({
+      config: { multiOutputFinishedTimeout: FINISHED_TIMEOUT_SECONDS, multiOutputMaxFinished: 3 },
+      outputChannel: mockOutputChannel,
+      getActiveDocumentFileName: mockGetActiveFileName,
+      outputName: 'TestOutput',
+    });
   });
 
   describe('constructor', () => {

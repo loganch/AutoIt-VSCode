@@ -28,12 +28,13 @@ const MILLISECONDS_PER_SECOND = 1000;
 class ProcessManager extends EventEmitter {
   /**
    * Creates a new ProcessManager instance.
-   * @param {AutoItConfig} config - Configuration object with process management settings
-   * @param {Object} outputChannel - Main output channel for logging
-   * @param {Function} getActiveDocumentFileName - Function to get active document filename
-   * @param {string} outputName - Base name for output channels
+   * @param {Object} options
+   * @param {AutoItConfig} options.config - Configuration object with process management settings
+   * @param {Object} options.outputChannel - Main output channel for logging
+   * @param {Function} options.getActiveDocumentFileName - Function to get active document filename
+   * @param {string} options.outputName - Base name for output channels
    */
-  constructor(config, outputChannel, getActiveDocumentFileName, outputName) {
+  constructor({ config, outputChannel, getActiveDocumentFileName, outputName }) {
     super();
     this.config = config;
     this.outputChannel = outputChannel;
