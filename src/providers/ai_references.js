@@ -11,6 +11,7 @@ import {
 } from '../utils/textUtils.js';
 import { AutoItDefinitionProvider } from './ai_definition';
 import { handleError } from '../errorUtils';
+import { debugLog } from '../debugLog';
 
 // Workspace scan budget (mirrors ai_workspaceSymbols.js defaults).
 const DEFAULT_MAX_FILES = 500;
@@ -129,8 +130,10 @@ const AutoItReferenceProvider = {
                 : await workspace.openTextDocument(file.fsPath);
             const hits = this.scanText(fileDoc.getText(), this.cloneRegex(regex));
             return { uri: fileDoc.uri, hits };
-          } catch {
-            return null; // skip unreadable files
+          } catch (err) {
+            // Skip files that can't be opened, but record why when debug logging is on.
+            debugLog(`provideReferences: skipping ${file.fsPath}: ${err?.message ?? err}`);
+            return null;
           }
         }),
       );
