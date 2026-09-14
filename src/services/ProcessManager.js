@@ -89,8 +89,8 @@ class ProcessManager extends EventEmitter {
 
   /**
    * Replaces a tracked runner, used when a process reuses an existing output panel and ID.
-   * @param {Object} oldRunner - The previous process object
-   * @param {Object} newRunner - The new process object
+   * @param {ChildProcess} oldRunner - The previous process object
+   * @param {ChildProcess} newRunner - The new process object
    * @param {RunnerInfo} info - The runner information to retain
    */
   replaceRunner(oldRunner, newRunner, info) {
@@ -199,7 +199,7 @@ class ProcessManager extends EventEmitter {
 
   /**
    * Cleans up a finished runner by flushing its output and disposing of its output window, if necessary.
-   * @param {Object} runner - The runner process object
+   * @param {ChildProcess} runner - The runner process object
    * @param {RunnerInfo} info - Information about the finished runner, including its callback and output window.
    */
   cleanupFinishedRunner(runner, info) {
@@ -229,7 +229,7 @@ class ProcessManager extends EventEmitter {
 
   /**
    * Adds a new runner to the tracking list.
-   * @param {Object} runner - The process runner object
+   * @param {ChildProcess} runner - The process runner object
    * @param {RunnerInfo} info - The runner information
    */
   addRunner(runner, info) {
@@ -243,7 +243,7 @@ class ProcessManager extends EventEmitter {
 
   /**
    * Updates the status of a runner.
-   * @param {Object} runner - The process runner object
+   * @param {ChildProcess} runner - The process runner object
    * @param {boolean} status - The new status
    */
   updateRunnerStatus(runner, status) {
