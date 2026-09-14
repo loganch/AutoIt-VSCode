@@ -3,8 +3,14 @@ import { workspace } from 'vscode';
 /**
  * Resolves VS Code variables in a path string.
  * Supports: ${workspaceFolder}, ${workspaceFolderBasename}, ${cwd}, ${home}
+ *
+ * Falsy or non-string input is passed through unchanged rather than coerced
+ * (see the 'passes through non-string and empty input unchanged' test) --
+ * every call site in this codebase only ever supplies a real path string, so
+ * this is defensive rather than a documented input contract.
  * @param {string} inputPath - path string that may contain VS Code variables
- * @returns {string} path with variables resolved
+ * @returns {string|*} path with variables resolved, or the original input
+ *   unchanged if it was falsy or not a string
  */
 export function resolveVariables(inputPath) {
   if (!inputPath || typeof inputPath !== 'string') {
