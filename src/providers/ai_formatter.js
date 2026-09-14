@@ -181,7 +181,7 @@ function runTidy(filePath) {
       }
     };
 
-    const handleError = error => {
+    const handleSpawnError = error => {
       if (hasExited) return;
       hasExited = true;
 
@@ -191,7 +191,7 @@ function runTidy(filePath) {
     };
 
     tidyProcess.on('exit', handleExit);
-    tidyProcess.on('error', handleError);
+    tidyProcess.on('error', handleSpawnError);
   });
 }
 
