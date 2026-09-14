@@ -6,6 +6,7 @@ import { getIncludePath, getIncludeScripts } from '../utils/includeResolution';
 import { getIncludeText } from '../utils/fsCache';
 import { lookupDefinition, noteFileContent } from '../services/symbolIndex';
 import { getIncludeSet, extractIncludeEdges, toUriString } from '../services/includeGraph';
+import { handleError } from '../errorUtils';
 
 // Constants for better maintainability
 const REGEX_FLAGS = 'mi';
@@ -141,6 +142,10 @@ const AutoItDefinitionProvider = {
     } catch (err) {
       // Every throw site in this file already builds a descriptive message,
       // so it doubles as the user-facing text at this one toast boundary.
+      // Route through handleError (showUser: false) too, so the console log
+      // stays consistent with every other catch site's format and keeps the
+      // error's stack, without overriding this file's deliberately specific toast.
+      handleError('provideDefinition', err);
       window.showErrorMessage(`provideDefinition error: ${err.message}`);
       return null;
     }

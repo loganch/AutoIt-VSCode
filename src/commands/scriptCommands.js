@@ -95,8 +95,7 @@ async function runScript() {
       config.multiOutput && config.multiOutputReuseOutput,
     );
   } catch (error) {
-    handleError('runScript', error);
-    showErrorMessage(`Failed to run script: ${error.message}`);
+    handleError('runScript', error, true);
   }
 }
 

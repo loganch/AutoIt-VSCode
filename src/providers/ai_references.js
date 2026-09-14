@@ -10,6 +10,7 @@ import {
   stripLineComment,
 } from '../utils/textUtils.js';
 import { AutoItDefinitionProvider } from './ai_definition';
+import { handleError } from '../errorUtils';
 
 // Workspace scan budget (mirrors ai_workspaceSymbols.js defaults).
 const DEFAULT_MAX_FILES = 500;
@@ -36,7 +37,7 @@ const AutoItReferenceProvider = {
       // Function or Global variable -> workspace scan (implemented in Task 6).
       return this.collectWorkspace(document, regex, includeDeclaration, position, token);
     } catch (err) {
-      window.showErrorMessage(`provideReferences error: ${err.message}`);
+      handleError('provideReferences', err, true);
       return [];
     }
   },

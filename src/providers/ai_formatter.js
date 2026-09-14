@@ -6,6 +6,7 @@ import conf from '../config/ai_config';
 import { FORMATTER } from '../constants';
 import { debugLog } from '../debugLog';
 import { validateFilePath, validateExecutablePath } from '../utils/pathValidation';
+import { handleError } from '../errorUtils';
 
 const RANDOM_SUFFIX_START_INDEX = 2;
 const RANDOM_SUFFIX_END_INDEX = 8;
@@ -72,8 +73,7 @@ const AutoItFormatterProvider = {
 
       return [TextEdit.replace(fullDocumentRange(document), formattedText)];
     } catch (error) {
-      const errorMessage = `AutoIt Formatting Error: ${error.message}`;
-      window.showErrorMessage(errorMessage);
+      handleError('provideDocumentFormattingEdits', error, true);
       debugLog(`[AutoIt Formatter] Error details: ${error?.message ?? error}`);
       return [];
     } finally {
