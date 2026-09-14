@@ -27,7 +27,7 @@ jest.mock('../../src/completionTransforms', () => ({
   ),
 }));
 
-import { completions as functions } from '../../src/signatures/udf_debug';
+import { completions as functions } from '../../src/signatures/udf/udf_debug';
 
 describe('udf_debug completions', () => {
   it('exports a completion array', () => {
