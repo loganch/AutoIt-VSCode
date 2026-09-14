@@ -44,16 +44,22 @@ export default [
       'import/no-useless-path-segments': 'error',
 
       // Layering rule (F23): data → domain helpers → features → infrastructure.
-      // Enforced below: the data layer (completions/, hovers/, signatures/) and
-      // parsers/ cannot import from providers/ (features), config/ (the
-      // config/support cluster split out of providers/, still infrastructure),
-      // services/ (infra), or commands/ (orchestration); utils/ cannot import
-      // the ai_config hub (it has module-load side effects — a config-change
-      // listener and getPaths() call — that non-feature code shouldn't trigger
-      // just to reach findFilepath; import the narrow config/pathResolution
-      // leaf instead). All three are currently clean, so this is a regression
-      // guard. Aspirational rule deferred to F25 (needs refactoring): features
-      // (providers/ai_*) should import services/ only via ai_config.
+      // Enforced below: the data layer (completions/, hovers/, signatures/)
+      // cannot import from providers/ (features), config/ (the config/support
+      // cluster split out of providers/, still infrastructure), services/
+      // (infra), or commands/ (orchestration); utils/ cannot import the
+      // ai_config hub (it has module-load side effects — a config-change
+      // listener and getPaths() call — that non-feature code shouldn't
+      // trigger just to reach findFilepath; import the narrow
+      // config/pathResolution leaf instead). Both are currently clean, so
+      // this is a regression guard. (F25's domain layer work replaced
+      // src/parsers/ with src/language/, so the zone that used to guard
+      // parsers/ was removed rather than repointed -- language/ isn't a
+      // consumer of providers/config/services/commands/ the way parsers/ was.)
+      // Aspirational rule still open (see review::.::holistic::
+      // cross_module_architecture "Four providers/ modules import individual
+      // services/ modules directly" finding): features (providers/ai_*)
+      // should import services/ only via ai_config.
       'import/no-restricted-paths': [
         'error',
         {
@@ -62,11 +68,6 @@ export default [
               target: 'src/{completions,hovers,signatures}/**',
               from: ['src/providers/**', 'src/config/**', 'src/services/**', 'src/commands/**'],
               message: 'Data layer must not import features or infrastructure (F23 layering rule).',
-            },
-            {
-              target: 'src/parsers/**',
-              from: ['src/providers/**', 'src/config/**', 'src/services/**', 'src/commands/**'],
-              message: 'Parsers must not import features or infrastructure (F23 layering rule).',
             },
             {
               target: 'src/utils/**',
