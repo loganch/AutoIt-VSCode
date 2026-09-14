@@ -69,4 +69,15 @@ describe('send_keys completions', () => {
     expect(ascEntry).toBeDefined();
     expect(typeof ascEntry.insertText).toBe('object');
   });
+
+  it.each(['{NUMLOCK}', '{SCROLLLOCK}'])(
+    '%s expands as a choice snippet via insertText (not the inserText typo)',
+    label => {
+      const entry = entries.find(e => e.label === label);
+      expect(entry).toBeDefined();
+      expect(entry.insertText).toBeDefined();
+      expect(entry.insertText.value).toContain('on|off|toggle');
+      expect(entry.inserText).toBeUndefined();
+    },
+  );
 });

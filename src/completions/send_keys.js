@@ -201,7 +201,7 @@ const items = [
   {
     label: '{NUMLOCK}',
     documentation: 'NUMLOCK (on/off/toggle)',
-    inserText: new SnippetString('{NUMLOCK ').appendChoice(['on', 'off', 'toggle']).appendText('}'),
+    insertText: new SnippetString('{NUMLOCK ').appendChoice(['on', 'off', 'toggle']).appendText('}'),
   },
   {
     label: '{NUMPAD0}',
@@ -318,7 +318,7 @@ const items = [
   {
     label: '{SCROLLLOCK}',
     documentation: 'SCROLLLOCK (on/off/toggle)',
-    inserText: new SnippetString('{SCROLLLOCK ')
+    insertText: new SnippetString('{SCROLLLOCK ')
       .appendChoice(['on', 'off', 'toggle'])
       .appendText('}'),
   },
