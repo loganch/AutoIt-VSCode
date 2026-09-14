@@ -74,6 +74,17 @@ export default [
               message:
                 'utils/ must not import the ai_config hub (module-load side effects); import config/pathResolution directly (F23/F24 layering rule).',
             },
+            {
+              // services/ -> commands/ is now fully clean (the commandsPrefix/timing
+              // constants and getActiveDocumentFileName edges were broken up); guard
+              // it as a regression check. services/ -> providers/ still has one
+              // deliberate edge (symbolIndex.js importing ai_symbols.js's
+              // provideDocumentSymbols, a ~500-line parsing implementation not worth
+              // relocating for this alone) so that direction isn't guarded yet.
+              target: 'src/services/**',
+              from: ['src/commands/**'],
+              message: 'services/ must not import commands/ (orchestration) — inverted layering.',
+            },
           ],
         },
       ],
