@@ -42,19 +42,19 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/config/ai_config', () => ({
+jest.mock('../src/config/ai_config', () => ({
   __esModule: true,
   default: {
     findFilePath: jest.fn(() => ''),
   },
 }));
 
-import hovers from '../../src/hovers';
+import hovers from '../src/hovers';
 
 const MINIMUM_HOVER_ENTRIES = 100;
 const KEY_SAMPLE_SIZE = 20;
 
-describe('hovers/index', () => {
+describe('hovers', () => {
   it('exports a lowercase-keyed hover map', () => {
     expect(hovers).toBeDefined();
     expect(typeof hovers).toBe('object');
