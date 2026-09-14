@@ -74,10 +74,18 @@ class ProcessRunner {
 
       const id = runnerPrev ? runnerPrev.info.id : this.processManager.nextId();
 
-      const aiOutProcess = this.config.multiOutput
-        ? (runnerPrev && !runnerPrev.info.aiOut.void && runnerPrev.info.aiOut) ||
-          this.outputChannelManager.createProcessOutputChannel(id, thisFile, 'vscode-autoit-output')
-        : this._createVoidOutputChannel();
+      let aiOutProcess;
+      if (!this.config.multiOutput) {
+        aiOutProcess = this._createVoidOutputChannel();
+      } else if (runnerPrev?.info.aiOut && !runnerPrev.info.aiOut.void) {
+        aiOutProcess = runnerPrev.info.aiOut;
+      } else {
+        aiOutProcess = this.outputChannelManager.createProcessOutputChannel(
+          id,
+          thisFile,
+          'vscode-autoit-output',
+        );
+      }
 
       const aiOut = this.outputChannelManager.createProxyOutputChannel({
         id,
