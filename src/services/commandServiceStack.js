@@ -32,7 +32,7 @@ export function createServiceStack(getActiveDocumentFileName) {
     outputName: `extension-output-${packageJson.publisher}.${packageJson.name}-#`,
   });
 
-  const hotkeyManager = new HotkeyManager(config);
+  const hotkeyManager = new HotkeyManager({ config });
 
   const outputChannelManager = new OutputChannelManager({
     globalOutputChannel,

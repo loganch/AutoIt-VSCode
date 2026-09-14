@@ -22,9 +22,10 @@ const HOTKEY_PLACEHOLDER = '\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n';
 class HotkeyManager {
   /**
    * Creates a new HotkeyManager instance.
-   * @param {AutoItConfig} config - Configuration object containing wrapperPath and other settings.
+   * @param {Object} options
+   * @param {AutoItConfig} options.config - Configuration object containing wrapperPath and other settings.
    */
-  constructor(config) {
+  constructor({ config }) {
     // Matches hotkey entries in AutoIt3Wrapper.ini
     this.regex = /(SciTE_(STOPEXECUTE|RESTART)\s*=).*/gi;
 

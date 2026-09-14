@@ -28,7 +28,7 @@ describe('HotkeyManager', () => {
     fs.promises.readFile.mockReset();
     fs.promises.writeFile.mockReset();
     fs.promises.rm.mockReset();
-    manager = new HotkeyManager({ wrapperPath: 'C:\\AutoIt\\AutoIt3Wrapper.exe' });
+    manager = new HotkeyManager({ config: { wrapperPath: 'C:\\AutoIt\\AutoIt3Wrapper.exe' } });
   });
 
   afterEach(() => {
