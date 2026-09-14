@@ -49,7 +49,7 @@ const AutoItDefinitionProvider = {
    * Finds the definition of a word in a document and returns its location.
    * @param {import("vscode").TextDocument} document - The document in which to search for the word definition.
    * @param {Position} position - The position of the word for which to find the definition.
-   * @returns {Location|null} - The location of the word definition, or null if not found.
+   * @returns {Location|Location[]|null} - The location(s) of the word definition, or null if not found.
    */
   provideDefinition(document, position) {
     try {
