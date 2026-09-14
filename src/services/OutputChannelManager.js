@@ -22,12 +22,6 @@ const CRLF_LENGTH = 2;
 const _cachedOutputChannels = {};
 
 /**
- * @typedef {Object} OutputOptions
- * @property {number} id - Process ID
- * @property {Object} aiOutProcess - Process output channel
- */
-
-/**
  * Process-specific output formatting strategy - shows timestamps only for process output.
  * @param {string[]} lines - Lines to format (mutated in place)
  * @param {{time: string, isNewLineProcess: boolean, config: Object}} state - Formatting state
@@ -194,12 +188,11 @@ class OutputChannelManager {
 
   /**
    * Creates a proxy output channel with formatting and filtering capabilities.
-   * @param {OutputOptions} options - Output options containing process ID and channel
+   * @param {number} id - Process ID
+   * @param {Object} aiOutProcess - Process-specific output channel to proxy
    * @returns {Proxy} Proxy object that handles output operations
    */
-  createProxyOutputChannel(options) {
-    const { id, aiOutProcess } = options;
-
+  createProxyOutputChannel(id, aiOutProcess) {
     let prevLine = '';
     let prevLineTimer;
     let isNewLineProcess = true;

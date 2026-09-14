@@ -111,10 +111,7 @@ describe('OutputChannelManager', () => {
     const manager = new OutputChannelManager(globalChannel, config, {}, hotkeyManager, runners);
     const processChannel = makeChannel({ name: 'proc1' });
 
-    const proxy = manager.createProxyOutputChannel({
-      id: 1,
-      aiOutProcess: processChannel,
-    });
+    const proxy = manager.createProxyOutputChannel(1, processChannel);
 
     expect(typeof proxy.append).toBe('function');
     expect(typeof proxy.appendLine).toBe('function');
@@ -158,7 +155,7 @@ describe('OutputChannelManager', () => {
       runners,
     );
 
-    const proxy = manager.createProxyOutputChannel({ id: 1, aiOutProcess: processChannel });
+    const proxy = manager.createProxyOutputChannel(1, processChannel);
 
     proxy.append(
       '!>Failed Setting Hotkey(s)...\r\n--> SetHotKey () Restart failed, SetHotKey () Stop failed.\r\n',

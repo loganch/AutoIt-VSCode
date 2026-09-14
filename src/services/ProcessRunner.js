@@ -89,10 +89,7 @@ class ProcessRunner {
         );
       }
 
-      const aiOut = this.outputChannelManager.createProxyOutputChannel({
-        id,
-        aiOutProcess,
-      });
+      const aiOut = this.outputChannelManager.createProxyOutputChannel(id, aiOutProcess);
 
       const info = (runnerPrev && runnerPrev.info) || {
         id,
