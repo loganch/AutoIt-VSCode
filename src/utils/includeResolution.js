@@ -132,11 +132,12 @@ export const getIncludeScripts = (document, docText) => {
  */
 const collectIncludeScripts = (document, docText, scriptsToSearch, visited) => {
   /**
-   * Process individual include with enhanced error handling
-   * @param {string} includePath - Path to process
+   * Resolves a single include path and, if valid and unvisited, adds it to the collection
+   * and recurses into its own includes.
+   * @param {string} includePath - Path to resolve
    * @param {boolean} isLibrary - Whether this is a library include
    */
-  const processInclude = (includePath, isLibrary = false) => {
+  const resolveAndCollectInclude = (includePath, isLibrary = false) => {
     if (!includePath) return;
 
     // Resolve path with appropriate format hints. getIncludePath already
@@ -171,9 +172,9 @@ const collectIncludeScripts = (document, docText, scriptsToSearch, visited) => {
 
   // Process relative includes
   const relativeMatches = [...docText.matchAll(REGEX_PATTERNS.relativeInclude)];
-  relativeMatches.forEach(match => processInclude(match[1], false));
+  relativeMatches.forEach(match => resolveAndCollectInclude(match[1], false));
 
   // Process library includes
   const libraryMatches = [...docText.matchAll(REGEX_PATTERNS.libraryInclude)];
-  libraryMatches.forEach(match => processInclude(match[1], true));
+  libraryMatches.forEach(match => resolveAndCollectInclude(match[1], true));
 };
