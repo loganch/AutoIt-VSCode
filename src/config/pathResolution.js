@@ -165,7 +165,15 @@ function ensureIndexedPath(confValue, defaultPath, j, suffix, fallbackToInclude)
   updateFullPath(filePath, defaultPath[j], suffix);
 }
 
-function getPathsSmartHelp(defaultPath, confValue, i) {
+/**
+ * Populates defaultPath.fullPath in place with resolved smartHelp entries
+ * (chmPath/udfPath, keyed by UDF function prefix) from the configured value.
+ * @param {Object} defaultPath - The smartHelp defaultPaths entry to mutate.
+ * @param {Object} confValue - The configured smartHelp value, keyed by prefix.
+ * @param {string} i - Configuration key suffix used for error messages.
+ * @returns {void}
+ */
+function populateSmartHelpPaths(defaultPath, confValue, i) {
   defaultPath.fullPath = {};
   for (const prefix in confValue) {
     if (!Object.hasOwn(confValue, prefix)) continue;
@@ -259,7 +267,7 @@ function resolvePaths() {
         // convert array-based old config into new object-based
         return upgradeSmartHelpConfig(conf.data);
 
-      getPathsSmartHelp(defaultPath, confValue, i);
+      populateSmartHelpPaths(defaultPath, confValue, i);
     } else if (Array.isArray(confValue)) {
       // i !== 'includePaths' here (that case is handled above), so entries
       // never fall back to 'Include'.
