@@ -8,4 +8,10 @@ describe('regexPatterns', () => {
     expect(updatedRegex.source).toBe(baseRegex.source);
     expect(updatedRegex.flags).toBe('gm');
   });
+
+  test('setRegExpFlags always returns a RegExp, even for invalid input', () => {
+    expect(setRegExpFlags('not a regex', 'gm')).toBeInstanceOf(RegExp);
+    expect(setRegExpFlags(/autoit/, 42)).toBeInstanceOf(RegExp);
+    expect(setRegExpFlags(null, null)).toBeInstanceOf(RegExp);
+  });
 });

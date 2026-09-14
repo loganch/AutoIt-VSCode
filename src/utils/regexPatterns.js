@@ -66,11 +66,11 @@ export const buildHeaderRegex = functionName => {
  * Creates a new regular expression with different flags while preserving the original pattern.
  * @param {RegExp} regex - Source regular expression to copy the pattern from
  * @param {string} flags - New regex flags to apply (e.g., "gi" for global + case-insensitive)
- * @returns {RegExp} New RegExp instance with the same pattern but different flags, or safe default if invalid input
+ * @returns {RegExp} New RegExp instance with the same pattern but different flags, or /(?:)/ if either argument is invalid
  */
 export const setRegExpFlags = (regex, flags) => {
   if (!(regex instanceof RegExp) || typeof flags !== 'string') {
-    return regex || /(?:)/;
+    return /(?:)/;
   }
   return new RegExp(regex.source, flags);
 };
