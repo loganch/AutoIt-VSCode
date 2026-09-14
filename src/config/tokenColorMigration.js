@@ -9,7 +9,7 @@ import meta from '../../package.json';
  */
 function migrateTokenColorDefaults() {
   try {
-    const cConfig = workspace.getConfiguration('editor');
+    const config = workspace.getConfiguration('editor');
     const dataNew = {};
     let save = false;
 
@@ -28,7 +28,7 @@ function migrateTokenColorDefaults() {
       return obj;
     }, {});
 
-    let value = cConfig.get('tokenColorCustomizations');
+    let value = config.get('tokenColorCustomizations');
     if (typeof value !== 'object' || value === null) value = {};
 
     const keys = Object.keys(value);
@@ -59,7 +59,7 @@ function migrateTokenColorDefaults() {
     }
     if (save) {
       // save global settings
-      cConfig.update('tokenColorCustomizations', dataNew, true);
+      config.update('tokenColorCustomizations', dataNew, true);
     }
   } catch (error) {
     // Log only to console to keep activation resilient without hiding diagnostics.

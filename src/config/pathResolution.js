@@ -57,8 +57,7 @@ function verifyPath(filePath, pathState, msgSuffix) {
   return Promise.resolve(workspace.fs.stat(Uri.file(pathState.fullPath)))
     .then(stats => {
       const type =
-        (pathState.file !== undefined ? FileType.File : FileType.Directory) |
-        FileType.SymbolicLink;
+        (pathState.file !== undefined ? FileType.File : FileType.Directory) | FileType.SymbolicLink;
       if (!(stats.type & type)) {
         if (showErrors) showError(filePath, pathState, msgSuffix);
 
@@ -194,19 +193,20 @@ function populateSmartHelpPaths(defaultPath, confValue, i) {
 
     for (let k = 0; k < udfPath.length; k++) {
       const udfPathState = { fullPath: '', ...defaultPath.check };
-      const bShowErrors = showErrors;
-      const sMsgSuffix = msgSuffix;
-      const aUdfPath = udfPath;
+      // Snapshot the module-level showErrors flag: it can be reassigned by
+      // refreshPaths() before this .then() runs, and no-loop-func forbids
+      // referencing the mutable outer binding directly from a loop closure.
+      const shouldShowErrors = showErrors;
       updateFullPath(udfPath[k], udfPathState).then(filePath => {
         // prefer the resolved path from updateFullPath, otherwise try configured include paths
         let resolved = filePath;
         if (!resolved) {
-          resolved = findFilePath(aUdfPath[k], true);
+          resolved = findFilePath(udfPath[k], true);
         }
         if (resolved) {
-          aUdfPath[k] = resolved;
-        } else if (bShowErrors) {
-          showError(aUdfPath[k], udfPathState, `${sMsgSuffix}.udfPath[${k}]`);
+          udfPath[k] = resolved;
+        } else if (shouldShowErrors) {
+          showError(udfPath[k], udfPathState, `${msgSuffix}.udfPath[${k}]`);
         }
       });
     }

@@ -24,7 +24,7 @@ function appendTrace(match, p1, p2, functionName) {
 }
 
 async function functionTraceAdd() {
-  const sPattern = /()(\bfunc\b\s+([^)\s]+)\(.*\))/gi;
+  const funcPattern = /()(\bfunc\b\s+([^)\s]+)\(.*\))/gi;
 
   // Remove existing trace statements
   const traceStatementPattern = /\s*ConsoleWrite\('@@ \(.+;### Trace Function'/;
@@ -41,7 +41,7 @@ async function functionTraceAdd() {
   const { document } = editor;
   const text = document.getText();
 
-  const updatedText = text.replaceAll(sPattern, appendTrace);
+  const updatedText = text.replaceAll(funcPattern, appendTrace);
 
   if (!updatedText) {
     return;
