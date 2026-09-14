@@ -74,11 +74,7 @@ const AutoItDefinitionProvider = {
       const match = definitionRegex.exec(documentText);
       if (match) {
         // Capture group for symbol if present; compute the exact symbol index
-        let symbolOffsetInMatch = 0;
-        if (match[1]) {
-          const idxIn0 = match[0].indexOf(match[1]);
-          if (idxIn0 >= 0) symbolOffsetInMatch = idxIn0;
-        }
+        const symbolOffsetInMatch = match[1] ? match[0].indexOf(match[1]) : 0;
         const absoluteIndex = match.index + symbolOffsetInMatch;
         const pos = document.positionAt(absoluteIndex);
         const range = new Range(pos, pos);
