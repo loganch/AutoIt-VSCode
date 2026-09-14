@@ -137,7 +137,7 @@ function launchHelp() {
   if (prefix) {
     paths = config.smartHelp[prefix[0]];
   }
-  if (prefix && paths) {
+  if (paths) {
     // Make sure help file exists
     if (!fs.existsSync(paths.chmPath)) {
       window.showErrorMessage(`Unable to locate ${paths.chmPath}`);
