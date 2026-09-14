@@ -238,6 +238,17 @@ const setupDocumentTracking = ctx => {
 /**
  * Keeps MapTrackingService/VariableTrackingService and the Au3Check version
  * cache in sync with `autoit.*` configuration changes.
+ *
+ * This is a second, independent onDidChangeConfiguration subscription
+ * alongside ai_config's registerConfigListener() (which refreshes conf.data
+ * and re-verifies paths). They are kept separate rather than merged into one
+ * pipeline because their consumers need different config shapes: this
+ * listener reads includePaths raw via workspace.getConfiguration (the shape
+ * MapTrackingService/VariableTrackingService's IncludeResolver expects),
+ * while the ai_config facade's `config` proxy resolves includePaths to
+ * absolute paths for Au3Check. Registration order matters: activate()
+ * registers conf.registerConfigListener() before setupConfigSync so conf.data
+ * is already fresh by the time this listener runs, if it ever needs it.
  */
 const setupConfigSync = (ctx, mapTrackingService, variableTrackingService) => {
   ctx.subscriptions.push(
