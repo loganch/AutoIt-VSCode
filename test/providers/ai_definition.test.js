@@ -494,18 +494,6 @@ function posAtFirst(doc, token) {
   return doc.positionAt(idx + Math.max(0, token.indexOf('$') === 0 ? 1 : 0)); // ensure inside token
 }
 
-// Safe version that returns null instead of throwing for missing tokens
-function posAtFirstSafe(doc, token) {
-  try {
-    return posAtFirst(doc, token);
-  } catch (error) {
-    if (error.message.includes('Token not found')) {
-      return null; // Return null for missing tokens instead of throwing
-    }
-    throw error; // Re-throw unexpected errors
-  }
-}
-
 // Fixture validation utility
 function validateFixtureSymbols() {
   const allContent = MAIN_CONTENT + '\n' + HELPER_CONTENT + '\n' + LIB_ARRAY_CONTENT;
@@ -971,12 +959,10 @@ describe('ai_definition: null results when symbol not found', () => {
     util.getIncludeText.mockImplementation(mocks.getIncludeText);
 
     const doc = makeDoc();
-    const pos = posAtFirstSafe(doc, 'NotExistingSymbol');
-    if (pos === null) {
-      // Token doesn't exist, which is expected for this test
-      expect(true).toBe(true);
-      return;
-    }
+    // 'Return' is a language keyword present in the fixture text but never
+    // indexed as a symbol, so this genuinely exercises the absent-symbol path
+    // instead of always short-circuiting on a token that can never be found.
+    const pos = posAtFirst(doc, 'Return');
 
     const res = definitionProvider.provideDefinition(doc, pos);
     expect(res).toBeNull();
