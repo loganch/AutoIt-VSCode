@@ -90,8 +90,7 @@ function getIndent() {
     for (let i = selection.active.line - 1; i >= 0; i--) {
       const line = document.lineAt(i);
       if (!line.isEmptyOrWhitespace) {
-        const match = line.text.match(/^[\s]*/);
-        indent = match ? match[0] : '';
+        indent = line.text.match(/^[\s]*/)[0];
         break;
       }
     }
@@ -99,8 +98,7 @@ function getIndent() {
   }
 
   const lineText = activeLine.text;
-  const indentMatch = lineText.match(/^[\s]*/);
-  return indentMatch ? indentMatch[0] : '';
+  return lineText.match(/^[\s]*/)[0];
 }
 
 /**
