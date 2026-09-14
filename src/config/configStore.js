@@ -12,8 +12,22 @@ import { handleError } from '../errorUtils';
  * module's single responsibility; keep it here and document new key shapes.
  */
 
+// `data` is resolved lazily via a getter (not at module-import time) so
+// merely importing this module never calls the VS Code API before the
+// extension host is ready — the same discipline completionTransforms.js and
+// debugLog.js already apply.
+let _data = null;
+
 const conf = {
-  data: workspace.getConfiguration('autoit'),
+  get data() {
+    if (_data === null) {
+      _data = workspace.getConfiguration('autoit');
+    }
+    return _data;
+  },
+  set data(value) {
+    _data = value;
+  },
   defaultPaths: {
     aiPath: { file: 'AutoIt3.exe' },
     wrapperPath: { dir: 'SciTE\\AutoIt3Wrapper\\', file: 'AutoIt3Wrapper.au3' },

@@ -54,6 +54,19 @@ describe('ai_config', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // configStore.js resolves conf.data lazily now (not at import time), so
+    // the mock's factory-provided implementation — wiped by jest's global
+    // resetMocks before every test — must be restored here rather than
+    // relying on it surviving from module load in beforeAll.
+    mockGetConfiguration.mockImplementation(() => ({
+      get: jest.fn(key => {
+        if (key === 'aiPath') return '';
+        if (key === 'includePaths') return [''];
+        return undefined;
+      }),
+      update: jest.fn(),
+      inspect: jest.fn(() => ({})),
+    }));
   });
 
   test('exports default object with expected shape', () => {
@@ -117,9 +130,38 @@ describe('ai_config', () => {
     });
 
     test('init() runs the token-color migration exactly once', () => {
+      // Self-contained like the previous test: configStore.js resolves
+      // conf.data lazily now, so init() (not the require) is this test's
+      // first real access to workspace.getConfiguration. Don't rely on the
+      // previous test's local vscode doMock (jest.dontMock doesn't restore
+      // the file's top-level jest.mock — it falls through to the global
+      // __mocks__/vscode.js, whose getConfiguration is an empty jest.fn())
+      // or on jest's automatic mock-reset leaving that test's local mocks
+      // intact by the time this test runs.
+      jest.resetModules();
+      jest.doMock('vscode', () => ({
+        FileType: { File: 1, Directory: 2, SymbolicLink: 64 },
+        Uri: { file: p => ({ fsPath: p }) },
+        window: { showErrorMessage: jest.fn(), showInformationMessage: jest.fn() },
+        workspace: {
+          getConfiguration: jest.fn(() => ({
+            get: jest.fn(key => {
+              if (key === 'aiPath') return '';
+              if (key === 'includePaths') return [''];
+              return undefined;
+            }),
+            update: jest.fn(),
+            inspect: jest.fn(() => ({})),
+          })),
+          onDidChangeConfiguration: jest.fn(() => ({ dispose: jest.fn() })),
+          fs: { stat: jest.fn(() => Promise.resolve({ type: 1 })) },
+        },
+      }));
+
       const fresh = require('../src/config/ai_config').default;
       expect(() => fresh.init()).not.toThrow();
       expect(() => fresh.init()).not.toThrow(); // idempotent, safe to call again
+      jest.dontMock('vscode');
     });
   });
 
