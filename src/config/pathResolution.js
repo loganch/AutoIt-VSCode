@@ -4,7 +4,7 @@ import path from 'path';
 import { showErrorMessage } from './ai_showMessage';
 import { detectAutoItPaths } from './autoItInstallDetector';
 import { resolveVariables, splitPath, fixPath } from './pathStringUtils';
-import { upgradeSmartHelpConfig } from './smartHelpMigrator';
+import { migrateSmartHelpConfig } from './smartHelpMigrator';
 import { syncIncludePathsToRegistry } from './registrySync';
 import { conf } from './configStore';
 
@@ -265,7 +265,7 @@ function resolvePaths() {
     } else if (i === 'smartHelp') {
       if (Array.isArray(confValue))
         // convert array-based old config into new object-based
-        return upgradeSmartHelpConfig(conf.data);
+        return migrateSmartHelpConfig(conf.data);
 
       populateSmartHelpPaths(defaultPath, confValue, i);
     } else if (Array.isArray(confValue)) {

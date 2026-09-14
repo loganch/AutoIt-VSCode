@@ -4,7 +4,7 @@
  * (workspace folder / workspace / global / default).
  * @param {object} confData - the `autoit` configuration object (workspace.getConfiguration('autoit'))
  */
-export function upgradeSmartHelpConfig(confData) {
+export function migrateSmartHelpConfig(confData) {
   const data = confData.smartHelp;
   const inspect = confData.inspect('smartHelp');
   const props = {

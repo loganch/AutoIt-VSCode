@@ -19,7 +19,7 @@ import { init as initTokenColors } from './tokenColorMigration';
 
 /**
  * Explicit init gate (F17): resolvePaths() can write global config (the legacy
- * smartHelp array gets migrated via upgradeSmartHelpConfig), so — like the
+ * smartHelp array gets migrated via migrateSmartHelpConfig), so — like the
  * token-color migration — it must not run merely from importing this module.
  * Called once from extension.js's `activate()`.
  */

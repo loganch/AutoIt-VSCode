@@ -1,6 +1,6 @@
 jest.mock('vscode', () => ({}));
 
-import { upgradeSmartHelpConfig } from '../../src/config/smartHelpMigrator';
+import { migrateSmartHelpConfig } from '../../src/config/smartHelpMigrator';
 
 const makeConf = (smartHelp, inspectResult = {}) => ({
   smartHelp,
@@ -8,14 +8,14 @@ const makeConf = (smartHelp, inspectResult = {}) => ({
   update: jest.fn(),
 });
 
-describe('upgradeSmartHelpConfig', () => {
+describe('migrateSmartHelpConfig', () => {
   test('migrates array entries to the object-keyed-by-prefix shape', () => {
     const conf = makeConf([
       ['_ArrayDisplay', 'C:\\help\\array.chm', 'C:\\udf\\array.au3'],
       ['_GUICtrl', 'C:\\help\\gui.chm', 'C:\\udf\\gui.au3|C:\\udf\\gui2.au3'],
     ]);
 
-    upgradeSmartHelpConfig(conf);
+    migrateSmartHelpConfig(conf);
 
     expect(conf.update).toHaveBeenCalledWith(
       'smartHelp',
@@ -34,7 +34,7 @@ describe('upgradeSmartHelpConfig', () => {
   test('clears the setting when the migrated result is empty', () => {
     const conf = makeConf([]);
 
-    upgradeSmartHelpConfig(conf);
+    migrateSmartHelpConfig(conf);
 
     expect(conf.update).toHaveBeenCalledWith('smartHelp', undefined, undefined, undefined);
   });
@@ -42,7 +42,7 @@ describe('upgradeSmartHelpConfig', () => {
   test('clears the setting when smartHelp is a legacy string', () => {
     const conf = makeConf('some-legacy-string');
 
-    upgradeSmartHelpConfig(conf);
+    migrateSmartHelpConfig(conf);
 
     expect(conf.update).toHaveBeenCalledWith('smartHelp', undefined, undefined, undefined);
   });
@@ -52,7 +52,7 @@ describe('upgradeSmartHelpConfig', () => {
       workspaceValue: { keys: [] },
     });
 
-    upgradeSmartHelpConfig(conf);
+    migrateSmartHelpConfig(conf);
 
     expect(conf.update).toHaveBeenCalledWith(
       'smartHelp',
@@ -67,7 +67,7 @@ describe('upgradeSmartHelpConfig', () => {
       globalLanguageValue: { keys: [] },
     });
 
-    upgradeSmartHelpConfig(conf);
+    migrateSmartHelpConfig(conf);
 
     expect(conf.update).toHaveBeenCalledWith(
       'smartHelp',
@@ -80,7 +80,7 @@ describe('upgradeSmartHelpConfig', () => {
   test('leaves object-shaped settings untouched but still updates', () => {
     const conf = makeConf({ _X: { chmPath: 'a.chm', udfPath: ['b.au3'] } });
 
-    upgradeSmartHelpConfig(conf);
+    migrateSmartHelpConfig(conf);
 
     expect(conf.update).toHaveBeenCalledWith('smartHelp', undefined, undefined, undefined);
   });
