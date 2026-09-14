@@ -618,9 +618,9 @@ function createUtilMocks(options = {}) {
       return getContentWithCloning(content);
     }),
 
-    getIncludeScripts: jest.fn((document, docText, scriptsToSearch) => {
-      // Honor the real contract: populate the caller's array by reference
-      // and return void (mirrors src/utils/includeResolution.js).
+    getIncludeScripts: jest.fn((document, docText) => {
+      // Honor the real contract: returns the resolved scripts array
+      // (mirrors src/utils/includeResolution.js).
       const cacheKey = 'includeScripts';
       let scripts;
       if (config.useCache && mockState.hasCachedContent(cacheKey)) {
@@ -632,9 +632,7 @@ function createUtilMocks(options = {}) {
         }
       }
 
-      if (Array.isArray(scriptsToSearch)) {
-        scriptsToSearch.push(...scripts);
-      }
+      return [...scripts];
     }),
 
     getCallCounts: () => config.callCounts,

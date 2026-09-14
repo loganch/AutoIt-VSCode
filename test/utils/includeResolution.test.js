@@ -107,9 +107,7 @@ describe('includeResolution', () => {
       getText: jest.fn(),
       uri: { fsPath: mainDocumentPath },
     };
-    const scriptsToSearch = [];
-
-    getIncludeScripts(document, '#include "helper.au3"', scriptsToSearch);
+    const scriptsToSearch = getIncludeScripts(document, '#include "helper.au3"');
 
     expect(scriptsToSearch.map(filePath => path.basename(filePath))).toEqual([
       'helper.au3',

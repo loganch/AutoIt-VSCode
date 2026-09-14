@@ -96,19 +96,21 @@ export const getIncludePath = (fileName, document) => {
 /**
  * Recursively collects all AutoIt include file paths referenced in a document and its nested includes.
  * Prevents circular dependencies by tracking visited files. Processes both relative includes
- * (`#include "file.au3"`) and library includes (`#include <file.au3>`). The results are accumulated
- * in the provided array, maintaining order while ensuring uniqueness.
+ * (`#include "file.au3"`) and library includes (`#include <file.au3>`), maintaining order while
+ * ensuring uniqueness.
  *
  * @param {import('vscode').TextDocument} document - Current VSCode document being analyzed
  * @param {string} docText - Complete text content of the document to scan for includes
- * @param {string[]} scriptsToSearch - Array that will be populated with resolved absolute paths to include files
+ * @returns {string[]} Resolved absolute paths to include files, in discovery order
  */
-export const getIncludeScripts = (document, docText, scriptsToSearch) => {
-  if (!isValidDocument(document) || !docText || !Array.isArray(scriptsToSearch)) {
-    return;
+export const getIncludeScripts = (document, docText) => {
+  const scriptsToSearch = [];
+  if (!isValidDocument(document) || !docText) {
+    return scriptsToSearch;
   }
 
   collectIncludeScripts(document, docText, scriptsToSearch, new Set());
+  return scriptsToSearch;
 };
 
 /**

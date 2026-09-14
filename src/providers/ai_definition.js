@@ -160,9 +160,7 @@ const AutoItDefinitionProvider = {
 
   findDefinitionInIncludeFiles(docText, defRegex, document, lookupText) {
     try {
-      const scriptsToSearch = [];
-      // getIncludeScripts populates the array by reference and returns void.
-      getIncludeScripts(document, docText, scriptsToSearch);
+      const scriptsToSearch = getIncludeScripts(document, docText);
 
       for (const script of scriptsToSearch) {
         // getIncludePath/getIncludeText never throw (both are safeExecute-backed
