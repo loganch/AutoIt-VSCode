@@ -279,31 +279,32 @@ const setupConfigSync = (ctx, mapTrackingService, variableTrackingService) => {
         const updatedIncludePaths = updatedConfig.get('includePaths', []);
         const updatedMaxDepth = updatedConfig.get('maps.includeDepth', DEFAULT_MAX_INCLUDE_DEPTH);
 
-        try {
+        // Runs fn(), logging (not throwing) on failure so one service's bad
+        // config update can't stop the other from applying its own -- each
+        // keeps using its previous configuration on error.
+        const tryStep = (label, fn) => {
+          try {
+            fn();
+          } catch (error) {
+            handleError(`${label} configuration update`, error, false, { updatedWorkspaceRoot });
+          }
+        };
+
+        tryStep('MapTrackingService', () =>
           mapTrackingService.updateConfiguration(
             updatedWorkspaceRoot,
             updatedIncludePaths,
             updatedMaxDepth,
-          );
-        } catch (error) {
-          handleError('MapTrackingService configuration update', error, false, {
-            updatedWorkspaceRoot,
-          });
-          // Continue execution - the service will keep using previous configuration
-        }
+          ),
+        );
 
-        try {
+        tryStep('VariableTrackingService', () =>
           variableTrackingService.updateConfiguration(
             updatedWorkspaceRoot,
             updatedIncludePaths,
             updatedMaxDepth,
-          );
-        } catch (error) {
-          handleError('VariableTrackingService configuration update', error, false, {
-            updatedWorkspaceRoot,
-          });
-          // Continue execution - the service will keep using previous configuration
-        }
+          ),
+        );
       }
     }),
   );
