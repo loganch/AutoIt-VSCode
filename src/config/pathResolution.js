@@ -180,7 +180,7 @@ function resolvePaths() {
   aiPath = splitPath(conf.data.aiPath || '');
 
   // Auto-detect AutoIt installation if no aiPath is configured
-  if (!aiPath.dir || aiPath.dir === '' || aiPath.dir === '\\') {
+  if (!aiPath.dir || aiPath.dir === '\\') {
     const detected = detectAutoItPaths();
     if (detected.length > 0) {
       const detectedDir = detected[0].replace(/[\\/]+$/, '');
