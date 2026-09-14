@@ -4,7 +4,7 @@ import {
   descriptionHeader,
   fillCompletions,
   setDetail,
-} from '../completionTransforms';
+} from '../../completionTransforms';
 
 let WdBreakType = [
   {

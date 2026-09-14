@@ -1,5 +1,5 @@
 import { CompletionItemKind } from 'vscode';
-import { completionToHover, fillCompletions } from '../completionTransforms';
+import { completionToHover, fillCompletions } from '../../completionTransforms';
 
 const copyAndInstall = 'File Copy/Install Option Constant';
 const dateTime = 'File Date/Time Option Constant';
