@@ -18,20 +18,23 @@ describe('handleError', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  test('logs Error instances using their message', () => {
-    handleError('parseFile', new Error('boom'));
-    expect(consoleErrorSpy).toHaveBeenCalledWith('[AutoIt Extension] parseFile: boom');
+  test('logs Error instances using their message, with the original error as a second arg', () => {
+    const error = new Error('boom');
+    handleError('parseFile', error);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[AutoIt Extension] parseFile: boom', error);
   });
 
-  test('stringifies non-Error values', () => {
+  test('stringifies non-Error values without a second console.error argument', () => {
     handleError('parseFile', 'plain failure');
     expect(consoleErrorSpy).toHaveBeenCalledWith('[AutoIt Extension] parseFile: plain failure');
   });
 
   test('appends JSON context when provided', () => {
-    handleError('parseFile', new Error('boom'), false, { line: 3 });
+    const error = new Error('boom');
+    handleError('parseFile', error, false, { line: 3 });
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       '[AutoIt Extension] parseFile: boom (Context: {"line":3})',
+      error,
     );
   });
 
@@ -70,6 +73,9 @@ describe('safeExecute', () => {
       'fallback',
     );
     expect(result).toBe('fallback');
-    expect(consoleErrorSpy).toHaveBeenCalledWith('[AutoIt Extension] riskyOp: kaboom');
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[AutoIt Extension] riskyOp: kaboom',
+      expect.any(Error),
+    );
   });
 });

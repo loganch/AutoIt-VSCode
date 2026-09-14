@@ -195,6 +195,7 @@ $mData.key = "value"`;
       // Should have logged the failure to read the missing include via handleError
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('MapTrackingService _ensureIncludedFilesParsed'),
+        expect.any(Error),
       );
     });
   });

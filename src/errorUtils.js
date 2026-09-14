@@ -23,8 +23,14 @@ const handleError = (operation, error, showUser = false, context = null) => {
     ? `${operation}: ${errorMessage} (Context: ${JSON.stringify(context)})`
     : `${operation}: ${errorMessage}`;
 
-  // Always log to console for debugging
-  console.error(`[AutoIt Extension] ${fullMessage}`);
+  // Always log to console for debugging. Pass the original error as a second
+  // argument (when it's a real Error) so the console preserves its stack and
+  // cause chain instead of only the flattened message string.
+  if (error instanceof Error) {
+    console.error(`[AutoIt Extension] ${fullMessage}`, error);
+  } else {
+    console.error(`[AutoIt Extension] ${fullMessage}`);
+  }
 
   // Optionally show to user (reduced verbosity)
   if (showUser) {
