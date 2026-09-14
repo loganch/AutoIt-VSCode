@@ -5,6 +5,9 @@ import {
   NO_BREAK_SPACE,
 } from '../constants';
 import { handleError } from '../errorUtils';
+
+/** @typedef {import('../config/configStore').AutoItConfig} AutoItConfig */
+
 // Constants to avoid magic numbers when checking for CRLF endings
 const CRLF = '\r\n';
 const CRLF_LENGTH = 2;
@@ -94,7 +97,7 @@ class OutputChannelManager {
   /**
    * Creates an instance of OutputChannelManager.
    * @param {Object} globalOutputChannel - Global output channel singleton
-   * @param {Object} config - Configuration object from ai_config
+   * @param {AutoItConfig} config - Configuration object from ai_config
    * @param {Object} keybindings - Keybindings object for hotkey replacement
    * @param {Object} aWrapperHotkey - AutoIt3Wrapper hotkey manager
    * @param {Object} runners - Runners object for managing output state

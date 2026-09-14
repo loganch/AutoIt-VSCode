@@ -4,6 +4,8 @@ import { decode } from 'iconv-lite';
 import { validateFilePath, validateExecutablePath } from '../utils/pathValidation';
 import { handleError } from '../errorUtils';
 
+/** @typedef {import('../config/configStore').AutoItConfig} AutoItConfig */
+
 const MILLISECONDS_TO_SECONDS = 1000;
 const EXIT_CODE_SPAWN_FAILURE = -2;
 
@@ -15,7 +17,7 @@ class ProcessRunner {
   /**
    * Creates a new ProcessRunner instance.
    * @param {Object} options
-   * @param {Object} options.config - Configuration object from ai_config
+   * @param {AutoItConfig} options.config - Configuration object from ai_config
    * @param {import('./ProcessManager').default} options.processManager - Tracks running processes
    * @param {import('./OutputChannelManager').default} options.outputChannelManager - Creates output channels
    * @param {import('./HotkeyManager').default} options.hotkeyManager - Manages AutoIt3Wrapper hotkeys

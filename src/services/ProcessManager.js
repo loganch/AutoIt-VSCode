@@ -2,6 +2,8 @@ import { EventEmitter } from 'events';
 import { window } from 'vscode';
 import { handleError } from '../errorUtils';
 
+/** @typedef {import('../config/configStore').AutoItConfig} AutoItConfig */
+
 const MILLISECONDS_PER_SECOND = 1000;
 
 /**
@@ -26,7 +28,7 @@ const MILLISECONDS_PER_SECOND = 1000;
 class ProcessManager extends EventEmitter {
   /**
    * Creates a new ProcessManager instance.
-   * @param {Object} config - Configuration object with process management settings
+   * @param {AutoItConfig} config - Configuration object with process management settings
    * @param {Object} outputChannel - Main output channel for logging
    * @param {Function} getActiveDocumentFileName - Function to get active document filename
    * @param {string} outputName - Base name for output channels

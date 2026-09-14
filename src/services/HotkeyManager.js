@@ -2,6 +2,8 @@ import fsSync, { promises as fs } from 'fs';
 import path from 'path';
 import { debugLog } from '../debugLog';
 
+/** @typedef {import('../config/configStore').AutoItConfig} AutoItConfig */
+
 /**
  * Service for managing AutoIt3Wrapper hotkey conflicts with comprehensive functionality
  * for INI file detection, hotkey disabling, restoration, and concurrency management.
@@ -19,7 +21,7 @@ const HOTKEY_PLACEHOLDER = '\r\nSciTE_STOPEXECUTE=\r\nSciTE_RESTART=\r\n';
 class HotkeyManager {
   /**
    * Creates a new HotkeyManager instance.
-   * @param {Object} config - Configuration object containing wrapperPath and other settings.
+   * @param {AutoItConfig} config - Configuration object containing wrapperPath and other settings.
    */
   constructor(config) {
     // Matches hotkey entries in AutoIt3Wrapper.ini

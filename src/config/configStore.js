@@ -12,6 +12,39 @@ import { handleError } from '../errorUtils';
  * module's single responsibility; keep it here and document new key shapes.
  */
 
+/**
+ * @typedef {Object} AutoItConfig - Shape of the `config` Proxy exported below.
+ *   The `*Path`/`includePaths`/`smartHelp` keys resolve to the matching
+ *   `defaultPaths` entry's `fullPath` (or `fullPath` list, for `includePaths`);
+ *   every other key -- including settings not listed here -- passes through
+ *   to the raw `autoit` workspace configuration, so this typedef documents
+ *   the keys this codebase actually reads rather than an exhaustive contract.
+ * All properties are optional here since real config objects only ever
+ * carry the keys their configured/detected paths and workspace settings
+ * happen to produce, and tests commonly construct partial config mocks.
+ * @property {string} [aiPath] - Resolved path to AutoIt3.exe.
+ * @property {string} [wrapperPath] - Resolved path to AutoIt3Wrapper.au3.
+ * @property {string} [checkPath] - Resolved path to AU3Check.exe.
+ * @property {string} [helpPath] - Resolved path to AutoIt3Help.exe.
+ * @property {string} [infoPath] - Resolved path to Au3Info.exe.
+ * @property {string} [kodaPath] - Resolved path to Koda's FD.exe.
+ * @property {string[]} [includePaths] - Resolved fullPath for each configured include path.
+ * @property {Object.<string, {chmPath: string, udfPath: string[]}>} [smartHelp] - Resolved smartHelp entries keyed by UDF function prefix.
+ * @property {boolean} [enableDiagnostics] - Whether Au3Check diagnostics are enabled.
+ * @property {string} [consoleParams] - Extra console parameters passed to AutoIt3Wrapper.
+ * @property {boolean} [multiOutput] - Whether per-process output channels are shown.
+ * @property {boolean} [multiOutputReuseOutput] - Whether multi-output reuses one channel.
+ * @property {number} [multiOutputFinishedTimeout] - Delay before a finished multi-output channel is auto-closed.
+ * @property {number} [multiOutputMaxFinished] - Max finished multi-output channels kept open.
+ * @property {string} [multiOutputShowProcessId] - How process IDs are prefixed in multi-output ('Multi'|'None'|other).
+ * @property {string} [outputShowTime] - When to prefix output lines with a timestamp ('Process'|'Global'|'All').
+ * @property {string} [outputCodePage] - Code page used to decode process output.
+ * @property {number} [outputMaxHistoryLines] - Max lines kept in the AutoIt output channel.
+ * @property {boolean} [clearOutput] - Whether output is cleared before each run.
+ * @property {(key: string, defaultValue?: any) => any} [get] - Pass-through to the raw workspace configuration's `get`.
+ * @property {(key: string, value: any) => void} [update] - Pass-through to the raw workspace configuration's `update`.
+ */
+
 // `data` is resolved lazily via a getter (not at module-import time) so
 // merely importing this module never calls the VS Code API before the
 // extension host is ready — the same discipline completionTransforms.js and
