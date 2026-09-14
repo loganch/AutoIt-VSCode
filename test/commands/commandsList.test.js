@@ -1,4 +1,4 @@
-import { commandsPrefix, commandsList } from '../src/commandsList';
+import { commandsPrefix, commandsList } from '../../src/commands/commandsList';
 
 describe('commandsList', () => {
   it('exports commandsPrefix as a string', () => {

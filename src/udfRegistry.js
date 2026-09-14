@@ -4,7 +4,9 @@
 // optionally, a `hovers` map. completions/index.js and hovers/index.js both
 // derive their registries from this one list, so a new UDF is registered in
 // one place and cannot be added to one index but forgotten in the other —
-// the F5 tech-debt risk that motivated this file.
+// the F5 tech-debt risk that motivated this file. Sits at src/ root because
+// it spans both signatures/ and completions/ equally — filing it under
+// either would misrepresent it as belonging to just one.
 
 import * as functions from './signatures/functions';
 import * as keywords from './signatures/keywords';

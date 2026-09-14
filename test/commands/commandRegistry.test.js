@@ -39,7 +39,7 @@ jest.mock('../../src/commands/utilityCommands', () => ({
 jest.mock('../../src/commands/functionTraceAdd.js', () => ({ __esModule: true, default: jest.fn() }));
 
 import { commandRegistry } from '../../src/commands/commandRegistry';
-import { commandsList } from '../../src/commandsList';
+import { commandsList } from '../../src/commands/commandsList';
 
 const packageJson = require('../../package.json');
 

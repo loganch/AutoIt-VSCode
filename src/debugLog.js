@@ -1,6 +1,10 @@
 /// <reference types="vscode" />
 import { window, workspace } from 'vscode';
 
+// Cross-cutting leaf helper used across commands/, providers/, services/, and
+// utils/ alike — it has no single owning subdirectory, so it stays at src/
+// root rather than implying a false home under one of them.
+
 /**
  * Optional debug logger gated on the `autoit.debugLogging` setting. Centralises
  * the cfg-check + output-channel/console boilerplate that was copy-pasted ~5×

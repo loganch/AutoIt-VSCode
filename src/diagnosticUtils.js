@@ -1,6 +1,10 @@
 import { Diagnostic, DiagnosticSeverity, Position, Range, Uri, workspace } from 'vscode';
 import { debugLog } from './debugLog';
 
+// AU3Check output parsing and diagnostic-collection bookkeeping for
+// extension.js's document-check pipeline. Sits at src/ root next to its sole
+// caller rather than under a subdirectory it doesn't otherwise belong to.
+
 /**
  * Returns the diagnostic severity based on the severity string.
  * @param {string} severityString - The severity string to convert to DiagnosticSeverity.

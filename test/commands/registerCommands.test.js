@@ -16,7 +16,7 @@ jest.mock('../../src/commands/commandRegistry', () => ({
 }));
 
 // Mock commandsList to use simple known values (commandC has no registry handler)
-jest.mock('../../src/commandsList', () => ({
+jest.mock('../../src/commands/commandsList', () => ({
   commandsList: ['commandA', 'commandB', 'commandC'],
   commandsPrefix: 'autoit.',
 }));
