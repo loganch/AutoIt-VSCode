@@ -5,7 +5,7 @@ import { REGEX_PATTERNS } from './regexPatterns';
 import { validateString } from './validation';
 
 export const isValidFilePath = filePath => {
-  return typeof filePath === 'string' && filePath.length > 0 && filePath.trim().length > 0;
+  return typeof filePath === 'string' && filePath.trim().length > 0;
 };
 
 /**
