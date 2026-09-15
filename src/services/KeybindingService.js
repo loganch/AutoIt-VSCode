@@ -5,12 +5,7 @@ import { parse } from 'jsonc-parser';
 import { performance } from 'perf_hooks';
 import { handleError } from '../errorUtils';
 
-/**
- * @typedef {Object.<string, string>} KeybindingMap
- * @typedef {Object} KeybindingFilter
- * @property {boolean} status - Filter by status
- * @property {string|null} thisFile - Filter by file
- */
+/** @typedef {Object.<string, string>} KeybindingMap */
 
 /**
  * Service for managing VSCode keybindings with profile detection, file watching,
