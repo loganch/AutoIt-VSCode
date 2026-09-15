@@ -58,6 +58,61 @@ describe('TrackingServiceBase', () => {
     });
   });
 
+  describe('updateFileDebounced', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    test('registers a single debounced parser per file and records the pending parse', () => {
+      service.updateFileDebounced('C:\\a.au3', 'v1');
+      service.updateFileDebounced('C:\\a.au3', 'v2');
+
+      expect(service.debouncedParseByFile.size).toBe(1);
+      expect(typeof service.debouncedParseByFile.get('C:\\a.au3').cancel).toBe('function');
+      expect(service.pendingParses.get('C:\\a.au3').source).toBe('v2');
+    });
+
+    test('parses only the latest source after the debounce window', () => {
+      service.updateFileDebounced('C:\\a.au3', 'v1');
+      service.updateFileDebounced('C:\\a.au3', 'v2');
+
+      jest.advanceTimersByTime(service.parseDebounceMs);
+
+      expect(service.fileParsers.get('C:\\a.au3')).toEqual({ lines: ['v2'] });
+    });
+
+    test('does not parse before the debounce window elapses', () => {
+      service.updateFileDebounced('C:\\a.au3', 'v1');
+
+      jest.advanceTimersByTime(service.parseDebounceMs / 2);
+
+      expect(service.fileParsers.has('C:\\a.au3')).toBe(false);
+    });
+
+    test('keeps independent debounce timers per file', () => {
+      service.updateFileDebounced('C:\\a.au3', 'a-src');
+      service.updateFileDebounced('C:\\b.au3', 'b-src');
+
+      jest.advanceTimersByTime(service.parseDebounceMs);
+
+      expect(service.fileParsers.get('C:\\a.au3')).toEqual({ lines: ['a-src'] });
+      expect(service.fileParsers.get('C:\\b.au3')).toEqual({ lines: ['b-src'] });
+    });
+
+    test('cancel prevents the pending parse from running', () => {
+      service.updateFileDebounced('C:\\a.au3', 'v1');
+      service.debouncedParseByFile.get('C:\\a.au3').cancel();
+
+      jest.advanceTimersByTime(service.parseDebounceMs * 2);
+
+      expect(service.fileParsers.has('C:\\a.au3')).toBe(false);
+    });
+  });
+
   test('updateFileImmediate cancels pending debounced parse and parses synchronously', () => {
     const cancel = jest.fn();
     service.debouncedParseByFile.set('C:\\a.au3', { cancel });

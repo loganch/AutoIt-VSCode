@@ -1,5 +1,5 @@
 import IncludeResolver from '../../language/include.js';
-import updateFileDebounced from '../debouncedFileUpdate.js';
+import debounce from '../../utils/debounce.js';
 import fs from 'fs';
 import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../../constants.js';
 import { handleError } from '../../errorUtils.js';
@@ -147,7 +147,19 @@ class TrackingServiceBase {
    * @param {string} source - File source code
    */
   updateFileDebounced(filePath, source) {
-    updateFileDebounced(this, filePath, source);
+    if (!this.debouncedParseByFile.has(filePath)) {
+      this.debouncedParseByFile.set(
+        filePath,
+        debounce((path, src) => {
+          this._parseFile(path, src);
+        }, this.parseDebounceMs),
+      );
+    }
+
+    this.pendingParses.set(filePath, { source, timestamp: Date.now() });
+
+    const debouncedParse = this.debouncedParseByFile.get(filePath);
+    debouncedParse(filePath, source);
   }
 
   /**
