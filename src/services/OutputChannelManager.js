@@ -91,10 +91,10 @@ class OutputChannelManager {
   /**
    * Creates an instance of OutputChannelManager.
    * @param {Object} options
-   * @param {Object} options.globalOutputChannel - Global output channel singleton
+   * @param {import("vscode").OutputChannel} options.globalOutputChannel - Global output channel singleton
    * @param {AutoItConfig} options.config - Configuration object from ai_config
-   * @param {Object} [options.keybindings] - Keybindings object for hotkey replacement
-   * @param {Object} [options.aWrapperHotkey] - AutoIt3Wrapper hotkey manager
+   * @param {import("./KeybindingService").KeybindingMap} [options.keybindings] - Keybindings object for hotkey replacement
+   * @param {import("./HotkeyManager").default} [options.aWrapperHotkey] - AutoIt3Wrapper hotkey manager
    * @param {Object} [options.runners] - Runners object for managing output state
    */
   constructor({ globalOutputChannel, config, keybindings = {}, aWrapperHotkey, runners = {} }) {
