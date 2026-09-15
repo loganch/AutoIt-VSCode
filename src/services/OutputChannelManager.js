@@ -98,26 +98,6 @@ class OutputChannelManager {
    * @param {Object} [options.runners] - Runners object for managing output state
    */
   constructor({ globalOutputChannel, config, keybindings = {}, aWrapperHotkey, runners = {} }) {
-    // Validate required parameters
-    if (!globalOutputChannel) {
-      throw new Error(
-        'OutputChannelManager: globalOutputChannel is required and cannot be null/undefined',
-      );
-    }
-
-    // Validate that globalOutputChannel has the expected methods
-    const requiredMethods = ['append', 'appendLine', 'show', 'hide', 'clear', 'dispose'];
-    for (const method of requiredMethods) {
-      if (typeof globalOutputChannel[method] !== 'function') {
-        throw new Error(`OutputChannelManager: globalOutputChannel must have method '${method}'`);
-      }
-    }
-
-    // Validate config parameter
-    if (!config || typeof config !== 'object') {
-      throw new Error('OutputChannelManager: config parameter is required and must be an object');
-    }
-
     this.globalOutputChannel = globalOutputChannel;
     this.config = config;
     this.keybindings = keybindings;

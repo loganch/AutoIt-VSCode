@@ -47,45 +47,6 @@ describe('OutputChannelManager', () => {
     runners = { isNewLine: true, lastId: 0 };
   });
 
-  it('throws when globalOutputChannel is missing', () => {
-    expect(
-      () =>
-        new OutputChannelManager({
-          globalOutputChannel: null,
-          config,
-          keybindings: {},
-          aWrapperHotkey: hotkeyManager,
-          runners,
-        }),
-    ).toThrow(/globalOutputChannel is required/);
-  });
-
-  it('throws when globalOutputChannel lacks required methods', () => {
-    expect(
-      () =>
-        new OutputChannelManager({
-          globalOutputChannel: { append: jest.fn() },
-          config,
-          keybindings: {},
-          aWrapperHotkey: hotkeyManager,
-          runners,
-        }),
-    ).toThrow(/must have method/);
-  });
-
-  it('throws when config is missing', () => {
-    expect(
-      () =>
-        new OutputChannelManager({
-          globalOutputChannel: globalChannel,
-          config: null,
-          keybindings: {},
-          aWrapperHotkey: hotkeyManager,
-          runners,
-        }),
-    ).toThrow(/config parameter is required/);
-  });
-
   it('creates an instance with valid dependencies', () => {
     const manager = new OutputChannelManager({
       globalOutputChannel: globalChannel,

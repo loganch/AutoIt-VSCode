@@ -13,7 +13,6 @@ import { searchAndReplace } from './editorActions';
  * @returns {string} - The modified match with the added trace statement.
  */
 function appendTrace(match, p1, p2, functionName) {
-  // Check for skipping comments
   if (p1.includes('; FunctionTraceSkip')) {
     return match;
   }
@@ -26,11 +25,9 @@ function appendTrace(match, p1, p2, functionName) {
 async function functionTraceAdd() {
   const funcPattern = /()(\bfunc\b\s+([^)\s]+)\(.*\))/gi;
 
-  // Remove existing trace statements
   const traceStatementPattern = /\s*ConsoleWrite\('@@ \(.+;### Trace Function'/;
   await searchAndReplace(traceStatementPattern);
 
-  // Perform replacement using regular expressions
   const editor = window.activeTextEditor;
 
   if (!editor) {
