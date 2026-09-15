@@ -138,7 +138,7 @@ class HotkeyManager {
 
     // Safety timer - should never fire unless something went wrong
     this.timer = setTimeout(() => {
-      console.warn('HotkeyManager: Safety timer triggered - forcing reset');
+      debugLog('HotkeyManager: Safety timer triggered - forcing reset');
       this._forceReset();
     }, SAFE_TIMER_MS);
 
@@ -186,7 +186,7 @@ class HotkeyManager {
    * @private
    */
   async _forceReset() {
-    console.warn('HotkeyManager: Performing force reset');
+    debugLog('HotkeyManager: Performing force reset');
     this.count.clear();
     await this.reset();
   }

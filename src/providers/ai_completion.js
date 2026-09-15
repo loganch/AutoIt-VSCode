@@ -341,7 +341,10 @@ const getMapKeyCompletions = async (document, position, mapName) => {
 
   // Guard that result is an object
   if (!result || typeof result !== 'object') {
-    console.warn('Invalid result from getKeysForMapWithIncludes:', result);
+    console.warn(
+      '[AutoIt Extension] getMapKeyCompletions: Invalid result from getKeysForMapWithIncludes:',
+      result,
+    );
     return [];
   }
 

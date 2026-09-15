@@ -125,7 +125,7 @@ class OutputChannelManager {
     // generateHotkeyReplacementMessage), so say so once at wiring time.
     if (Object.keys(this.keybindings).length === 0) {
       console.warn(
-        '[OutputChannelManager] No keybindings provided; hotkey-failure messages will omit key hints.',
+        '[AutoIt Extension] OutputChannelManager: No keybindings provided; hotkey-failure messages will omit key hints.',
       );
     }
     this.aWrapperHotkey = aWrapperHotkey;
@@ -367,7 +367,7 @@ class OutputChannelManager {
         // Provide a fallback function that prevents crashes
         return () => {
           console.warn(
-            `[OutputChannelManager] Fallback called for method '${prop}' due to proxy error`,
+            `[AutoIt Extension] OutputChannelManager: Fallback called for method '${prop}' due to proxy error`,
           );
         };
       }

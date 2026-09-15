@@ -3,6 +3,7 @@ import { existsSync } from 'fs';
 import { execFile } from 'child_process';
 import { basename, dirname, sep } from 'path';
 import { FORMATTER } from '../constants';
+import { handleError } from '../errorUtils';
 
 const validateCheckPath = checkPath => {
   if (!existsSync(checkPath)) {
@@ -67,7 +68,7 @@ const runCheckProcess = (document, { checkPath, includePaths }) => {
       if (!data || data.length === 0) {
         return;
       }
-      console.error(`[AutoIt][extension] Au3Check stderr: ${data.toString()}`);
+      handleError('Au3Check stderr', data.toString());
     });
 
     checkProcess.on('error', error => {
