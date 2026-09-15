@@ -1,5 +1,5 @@
 import { window, Position } from 'vscode';
-import searchAndReplace from './editorActions';
+import { searchAndReplace } from './editorActions';
 import { handleError } from '../errorUtils';
 
 /**

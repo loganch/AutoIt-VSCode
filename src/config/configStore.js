@@ -116,7 +116,7 @@ function setSuppressEvents(suppress) {
 }
 
 /** @returns {boolean} True while configuration-change handling is suppressed. */
-function isNoEvents() {
+function areEventsSuppressed() {
   return suppressEvents;
 }
 
@@ -142,7 +142,7 @@ export {
   addListener,
   removeListener,
   setSuppressEvents,
-  isNoEvents,
+  areEventsSuppressed,
   refreshData,
   notifyListeners,
 };

@@ -49,7 +49,7 @@ export function getActiveDocumentFileName() {
  * @param {string} [replacement='\r\n'] - The string to replace the matched patterns with.
  * @returns {Promise<number>} A promise that resolves to the number of replacements made.
  */
-async function searchAndReplace(regex, replacement = '\r\n') {
+export async function searchAndReplace(regex, replacement = '\r\n') {
   const editor = window.activeTextEditor;
 
   if (!editor) {
@@ -73,5 +73,3 @@ async function searchAndReplace(regex, replacement = '\r\n') {
 
   return (text.match(regex) || []).length;
 }
-
-export default searchAndReplace;

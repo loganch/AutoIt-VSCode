@@ -7,6 +7,7 @@ import { resolveVariables, splitPath, fixPath } from './pathStringUtils';
 import { migrateSmartHelpConfig } from './smartHelpMigrator';
 import { syncIncludePathsToRegistry } from './registrySync';
 import { conf } from './configStore';
+import { handleError } from '../errorUtils';
 
 const isWinOS = process.platform === 'win32';
 const MESSAGE_HIDE_DELAY_MS = 1000;
@@ -71,7 +72,8 @@ function verifyPath(filePath, pathState, msgSuffix) {
       pathState.prevCheck = filePath;
       return filePath;
     })
-    .catch(() => {
+    .catch(err => {
+      handleError('verifyPath', err, false, { filePath });
       if (showErrors) showError(filePath, pathState, msgSuffix);
       return undefined;
     });

@@ -11,10 +11,12 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/commands/editorActions', () => jest.fn(() => Promise.resolve(0)));
+jest.mock('../../src/commands/editorActions', () => ({
+  searchAndReplace: jest.fn(() => Promise.resolve(0)),
+}));
 
 import functionTraceAdd from '../../src/commands/functionTraceAdd';
-import searchAndReplace from '../../src/commands/editorActions';
+import { searchAndReplace } from '../../src/commands/editorActions';
 
 describe('functionTraceAdd', () => {
   beforeEach(() => {

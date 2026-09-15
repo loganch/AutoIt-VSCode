@@ -9,7 +9,7 @@ import {
   addListener,
   removeListener,
   setSuppressEvents,
-  isNoEvents,
+  areEventsSuppressed,
   refreshData,
   notifyListeners,
   config,
@@ -36,7 +36,7 @@ function init() {
  */
 function registerConfigListener() {
   return workspace.onDidChangeConfiguration(({ affectsConfiguration }) => {
-    if (isNoEvents() || !affectsConfiguration('autoit')) return;
+    if (areEventsSuppressed() || !affectsConfiguration('autoit')) return;
 
     refreshData();
 

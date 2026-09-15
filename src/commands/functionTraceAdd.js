@@ -1,5 +1,5 @@
 import { window, Range } from 'vscode';
-import searchAndReplace from './editorActions';
+import { searchAndReplace } from './editorActions';
 
 /**
  * Adds a trace statement to a given match in a text.
