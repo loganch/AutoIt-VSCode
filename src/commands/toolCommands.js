@@ -11,6 +11,7 @@ import { escapeRegexLiteral } from '../utils/regexPatterns';
 import conf from '../config/ai_config';
 import { getServiceStack } from '../services/process/commandServiceStack';
 import { validateExecutablePath } from '../utils/pathValidation';
+import { handleError } from '../errorUtils';
 
 // Timeout used for status bar messages (ms)
 const STATUS_MSG_TIMEOUT_MS = 1500;
@@ -187,16 +188,20 @@ function launchInfo() {
 
 /**
  * Launches Koda Form Designer
- * @returns {void}
+ * @returns {Promise<void>}
  */
-function launchKoda() {
+async function launchKoda() {
   const kodaPathValidation = validateExecutablePath(config.kodaPath);
   if (!kodaPathValidation.valid) {
     window.showErrorMessage(`Koda Form Designer not found: ${config.kodaPath}`);
     return;
   }
 
-  getServiceStack(getActiveDocumentFileName).processRunner.run(config.kodaPath, []);
+  try {
+    await getServiceStack(getActiveDocumentFileName).processRunner.run(config.kodaPath, []);
+  } catch (error) {
+    handleError('launchKoda', error, true);
+  }
 }
 
 export { compile, tidy, check, build, launchHelp, launchInfo, launchKoda };

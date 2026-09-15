@@ -209,16 +209,16 @@ describe('ToolCommands.launchKoda', () => {
     ({ launchKoda } = require('../../src/commands/toolCommands'));
   });
 
-  test('runs Koda when the executable exists', () => {
-    launchKoda();
+  test('runs Koda when the executable exists', async () => {
+    await launchKoda();
 
     expect(mockRun).toHaveBeenCalledWith(mockConfig.kodaPath, []);
   });
 
-  test('shows an error and does not run when the Koda executable is missing', () => {
+  test('shows an error and does not run when the Koda executable is missing', async () => {
     mockExistsSync.mockReturnValue(false);
 
-    launchKoda();
+    await launchKoda();
 
     expect(mockWindow.showErrorMessage).toHaveBeenCalledWith(
       `Koda Form Designer not found: ${mockConfig.kodaPath}`,
