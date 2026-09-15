@@ -4,19 +4,25 @@ import { performance } from 'node:perf_hooks';
 let lastHide = 0;
 const MESSAGE_BURST_COUNT = 4;
 const MESSAGE_COOLDOWN_MS = 900;
+
+/**
+ * Extracts the optional `{ timeout }` options object from a message call's
+ * arguments (its second positional arg, when present).
+ * @param {Array} args - Arguments passed to the message wrapper
+ * @returns {{timeout: number|undefined}}
+ */
+const parseMessageOptions = args => {
+  const [, options] = args;
+  const isOptionsObject = options && options instanceof Object && !(options instanceof Array);
+  return { timeout: isOptionsObject ? options.timeout : undefined };
+};
+
 // accepts new option parameter in second argument: timeout
 const initMessage = type => {
   const timers = {};
   const func = (...args) => {
-    let timeout;
-    const [message, options] = args;
-    if (options && options instanceof Object && !(options instanceof Array)) {
-      ({ timeout } = options);
-      // not sure if we need to bother sanitize options object or not, seems to work as is
-      // delete options.timeout;
-      // if (!options.keys().length)
-      //   args.splice(1,1);
-    }
+    const [message] = args;
+    const { timeout } = parseMessageOptions(args);
     const clearTimeoutEx = () => {
       clearTimeout(timers[message]);
       delete timers[message];
