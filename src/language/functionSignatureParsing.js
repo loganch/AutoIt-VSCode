@@ -6,6 +6,22 @@
 const FUNCTION_START_PATTERN = /^\s*(?:Volatile\s+)?Func\s+(\w+)\s*\(/i;
 
 /**
+ * @typedef {Object} FunctionDeclarationMatch
+ * @property {string} functionName - Name of the declared function
+ * @property {string} paramsText - Raw text between the parentheses, trimmed
+ * @property {number} paramsStartIndex - Index in `line` where paramsText begins
+ * @property {number} closingParenIndex - Index in `line` of the matching closing paren
+ */
+
+/**
+ * @typedef {Object} FunctionBoundary
+ * @property {string} name - Function name
+ * @property {number} startLine - Zero-based index of the `Func` line
+ * @property {number} endLine - Zero-based index of the matching `EndFunc` line
+ * @property {string[]} parameters - Normalized parameter names
+ */
+
+/**
  * Yields each character with its quoted context so callers never reimplement
  * AutoIt string tracking (including doubled-quote escapes). Quote characters
  * themselves yield as quoted; callers gate delimiter/depth logic on !quoted.
@@ -76,6 +92,13 @@ const scanForClosingParen = (text, startIndex) => {
   return -1;
 };
 
+/**
+ * Splits `text` on `delimiter`, but only at top-level nesting -- occurrences
+ * inside quoted strings or nested (), [], {} are not treated as splits.
+ * @param {string} text - Source text to split
+ * @param {string} [delimiter] - Delimiter character to split on
+ * @returns {string[]} Trimmed, non-empty top-level tokens
+ */
 const splitTopLevel = (text, delimiter = ',') => {
   if (!text || typeof text !== 'string') {
     return [];
@@ -167,6 +190,13 @@ const splitTopLevelAssignment = text => {
   };
 };
 
+/**
+ * Parses a single line as a `Func Name(...)` declaration, respecting quoted
+ * strings and nested delimiters when locating the closing parenthesis.
+ * @param {string} line - Source line to parse
+ * @returns {FunctionDeclarationMatch|null} Match details, or null if `line`
+ *   isn't a function declaration or has no matching closing paren
+ */
 const parseFunctionDeclarationLine = line => {
   if (typeof line !== 'string') {
     return null;
@@ -208,6 +238,13 @@ const normalizeParameterName = (paramToken, ensureDollarPrefix = false) => {
   return withoutByRef;
 };
 
+/**
+ * Splits a parameter-list string into normalized parameter names (ByRef and
+ * default-value parts stripped).
+ * @param {string} paramsText - Raw parameter-list text between the parens
+ * @param {boolean} [ensureDollarPrefix] - Add a leading $ to names missing one
+ * @returns {string[]} Normalized, non-empty parameter names
+ */
 const parseParameterNames = (paramsText, ensureDollarPrefix = false) => {
   if (!paramsText || typeof paramsText !== 'string') {
     return [];
@@ -218,6 +255,13 @@ const parseParameterNames = (paramsText, ensureDollarPrefix = false) => {
     .filter(Boolean);
 };
 
+/**
+ * Scans document lines for Func/EndFunc boundaries, collecting each
+ * function's name, line range, and normalized parameter names.
+ * @param {string[]} lines - Document lines to scan
+ * @param {boolean} [ensureDollarPrefix] - Add a leading $ to parameter names missing one
+ * @returns {FunctionBoundary[]} One entry per matched Func/EndFunc pair
+ */
 const parseFunctionBoundaries = (lines, ensureDollarPrefix = false) => {
   const funcEndPattern = /^\s*EndFunc/i;
   const functions = [];
