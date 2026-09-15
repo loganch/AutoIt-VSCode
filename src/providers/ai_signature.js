@@ -7,7 +7,11 @@ import {
   languages,
 } from 'vscode';
 import { AUTOIT_MODE } from '../utils/coreConstants';
-import { buildFunctionSignature, getIncludeData, getIncludeDataByPath } from '../utils/functionSignature';
+import {
+  buildFunctionSignature,
+  getIncludeData,
+  getIncludeDataByPath,
+} from '../utils/functionSignature';
 import { REGEX_PATTERNS } from '../utils/regexPatterns';
 import { isInComment } from '../utils/textUtils';
 
@@ -17,6 +21,8 @@ import defaultSigs from '../signatures';
 
 const { findFilePath } = aiConfig;
 import { DEFAULT_UDFS } from '../constants';
+
+/** @typedef {import('../utils/functionSignature').FunctionSignatureData} FunctionSignatureData */
 
 const documentSignatureCache = new Map();
 const FUNCTION_NAME_PART_INDEX_FROM_END = 2;
@@ -131,9 +137,10 @@ function getLibraryIncludesFromText(text) {
  * @param {string[]} includesCheck - Include scripts referenced with `#include "..."`.
  * @param {string[]} libraryIncludes - Include file names referenced with `#include <...>`.
  * @param {import("vscode").TextDocument} document - The document the includes belong to.
- * @returns {Object} An object containing the signatures found in the included files.
+ * @returns {Object.<string, FunctionSignatureData>} An object containing the signatures found in the included files.
  */
 function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, document) {
+  /** @type {Object.<string, FunctionSignatureData>} */
   const includes = {};
 
   includesCheck.forEach(script => {
@@ -156,9 +163,10 @@ function parseIncludedFunctionSignatures(includesCheck, libraryIncludes, documen
  * Returns an object of AutoIt functions found within the given AutoIt script text
  * @param {string} text The full text of the AutoIt script
  * @param {string} fileName The name of the file the text belongs to
- * @returns {Object} Object containing SignatureInformation objects
+ * @returns {Object.<string, FunctionSignatureData>} Object containing the parsed signatures
  */
 function parseLocalFunctionSignatures(text, fileName) {
+  /** @type {Object.<string, FunctionSignatureData>} */
   const functions = {};
 
   functionDefinitionRegex.lastIndex = 0;
@@ -179,7 +187,7 @@ function parseLocalFunctionSignatures(text, fileName) {
  * so only local functions are re-parsed.
  *
  * @param {import("vscode").TextDocument} document - The document to collect signatures for.
- * @returns {Object} An object containing all signatures available to the document.
+ * @returns {Object.<string, FunctionSignatureData>} An object containing all signatures available to the document.
  */
 function getDocumentSignatures(document) {
   const cacheKey = document.uri ? document.uri.toString() : document.fileName;
@@ -215,7 +223,7 @@ function getDocumentSignatures(document) {
 
 /**
  * Creates a SignatureInformation object from a given signature.
- * @param {Object} foundSig - The signature to create the SignatureInformation object from.
+ * @param {FunctionSignatureData} foundSig - The signature to create the SignatureInformation object from.
  * @returns {SignatureInformation} The created SignatureInformation object.
  */
 function createSignatureInfo(foundSig) {
