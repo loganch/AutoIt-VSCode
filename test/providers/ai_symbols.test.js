@@ -273,7 +273,7 @@ describe('Map Symbol Generation', () => {
 
   beforeEach(() => {
     // Reset MapTrackingService singleton before each test
-    const MapTrackingService = require('../../src/services/MapTrackingService').default;
+    const MapTrackingService = require('../../src/services/tracking/MapTrackingService').default;
     MapTrackingService.resetInstance();
 
     // Store original configuration and set default mock

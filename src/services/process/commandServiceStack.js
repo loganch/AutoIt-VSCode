@@ -1,9 +1,9 @@
 import ProcessRunner from './ProcessRunner';
 import ProcessManager from './ProcessManager';
-import OutputChannelManager from './OutputChannelManager';
-import HotkeyManager from './HotkeyManager';
-import conf from '../config/ai_config';
-import packageJson from '../../package.json';
+import OutputChannelManager from '../OutputChannelManager';
+import HotkeyManager from '../HotkeyManager';
+import conf from '../../config/ai_config';
+import packageJson from '../../../package.json';
 
 const { config } = conf;
 

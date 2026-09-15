@@ -5,7 +5,7 @@ import { spawn } from 'child_process';
 import { getIncludeText } from '../utils/fsCache';
 import { escapeRegexLiteral } from '../utils/regexPatterns';
 import conf from '../config/ai_config';
-import { getServiceStack } from '../services/commandServiceStack';
+import { getServiceStack } from '../services/process/commandServiceStack';
 import { validateExecutablePath } from '../utils/pathValidation';
 
 // Timeout used for status bar messages (ms)

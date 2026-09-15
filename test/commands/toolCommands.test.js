@@ -54,13 +54,15 @@ jest.mock('../../src/commands/scriptCommands.js', () => ({
   globalOutputChannel: {},
 }));
 
-jest.mock('../../src/services/ProcessRunner', () =>
+jest.mock('../../src/services/process/ProcessRunner', () =>
   jest.fn().mockImplementation(() => ({
     run: jest.fn(),
   })),
 );
 
-jest.mock('../../src/services/ProcessManager', () => jest.fn().mockImplementation(() => ({})));
+jest.mock('../../src/services/process/ProcessManager', () =>
+  jest.fn().mockImplementation(() => ({})),
+);
 jest.mock('../../src/services/OutputChannelManager', () => {
   const MockOutputChannelManager = jest.fn().mockImplementation(() => ({}));
   MockOutputChannelManager.createGlobalOutputChannel = jest.fn(() => ({
@@ -187,8 +189,8 @@ describe('ToolCommands.launchKoda', () => {
     mockExistsSync.mockReturnValue(true);
 
     // resetMocks wipes the class-mock implementations; reinstall for the stack factory
-    const ProcessRunner = require('../../src/services/ProcessRunner');
-    const ProcessManager = require('../../src/services/ProcessManager');
+    const ProcessRunner = require('../../src/services/process/ProcessRunner');
+    const ProcessManager = require('../../src/services/process/ProcessManager');
     const OutputChannelManager = require('../../src/services/OutputChannelManager');
     const HotkeyManager = require('../../src/services/HotkeyManager');
     ProcessRunner.mockImplementation(() => ({ run: (...args) => mockRun(...args) }));

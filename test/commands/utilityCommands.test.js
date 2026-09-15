@@ -39,7 +39,7 @@ jest.mock('../../src/config/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
 }));
 
-jest.mock('../../src/services/commandServiceStack', () => {
+jest.mock('../../src/services/process/commandServiceStack', () => {
   const pkg = require('../../package.json');
   const stack = {
     globalOutputChannel: {

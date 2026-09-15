@@ -1,8 +1,8 @@
 jest.mock('vscode', () => ({}));
 
 import fs from 'fs';
-import TrackingServiceBase from '../../src/services/TrackingServiceBase';
-import IncludeResolver from '../../src/language/include.js';
+import TrackingServiceBase from '../../../src/services/tracking/TrackingServiceBase';
+import IncludeResolver from '../../../src/language/include.js';
 
 class MinimalTracker extends TrackingServiceBase {
   createParser(source) {

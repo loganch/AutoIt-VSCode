@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
 import { window } from 'vscode';
-import { handleError } from '../errorUtils';
+import { handleError } from '../../errorUtils';
 
-/** @typedef {import('../config/configStore').AutoItConfig} AutoItConfig */
+/** @typedef {import('../../config/configStore').AutoItConfig} AutoItConfig */
 
 const MILLISECONDS_PER_SECOND = 1000;
 

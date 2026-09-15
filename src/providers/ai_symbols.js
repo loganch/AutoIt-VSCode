@@ -14,7 +14,7 @@ import { REGEX_PATTERNS } from '../utils/regexPatterns';
 
 const { functionPattern, regionPattern, variablePattern } = REGEX_PATTERNS;
 import { rangeContainsRange } from '../utils/textUtils';
-import MapTrackingService from '../services/MapTrackingService.js';
+import MapTrackingService from '../services/tracking/MapTrackingService.js';
 import { handleError } from '../errorUtils';
 
 const commentEndRegex = /^\s*#(?:ce|comments-end)/;

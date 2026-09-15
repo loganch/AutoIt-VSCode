@@ -6,15 +6,15 @@ jest.mock('iconv-lite', () => ({
   decode: jest.fn((data, enc) => `decoded:${enc}:${data.toString()}`),
 }));
 
-jest.mock('../../src/utils/pathValidation', () => ({
+jest.mock('../../../src/utils/pathValidation', () => ({
   validateFilePath: jest.fn(() => ({ valid: true })),
   validateExecutablePath: jest.fn(() => ({ valid: true })),
 }));
 
 const { spawn } = require('child_process');
 const { decode } = require('iconv-lite');
-const { validateFilePath, validateExecutablePath } = require('../../src/utils/pathValidation');
-const ProcessRunner = require('../../src/services/ProcessRunner').default;
+const { validateFilePath, validateExecutablePath } = require('../../../src/utils/pathValidation');
+const ProcessRunner = require('../../../src/services/process/ProcessRunner').default;
 
 const FIRST_PROCESS_ID = 1;
 const SECOND_EXIT_CODE = 2;
@@ -211,7 +211,7 @@ describe('ProcessRunner', () => {
     expect(typeof exitHandlers.exit).toBe('function');
   });
 
-  it('run does not throw when reuseAiOutput is false and multiOutput is on (matches runScript\'s call pattern)', async () => {
+  it("run does not throw when reuseAiOutput is false and multiOutput is on (matches runScript's call pattern)", async () => {
     // scriptCommands.js's runScript passes reuseAiOutput = config.multiOutput &&
     // config.multiOutputReuseOutput, which is `false` (the boolean, not null)
     // whenever multiOutput is off. `false && findRunner(...)` short-circuits to
@@ -225,9 +225,7 @@ describe('ProcessRunner', () => {
     };
     spawn.mockReturnValue(child);
 
-    await expect(runner.run('C:\\AutoIt\\AutoIt3.exe', ['script.au3'], false)).resolves.toBe(
-      child,
-    );
+    await expect(runner.run('C:\\AutoIt\\AutoIt3.exe', ['script.au3'], false)).resolves.toBe(child);
     expect(processManager.findRunner).not.toHaveBeenCalled();
   });
 

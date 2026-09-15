@@ -31,8 +31,8 @@ import { registerParenTriggerListener } from './completionTransforms';
 import { warmDocument, resetIndex } from './services/symbolIndex';
 import { clearIncludeEdges } from './services/includeGraph';
 import { ensureWarm } from './services/symbolWarmup';
-import MapTrackingService from './services/MapTrackingService.js';
-import VariableTrackingService from './services/VariableTrackingService.js';
+import MapTrackingService from './services/tracking/MapTrackingService.js';
+import VariableTrackingService from './services/tracking/VariableTrackingService.js';
 import {
   runCheckProcess,
   validateCheckPath,

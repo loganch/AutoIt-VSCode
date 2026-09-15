@@ -60,8 +60,8 @@ jest.mock('vscode', () => ({
   window: mockWindow,
 }));
 
-jest.mock('../../src/services/ProcessRunner', () => MockProcessRunner);
-jest.mock('../../src/services/ProcessManager', () => MockProcessManager);
+jest.mock('../../src/services/process/ProcessRunner', () => MockProcessRunner);
+jest.mock('../../src/services/process/ProcessManager', () => MockProcessManager);
 jest.mock('../../src/services/OutputChannelManager', () => MockOutputChannelManager);
 jest.mock('../../src/services/HotkeyManager', () => MockHotkeyManager);
 
@@ -118,12 +118,8 @@ describe('ScriptCommands', () => {
       () => mockGlobalOutputChannel,
     );
 
-    ({
-      killScript,
-      restartScript,
-      runScript,
-    } = require('../../src/commands/scriptCommands.js'));
-    ({ getServiceStack } = require('../../src/services/commandServiceStack.js'));
+    ({ killScript, restartScript, runScript } = require('../../src/commands/scriptCommands.js'));
+    ({ getServiceStack } = require('../../src/services/process/commandServiceStack.js'));
   });
 
   test('builds the shared stack lazily via getServiceStack', () => {

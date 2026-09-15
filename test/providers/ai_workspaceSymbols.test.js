@@ -95,7 +95,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-jest.mock('../../src/services/MapTrackingService.js', () => ({
+jest.mock('../../src/services/tracking/MapTrackingService.js', () => ({
   __esModule: true,
   default: {
     getInstance: jest.fn(() => ({

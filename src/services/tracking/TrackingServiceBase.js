@@ -1,8 +1,8 @@
-import IncludeResolver from '../language/include.js';
-import updateFileDebounced from './debouncedFileUpdate.js';
+import IncludeResolver from '../../language/include.js';
+import updateFileDebounced from '../debouncedFileUpdate.js';
 import fs from 'fs';
-import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../constants.js';
-import { handleError } from '../errorUtils.js';
+import { DEFAULT_MAX_INCLUDE_DEPTH, DEFAULT_PARSE_DEBOUNCE_MS } from '../../constants.js';
+import { handleError } from '../../errorUtils.js';
 
 // ponytail: WeakMap keyed by constructor gives each subclass its own singleton
 // slot without per-subclass static fields or getInstance/resetInstance wrappers.

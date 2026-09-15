@@ -1,4 +1,4 @@
-import MapTrackingService from '../../src/services/MapTrackingService.js';
+import MapTrackingService from '../../../src/services/tracking/MapTrackingService.js';
 import fs from 'fs';
 
 jest.mock('fs');

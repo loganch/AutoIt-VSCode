@@ -4,7 +4,7 @@ jest.mock('vscode', () => ({
   },
 }));
 
-const ProcessManager = require('../../src/services/ProcessManager').default;
+const ProcessManager = require('../../../src/services/process/ProcessManager').default;
 
 const FINISHED_TIMEOUT_SECONDS = 5;
 

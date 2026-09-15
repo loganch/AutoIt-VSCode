@@ -1,4 +1,4 @@
-import MapParser from '../language/map.js';
+import MapParser from '../../language/map.js';
 import TrackingServiceBase from './TrackingServiceBase.js';
 
 /**

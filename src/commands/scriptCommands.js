@@ -8,7 +8,7 @@ import {
 import { getActiveDocumentFileName } from './editorActions';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';
-import { getServiceStack } from '../services/commandServiceStack';
+import { getServiceStack } from '../services/process/commandServiceStack';
 import { handleError } from '../errorUtils';
 
 const { config } = conf;

@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import VariableTrackingService from '../../src/services/VariableTrackingService.js';
+import VariableTrackingService from '../../../src/services/tracking/VariableTrackingService.js';
 
 const GLOBAL_LINE = 0;
 const INITIAL_MAX_DEPTH = 3;

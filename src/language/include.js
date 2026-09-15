@@ -6,7 +6,7 @@ import { safeFileExists, safeReadFile } from '../utils/fsCache';
 // Include-capability layering (see config/pathResolution.js for the full
 // list): unlike utils/includeResolution.js's function-based helpers, this is
 // a stateful class (workspace root + max depth) built specifically for
-// services/TrackingServiceBase.js's recursive include-graph walk — it owns
+// services/tracking/TrackingServiceBase.js's recursive include-graph walk — it owns
 // cycle detection and per-service configuration, not general-purpose lookup.
 
 /**

@@ -6,7 +6,7 @@ import { showErrorMessage } from '../config/ai_showMessage';
 import { handleError } from '../errorUtils';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import OutputChannelManager from '../services/OutputChannelManager';
-import { getServiceStack } from '../services/commandServiceStack';
+import { getServiceStack } from '../services/process/commandServiceStack';
 import { getActiveDocumentFileName } from './editorActions';
 
 const { functionDefinitionRegex } = REGEX_PATTERNS;

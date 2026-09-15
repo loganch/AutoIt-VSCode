@@ -28,8 +28,8 @@ import aiConfig from '../config/ai_config';
 import { DEFAULT_UDFS } from '../constants';
 
 const { findFilePath } = aiConfig;
-import MapTrackingService from '../services/MapTrackingService.js';
-import VariableTrackingService from '../services/VariableTrackingService.js';
+import MapTrackingService from '../services/tracking/MapTrackingService.js';
+import VariableTrackingService from '../services/tracking/VariableTrackingService.js';
 import { attachIncludeEdits } from '../utils/includeAutoInsert';
 import { parenCommitCharacters } from '../completionTransforms';
 

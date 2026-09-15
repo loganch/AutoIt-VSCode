@@ -1,14 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const pkg = require('../../package.json');
+const pkg = require('../../../package.json');
 
 const expected = `extension-output-${pkg.publisher}.${pkg.name}-#`;
-const producers = ['src/services/commandServiceStack.js'];
+const producers = ['src/services/process/commandServiceStack.js'];
 
 describe('outputName interpolation guard', () => {
   it.each(producers)('builds interpolated outputName in %s', rel => {
-    const src = fs.readFileSync(path.join(__dirname, '..', '..', rel), 'utf8');
+    const src = fs.readFileSync(path.join(__dirname, '..', '..', '..', rel), 'utf8');
     expect(src).toContain('`extension-output-${packageJson.publisher}.${packageJson.name}-#`');
     expect(src).not.toContain("'extension-output-${require");
   });
@@ -25,7 +25,7 @@ describe('outputName interpolation guard', () => {
         }
       }
     };
-    walk(path.join(__dirname, '..', '..', 'src'));
+    walk(path.join(__dirname, '..', '..', '..', 'src'));
     expect(hits).toEqual([]);
   });
 

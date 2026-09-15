@@ -92,8 +92,8 @@ const stubService = {
     }),
   },
 };
-jest.mock('../src/services/MapTrackingService.js', () => stubService);
-jest.mock('../src/services/VariableTrackingService.js', () => stubService);
+jest.mock('../src/services/tracking/MapTrackingService.js', () => stubService);
+jest.mock('../src/services/tracking/VariableTrackingService.js', () => stubService);
 
 // Feature providers are irrelevant here; stub them to keep activate() cheap.
 // languageConfiguration's default is data passed to setLanguageConfiguration
