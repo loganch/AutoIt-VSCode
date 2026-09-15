@@ -24,7 +24,7 @@ let aiPath = { path: '', dir: '', file: '', isRelative: false };
 
 /**
  * @param {string} filePath
- * @param {Object} pathState - see the PathState typedef above
+ * @param {PathState} pathState
  * @param {string} msgSuffix
  */
 function showError(filePath, pathState, msgSuffix) {
@@ -49,7 +49,7 @@ function showError(filePath, pathState, msgSuffix) {
  * Verify that a previously-resolved fullPath exists and matches expected type.
  * Uses workspace.fs.stat for editor-friendly checks.
  * @param {string} filePath - original (user) path string used for messages
- * @param {Object} pathState - state holding fullPath and file indicator (see PathState typedef above)
+ * @param {PathState} pathState - state holding fullPath and file indicator
  * @param {string} msgSuffix - configuration key suffix for error messages
  * @returns {Promise<string|undefined>} resolves to filePath on success, undefined on failure
  */
@@ -80,7 +80,7 @@ function verifyPath(filePath, pathState, msgSuffix) {
 /**
  * Compute and set pathState.fullPath for a configured value, then verify it.
  * @param {string} _path - configured path/value
- * @param {Object} pathState - state object to update with fullPath (see PathState typedef above)
+ * @param {PathState} pathState - state object to update with fullPath
  * @param {string} [msgSuffix] - configuration key suffix for error messages (optional)
  * @returns {Promise<string|undefined>} resolves to filePath on success, undefined on failure
  */
