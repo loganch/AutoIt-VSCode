@@ -5,7 +5,11 @@ import {
   showInformationMessage,
   showWarningMessage,
 } from '../config/ai_showMessage';
-import { getActiveDocumentFileName } from './editorActions';
+import {
+  getActiveDocumentFileName,
+  untitledFileErrorMessage,
+  saveFailureWarningMessage,
+} from './editorActions';
 import { validateFilePath } from '../utils/pathValidation.js';
 import { validateParameterString } from '../utils/parameterValidation.js';
 import { getServiceStack } from '../services/process/commandServiceStack';
@@ -33,7 +37,7 @@ async function runScript() {
 
   // Check if file is untitled before attempting to save
   if (thisDoc.isUntitled) {
-    showErrorMessage(`"${thisFile}" file must be saved first!`);
+    showErrorMessage(untitledFileErrorMessage(thisFile));
     return;
   }
 
@@ -48,7 +52,7 @@ async function runScript() {
   const saveResult = await thisDoc.save();
 
   if (!saveResult) {
-    showInformationMessage(`File failed to save, running saved file instead ("${thisFile}")`, {
+    showInformationMessage(saveFailureWarningMessage(thisFile, 'running'), {
       timeout: 30000,
     });
   }

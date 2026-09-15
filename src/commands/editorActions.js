@@ -1,6 +1,30 @@
 import { window, Range } from 'vscode';
 
 /**
+ * Message shown when a wrapper command needs a saved (non-untitled) file.
+ * Shared by scriptCommands.js's runScript and toolCommands.js's
+ * runWrapperCommand, which previously duplicated this exact string.
+ * @param {string} thisFile - The file name to include in the message
+ * @returns {string} The formatted error message
+ */
+export function untitledFileErrorMessage(thisFile) {
+  return `"${thisFile}" file must be saved first!`;
+}
+
+/**
+ * Message shown when a save didn't take effect but the command proceeds
+ * against the last-saved file anyway. Shared by scriptCommands.js's
+ * runScript and toolCommands.js's runWrapperCommand, which previously
+ * duplicated this exact string shape (only the verb differed).
+ * @param {string} thisFile - The file name to include in the message
+ * @param {string} progressVerb - Verb describing what proceeds anyway (e.g. "running", "compiling")
+ * @returns {string} The formatted warning message
+ */
+export function saveFailureWarningMessage(thisFile, progressVerb) {
+  return `File failed to save, ${progressVerb} saved file instead ("${thisFile}")`;
+}
+
+/**
  * Get the file name of the active document in the editor.
  *
  * Note that `window.activeTextEditor.document.fileName` is not available in some situations.

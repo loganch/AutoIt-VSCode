@@ -1,4 +1,8 @@
-import { getActiveDocumentFileName } from './editorActions';
+import {
+  getActiveDocumentFileName,
+  untitledFileErrorMessage,
+  saveFailureWarningMessage,
+} from './editorActions';
 import { window } from 'vscode';
 import fs from 'fs';
 import { spawn } from 'child_process';
@@ -28,7 +32,7 @@ async function runWrapperCommand({ flags, statusMessage, dirtyIsError, progressV
   // Save the file
   await thisDoc.save();
   if (thisDoc.isUntitled) {
-    window.showErrorMessage(`"${thisFile}" file must be saved first!`);
+    window.showErrorMessage(untitledFileErrorMessage(thisFile));
     return;
   }
 
@@ -37,9 +41,7 @@ async function runWrapperCommand({ flags, statusMessage, dirtyIsError, progressV
       window.showErrorMessage(`File failed to save ("${thisFile}")`);
       return;
     }
-    window.showInformationMessage(
-      `File failed to save, ${progressVerb} saved file instead ("${thisFile}")`,
-    );
+    window.showInformationMessage(saveFailureWarningMessage(thisFile, progressVerb));
   }
 
   window.setStatusBarMessage(
