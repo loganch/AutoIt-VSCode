@@ -35,7 +35,7 @@ jest.mock('fs', () => ({
   existsSync: (...args) => mockExistsSync(...args),
 }));
 
-jest.mock('../../src/config/ai_showMessage', () => ({
+jest.mock('../../src/utils/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
 }));
 

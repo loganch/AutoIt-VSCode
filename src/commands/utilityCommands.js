@@ -2,7 +2,7 @@ import { window, Position, Uri } from 'vscode';
 import path from 'path';
 import fs from 'fs';
 import aiConfig from '../config/ai_config';
-import { showErrorMessage } from '../config/ai_showMessage';
+import { showErrorMessage } from '../utils/ai_showMessage';
 import { handleError } from '../errorUtils';
 import { REGEX_PATTERNS, setRegExpFlags } from '../utils/regexPatterns';
 import OutputChannelManager from '../services/OutputChannelManager';

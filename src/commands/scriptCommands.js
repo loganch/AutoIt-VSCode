@@ -4,7 +4,7 @@ import {
   showErrorMessage,
   showInformationMessage,
   showWarningMessage,
-} from '../config/ai_showMessage';
+} from '../utils/ai_showMessage';
 import {
   getActiveDocumentFileName,
   untitledFileErrorMessage,

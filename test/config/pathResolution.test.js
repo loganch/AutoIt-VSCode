@@ -10,7 +10,7 @@ jest.mock('vscode', () => ({
 }));
 
 const mockShowErrorMessage = jest.fn();
-jest.mock('../../src/config/ai_showMessage', () => ({
+jest.mock('../../src/utils/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
 }));
 

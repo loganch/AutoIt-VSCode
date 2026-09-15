@@ -1,7 +1,7 @@
 import { FileType, Uri, workspace } from 'vscode';
 import fs from 'fs';
 import path from 'path';
-import { showErrorMessage } from './ai_showMessage';
+import { showErrorMessage } from '../utils/ai_showMessage';
 import { detectAutoItPaths } from './autoItInstallDetector';
 import { resolveVariables, splitPath, fixPath } from './pathStringUtils';
 import { migrateSmartHelpConfig } from './smartHelpMigrator';

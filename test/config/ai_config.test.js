@@ -41,7 +41,7 @@ jest.mock('child_process', () => ({
   execFile: jest.fn(),
 }));
 
-jest.mock('../../src/config/ai_showMessage', () => ({
+jest.mock('../../src/utils/ai_showMessage', () => ({
   showErrorMessage: jest.fn(),
 }));
 

@@ -72,7 +72,7 @@ jest.mock('../../src/config/ai_config', () => ({
   },
 }));
 
-jest.mock('../../src/config/ai_showMessage', () => ({
+jest.mock('../../src/utils/ai_showMessage', () => ({
   showErrorMessage: (...args) => mockShowErrorMessage(...args),
   showInformationMessage: (...args) => mockShowInformationMessage(...args),
   showWarningMessage: (...args) => mockShowWarningMessage(...args),
