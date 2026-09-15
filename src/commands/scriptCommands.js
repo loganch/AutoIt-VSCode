@@ -130,16 +130,13 @@ function killScript(thisFile = null) {
  * @returns {Promise<void>|undefined} Promise if async operation, undefined otherwise
  */
 function restartScript() {
-  const { runner, info } =
-    getServiceStack(getActiveDocumentFileName).processManager.lastRunningOpened || {};
+  const { processManager } = getServiceStack(getActiveDocumentFileName);
+  const { runner, info } = processManager.lastRunningOpened || {};
 
   // If there's a currently running script, kill it and restart when it exits
   if (runner && info?.status) {
     runner.on('exit', () => {
-      if (info.callback) {
-        clearTimeout(info.timer);
-        info.callback();
-      }
+      processManager.finishRunner(info);
       // Fire and forget - errors will be handled by runScript internally
       runScript().catch(error => {
         handleError('restartScript', error);

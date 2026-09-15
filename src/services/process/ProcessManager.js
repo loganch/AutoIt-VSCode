@@ -198,6 +198,20 @@ class ProcessManager extends EventEmitter {
   }
 
   /**
+   * Cancels a runner's pending finished-cleanup timer and runs its callback
+   * immediately. Used when a caller needs the runner's finished-state cleanup
+   * to happen right now instead of waiting out multiOutputFinishedTimeout
+   * (e.g. restarting a script that just exited).
+   * @param {RunnerInfo} info - The runner information, including its callback and timer.
+   */
+  finishRunner(info) {
+    if (info.callback) {
+      clearTimeout(info.timer);
+      info.callback();
+    }
+  }
+
+  /**
    * Cleans up a finished runner by flushing its output and disposing of its output window, if necessary.
    * @param {ChildProcess} runner - The runner process object
    * @param {RunnerInfo} info - Information about the finished runner, including its callback and output window.
