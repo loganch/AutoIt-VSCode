@@ -205,7 +205,7 @@ class OutputChannelManager {
     let hotkeyFailedMsgFound = false;
 
     const outputText = (aiOut, prop, lines) => {
-      const time = this.getTime();
+      const time = OutputChannelManager.getTime();
       const linesProcess = Object.assign([], lines);
 
       if (prop === 'appendLine') {
@@ -404,12 +404,11 @@ class OutputChannelManager {
 
   /**
    * Returns the current time in a specific format for output timestamps.
-   * @private
    * @returns {string} The current time in the format "hh:mm:ss.ms".
    * @example
    * // returns "10:30:45.123"
    */
-  getTime() {
+  static getTime() {
     return new Date()
       .toLocaleString('sv', {
         hour: 'numeric',

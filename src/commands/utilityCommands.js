@@ -25,26 +25,6 @@ const BYREF_PREFIX_LENGTH = 6;
 const PARAMETER_PAD_LENGTH = 21;
 
 /**
- * Returns the current time in a specific format.
- * @returns {string} The current time in the format "hh:mm:ss.ms".
- */
-function getTime() {
-  try {
-    return new Date()
-      .toLocaleString('sv', {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        fractionalSecondDigits: 3,
-      })
-      .replace(',', '.');
-  } catch (error) {
-    handleError('getTime', error);
-    return new Date().toISOString();
-  }
-}
-
-/**
  * Trims the output text in the visible AutoIt output to the max number of lines
  * set in the configuration. Delegates to the shared ProcessManager's
  * isAiOutVisible() and OutputChannelManager.trimOutputLines() so this stays
@@ -231,9 +211,10 @@ const insertHeader = () => {
 
 export {
   getActiveDocumentFileName,
-  getTime,
   trimOutputLines,
   changeConsoleParams as changeParams,
   openInclude,
   insertHeader,
 };
+
+export const { getTime } = OutputChannelManager;
