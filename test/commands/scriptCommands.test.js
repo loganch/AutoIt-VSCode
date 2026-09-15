@@ -91,6 +91,7 @@ describe('ScriptCommands', () => {
   let restartScript;
   let runScript;
   let getServiceStack;
+  let initServiceStack;
 
   beforeEach(() => {
     jest.resetModules();
@@ -119,16 +120,24 @@ describe('ScriptCommands', () => {
     );
 
     ({ killScript, restartScript, runScript } = require('../../src/commands/scriptCommands.js'));
-    ({ getServiceStack } = require('../../src/services/process/commandServiceStack.js'));
+    ({
+      getServiceStack,
+      initServiceStack,
+    } = require('../../src/services/process/commandServiceStack.js'));
   });
 
-  test('builds the shared stack lazily via getServiceStack', () => {
+  test('getServiceStack throws before initServiceStack has been called', () => {
+    expect(() => getServiceStack()).toThrow(/before initServiceStack/);
+  });
+
+  test('initServiceStack builds the shared stack once', () => {
     expect(MockOutputChannelManager.createGlobalOutputChannel).not.toHaveBeenCalled();
-    expect(getServiceStack().globalOutputChannel).toBe(mockGlobalOutputChannel);
+    expect(initServiceStack(() => 'file.au3').globalOutputChannel).toBe(mockGlobalOutputChannel);
     expect(MockOutputChannelManager.createGlobalOutputChannel).toHaveBeenCalledWith(
       'AutoIt (global)',
       'vscode-autoit-output',
     );
+    expect(getServiceStack().globalOutputChannel).toBe(mockGlobalOutputChannel);
   });
 
   test('runScript prompts the user to save untitled files first', async () => {
@@ -159,6 +168,7 @@ describe('ScriptCommands', () => {
       warnings: ['metacharacters detected'],
     });
     mockWindow.activeTextEditor = { document: savedDocument };
+    initServiceStack(() => savedDocument.fileName);
 
     await runScript();
 
@@ -189,6 +199,7 @@ describe('ScriptCommands', () => {
   });
 
   test('killScript notifies the user when no script is running', () => {
+    initServiceStack(() => 'C:\\workspace\\script.au3');
     mockFindRunner.mockReturnValue(null);
 
     killScript('C:\\workspace\\script.au3');
@@ -207,6 +218,7 @@ describe('ScriptCommands', () => {
         save: jest.fn().mockResolvedValue(true),
       },
     };
+    initServiceStack(() => 'C:\\workspace\\script.au3');
 
     await restartScript();
 

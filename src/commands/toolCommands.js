@@ -51,7 +51,7 @@ async function runWrapperCommand({ flags, statusMessage, dirtyIsError, progressV
   );
 
   // Launch the AutoIt Wrapper executable with the script's path
-  await getServiceStack(getActiveDocumentFileName).processRunner.run(config.aiPath, [
+  await getServiceStack().processRunner.run(config.aiPath, [
     config.wrapperPath,
     ...flags,
     '/in',
@@ -198,7 +198,7 @@ async function launchKoda() {
   }
 
   try {
-    await getServiceStack(getActiveDocumentFileName).processRunner.run(config.kodaPath, []);
+    await getServiceStack().processRunner.run(config.kodaPath, []);
   } catch (error) {
     handleError('launchKoda', error, true);
   }

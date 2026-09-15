@@ -17,6 +17,8 @@ import registerDefinitionFeature, {
 import registerReferencesFeature from './providers/ai_references';
 
 import { registerCommands } from './commands/registerCommands';
+import { getActiveDocumentFileName } from './commands/editorActions';
+import { initServiceStack } from './services/process/commandServiceStack';
 import registerFormatterFeature from './providers/ai_formatter';
 import {
   clearDiagnosticsOwnedBy,
@@ -369,6 +371,7 @@ const setupDiagnostics = ctx => {
 
 export const activate = ctx => {
   conf.init();
+  initServiceStack(getActiveDocumentFileName);
 
   const features = [
     registerHoverFeature(),

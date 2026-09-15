@@ -206,6 +206,9 @@ describe('ToolCommands.launchKoda', () => {
     }));
     HotkeyManager.mockImplementation(() => ({}));
 
+    const { initServiceStack } = require('../../src/services/process/commandServiceStack');
+    initServiceStack(() => 'C:\\workspace\\script.au3');
+
     ({ launchKoda } = require('../../src/commands/toolCommands'));
   });
 

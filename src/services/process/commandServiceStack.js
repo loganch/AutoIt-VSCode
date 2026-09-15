@@ -13,7 +13,8 @@ const { config } = conf;
  * stack so a single ProcessManager owns runner state across script and tool commands.
  *
  * Importing this module is side-effect free. Call createServiceStack() for a
- * fresh stack (tests) or getServiceStack() for the cached shared instance.
+ * fresh stack (tests), initServiceStack() once at activation to build the
+ * cached shared instance, or getServiceStack() to read it back afterward.
  *
  * @param {Function} getActiveDocumentFileName - Getter for the active document's
  *   filename, supplied by the commands/ caller so this services/ module doesn't
@@ -64,9 +65,28 @@ export function createServiceStack(getActiveDocumentFileName) {
 
 let _cached = null;
 
-export function getServiceStack(getActiveDocumentFileName) {
+/**
+ * Builds and caches the shared service stack. Call once, at activation --
+ * getActiveDocumentFileName only matters on this call, unlike the read-only
+ * getServiceStack() below which takes no arguments.
+ * @param {Function} getActiveDocumentFileName
+ * @returns {ReturnType<typeof createServiceStack>}
+ */
+export function initServiceStack(getActiveDocumentFileName) {
   if (!_cached) {
     _cached = createServiceStack(getActiveDocumentFileName);
+  }
+  return _cached;
+}
+
+/**
+ * Reads back the shared service stack built by initServiceStack().
+ * @returns {ReturnType<typeof createServiceStack>}
+ * @throws {Error} If called before initServiceStack()
+ */
+export function getServiceStack() {
+  if (!_cached) {
+    throw new Error('commandServiceStack: getServiceStack() called before initServiceStack()');
   }
   return _cached;
 }

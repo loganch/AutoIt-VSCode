@@ -55,6 +55,17 @@ jest.mock('vscode', () => {
       showErrorMessage: () => {},
       activeTextEditor: undefined,
       onDidChangeActiveTextEditor: register('activeEditor'),
+      // extension.js's activate() now eagerly builds the shared process
+      // service stack (initServiceStack), which creates the global output
+      // channel via OutputChannelManager.createGlobalOutputChannel.
+      createOutputChannel: () => ({
+        append: () => {},
+        appendLine: () => {},
+        clear: () => {},
+        dispose: () => {},
+        hide: () => {},
+        show: () => {},
+      }),
     },
     workspace: {
       workspaceFolders: [{ uri: { fsPath: 'C:/ws' } }],

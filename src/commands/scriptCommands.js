@@ -88,7 +88,7 @@ async function runScript() {
   }
 
   try {
-    await getServiceStack(getActiveDocumentFileName).processRunner.run(
+    await getServiceStack().processRunner.run(
       config.aiPath,
       args,
       config.multiOutput && config.multiOutputReuseOutput,
@@ -104,7 +104,7 @@ async function runScript() {
  * @returns {void}
  */
 function killScript(thisFile = null) {
-  const activeRun = getServiceStack(getActiveDocumentFileName).processManager.findRunner({
+  const activeRun = getServiceStack().processManager.findRunner({
     status: true,
     thisFile,
   });
@@ -130,7 +130,7 @@ function killScript(thisFile = null) {
  * @returns {Promise<void>|undefined} Promise if async operation, undefined otherwise
  */
 function restartScript() {
-  const { processManager } = getServiceStack(getActiveDocumentFileName);
+  const { processManager } = getServiceStack();
   const { runner, info } = processManager.lastRunningOpened || {};
 
   // If there's a currently running script, kill it and restart when it exits

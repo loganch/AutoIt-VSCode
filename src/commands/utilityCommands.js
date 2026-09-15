@@ -33,7 +33,7 @@ const PARAMETER_PAD_LENGTH = 21;
  */
 const trimOutputLines = () => {
   try {
-    const { processManager, globalOutputChannel } = getServiceStack(getActiveDocumentFileName);
+    const { processManager, globalOutputChannel } = getServiceStack();
     OutputChannelManager.trimOutputLines(processManager, globalOutputChannel);
   } catch (error) {
     handleError('trimOutputLines', error);
