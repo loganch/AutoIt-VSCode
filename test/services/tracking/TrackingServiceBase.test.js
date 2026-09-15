@@ -15,7 +15,11 @@ describe('TrackingServiceBase', () => {
 
   beforeEach(() => {
     MinimalTracker.resetInstance();
-    service = MinimalTracker.getInstance('/ws', [], 3);
+    service = MinimalTracker.getInstance({
+      workspaceRoot: '/ws',
+      autoitIncludePaths: [],
+      maxIncludeDepth: 3,
+    });
   });
 
   afterEach(() => {
@@ -33,7 +37,7 @@ describe('TrackingServiceBase', () => {
         return { lines: source.split('\n') };
       }
     }
-    const other = OtherTracker.getInstance('/ws');
+    const other = OtherTracker.getInstance({ workspaceRoot: '/ws' });
     expect(other).not.toBe(service);
     OtherTracker.resetInstance();
   });
@@ -121,7 +125,7 @@ describe('TrackingServiceBase', () => {
   });
 
   test('getInstance throws when called with different parameters', () => {
-    expect(() => MinimalTracker.getInstance('/different')).toThrow(
+    expect(() => MinimalTracker.getInstance({ workspaceRoot: '/different' })).toThrow(
       /getInstance called with different parameters/,
     );
   });

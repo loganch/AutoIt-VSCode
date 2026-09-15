@@ -125,18 +125,18 @@ const setupDocumentTracking = ctx => {
   const autoitIncludePaths = autoitConfig.get('includePaths', []);
   const maxIncludeDepth = autoitConfig.get('maps.includeDepth', DEFAULT_MAX_INCLUDE_DEPTH);
 
-  const mapTrackingService = MapTrackingService.getInstance(
+  const mapTrackingService = MapTrackingService.getInstance({
     workspaceRoot,
     autoitIncludePaths,
     maxIncludeDepth,
-  );
+  });
 
   // Initialize VariableTrackingService
-  const variableTrackingService = VariableTrackingService.getInstance(
+  const variableTrackingService = VariableTrackingService.getInstance({
     workspaceRoot,
     autoitIncludePaths,
     maxIncludeDepth,
-  );
+  });
 
   // Immediate (non-debounced) sync of a document into both tracking services.
   // variableTrackingService can throw on malformed input; never let that abort

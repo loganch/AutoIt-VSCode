@@ -17,11 +17,11 @@ const instances = new WeakMap();
  * type-specific public query/merge methods (`getKeysForMap*` / `getVariablesAtPosition*`).
  */
 class TrackingServiceBase {
-  constructor(
+  constructor({
     workspaceRoot = '',
     autoitIncludePaths = [],
     maxIncludeDepth = DEFAULT_MAX_INCLUDE_DEPTH,
-  ) {
+  } = {}) {
     const Ctor = this.constructor;
     if (instances.has(Ctor)) {
       return instances.get(Ctor);
@@ -42,21 +42,29 @@ class TrackingServiceBase {
   }
 
   /**
-   * Get singleton instance. Parameters only apply on first call; use
+   * Get singleton instance. Options only apply on first call; use
    * {@link TrackingServiceBase#updateConfiguration} to change them later.
    * extension.js's setupDocumentTracking() is the sole initialization site —
    * every other caller must use the parameterless form.
+   * @param {Object} [options]
+   * @param {string} [options.workspaceRoot]
+   * @param {string[]} [options.autoitIncludePaths]
+   * @param {number} [options.maxIncludeDepth]
    * @returns {TrackingServiceBase}
-   * @throws {Error} If called with parameters that differ from the initial instance.
+   * @throws {Error} If called with options that differ from the initial instance.
    */
-  static getInstance(...args) {
+  static getInstance(options = {}) {
     const Ctor = this;
     if (!instances.has(Ctor)) {
-      return new Ctor(...args); // constructor registers itself in `instances`
+      return new Ctor(options); // constructor registers itself in `instances`
     }
-    if (args.some(a => a !== undefined)) {
+    const { workspaceRoot, autoitIncludePaths, maxIncludeDepth } = options;
+    if (
+      workspaceRoot !== undefined ||
+      autoitIncludePaths !== undefined ||
+      maxIncludeDepth !== undefined
+    ) {
       const instance = instances.get(Ctor);
-      const [workspaceRoot, autoitIncludePaths, maxIncludeDepth] = args;
       const hasChanges =
         (workspaceRoot !== undefined && workspaceRoot !== instance.workspaceRoot) ||
         (autoitIncludePaths !== undefined &&

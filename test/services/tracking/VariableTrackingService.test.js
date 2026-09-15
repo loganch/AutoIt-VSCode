@@ -19,7 +19,7 @@ describe('VariableTrackingService', () => {
 
     VariableTrackingService.resetInstance();
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    service = VariableTrackingService.getInstance('/workspace');
+    service = VariableTrackingService.getInstance({ workspaceRoot: '/workspace' });
     service.clear();
   });
 
@@ -29,8 +29,8 @@ describe('VariableTrackingService', () => {
   });
 
   test('returns the same singleton instance', () => {
-    const instanceOne = VariableTrackingService.getInstance('/workspace');
-    const instanceTwo = VariableTrackingService.getInstance('/workspace');
+    const instanceOne = VariableTrackingService.getInstance({ workspaceRoot: '/workspace' });
+    const instanceTwo = VariableTrackingService.getInstance({ workspaceRoot: '/workspace' });
 
     expect(instanceOne).toBe(instanceTwo);
   });
@@ -134,10 +134,18 @@ Global $gMain = 1`;
 
   test('throws when getInstance is called with different parameters', () => {
     VariableTrackingService.resetInstance();
-    VariableTrackingService.getInstance('/workspace-one', ['one'], INITIAL_MAX_DEPTH);
+    VariableTrackingService.getInstance({
+      workspaceRoot: '/workspace-one',
+      autoitIncludePaths: ['one'],
+      maxIncludeDepth: INITIAL_MAX_DEPTH,
+    });
 
     expect(() =>
-      VariableTrackingService.getInstance('/workspace-two', ['two'], UPDATED_MAX_DEPTH),
+      VariableTrackingService.getInstance({
+        workspaceRoot: '/workspace-two',
+        autoitIncludePaths: ['two'],
+        maxIncludeDepth: UPDATED_MAX_DEPTH,
+      }),
     ).toThrow(/getInstance called with different parameters than initial instance/);
   });
 });
