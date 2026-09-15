@@ -179,7 +179,7 @@ const parseFunctionFromText = params => {
  * @param {Object} params - An object containing the parameters.
  * @param {Array} params.regionName - An array containing the matched region name from the text.
  * @param {Set} params.found - A set containing the already found region names.
- * @param {Object} params.document - The document object.
+ * @param {import("vscode").TextDocument} params.document - The document object.
  * @param {Array} params.result - An array to store the symbol information objects.
  * @param {string} params.scriptText - The full text of the script.
  * @param {import("vscode").WorkspaceConfiguration} params.config - The current AutoIt configuration.
