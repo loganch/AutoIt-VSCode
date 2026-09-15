@@ -19,7 +19,8 @@ const DEBUG_TEMPLATES = {
 
 /**
  * Gets debug information for the selected variable or macro
- * @returns {{text: string, position: Position}|{}} Debug info object or empty object
+ * @returns {{text: string, position: Position}} Debug info object
+ * @throws {Error} If there is no active editor or no valid variable/macro is selected
  */
 function getDebugText() {
   const editor = window.activeTextEditor;

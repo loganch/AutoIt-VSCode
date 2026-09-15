@@ -38,7 +38,9 @@ describe('findFilePath', () => {
   });
 
   test('returns the first match from configured include paths', () => {
-    jest.spyOn(fs, 'existsSync').mockImplementation(p => p === 'C:\\Configured\\Include\\Array.au3');
+    jest
+      .spyOn(fs, 'existsSync')
+      .mockImplementation(p => p === 'C:\\Configured\\Include\\Array.au3');
 
     expect(findFilePath('Array.au3')).toBe('C:\\Configured\\Include\\Array.au3');
 
@@ -60,10 +62,10 @@ describe('findFilePath', () => {
     fs.existsSync.mockRestore();
   });
 
-  test('returns null when the file is nowhere to be found', () => {
+  test('returns undefined when the file is nowhere to be found', () => {
     jest.spyOn(fs, 'existsSync').mockReturnValue(false);
 
-    expect(findFilePath('Missing.au3')).toBeNull();
+    expect(findFilePath('Missing.au3')).toBeUndefined();
 
     fs.existsSync.mockRestore();
   });

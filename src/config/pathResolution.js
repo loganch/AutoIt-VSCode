@@ -105,10 +105,10 @@ function updateFullPath(_path, pathState, msgSuffix) {
  * syntax or document structure.
  *
  * Find a file by checking configured includePaths and (optionally) auto-detected AutoIt Include folders.
- * Returns the first matching full path or null if not found.
+ * Returns the first matching full path or undefined if not found.
  * @param {string} fileName - filename to search for
  * @param {boolean} preferLibrary - whether to prefer library entries (true) or search them last (false)
- * @returns {(string|null)} Full path if found, or null
+ * @returns {string|undefined} Full path if found, or undefined
  */
 const findFilePath = (fileName, preferLibrary = true) => {
   // work with copy to avoid changing main config
@@ -138,7 +138,7 @@ const findFilePath = (fileName, preferLibrary = true) => {
     }
   }
 
-  return null;
+  return undefined;
 };
 
 /**
