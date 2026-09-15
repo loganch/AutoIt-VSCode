@@ -133,15 +133,16 @@ export const getIncludeText = filePath => {
     return cached.content;
   }
 
-  // File changed (or not cached yet): read and store.
+  // File changed (or not cached yet): read and store. The stat above already
+  // confirmed the file exists, so an empty read result here is a legitimate
+  // zero-byte file, not a failure -- cache it like any other content so a
+  // zero-byte include still benefits from the grace-period fast path.
   const content = safeReadFile(normalized);
-  if (content) {
-    if (!includeCache.has(normalized) && includeCache.size >= MAX_INCLUDE_CACHE_SIZE) {
-      // ponytail: FIFO eviction (oldest insertion), not true LRU; upgrade if access patterns need it
-      includeCache.delete(includeCache.keys().next().value);
-    }
-    includeCache.set(normalized, { mtimeMs, content, statCheckedAt: now });
+  if (!includeCache.has(normalized) && includeCache.size >= MAX_INCLUDE_CACHE_SIZE) {
+    // ponytail: FIFO eviction (oldest insertion), not true LRU; upgrade if access patterns need it
+    includeCache.delete(includeCache.keys().next().value);
   }
+  includeCache.set(normalized, { mtimeMs, content, statCheckedAt: now });
 
   return content;
 };
