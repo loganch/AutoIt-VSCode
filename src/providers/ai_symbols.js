@@ -53,9 +53,10 @@ const createVariableSymbol = ({ variable, variableKind, document, line, containe
  * @param {String} functionName The name of the function from the AutoIt script
  * @param {import("vscode").TextDocument} document The current document to search
  * @param {Number} startingLineNumber The function's starting line number within the document
- * @returns {SymbolInformation} The generated SymbolInformation object
+ * @param {String} scriptText The full text of the document, searched for the function's body
+ * @returns {SymbolInformation|null} The generated SymbolInformation object, or null if the function body isn't found
  */
-const generateFunctionSymbol = (functionName, document, text, startingLineNumber, scriptText) => {
+const generateFunctionSymbol = (functionName, document, startingLineNumber, scriptText) => {
   // The g flag is required for lastIndex to be honored when searching from the
   // function's starting offset
   const functionBodyPattern = new RegExp(
@@ -165,7 +166,7 @@ const parseFunctionFromText = params => {
   const funcName = text.match(functionPattern);
   if (!funcName || processedSymbols.has(funcName[1])) return null;
 
-  const functionSymbol = generateFunctionSymbol(funcName[1], document, text, lineNum, scriptText);
+  const functionSymbol = generateFunctionSymbol(funcName[1], document, lineNum, scriptText);
   if (!functionSymbol) return null;
 
   result.push(functionSymbol);
