@@ -151,22 +151,19 @@ class ProcessRunner {
   }
 
   /**
-   * Creates a void output channel that discards all output
+   * Creates a void output channel that discards all output. A plain object,
+   * not a Proxy: OutputChannelManager only ever calls .append/.appendLine on
+   * this value (dynamically via aiOutProcess[prop]) and reads .void directly,
+   * so those are the only members this needs to implement.
    * @private
-   * @returns {Object} Void output channel proxy
+   * @returns {{void: true, append: Function, appendLine: Function}} Void output channel
    */
   _createVoidOutputChannel() {
-    return new Proxy(
-      {},
-      {
-        get(target, prop) {
-          if (prop === 'void') {
-            return true;
-          }
-          return () => {};
-        },
-      },
-    );
+    return {
+      void: true,
+      append: () => {},
+      appendLine: () => {},
+    };
   }
 
   /**
