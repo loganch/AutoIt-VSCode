@@ -25,6 +25,69 @@ const ARG_STEP = 2;
 const PARSE_INT_RADIX = 10;
 const CLI_ARGS_START_INDEX = 2;
 
+/**
+ * Parses common --runs/--timeout/--output CLI flags (plus any extraFlags),
+ * constructs ArgsClass with the parsed options, and runs its named method,
+ * exiting the process on failure. Shared by this script's own CLI block and
+ * validate-test-suite.js's, which have identical option parsing/wiring.
+ * @param {new (options: object) => object} ArgsClass - Class to instantiate with parsed options
+ * @param {string} methodName - Name of the async method to invoke and await
+ * @param {string} errorLabel - Label used in the failure console.error message
+ * @param {Object.<string, string>} [extraFlags] - Extra CLI flag -> options key mappings
+ */
+function runCliEntrypoint(ArgsClass, methodName, errorLabel, extraFlags = {}) {
+  const args = process.argv.slice(CLI_ARGS_START_INDEX);
+  const options = {};
+
+  for (let i = 0; i < args.length; i += ARG_STEP) {
+    const flag = args[i];
+    const value = args[i + 1];
+
+    switch (flag) {
+      case '--runs':
+        options.runs = parseInt(value, PARSE_INT_RADIX);
+        break;
+      case '--timeout':
+        options.timeout = parseInt(value, PARSE_INT_RADIX);
+        break;
+      case '--output':
+        options.outputFile = value;
+        break;
+      default:
+        if (extraFlags[flag]) {
+          options[extraFlags[flag]] = value;
+        }
+    }
+  }
+
+  const instance = new ArgsClass(options);
+  instance[methodName]().catch(error => {
+    console.error(`❌ ${errorLabel}:`, error);
+    process.exit(1);
+  });
+}
+
+/**
+ * Computes average/min/max execution time from a list of run results.
+ * Shared by FlakyTestDetector.analyzeFlakyBehavior and
+ * TestSuiteValidator.analyzeResults (validate-test-suite.js).
+ * @param {Array<{executionTime?: number}>} results
+ * @returns {{avgExecutionTime: number, minExecutionTime: number, maxExecutionTime: number}}
+ */
+function computeExecutionTimeStats(results) {
+  const executionTimes = results.filter(r => r.executionTime).map(r => r.executionTime);
+
+  const avgExecutionTime =
+    executionTimes.length > 0
+      ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length
+      : 0;
+
+  const minExecutionTime = executionTimes.length > 0 ? Math.min(...executionTimes) : 0;
+  const maxExecutionTime = executionTimes.length > 0 ? Math.max(...executionTimes) : 0;
+
+  return { avgExecutionTime, minExecutionTime, maxExecutionTime };
+}
+
 class FlakyTestDetector {
   constructor(options = {}) {
     this.runs = options.runs || DEFAULT_RUNS;
@@ -120,15 +183,9 @@ class FlakyTestDetector {
     const failedIterations = this.results.filter(r => r.status === 'FAILED').length;
     const successRate = (passedIterations / this.runs) * PERCENT_SCALE;
 
-    const executionTimes = this.results.filter(r => r.executionTime).map(r => r.executionTime);
-
-    const avgExecutionTime =
-      executionTimes.length > 0
-        ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length
-        : 0;
-
-    const minExecutionTime = executionTimes.length > 0 ? Math.min(...executionTimes) : 0;
-    const maxExecutionTime = executionTimes.length > 0 ? Math.max(...executionTimes) : 0;
+    const { avgExecutionTime, minExecutionTime, maxExecutionTime } = computeExecutionTimeStats(
+      this.results,
+    );
     const executionTimeVariance = maxExecutionTime - minExecutionTime;
 
     // Detect flaky behavior patterns
@@ -254,35 +311,9 @@ class FlakyTestDetector {
 
 // CLI execution
 if (require.main === module) {
-  const args = process.argv.slice(CLI_ARGS_START_INDEX);
-  const options = {};
-
-  // Parse command line arguments
-  for (let i = 0; i < args.length; i += ARG_STEP) {
-    const flag = args[i];
-    const value = args[i + 1];
-
-    switch (flag) {
-      case '--runs':
-        options.runs = parseInt(value, PARSE_INT_RADIX);
-        break;
-      case '--timeout':
-        options.timeout = parseInt(value, PARSE_INT_RADIX);
-        break;
-      case '--output':
-        options.outputFile = value;
-        break;
-      case '--pattern':
-        options.testPattern = value;
-        break;
-    }
-  }
-
-  const detector = new FlakyTestDetector(options);
-  detector.detectFlakyTests().catch(error => {
-    console.error('❌ Flaky test detection failed:', error);
-    process.exit(1);
+  runCliEntrypoint(FlakyTestDetector, 'detectFlakyTests', 'Flaky test detection failed', {
+    '--pattern': 'testPattern',
   });
 }
 
-module.exports = { FlakyTestDetector };
+module.exports = { FlakyTestDetector, runCliEntrypoint, computeExecutionTimeStats };

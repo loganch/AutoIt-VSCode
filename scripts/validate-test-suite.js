@@ -7,6 +7,7 @@
 
 const { execSync } = require('child_process');
 const fs = require('fs');
+const { runCliEntrypoint, computeExecutionTimeStats } = require('./flaky-test-detector');
 
 const DEFAULT_RUNS = 5;
 const DEFAULT_TIMEOUT_MS = 45000;
@@ -20,9 +21,7 @@ const PASS_RATE_REQUIRED = 100;
 const PERFORMANCE_THRESHOLD_MS = 30000;
 const SUMMARY_LINE_WIDTH = 60;
 const ARG_STEP = 2;
-const PARSE_INT_RADIX = 10;
 const DECIMAL_PLACES = 2;
-const CLI_ARGS_START_INDEX = 2;
 
 class TestSuiteValidator {
   constructor(options = {}) {
@@ -121,15 +120,9 @@ class TestSuiteValidator {
     const failedRuns = this.results.filter(r => r.status === 'FAILED').length;
     const passRate = (passedRuns / this.runs) * PASS_RATE_REQUIRED;
 
-    const executionTimes = this.results.filter(r => r.executionTime).map(r => r.executionTime);
-
-    const avgExecutionTime =
-      executionTimes.length > 0
-        ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length
-        : 0;
-
-    const minExecutionTime = executionTimes.length > 0 ? Math.min(...executionTimes) : 0;
-    const maxExecutionTime = executionTimes.length > 0 ? Math.max(...executionTimes) : 0;
+    const { avgExecutionTime, minExecutionTime, maxExecutionTime } = computeExecutionTimeStats(
+      this.results,
+    );
 
     // Calculate memory statistics
     const memoryDeltas = this.results.filter(r => r.memoryDelta).map(r => r.memoryDelta.heapUsed);
@@ -200,32 +193,7 @@ class TestSuiteValidator {
 
 // CLI execution
 if (require.main === module) {
-  const args = process.argv.slice(CLI_ARGS_START_INDEX);
-  const options = {};
-
-  // Parse command line arguments
-  for (let i = 0; i < args.length; i += ARG_STEP) {
-    const flag = args[i];
-    const value = args[i + 1];
-
-    switch (flag) {
-      case '--runs':
-        options.runs = parseInt(value, PARSE_INT_RADIX);
-        break;
-      case '--timeout':
-        options.timeout = parseInt(value, PARSE_INT_RADIX);
-        break;
-      case '--output':
-        options.outputFile = value;
-        break;
-    }
-  }
-
-  const validator = new TestSuiteValidator(options);
-  validator.validateTestSuite().catch(error => {
-    console.error('❌ Validation failed:', error);
-    process.exit(1);
-  });
+  runCliEntrypoint(TestSuiteValidator, 'validateTestSuite', 'Validation failed');
 }
 
 module.exports = { TestSuiteValidator };
