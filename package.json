@@ -64,7 +64,11 @@
         "extensions": [
           ".au3"
         ],
-        "configuration": "./syntaxes/autoit-language-configuration.json"
+        "configuration": "./syntaxes/autoit-language-configuration.json",
+        "icon": {
+					"light": "img/ai_icon.png",
+					"dark": "img/favicon.png"
+				}
       },
       {
         "id": "vscode-autoit-output",
